@@ -522,7 +522,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
@@ -586,7 +586,7 @@
     "naf/database",
     "naf/view"
    ],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   },
   "orm": {
    "description": "NAF ORM Plugin.",

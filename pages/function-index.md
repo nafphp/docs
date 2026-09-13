@@ -14,7 +14,7 @@ for services exposed through these helpers.
 
 ## naf/framework
 
-Version **v0.2.1** · [Core](first-app.md)
+Version **v0.2.2** · [Core](first-app.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -122,7 +122,7 @@ Version **v0.2.1** · [Signing in with a provider](oauth-client.md)
 
 ## naf/oauth-server
 
-Version **v0.2.0** · [Being the provider](oauth-server.md)
+Version **v0.2.1** · [Being the provider](oauth-server.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
