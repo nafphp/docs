@@ -74,3 +74,10 @@ Use `-n` only if the required extensions are compiled into that PHP binary; othe
 working INI configuration. The tutorial requires the corrected `naf/form` 0.2.1 helper and includes compatibility handling
 for the `naf/framework` 0.2.1 redirect protocol. Remove that response listener only after a fixed
 framework release is available and the examples pass against it.
+
+## Contributor and agent guidance
+
+Read [the shared workflow](AGENT_WORKFLOW.md) for NAF conventions and contribution permissions,
+and [the release procedure](RELEASING.md) when preparing or publishing a package. Each plugin
+repository provides its own `AGENTS.md` with its API, extension points and verification commands.
+These contributor documents are maintained here so standalone plugin clones can link to one source.
