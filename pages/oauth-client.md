@@ -6,14 +6,6 @@ requires:
 
 # Signing in with a provider
 
-<div align="center">
-
-[![NAF OAuth Client Plugin](https://github.com/nafphp/oauth-client/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/oauth-client/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
 ---
 
 > **Sign people in with Google, Microsoft or any OpenID Connect provider — and keep your own user model.**
@@ -26,7 +18,6 @@ That is the whole integration. The routes, the protocol and the account lookup a
 wired; what is left for you is the one decision nobody else can make — see
 [Which account is this?](#which-account-is-this)
 
-> 🧩 Part of the official NAF plugin collection.
 > Install it when people should sign in with an account they already have.
 
 ---

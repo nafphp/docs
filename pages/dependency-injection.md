@@ -1,11 +1,12 @@
 # Dependency Injection
 
-NAF provides a simple and flexible PSR-11 compliant container to manage your services and dependencies.
+A place to put the things your application needs, so a controller can ask for a mailer
+without knowing how to build one. The container is PSR-11, so anything expecting a standard
+container accepts it.
 
-However, NAF does **not** automatically inject constructor parameters.  
-You manually retrieve and manage your dependencies.
-
----
+It also resolves constructors it has never been told about: ask for a class, and the
+container builds it from the types in its signature. That keeps the wiring you write down
+to the cases where a default would be wrong.
 
 ## The Container
 

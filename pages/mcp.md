@@ -6,22 +6,12 @@ requires:
 
 # MCP tools
 
-<div style="text-align: center;" align="center">
-
-[![NAF MCP Plugin](https://github.com/nafphp/mcp/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/mcp/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
 ---
 
 > **Model Context Protocol (MCP) server implementation for NAF (Tools-first).**
 
 This plugin turns your NAF application into an **MCP server** that exposes
 **Tools** to AI clients such as ChatGPT.
-
-> 🧩 Part of the official NAF plugin collection.
 
 ---
 

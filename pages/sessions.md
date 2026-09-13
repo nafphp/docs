@@ -6,12 +6,13 @@ requires:
 
 # Sessions
 
-NAF provides a minimal but powerful session management system.  
-You can easily work with session data, flash messages, and session control.
+Data that has to survive from one request to the next: who is signed in, what somebody
+typed into the form that failed validation, the message that should appear once and then
+not again.
 
-Sessions are only started manually when you actually need them.
-
----
+Sessions start when you ask for one, not on every request. That is deliberate — a session
+started for a visitor who never needed one is a cookie you have to explain and a file you
+have to clean up.
 
 ## Starting a Session
 

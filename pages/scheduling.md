@@ -6,25 +6,13 @@ requires:
 
 # Scheduled jobs
 
-<div align="center" style="text-align: center;">
+Things that should happen at a time rather than on a request: a nightly cleanup, a
+report at eight, a sync every fifteen minutes.
 
-[![NAF Schedule Plugin](https://github.com/nafphp/schedule/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/schedule/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
----
-
-> **Minimalistic scheduling for NAF – cron-based, predictable, and queue-aware.**
-
-This plugin provides a lightweight scheduler for recurring tasks using cron expressions.
-It is designed to work seamlessly with the NAF Queue plugin, without introducing hidden magic or unnecessary complexity.
-
-> 🧩 Part of the official NAF plugin collection.  
-> Use it when you want to run recurring jobs reliably – without relying on system cron files or external schedulers.
-
----
+Jobs are described with cron expressions and handed to the queue, so the scheduler decides
+*when* and the worker decides *how*. The part worth reading before you rely on it is what
+happens when the machine was off at eight — a scheduler that silently skips is a scheduler
+you find out about in the wrong week.
 
 ## Basic idea
 

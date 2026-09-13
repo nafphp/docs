@@ -6,23 +6,13 @@ requires:
 
 # Console commands
 
-<div style="text-align: center;" align="center">
+Commands you run yourself, or that cron runs for you: a deployment step, a one-off
+import, a worker that needs to keep going. They run inside your application, so the
+container, the configuration and every plugin are there — unlike a bare PHP script
+sitting next to your project.
 
-[![NAF CLI Plugin](https://github.com/nafphp/cli/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/cli/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
----
-
-> **A minimal, developer-friendly command-line interface for your NAF application.**
-
-This plugin gives you a clean CLI system with colored output, argument parsing, and auto-discovered commands. All without external dependencies.
-
-> 🧩 Part of the official NAF plugin collection. Install it if you want powerful CLI tools for development, deployment, and automation.
-
----
+Commands are discovered rather than registered: put the class where the plugin looks
+and it appears in the list.
 
 ## Run a command
 

@@ -6,24 +6,12 @@ requires:
 
 # Queues and workers
 
-<div align="center" style="text-align: center;">
+Work that should not happen while somebody is waiting. A confirmation mail, a
+thumbnail, a call to a slow third party — the request hands it over and finishes.
 
-[![NAF Queue Plugin](https://github.com/nafphp/queue/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/queue/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
----
-
-> **Minimalistic queueing for NAF – file-based, simple, and extendable.**
-
-This plugin provides a lightweight job queue system with CLI worker support and no external dependencies by default.
-
-> 🧩 Part of the official NAF plugin collection.  
-> Use it when you want to delay tasks, run background jobs, or decouple logic – without setting up Redis or RabbitMQ.
-
----
+The default driver writes to files, so there is nothing to install before you can try it.
+Running the jobs is a command, which is why `naf/cli` comes along with this package: a
+queue nobody drains is just a directory filling up.
 
 ## Queue a job (default channel)
 

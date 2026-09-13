@@ -1,10 +1,13 @@
 # Configuration
 
-NAF provides a simple yet flexible configuration system based on `.env` files, a lightweight environment service, and a powerful configuration loader.
+Two things that are often confused: the **environment**, which differs per machine and
+holds credentials, and the **configuration**, which is part of your application and gets
+committed.
 
-You can manage different settings for local development, staging, and production environments.
-
----
+Environment values come from `.env` and are read with `env()`. Configuration comes from PHP
+files that return arrays — the core's, then each plugin's, then your application's — merged
+in that order, so a plugin ships a working default and you override only what you disagree
+with.
 
 ## Using `.env` Files
 
@@ -75,7 +78,7 @@ Available methods:
 
 ## Application Configuration
 
-NAF loads application settings through a lightweight `Config` class.
+Application settings are loaded through the `Config` class.
 
 You can organize configuration into arrays and load them through the container.
 

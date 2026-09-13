@@ -1,10 +1,12 @@
 # Plugins
 
-NAF includes a clean and lightweight plugin system that allows you to extend the framework with zero configuration.
+A plugin is an ordinary Composer package that declares `"type": "naf-plugin"`. That type
+is the whole discovery mechanism: the framework asks Composer which installed packages have
+it and boots them. There is nothing to register and no list to maintain.
 
-Plugins can provide additional configuration, templates (views), and custom logic via a `bootstrap.php` file. Once a plugin is installed via Composer, it is automatically detected and integrated.
-
----
+It also means the type has to be right. A package that installs correctly but declares a
+different type is not loaded — silently, without an error — which is exactly what happens
+to a `nixphp-plugin` under NAF 0.2.
 
 ## Plugin Structure
 

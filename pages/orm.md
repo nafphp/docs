@@ -6,28 +6,13 @@ requires:
 
 # ORM and repositories
 
-<div style="text-align: center;">
+Rows as objects, and a place to put the queries that fetch them. You define a model,
+ask a repository for it, and get instances back instead of associative arrays.
 
-[![NAF ORM Plugin](https://github.com/nafphp/orm/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/orm/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
----
-
-> **Minimalistic object mapper for your NAF application.**
-
-This plugin adds basic ORM support to NAF:  
-lightweight, readable, and ideal for small to medium use cases.
-
-It supports nested entity saving (including pivot tables),  
-auto-discovery of related entities, and repository-based lazy-loading.
-
-> 🧩 Part of the official NAF plugin collection.  
-> Use it if you want structured object handling – but without the complexity of full-stack ORM systems.
-
----
+It sits on `naf/database` and does not hide it: when a query wants to be SQL, write SQL.
+Reach for this when you would otherwise write the same mapping and the same finders by
+hand for the fifth time — not because an object mapper is the correct way to talk to a
+database.
 
 ## Configuration
 

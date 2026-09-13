@@ -4,11 +4,18 @@ title: What NAF is
 
 # What NAF is
 
-Welcome to **NAF** — a minimalist, modern PHP microframework.
+NAF is a PHP microframework: routing, a container, configuration, events and error
+handling, and nothing else. Everything past that — templates, forms, sessions, a database,
+a queue — is a separate package you install when you need it and never think about when
+you do not.
 
-## Overview
+That is the whole idea, and it has a cost worth naming: a fresh NAF application cannot
+render an HTML page until you decide how you want to. In exchange, an application that
+only answers JSON never carries a template engine, and one that has no forms never starts
+a session.
 
-NAF is a lightweight PHP framework that provides the essential tools for web development while remaining simple and flexible. It adheres to modern PHP standards and gives developers full control over their application architecture.
+If you are not sure which pieces your project needs,
+[start with the scenarios](choosing-packages.md).
 
 ## Target Audience
 

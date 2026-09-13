@@ -1,9 +1,10 @@
 # Installation
 
-NAF is designed as a lightweight framework package.  
-You install it into your own project using Composer.
+NAF is installed into a project you already have, or started from a skeleton that wires
+the usual pieces together for you. Both take one command.
 
----
+Which packages belong in that command depends on what you are building —
+[the scenarios](choosing-packages.md) answer that first.
 
 ## Install via Composer
 

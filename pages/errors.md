@@ -1,11 +1,11 @@
 # Error Handling
 
-NAF provides a simple and flexible mechanism for handling errors like 404 (Not Found) and 500 (Internal Server Error).
+What happens when a route does not match, a controller throws, or your own code decides
+the request should stop. All three end in a response rather than a stack trace on a white
+page — and which response is yours to define.
 
-By default, NAF uses internal error views located in the framework core.  
-However, you can easily override these pages in your project.
-
----
+`abort()` is the deliberate case: a controller that has decided the answer is 404 says so
+and stops, instead of returning a value that every caller above it has to check.
 
 ## Default Error Pages
 

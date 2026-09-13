@@ -6,29 +6,13 @@ requires:
 
 # HTTP client
 
-````md
-<div align="center" style="text-align: center;">
+Calling somebody else's HTTP service from inside your application — an internal API,
+a payment provider, a webhook you have to deliver.
 
-[![NAF Client Plugin](https://github.com/nafphp/client/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/client/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
----
-
-> **Lightweight PSR-18 HTTP client — pragmatic, robust, and framework-friendly.**
-
-This plugin provides a small and dependency-free implementation of  
-`Psr\Http\Client\ClientInterface`, designed for **internal APIs, integrations,
-and infrastructure code** inside NAF applications.
-
-It focuses on **correctness, stability, and testability** rather than feature bloat.
-
-> 🧩 Official NAF plugin  
-> Minimal surface area, explicit behavior, no hidden magic.
-
----
+It implements PSR-18, so anything expecting a standard client accepts it, and it carries
+no dependencies of its own. Two transports sit behind it, cURL and streams, and it falls
+back when the first is unavailable — which matters on the shared hosting where cURL is a
+question rather than a given.
 
 ## Transport Architecture
 

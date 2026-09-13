@@ -6,14 +6,6 @@ requires:
 
 # Being the provider
 
-<div align="center">
-
-[![NAF OAuth Server Plugin](https://github.com/nafphp/oauth-server/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/oauth-server/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
 ---
 
 > **Be the place people sign in with — an OAuth2 authorization server and OpenID Connect provider, on the accounts you already have.**
@@ -25,7 +17,6 @@ token()->requireScope('posts.write');
 That is the whole of what an API endpoint has to say. The authorization, the consent, the
 tokens and their revocation are already wired.
 
-> 🧩 Part of the official NAF plugin collection.
 > Install it when other applications should be able to act on behalf of your users.
 
 ---

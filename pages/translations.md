@@ -6,27 +6,12 @@ requires:
 
 # Translations
 
-<div style="text-align: center;" align="center">
+Text in more than one language, kept in JSON files rather than in the code. A key goes
+in, the string for the current language comes out, and a missing key falls back rather
+than breaking the page.
 
-[![NAF I18n Plugin](https://github.com/nafphp/i18n/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/i18n/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
----
-
-> **Simple JSON-based translations for your NAF application.**
-
-This plugin provides a lightweight translation system for multilingual apps.
-It reads language files from disk, supports variable replacements, and falls back gracefully — all with minimal overhead.
-
-> 🧩 Part of the official NAF plugin collection.
-> Install it if you want clean, flexible localization without external libraries.
-
----
-
->If you don't configure a language, the default language is English (`en`).
+Variables are substituted into the string, so a translator moves them around the sentence
+instead of you concatenating fragments in the order English happens to use.
 
 ## Translate
 

@@ -1,10 +1,12 @@
 # Events
 
-NAF includes a minimal yet powerful event system that allows you to hook into different parts of the application lifecycle.
+Points in the request where the framework stops and asks whether anybody wants to do
+something. A listener is a callable; there is no event class hierarchy to learn and no
+subscriber interface to implement.
 
-You can register listeners for specific events and execute custom code when those events are fired.
-
----
+This is also how plugins work on your application rather than around it: the CSRF check is
+a listener on `controller.calling`, not a layer wrapped around your controller. Anything a
+plugin does at these points, your own code can do the same way.
 
 ## Listening for Events
 

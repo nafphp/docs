@@ -6,14 +6,6 @@ requires:
 
 # Authentication and permissions
 
-<div align="center">
-
-[![NAF Auth Plugin](https://github.com/nafphp/auth/actions/workflows/php.yml/badge.svg)](https://github.com/nafphp/auth/actions/workflows/php.yml)
-
-</div>
-
-[← Back to NAF](https://github.com/nafphp/framework)
-
 ---
 
 > **Log people in, and check what they may do — with your own user model.**
@@ -25,7 +17,6 @@ auth()->can('posts.edit');                                        // bool, guest
 auth()->requireRole('admin');                                     // or a 403 leaves the controller
 ```
 
-> 🧩 Part of the official NAF plugin collection.
 > Install it when you need logins, and nothing else.
 
 ---

@@ -4,8 +4,14 @@ requires:
   - naf/view
 ---
 
-NAF comes with a lightweight native view system.  
-It provides simple template inheritance, layout usage, and reusable content blocks — without needing a heavy engine like Blade or Twig.
+# Views and templates
+
+PHP templates with layouts and blocks. There is no template language: a view is a
+`.phtml` file, `<?= ?>` is the syntax, and your editor already understands it.
+
+What you get beyond a plain `include` is inheritance — a layout with named blocks a view
+fills in — plus asset collection and an escaping helper. What you do not get is a compiler,
+a cache directory, or a syntax to learn.
 
 ## Rendering a View
 

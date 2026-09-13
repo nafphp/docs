@@ -6,11 +6,11 @@ requires:
 
 # Database
 
-NAF provides a simple and flexible way to work with databases using native PDO.
+A PDO connection, configured in one place, with migrations to get the schema there.
+You write SQL and get back what PDO gives you.
 
-You are free to build your own database layer or plug in any external ORM if needed.
-
----
+That is the whole of it. If you want rows to arrive as objects, [`naf/orm`](orm.md) sits
+on top of this package; if you want somebody else's ORM, nothing here is in the way.
 
 ## Accessing the Database
 

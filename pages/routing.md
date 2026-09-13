@@ -1,9 +1,12 @@
 # Routing
 
-NAF provides a simple and powerful routing system based on HTTP methods and URIs.  
-Routes map incoming requests to controller methods or closures with minimal configuration.
+A route says which HTTP method and path lead to which piece of your code. There is no
+annotation scanning and no route cache to rebuild: routes are a PHP file that runs at
+startup, so a route is a line you can read.
 
----
+Every route past the first needs a name. That is not decoration — the name is how you
+generate URLs, how the active-navigation helper knows where it is, and how a route is
+exempted from a CSRF check.
 
 ## Defining Routes
 
