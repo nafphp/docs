@@ -2,119 +2,60 @@
 title: Best practices
 ---
 
-# Best Practices
+# Best practices
 
-NAF gives you a lot of flexibility and freedom.  
-Following a few simple best practices can help keep your project clean, scalable, and maintainable.
+Start with the complete files in [Your first application](first-app.md). In reference chapters,
+short snippets demonstrate one API and may belong inside an existing method; recipe blocks
+with file titles contain complete files.
 
----
+## Keep HTTP handling in controllers
 
-## Keep Controllers Thin
+Read and validate the request, call an application service, then return a response. A service
+can own business rules and database operations without knowing about HTTP. Inject it through
+the controller constructor; [the container](dependency-injection.md) can build concrete
+classes with `make()` and resolve registered interfaces.
 
-Controllers should focus on handling HTTP-specific logic:  
-**Receiving requests, calling services, and returning responses.**
+Prefer class or interface names as container keys when you want typed injection. String keys
+are also supported, but you must retrieve them explicitly, for example inside a factory.
 
-Move heavy business logic into separate service classes.
+## Read data deliberately
 
-Example:
+`param()` can combine body and query data. Use `request()->getParsedBody()` for form-body-only
+input, or decode the raw JSON body when malformed JSON needs a distinct 400 response. Validate
+both the type and the value before writing to storage. See [Handling a POST
+request](recipes/post-requests.md).
 
-```php
-// Good: Controller is only responsible for flow control
-public function create()
-{
-    $productService = app()->container()->get('productService');
-    $product = $productService->create($_POST);
+`database()` returns PDO, so queries use prepared statements. Model finders belong to an
+[ORM repository](orm.md), not to PDO. Keep credentials in the environment and configuration in
+`app/config.php`; do not interpolate untrusted input into SQL or filenames.
 
-    return redirect('/products');
-}
-```
+## Return the right response
 
----
+Use `abort(404)` for a missing HTML resource, or return `json(['error' => 'Not found'], 404)`
+for an expected API failure. `abort()` throws; a custom JSON exception listener covers
+unexpected API failures. See [Errors and aborting](errors.md).
 
-## Use Services for Business Logic
+After a successful browser form submission, redirect to a GET route. On validation failure,
+render the submitted values and errors in the current request. `memory()` does not persist
+values across a redirect.
 
-Complex operations (e.g., creating users, processing orders) should be done inside dedicated service classes.
+## Escape at the output boundary
 
-Example:
-
-```php
-namespace App\Services;
-
-class ProductService
-{
-    public function create(array $data)
-    {
-        // Validation, database operations, etc.
-    }
-}
-```
-
-- Keeps your code modular.
-- Makes testing and maintenance easier.
-
----
-
-## Use Events to Decouple Features
-
-Instead of hardcoding everything, use `event()->dispatch()` and `event()->listen()`  
-to make your application more flexible and extensible.
-
-Example:
+With `naf/view`, a template imports and calls `s()` explicitly:
 
 ```php
-event()->dispatch('user.registered', $user);
+<?php use function Naf\View\s; ?>
+<h1>Hello, <?= s($name) ?>!</h1>
 ```
 
-- Other parts of your app can react to events **without** changing the core code.
+Form values need escaping too. Call `csrf()->generate()` once per rendered page and reuse the
+token for multiple forms: each call replaces the stored token. See [Forms](forms.md).
 
----
+## Keep deployment and local development distinct
 
-## Handle Errors Cleanly
+Use `APP_ENV=dev` locally and `APP_ENV=prod` in production. The web root is `public/`.
+Keep application files, environment files and storage outside that public directory. Add only
+the packages needed for your feature and keep the Composer lock file for reproducible installs.
 
-Always use the `abort()` helper when something goes wrong.
-
-Example:
-
-```php
-$product = database()->find('products', $id);
-
-if (!$product) {
-    abort(404, 'Product not found.');
-}
-```
-
-- Makes sure that the user sees proper error pages.
-- Keeps your controller flow clean and predictable.
-
----
-
-## Organize Config and Services
-
-- Keep all important configuration in `app/config.php`.
-- Use the container (`app()->container()`) to manage your services centrally.
-- Prefer **string keys** like `'productService'`, `'userRepository'` instead of full class names.
-
-Good example:
-
-```php
-app()->container()->set('userRepository', function () {
-    return new \App\Repositories\UserRepository();
-});
-```
-
----
-
-## Write Custom Helpers if Needed
-
-If you find yourself repeating common tasks (like escaping output or creating responses),  
-feel free to add your own global helpers.
-
-NAF encourages building **small, reusable tools** that fit your needs.
-
-Example:
-
-```php
-use function Naf\View\s;
-
-<h1>Hello, <?= s($user->name) ?>!</h1>
-```
+Run the example's verification steps after copying it. They check observable HTTP behavior,
+including failure responses, rather than only whether PHP can parse a file.
