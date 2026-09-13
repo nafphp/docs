@@ -115,3 +115,10 @@
 .md-typeset table:not([class]) code { white-space: nowrap; }
 .md-typeset table:not([class]) td:first-child { white-space: normal; }
 .md-typeset__table { overflow-x: auto; }
+
+/* --- The mark's left half is charcoal and disappears on a dark ground, so the
+       dark theme gets the light artwork instead. --- */
+[data-md-color-scheme="slate"] .md-header .md-logo img,
+[data-md-color-scheme="slate"] .md-nav__title .md-logo img {
+  content: url("naf-logo-small-square-light.png");
+}
