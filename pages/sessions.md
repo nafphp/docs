@@ -120,8 +120,6 @@ But using the `session()` helper is the recommended way.
 
 ---
 
----
-
 ## How it works
 
 * Automatically starts `session_start()` for web requests, with hardened cookie parameters and domain normalization.

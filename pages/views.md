@@ -180,8 +180,6 @@ Use `asset()->render('css')` or `asset()->render('js')` inside your layout:
 
 ---
 
----
-
 ## Helper Comparison
 
 | Helper     | Returns             | Use case                                |

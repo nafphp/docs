@@ -114,8 +114,6 @@ The PDO instance comes with these options:
 
 ---
 
----
-
 ## How it works
 
 * Loads config from `/app/config.php` from the key `database`

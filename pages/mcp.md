@@ -6,8 +6,6 @@ requires:
 
 # MCP tools
 
----
-
 > **Model Context Protocol (MCP) server implementation for NAF (Tools-first).**
 
 This plugin turns your NAF application into an **MCP server** that exposes

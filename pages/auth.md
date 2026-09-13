@@ -6,8 +6,6 @@ requires:
 
 # Authentication and permissions
 
----
-
 > **Log people in, and check what they may do — with your own user model.**
 
 ```php

@@ -6,8 +6,6 @@ requires:
 
 # Signing in with a provider
 
----
-
 > **Sign people in with Google, Microsoft or any OpenID Connect provider — and keep your own user model.**
 
 ```php

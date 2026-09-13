@@ -6,8 +6,6 @@ requires:
 
 # Being the provider
 
----
-
 > **Be the place people sign in with — an OAuth2 authorization server and OpenID Connect provider, on the accounts you already have.**
 
 ```php
