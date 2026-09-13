@@ -53,7 +53,7 @@ markdown_extensions:
 
 nav:
   - Anfangen:
-      - Was NAF ist: what-naf-is.md
+      - Was NAF ist: index.md
       - Installieren: install.md
       - Die erste Anwendung: first-app.md
   - Kern:
