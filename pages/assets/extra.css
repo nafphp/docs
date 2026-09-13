@@ -122,3 +122,9 @@
 [data-md-color-scheme="slate"] .md-nav__title .md-logo img {
   content: url("naf-logo-small-square-light.png");
 }
+
+/* Keep namespaces visible beside long reflected signatures. */
+.md-typeset .function-reference td:first-child code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

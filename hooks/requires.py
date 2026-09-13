@@ -40,7 +40,7 @@ def on_page_markdown(markdown, page, config, files):
     extra -= {r.split("/", 1)[1] for r in req}
     if extra:
         names = ", ".join(f"`naf/{e}`" for e in sorted(extra))
-        lines.append(f"    Pulls in {names}, because `{req[0]}` requires it.")
+        lines.append(f"    Also installs these transitive dependencies: {names}.")
         lines.append("")
 
     return "\n".join(lines) + markdown

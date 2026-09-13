@@ -35,7 +35,7 @@ decision an application should be making:
 | **`nonce`** | issued and checked against the ID token |
 | **Signature** | always verified against the provider's published keys, wherever there is an ID token |
 | **Algorithm** | pinned to what the provider publishes, never read from the token's own header |
-| **Claims** | `iss`, `aud`, `azp`, `exp`, `iat`, `nonce`, `sub` — all required, all checked |
+| **Claims** | `iss`, `aud`, `exp`, `iat`, `nonce`, `sub` are checked; `azp` is checked when present |
 | **Metadata** | the document has to name the issuer you configured before anything in it is used |
 | **Redirect URI** | derived from your public URL, sent exactly, never taken from a request |
 | **Transport** | https only, and no redirects followed while credentials are in flight |
@@ -80,6 +80,9 @@ return [
 Two things: where your accounts live, and which logins you offer. The connection, the callback
 routes, the session, the link table, the HTTP transport and the landing page are all taken from
 what is already there.
+
+The diagnostic commands need `composer require naf/cli`.
+For the API-call example later, also install `naf/client`.
 
 Then ask what to register with the provider:
 
@@ -421,6 +424,10 @@ Then, wherever the API call happens:
 ```php
 use function Naf\OAuth\Client\oauth;
 use function Naf\OAuth\Client\oauth_token;
+use function Naf\Auth\auth;
+use function Naf\Client\client;
+use function Naf\redirect;
+use Nyholm\Psr7\Request;
 
 $token = oauth_token('google');
 
@@ -432,9 +439,11 @@ if ($token === null || !$token->grants('https://www.googleapis.com/auth/calendar
     ));
 }
 
-$response = client()->get('https://www.googleapis.com/calendar/v3/calendars/primary/events', [
-    'headers' => ['Authorization' => 'Bearer ' . $token->accessToken],
-]);
+$response = client()->sendRequest(new Request(
+    'GET',
+    'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+    ['Authorization' => 'Bearer ' . $token->accessToken],
+));
 ```
 
 `oauth_token()` hands out something usable or nothing: an expired access token is renewed on the

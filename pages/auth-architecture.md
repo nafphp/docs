@@ -6,8 +6,8 @@ requires:
 
 # Why auth has this shape
 
-Why the plugin has this shape. [Anmeldung und Rechte](auth.md) ist das vollständige Bild für Anwender;
-diese Seite ist die Begründung dahinter.
+Why the plugin has this shape. [Authentication and permissions](auth.md) describes how
+to use it; this page explains the design.
 
 ## One implementation per question
 
@@ -24,9 +24,9 @@ Consequences that are deliberate, not oversights:
   keep in sync between instances.
 - **No `Actor`.** `auth()->user()` returns the provider's own object and `auth()` answers the
   authorization questions about it. One way to reach the person, one way to ask about them.
-- **Grants live on `IdentityInterface`.** Three methods, always present, so nothing has to test
-  whether an identity happens to implement a second, optional contract. Returning `[]` is the
-  honest answer for an application that only needs logins.
+- **Grants live on `IdentityInterface`.** Identifier, roles and permissions form the base
+  contract. `UserInterface` extends it with `isActive()` and `getProfile()`; Auth checks
+  that extended contract when present. Returning `[]` for grants suits login-only applications.
 - **Variadics replace the ANY/ALL pairs.** `can('a', 'b')` is "both"; `canAny('a', 'b')` is "either".
   Listing nothing is vacuously true for the ALL forms, so `requirePermission(...$configured)` with an
   empty configuration asks for a login and nothing more.

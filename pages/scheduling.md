@@ -51,7 +51,8 @@ scheduler()->addScheduledJob(SyncInventory::class, ['warehouse' => 'north']);
 ```
 
 In your application's `bootstrap.php`. The optional payload reaches the job's constructor,
-which is how the same class serves several schedules with different arguments.
+but each class can be registered only once: a second registration of the same class
+replaces the first payload. Use distinct job classes for distinct registered schedules.
 
 `vendor/bin/naf schedule:list` shows what is registered and when each one runs next.
 
@@ -82,10 +83,13 @@ vendor/bin/naf schedule:ticker
 
 ```ini
 [program:naf-schedule]
-command=php bin/naf schedule:ticker --max-runtime=3600
+directory=/var/www/my-app
+command=php /var/www/my-app/vendor/bin/naf schedule:ticker --max-runtime=3600
 autostart=true
 autorestart=true
 ```
+
+Replace `/var/www/my-app` with your application path.
 
 ## What happens to a window that was missed
 

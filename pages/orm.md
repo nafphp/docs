@@ -6,127 +6,135 @@ requires:
 
 # ORM and repositories
 
-Rows as objects, and a place to put the queries that fetch them. You define a model,
-ask a repository for it, and get instances back instead of associative arrays.
+Repositories read rows as model objects; the entity manager saves them. `naf/orm` installs
+`naf/database`, which supplies the PDO connection. It does not create tables for your models.
 
-It sits on `naf/database` and does not hide it: when a query wants to be SQL, write SQL.
-Reach for this when you would otherwise write the same mapping and the same finders by
-hand for the fifth time — not because an object mapper is the correct way to talk to a
-database.
+## A complete small example
 
-## A model
+Start from [Your first application](first-app.md), install the package above and enable PHP's
+`pdo_sqlite` extension. Create `app/Models`, `app/Repositories`, `bin` and `storage` directories.
+Use this config, or merge its `database` key into your existing config:
 
-```php
+```php title="app/config.php"
+<?php
+
+return ['database' => [
+    'driver' => 'sqlite',
+    'database' => BASE_PATH . '/storage/app.sqlite',
+]];
+```
+
+```php title="app/Models/Product.php"
+<?php
+
 namespace App\Models;
 
-use Naf\ORM\Core\AbstractModel;
+use Naf\ORM\Model\AbstractModel;
 
 final class Product extends AbstractModel
 {
-    protected ?int $id = null;
     protected string $name = '';
-    protected ?Category $category = null;
-    protected array $tags = [];
+    protected string $sku = '';
+    protected string $status = 'active';
+    protected string $created_at = '';
 
-    // getters and setters
+    public function getName(): string { return $this->name; }
 }
 ```
 
-The table name follows from the class name, and the primary key is `id` unless the model
-says otherwise. A constructor taking an array is inherited, so a row can be hydrated
-straight into an instance.
+`AbstractModel` inherits an array constructor and the nullable `id` property. The default table
+name is the lowercase class name plus `s`: `Product` uses `products`, with primary key `id`.
 
-## A repository
+```php title="app/Repositories/ProductRepository.php"
+<?php
 
-```php
 namespace App\Repositories;
 
+use App\Models\Product;
 use Naf\ORM\Repository\AbstractRepository;
 
 final class ProductRepository extends AbstractRepository
 {
-    protected function getEntityClass(): string
-    {
-        return Product::class;
-    }
+    protected function getEntityClass(): string { return Product::class; }
 }
 ```
 
-That is the whole of it for the common case. The finders below come with the base class.
+```php title="bin/products-demo.php"
+<?php
 
-## Reading
+require dirname(__DIR__) . '/bootstrap.php';
 
-```php
-use function Naf\ORM\repo;
+use App\Models\Product;
+use App\Repositories\ProductRepository;
+use function Naf\Database\database;
+use function Naf\ORM\{em, repo};
 
+database()->exec('CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL, sku TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL, created_at TEXT NOT NULL
+)');
 $products = repo(ProductRepository::class);
-
-$all     = $products->findAll();
-$one     = $products->findOneBy('sku', 'ABC-1');            // ?EntityInterface
-$active  = $products->findBy('status', 'active');
-$recent  = $products->findBy(['status' => 'active'], null, ['created_at' => 'DESC'], 20);
+if ($products->findOneBy('sku', 'ABC-1') === null) {
+    em()->save(new Product([
+        'name' => 'NAF for Beginners', 'sku' => 'ABC-1',
+        'status' => 'active', 'created_at' => gmdate('Y-m-d H:i:s'),
+    ]));
+}
+$product = $products->findOneBy('sku', 'ABC-1');
+echo $product->getName() . "\n";
 ```
 
-`findBy()` and `findOneBy()` take either a field and a value, or an array of criteria.
-`findBy()` also takes an order, a limit and an offset — enough for a listing page without
-writing SQL, and no attempt to be a query builder for anything past that.
+```bash
+composer dump-autoload
+php bin/products-demo.php
+```
 
-Columns are checked against the table's own columns before they reach the statement, so a
-field name coming from a request cannot turn into SQL.
+Expect `NAF for Beginners`. Running it again finds the existing product.
+For deployed applications, manage schema changes through [migrations](database.md#migrations).
 
-## Reading through a pivot
+## Finders
+
+With the `$products` repository above:
 
 ```php
-$productsWithTag = repo(ProductRepository::class)->findByPivot(Tag::class, $tagId);
+$all = $products->findAll();
+$one = $products->findOneBy('sku', 'ABC-1');
+$active = $products->findBy('status', 'active');
+$recent = $products->findBy(['status' => 'active'], null, ['created_at' => 'DESC'], 20);
 ```
 
-The pivot table name is derived from the two singular table names in alphabetical order —
-`product_tag` for `Product` and `Tag`. When your table is called something else, say so on
-either entity:
+`findBy()` and `findOneBy()` accept a field/value pair or an array of criteria. `findBy()`
+also accepts order, limit and offset. Column names are checked against the model's scalar
+fields and primary key, or a repository's explicit `$allowedColumns` override. This whitelist
+is derived from the model, not queried from the database schema. Parameter values use prepared
+statements.
 
-```php
-public array $pivotTables = [
-    Tag::class => 'article_tags',
-];
-```
+`findOrCreateBy()` and `findOrCreateManyBy()` fill a single named field when inserting.
+Use them only when the other required fields have suitable model defaults.
 
-## Find or create
+## Related entities
 
-```php
-$category = repo(CategoryRepository::class)->findOrCreateBy('name', 'Books');
-$tags     = repo(TagRepository::class)->findOrCreateManyBy('name', ['Bestseller', 'Limited']);
-```
+To extend the example with categories or tags, first add their models, repositories and SQL
+tables. The entity manager walks entity-valued properties to save foreign keys, and arrays
+of entities to save pivot rows. These relations need application-defined accessors.
 
-Useful exactly where you would otherwise write the same select-then-insert by hand — tags,
-categories, anything keyed by a natural name.
+For a `Product` and `Tag`, the default pivot table is `product_tag`; its keys are `product_id`
+and `tag_id`. A repository's `findByPivot(Tag::class, $tagId)` reads through that pivot. A
+public `$pivotTables` mapping on either entity can override the pivot table name.
 
-## Saving
+There is no lazy loading or proxy object. Write a repository query explicitly when you need
+to load a relationship. For queries beyond the finders, use PDO through `database()`.
+
+## Transactions
+
+A single `em()->save()` opens a transaction when none is active. To span several saves:
 
 ```php
 use function Naf\ORM\em;
 
-$product = new Product();
-$product->setName('NAF for Beginners');
-$product->setCategory($category);
-$product->addTag($tagA);
-$product->addTag($tagB);
-
-em()->save($product);
-```
-
-One call saves the whole graph. The entity manager walks the object: properties holding an
-entity become a foreign key on this row, following the `<parent>_id` convention; properties
-holding an array of entities become pivot rows.
-
-Saving is on the entity manager, not on the repository — the repository reads, the manager
-writes. Two objects rather than one, because a save that touches four tables is not a
-concern of the repository for any one of them.
-
-## Transactions
-
-```php
+// $order and $invoice are your already-created entities.
 em()->begin();
-
 try {
     em()->save($order);
     em()->save($invoice);
@@ -137,21 +145,5 @@ try {
 }
 ```
 
-`save()` opens a transaction on its own when none is running, so a single save is already
-atomic across all the tables it touches. `begin()` is for spanning several.
-
-`em()->clear()` drops what the manager is holding — worth calling in a long-running worker
-that saves thousands of entities and would otherwise keep every one of them.
-
-## What this is not
-
-There is no lazy loading and no proxy objects. A getter that returns related entities asks
-its repository, which means you can see the query in your own code rather than discovering
-it in a profiler.
-
-There is also no migration generator: the ORM reads the schema, it does not write it. Use
-[`naf/database`](database.md) migrations for that.
-
-Reach for this when you would otherwise write the same mapping and the same finders by hand
-for the fifth time — not because an object mapper is the correct way to talk to a database.
-When a query wants to be SQL, `database()` is one import away.
+`em()->clear()` releases the manager's tracked state; call it periodically in long-running
+workers. Define and migrate your schema yourself: the ORM does not generate it.

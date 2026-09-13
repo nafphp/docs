@@ -25,10 +25,10 @@ and the request and response objects are all in the core. There is no template e
 switch off and no session being started behind your back.
 
 ```php
-use function Naf\{json, request, route};
+use function Naf\{json, param, route};
 
 route()->add('POST', '/webhook', function () {
-    $payload = request()->getParsedBody();
+    $payload = param()->all();
     // do the thing
     return json(['ok' => true]);
 }, 'webhook');
@@ -110,9 +110,10 @@ But the ordinary case is a user model in a database and a session to stay signed
 is why the two are suggested alongside it rather than required.
 
 ```php
+use Naf\Auth\Credentials\PasswordCredentials;
 use function Naf\Auth\auth;
 
-if (auth()->attempt(new PasswordCredentials($email, $password))) {
+if (auth()->authenticate(new PasswordCredentials($email, $password))) {
     // signed in
 }
 ```
@@ -146,8 +147,8 @@ Let people in with an account they already have, and keep your own user model.
 composer require naf/oauth-client
 ```
 
-Brings `naf/auth` and `naf/session`. Add `naf/view` if you want the ready-made button and
-callback pages rather than building your own.
+Brings `naf/auth` and `naf/session`. The ready-made button and pages also render without `naf/view`; add it
+when you want application templates to override the shipped markup.
 
 Read [Signing in with a provider](oauth-client.md).
 

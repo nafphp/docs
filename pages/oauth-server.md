@@ -121,7 +121,12 @@ still says who somebody is; `sub` is the whole of what the specification require
 
 ## Setting it up
 
+Install `naf/cli` for the setup and management commands, and configure a PDO connection
+(usually through `naf/database`). Existing local users and a login route are prerequisites;
+see [Authentication](auth.md#quickstart).
+
 ```bash
+composer require naf/cli naf/database
 vendor/bin/naf oauth:server:setup
 ```
 
@@ -328,7 +333,7 @@ same moment it stops working everywhere else.
 **Access tokens are opaque, not JWTs.** Revocation works without a second mechanism; a database
 leak yields hashes rather than usable tokens; a changed scope or a demoted user takes effect on
 the next call rather than the next token. A resource server running elsewhere uses authenticated
-introspection. (ID tokens will be JWTs when OIDC ships — the specification says so.)
+introspection. ID tokens are signed JWTs in the current OpenID Connect implementation.
 
 **Rotation is strict — there is no grace window.** Implementing one honestly would mean either
 keeping a bearer token in plaintext so it can be handed out twice, or standing down replay
@@ -371,8 +376,9 @@ neither.
 ### Upgrading
 
 The schema has changed and is not backward compatible: authorizations now carry their target
-API, families are rows of their own, and clients carry the secret they last replaced. Nothing is released yet, so the migration is meant to
-be re-run rather than patched:
+API, families are rows of their own, and clients carry the secret they last replaced. For a disposable development database created from an earlier schema, rebuild the
+tables after backing up anything you need. For a deployed database, write and test a
+forward migration; do not drop its tables:
 
 ```bash
 vendor/bin/naf db:migrate up      # after dropping the oauth_* tables of an earlier run

@@ -32,14 +32,14 @@ NAF includes:
 
 - **Routing** for URL handling and HTTP method mapping
 - **Controllers** for organizing request handling logic
-- **View System** with layout support and template inheritance
-- **Database Access** through straightforward PDO integration
-- **Session Management** for state handling
-- **Response Handling** with content negotiation
+- **Response helpers** for explicit HTML, JSON and redirects
+- **Dependency injection**, configuration, events and error handling
 - **Plugin System** for extending functionality
 - **PSR Compatibility** for integration with the PHP ecosystem
 
-All components are designed to be minimal, with no unnecessary abstractions or dependencies.
+Templates (`naf/view`), database access (`naf/database`) and sessions (`naf/session`)
+are optional plugins, described in [Choosing packages](choosing-packages.md).
+PSR-18 support comes from the optional `naf/client` package.
 
 ## Design Principles
 
