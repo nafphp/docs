@@ -1,13 +1,13 @@
 ---
-title: Paketübersicht
+title: Package overview
 ---
 
-# Paketübersicht
+# Package overview
 
-Was es gibt, was es voraussetzt und was es empfiehlt. Aus den `composer.json`
-der veröffentlichten Pakete erzeugt.
+What there is, what it requires and what it suggests. Generated from the
+`composer.json` of the published packages.
 
-| Paket | Braucht | Empfiehlt | PHP |
+| Package | Requires | Suggests | PHP |
 |---|---|---|---|
 | **`naf/framework`**<br><span style="font-weight:400">NAF - the ultra-light, functional PHP framework for fast microservices and APIs.</span> | — | — | `>=8.3` |
 | **`naf/auth`**<br><span style="font-weight:400">Authentication and permission checks for NAF, with your own user model.</span> | `naf/framework` | `naf/orm`, `naf/session` | `>=8.3` |

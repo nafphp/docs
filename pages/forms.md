@@ -1,10 +1,10 @@
 ---
-title: Formulare und Validierung
+title: Forms and validation
 requires:
   - naf/form
 ---
 
-# Form Handling
+# Forms and validation
 
 The `naf/form` plugin adds form input helpers and CSRF protection to your NAF application.
 It makes working with POST requests and form validation simpler and safer.

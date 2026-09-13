@@ -1,8 +1,8 @@
 ---
-title: Was NAF ist
+title: What NAF is
 ---
 
-# Introduction
+# What NAF is
 
 Welcome to **NAF** — a minimalist, modern PHP microframework.
 

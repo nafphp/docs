@@ -1,10 +1,10 @@
 ---
-title: Selbst Provider sein
+title: Being the provider
 requires:
   - naf/oauth-server
 ---
 
-# Selbst Provider sein
+# Being the provider
 
 <div align="center">
 

@@ -1,10 +1,10 @@
 ---
-title: Mit fremdem Konto anmelden
+title: Signing in with a provider
 requires:
   - naf/oauth-client
 ---
 
-# Mit fremdem Konto anmelden
+# Signing in with a provider
 
 <div align="center">
 

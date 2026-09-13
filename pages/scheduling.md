@@ -1,10 +1,10 @@
 ---
-title: Zeitgesteuerte Jobs
+title: Scheduled jobs
 requires:
   - naf/schedule
 ---
 
-# Zeitgesteuerte Jobs
+# Scheduled jobs
 
 <div align="center" style="text-align: center;">
 

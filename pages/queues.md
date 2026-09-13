@@ -1,10 +1,10 @@
 ---
-title: Queues und Worker
+title: Queues and workers
 requires:
   - naf/queue
 ---
 
-# Queues und Worker
+# Queues and workers
 
 <div align="center" style="text-align: center;">
 

@@ -1,10 +1,10 @@
 ---
-title: ORM und Repositories
+title: ORM and repositories
 requires:
   - naf/orm
 ---
 
-# ORM und Repositories
+# ORM and repositories
 
 <div style="text-align: center;">
 

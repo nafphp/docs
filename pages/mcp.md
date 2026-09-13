@@ -1,10 +1,10 @@
 ---
-title: MCP-Werkzeuge
+title: MCP tools
 requires:
   - naf/mcp
 ---
 
-# MCP-Werkzeuge
+# MCP tools
 
 <div style="text-align: center;" align="center">
 

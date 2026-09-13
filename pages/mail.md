@@ -1,10 +1,10 @@
 ---
-title: E-Mail versenden
+title: Sending mail
 requires:
   - naf/mail
 ---
 
-# E-Mail versenden
+# Sending mail
 
 <div style="text-align: center;" align="center">
 

@@ -1,10 +1,10 @@
 ---
-title: Übersetzungen
+title: Translations
 requires:
   - naf/i18n
 ---
 
-# Übersetzungen
+# Translations
 
 <div style="text-align: center;" align="center">
 

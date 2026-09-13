@@ -1,48 +1,48 @@
 ---
-title: Umstieg von NixPHP
+title: Upgrading from NixPHP
 ---
 
-# Umstieg von NixPHP
+# Upgrading from NixPHP
 
-NixPHP heißt jetzt **NAF**, kurz für *Not Another Framework*. Der alte Name kollidierte
-mit [NixOS](https://nixos.org) überall dort, wo es zählte — in Suchergebnissen, in
-Paketlisten, und am handfestesten in der Shell: Das CLI-Binary hieß buchstäblich `nix` und
-war auf jeder Maschine mit Nix schlicht nicht aufrufbar.
+NixPHP is now **NAF**, short for *Not Another Framework*. The old name collided with
+[NixOS](https://nixos.org) everywhere it mattered — in search results, in package listings,
+and most concretely in the shell, where the CLI binary was literally `nix` and could not be
+called at all on a machine with Nix installed.
 
-## Was sich geändert hat
+## What changed
 
-| | vorher | nachher |
+| | before | after |
 |---|---|---|
-| Composer-Vendor | `nixphp/…` | `naf/…` |
-| PHP-Namespace | `NixPHP\` | `Naf\` |
-| Konstante | `NIXPHP_BASE_PATH` | `NAF_BASE_PATH` |
-| Plugin-Typ | `nixphp-plugin` | `naf-plugin` |
-| CLI-Binary | `nix` | `naf` |
+| Composer vendor | `nixphp/…` | `naf/…` |
+| PHP namespace | `NixPHP\` | `Naf\` |
+| Base path constant | `NIXPHP_BASE_PATH` | `NAF_BASE_PATH` |
+| Plugin package type | `nixphp-plugin` | `naf-plugin` |
+| CLI binary | `nix` | `naf` |
 
-## Plugins müssen zusammen mit dem Framework umziehen
+## Plugins have to move with the framework
 
-Plugins werden über ihren Composer-Pakettyp gefunden, und der heißt jetzt `naf-plugin`.
-Ein Plugin, das noch `nixphp-plugin` deklariert, wird **nicht geladen** — ohne Fehler und
-ohne Warnung. Framework und alle benutzten Plugins gehören deshalb in einen Schritt.
+Plugins are discovered by their Composer package type, and that type is now `naf-plugin`.
+A plugin still declaring `nixphp-plugin` is **not loaded** — silently, with no error and no
+warning. Move the framework and every plugin you use in the same step.
 
-## Umstellen
+## Upgrading
 
 ```bash
 composer remove nixphp/framework
 composer require naf/framework:^0.2
 ```
 
-Dann die Verweise im eigenen Code umschreiben. Unter macOS:
+Then rewrite the references in your own code. On macOS:
 
 ```bash
 grep -rl -e 'NixPHP\\' -e 'nixphp/' --include='*.php' --include='composer.json' . \
   | xargs sed -i '' -e 's/NixPHP\\/Naf\\/g' -e 's#nixphp/#naf/#g'
 ```
 
-Unter Linux nimmt `sed -i` kein Argument — dort entfällt das `''`.
+On Linux, `sed -i` takes no argument — drop the `''`.
 
-## Die alten Pakete
+## The old packages
 
-Die `nixphp/*`-Pakete bleiben auf Packagist, als verwaist markiert und mit Verweis auf den
-Nachfolger. Sie bekommen keine weiteren Releases. Die Repositories unter
-`github.com/nixphp` bleiben stehen, wo sie sind — jeder bestehende Link funktioniert weiter.
+The `nixphp/*` packages stay on Packagist, marked abandoned and pointing at their successors.
+They receive no further releases. The repositories under `github.com/nixphp` stay where they
+are, so every existing link keeps working.

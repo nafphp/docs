@@ -1,6 +1,6 @@
-"""Rendert die requires-Deklaration einer Seite als Kasten — und nennt dabei,
-was transitiv mitkommt. Die Angabe steht damit in der Struktur der Seite und
-nicht in ihrem Fließtext, wo sie beim nächsten Umbau vergessen würde."""
+"""Renders a page's requires declaration as a box, and names what comes along
+transitively. The statement lives in the page's structure rather than in its
+prose, where the next rewrite would forget it."""
 import json, os
 
 DATA = os.path.join(os.path.dirname(__file__), "..", "tools", "packages.json")
@@ -30,8 +30,8 @@ def on_page_markdown(markdown, page, config, files):
     if not req:
         return markdown
 
-    lines = ['!!! info "Dieses Kapitel braucht ein zusätzliches Paket"' if len(req) == 1
-             else '!!! info "Dieses Kapitel braucht zusätzliche Pakete"', "",
+    lines = ['!!! info "This chapter needs an extra package"' if len(req) == 1
+             else '!!! info "This chapter needs extra packages"', "",
              "    ```bash", "    composer require " + " ".join(req), "    ```", ""]
 
     extra = set()
@@ -40,7 +40,7 @@ def on_page_markdown(markdown, page, config, files):
     extra -= {r.split("/", 1)[1] for r in req}
     if extra:
         names = ", ".join(f"`naf/{e}`" for e in sorted(extra))
-        lines.append(f"    Zieht {names} mit, weil {req[0]} es voraussetzt.")
+        lines.append(f"    Pulls in {names}, because `{req[0]}` requires it.")
         lines.append("")
 
     return "\n".join(lines) + markdown

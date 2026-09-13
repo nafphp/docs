@@ -1,10 +1,10 @@
 ---
-title: Warum auth so aussieht
+title: Why auth has this shape
 requires:
   - naf/auth
 ---
 
-# Warum auth so aussieht
+# Why auth has this shape
 
 Why the plugin has this shape. [Anmeldung und Rechte](auth.md) ist das vollständige Bild für Anwender;
 diese Seite ist die Begründung dahinter.

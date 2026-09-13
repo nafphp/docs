@@ -1,10 +1,10 @@
 ---
-title: Konsolenbefehle
+title: Console commands
 requires:
   - naf/cli
 ---
 
-# Konsolenbefehle
+# Console commands
 
 <div style="text-align: center;" align="center">
 

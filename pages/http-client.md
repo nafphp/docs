@@ -1,10 +1,10 @@
 ---
-title: HTTP-Client
+title: HTTP client
 requires:
   - naf/client
 ---
 
-# HTTP-Client
+# HTTP client
 
 ````md
 <div align="center" style="text-align: center;">

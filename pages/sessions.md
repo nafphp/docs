@@ -4,7 +4,7 @@ requires:
   - naf/session
 ---
 
-# Session
+# Sessions
 
 NAF provides a minimal but powerful session management system.  
 You can easily work with session data, flash messages, and session control.

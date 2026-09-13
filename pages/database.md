@@ -1,5 +1,5 @@
 ---
-title: Datenbank
+title: Database
 requires:
   - naf/database
 ---

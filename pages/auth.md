@@ -1,10 +1,10 @@
 ---
-title: Anmeldung und Rechte
+title: Authentication and permissions
 requires:
   - naf/auth
 ---
 
-# Anmeldung und Rechte
+# Authentication and permissions
 
 <div align="center">
 

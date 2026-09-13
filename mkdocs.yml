@@ -15,14 +15,10 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: teal
-      accent: teal
-      toggle: { icon: material/weather-night, name: Dunkles Design }
+      toggle: { icon: material/weather-night, name: Switch to dark mode }
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: teal
-      accent: teal
-      toggle: { icon: material/weather-sunny, name: Helles Design }
+      toggle: { icon: material/weather-sunny, name: Switch to light mode }
   font:
     text: IBM Plex Sans
     code: IBM Plex Mono
@@ -52,45 +48,45 @@ markdown_extensions:
   - pymdownx.details
 
 nav:
-  - Anfangen:
-      - Was NAF ist: index.md
-      - Installieren: install.md
-      - Die erste Anwendung: first-app.md
-  - Kern:
+  - Getting started:
+      - What NAF is: index.md
+      - Installation: install.md
+      - Your first application: first-app.md
+  - Core:
       - Routing: routing.md
       - Controller: controllers.md
-      - Request und Response: request-response.md
-      - Konfiguration: configuration.md
+      - Requests and responses: request-response.md
+      - Configuration: configuration.md
       - Dependency Injection: dependency-injection.md
       - Events: events.md
-      - Fehler und Abbrüche: errors.md
+      - Errors and aborting: errors.md
       - Guard: guard.md
-      - Dateien ausliefern: file-downloads.md
-      - Wie Plugins funktionieren: plugins.md
-      - Fremde Bibliotheken: external-libraries.md
-      - Bewährte Praxis: best-practices.md
-  - Darstellen:
-      - Views und Templates: views.md
-      - Formulare und Validierung: forms.md
-      - Übersetzungen: translations.md
-  - Speichern:
+      - Serving files: file-downloads.md
+      - How plugins work: plugins.md
+      - External libraries: external-libraries.md
+      - Best practices: best-practices.md
+  - Presenting:
+      - Views and templates: views.md
+      - Forms and validation: forms.md
+      - Translations: translations.md
+  - Storing:
       - Sessions: sessions.md
-      - Datenbank: database.md
-      - ORM und Repositories: orm.md
-  - Arbeiten lassen:
-      - Konsolenbefehle: console.md
-      - Queues und Worker: queues.md
-      - Zeitgesteuerte Jobs: scheduling.md
-      - E-Mail versenden: mail.md
-      - HTTP-Client: http-client.md
-  - Identität:
-      - Anmeldung und Rechte: auth.md
-      - Warum auth so aussieht: auth-architecture.md
-      - Mit fremdem Konto anmelden: oauth-client.md
-      - Selbst Provider sein: oauth-server.md
-  - Maschinen:
-      - MCP-Werkzeuge: mcp.md
-  - Nachschlagen:
-      - Funktionsindex: function-index.md
-      - Paketübersicht: packages.md
-      - Umstieg von NixPHP: upgrading-from-nixphp.md
+      - Database: database.md
+      - ORM and repositories: orm.md
+  - Doing work:
+      - Console commands: console.md
+      - Queues and workers: queues.md
+      - Scheduled jobs: scheduling.md
+      - Sending mail: mail.md
+      - HTTP client: http-client.md
+  - Identity:
+      - Authentication and permissions: auth.md
+      - Why auth has this shape: auth-architecture.md
+      - Signing in with a provider: oauth-client.md
+      - Being the provider: oauth-server.md
+  - Machines:
+      - MCP tools: mcp.md
+  - Reference:
+      - Function index: function-index.md
+      - Package overview: packages.md
+      - Upgrading from NixPHP: upgrading-from-nixphp.md

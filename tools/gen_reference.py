@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
-"""Erzeugt Funktionsindex und Paketübersicht aus den VERÖFFENTLICHTEN Paketen.
+"""Builds the function index and the package overview from the PUBLISHED packages.
 
-Nichts hiervon wird von Hand gepflegt: Die Pakete werden frisch installiert und
-ausgelesen, damit der Index das beschreibt, was jemand tatsächlich bekommt.
+None of this is maintained by hand: the packages are installed fresh and read, so
+the index describes what somebody actually gets.
 """
 import json, os, re, subprocess, sys, tempfile, urllib.request
 
 PAGES = os.path.join(os.path.dirname(__file__), "..", "pages")
 KAPITEL = {
-    "framework": ("Kern", None), "view": ("Views und Templates", "views.md"),
-    "form": ("Formulare und Validierung", "forms.md"), "session": ("Sessions", "sessions.md"),
-    "database": ("Datenbank", "database.md"), "orm": ("ORM und Repositories", "orm.md"),
-    "queue": ("Queues und Worker", "queues.md"), "schedule": ("Zeitgesteuerte Jobs", "scheduling.md"),
-    "mail": ("E-Mail versenden", "mail.md"), "i18n": ("Übersetzungen", "translations.md"),
-    "client": ("HTTP-Client", "http-client.md"), "cli": ("Konsolenbefehle", "console.md"),
-    "mcp": ("MCP-Werkzeuge", "mcp.md"), "auth": ("Anmeldung und Rechte", "auth.md"),
-    "oauth-client": ("Mit fremdem Konto anmelden", "oauth-client.md"),
-    "oauth-server": ("Selbst Provider sein", "oauth-server.md"),
+    "framework": ("Core", None), "view": ("Views and templates", "views.md"),
+    "form": ("Forms and validation", "forms.md"), "session": ("Sessions", "sessions.md"),
+    "database": ("Database", "database.md"), "orm": ("ORM and repositories", "orm.md"),
+    "queue": ("Queues and workers", "queues.md"), "schedule": ("Scheduled jobs", "scheduling.md"),
+    "mail": ("Sending mail", "mail.md"), "i18n": ("Translations", "translations.md"),
+    "client": ("HTTP client", "http-client.md"), "cli": ("Console commands", "console.md"),
+    "mcp": ("MCP tools", "mcp.md"), "auth": ("Authentication and permissions", "auth.md"),
+    "oauth-client": ("Signing in with a provider", "oauth-client.md"),
+    "oauth-server": ("Being the provider", "oauth-server.md"),
 }
 
 def vendor_packages():
@@ -56,25 +56,25 @@ def write_function_index(fns):
     by_pkg = {}
     for fn, pkg in sorted(fns.items()):
         by_pkg.setdefault(pkg, []).append(fn)
-    out = ["---", "title: Funktionsindex", "---", "", "# Funktionsindex", "",
-           "Jede öffentliche Funktion, die NAF mitbringt, und das Paket, aus dem sie kommt.",
-           "Diese Seite wird bei jedem Build aus den veröffentlichten Paketen erzeugt — sie",
-           "kann nicht veralten.", "",
-           "| Funktion | Paket | Installieren | Kapitel |", "|---|---|---|---|"]
+    out = ["---", "title: Function index", "---", "", "# Function index", "",
+           "Every public function NAF ships, and the package it comes from. Generated from",
+           "the published packages on every build, so it cannot go stale.", "",
+           "| Package | Functions | Chapter |", "|---|---|---|"]
     for pkg in sorted(by_pkg, key=lambda p: (p != "framework", p)):
         kap, link = KAPITEL.get(pkg, (pkg, None))
         kaptxt = f"[{kap}]({link})" if link else kap
-        inst = "— im Kern enthalten" if pkg == "framework" else f"`composer require naf/{pkg}`"
-        for fn in by_pkg[pkg]:
-            out.append(f"| `{fn}()` | `naf/{pkg}` | {inst} | {kaptxt} |")
+        fns_txt = " ".join(f"`{f}()`" for f in by_pkg[pkg])
+        install = "" if pkg == "framework" else f"<br><span style=\"font-size:.85em;opacity:.7\">`composer require naf/{pkg}`</span>"
+        out.append(f"| **`naf/{pkg}`**{install} | {fns_txt} | {kaptxt} |")
+    out += ["", f"*{len(fns)} functions across {len(by_pkg)} packages.*"]
     open(os.path.join(PAGES, "function-index.md"), "w", encoding="utf-8").write("\n".join(out) + "\n")
     return len(fns)
 
 def write_packages(meta):
-    out = ["---", "title: Paketübersicht", "---", "", "# Paketübersicht", "",
-           "Was es gibt, was es voraussetzt und was es empfiehlt. Aus den `composer.json`",
-           "der veröffentlichten Pakete erzeugt.", "",
-           "| Paket | Braucht | Empfiehlt | PHP |", "|---|---|---|---|"]
+    out = ["---", "title: Package overview", "---", "", "# Package overview", "",
+           "What there is, what it requires and what it suggests. Generated from the",
+           "`composer.json` of the published packages.", "",
+           "| Package | Requires | Suggests | PHP |", "|---|---|---|---|"]
     for pkg in sorted(meta, key=lambda p: (p != "framework", p)):
         m = meta[pkg]
         req = ", ".join(f"`{r}`" for r in m["requires"]) or "—"

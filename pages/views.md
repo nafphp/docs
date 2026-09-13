@@ -1,5 +1,5 @@
 ---
-title: Views und Templates
+title: Views and templates
 requires:
   - naf/view
 ---
