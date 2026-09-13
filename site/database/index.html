@@ -1139,6 +1139,28 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#defaults-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defaults applied
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internals
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1864,6 +1886,28 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#defaults-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defaults applied
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internals
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1894,8 +1938,8 @@
 <p>You are free to build your own database layer or plug in any external ORM if needed.</p>
 <hr />
 <h2 id="accessing-the-database">Accessing the Database<a class="headerlink" href="#accessing-the-database" title="Permanent link">&para;</a></h2>
-<p>The global <code>database()</code> helper gives you access to the PDO instance:</p>
-<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\database;</span>
+<p>The <code>database()</code> helper gives you access to the PDO instance. Import it first:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\Database\database;</span>
 
 <span class="x">$pdo = database();</span>
 </code></pre></div>
@@ -1967,6 +2011,24 @@
 <li>NAF uses native PDO for maximum flexibility.</li>
 <li>You can integrate any external ORM if needed (e.g., Eloquent, Doctrine, etc.).</li>
 </ul>
+<hr />
+<h2 id="defaults-applied">Defaults applied<a class="headerlink" href="#defaults-applied" title="Permanent link">&para;</a></h2>
+<p>The PDO instance comes with these options:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">[</span>
+<span class="x">    PDO::ATTR_ERRMODE            =&gt; PDO::ERRMODE_EXCEPTION,</span>
+<span class="x">    PDO::ATTR_DEFAULT_FETCH_MODE =&gt; PDO::FETCH_ASSOC,</span>
+<span class="x">]</span>
+</code></pre></div>
+<hr />
+<hr />
+<h2 id="internals">Internals<a class="headerlink" href="#internals" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Loads config from <code>/app/config.php</code> from the key <code>database</code></li>
+<li>Builds DSN based on a given driver (<code>mysql</code>, <code>sqlite</code>)</li>
+<li>Wraps PDO creation in a factory, handles exceptions gracefully</li>
+<li>Registers <code>database</code> in the container and provides the <code>database()</code> helper</li>
+</ul>
+<hr />
 
 
 

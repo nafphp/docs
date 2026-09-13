@@ -6,96 +6,168 @@ requires:
 
 # Forms and validation
 
-The `naf/form` plugin adds form input helpers and CSRF protection to your NAF application.
-It makes working with POST requests and form validation simpler and safer.
+`naf/form` covers the three things a form needs beyond HTML: validating what came in,
+showing what went wrong, and putting back what the person already typed. It also protects
+every unsafe request with a CSRF token, without you registering anything.
 
----
+## The helpers are namespaced
 
-## CSRF Protection
+Every helper lives in `Naf\Form`. Templates import the ones they use:
 
-The plugin adds a listener to all `POST`, `PUT`, and `DELETE` requests.
-Unless the request contains an `Authorization` header (e.g. for APIs), a valid CSRF token is required.
+```php
+<?php
+use function Naf\Form\{csrf, error, has_error, memory, validator};
+```
 
-### Adding the CSRF token to forms
+They are not global. A template that calls `memory()` without importing it will fail with
+an undefined-function error, and that is the single most common surprise with this plugin.
 
-Use the `csrf_token()` helper to insert a token into your form:
+## Validation
+
+Hand the request body and a set of rules to the validator:
+
+```php
+validator()->validate(request()->getParsedBody(), [
+    'email'    => 'required|email',
+    'password' => 'required|min:8',
+]);
+
+if (validator()->isValid()) {
+    // continue
+}
+```
+
+`validator()` returns the same instance for the whole request, so the view can ask it about
+errors later without you passing it around.
+
+### Built-in rules
+
+| Rule | Passes when | Default message |
+|---|---|---|
+| `required` | the value is not empty | Field is required. |
+| `email` | `FILTER_VALIDATE_EMAIL` accepts it | Please enter a valid email address. |
+| `min:n` | the value is empty, or at least `n` characters | At least %d characters. |
+| `max:n` | the value is empty, or at most `n` characters | Maximum of %d characters. |
+| `boolean` | it reads as a boolean | Is not a boolean value. |
+
+`min` and `max` pass on an empty value on purpose: whether a field may be empty at all is
+`required`'s question, and answering it twice produces two messages for one mistake.
+
+### Your own messages
+
+```php
+validator()->validate(request()->getParsedBody(), [
+    'name' => 'required|min:3',
+], [
+    'name' => [
+        'required' => 'Please enter your name.',
+        'min'      => 'At least %s characters.',
+    ],
+]);
+```
+
+### Your own rules
+
+```php
+Validator::register('starts_with', function ($value, $param) {
+    return str_starts_with((string) $value, $param);
+}, "Value must start with '%s'.");
+```
+
+Register it once, during boot, and use it like any built-in rule: `'ref' => 'starts_with:INV-'`.
+
+## Showing what went wrong
+
+```php
+<input name="email" class="<?= error_class('email', validator()) ?>">
+<?php if (has_error('email', validator())): ?>
+    <span class="error"><?= error('email', validator()) ?></span>
+<?php endif ?>
+```
+
+- `error($field, $validator)` — the first message for that field, or `null`
+- `has_error($field, $validator)` — whether the field has one
+- `error_class($field, $validator)` — a class name to hang styling on
+- `is_post()` — whether this request was a POST, for the usual `if (is_post())` branch
+
+## Putting back what was typed
+
+A failed validation should not empty the form. `memory()` reads the previous submission:
+
+```php
+<input name="email" value="<?= memory('email') ?>">
+<input type="checkbox" name="agree" <?= memory_checked('agree') ?>>
+<option value="de" <?= memory_selected('country', 'de') ?>>Germany</option>
+```
+
+`memory_checked()` and `memory_selected()` return the whole attribute or an empty string,
+so they can be dropped into the tag without a conditional.
+
+## CSRF protection
+
+Put a token in every form that changes something:
 
 ```php
 <form method="post">
-    <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+    <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
     <!-- your fields -->
 </form>
 ```
 
-### What happens automatically
+That is all. The check runs on its own, before your controller.
 
-* The plugin listens to the `controller.calling` event.
-* It checks if a valid CSRF token is present.
-* If the token is missing or invalid, the request is aborted with status code **400**.
+### What is checked, and when
 
-You don’t need to register anything manually.
+The plugin listens on `Event::CONTROLLER_CALLING` and inspects **POST, PUT and DELETE**
+requests. Anything else passes untouched. The token is read from the `_csrf` body field, or
+from an `X-CSRF-Token` header for requests that send JSON rather than a form.
 
----
+A missing token aborts with **400 CSRF token missing**, an invalid one with
+**400 CSRF token invalid** — in both cases before the controller runs.
 
-### Custom token generation (advanced)
+### Requests that carry their own credentials
 
-In rare cases, you may want to **manually generate** a token, e.g. for an external JS request or API fallback:
+A request whose `Authorization` header begins with `Bearer` is let through.
 
-```php
-$token = guard()->csrf()->generate();
-```
+Only `Bearer`. A browser attaches cookies and Basic credentials by itself, so a request
+carrying those is exactly the kind CSRF exists to stop — the header was never proof of
+anything, and treating *any* `Authorization` header as a pass made the header itself the
+bypass. Nothing attaches a Bearer token automatically, so a request that has one was built
+deliberately by whoever holds it.
 
-This ensures a valid token is created and stored in the session.
+### Routes that authenticate some other way
 
----
-
-## Input Memory
-
-If you want to repopulate form input after a failed submission (e.g. validation failed),
-you can use the `memory()` helper:
-
-```php
-<input type="text" name="email" value="<?= memory('email') ?>">
-```
-
-This function checks if the user submitted a value for this field in the last request and fills it in.
-
----
-
-## Form Errors
-
-When using a validation system (e.g. the one provided by `naf/form`),
-you can use the `formError()` helper to display validation messages:
+A protocol endpoint called by a program carries no session to ride on and no form to put a
+token in. A CSRF check there refuses legitimate requests while protecting nothing. Name
+such routes one at a time:
 
 ```php
-<?php if ($error = formError('email')): ?>
-    <p class="error"><?= $error ?></p>
-<?php endif; ?>
+'csrf_exempt_routes' => [
+    'oauth.token' => true,
+],
 ```
 
-The helper will return the error message for the given field, if present.
+It is a map rather than a list so that several plugins can contribute to it without one
+overwriting another by position — and so an application can switch a plugin's exemption
+back off with `false`.
 
----
+Routes are named, never guessed from a path. There is no pattern matching here, and that is
+deliberate: a prefix rule exempts endpoints nobody remembered adding.
 
-## How it works under the hood
+### Turning it off
 
-* The plugin hooks into the event system to run a CSRF check before each controller.
-* The token is stored in the session using the `naf/session` plugin.
-* Input data is preserved using the memory service (also session-based).
-* Helpers like `memory()` and `csrf_token()` are globally available in views.
+```php
+'csrf_validation' => false,
+```
 
----
+For a service with no browser clients at all. If some of your endpoints need it and others
+do not, exempt those routes instead.
 
-## Requirements
+## How it works
 
-* `naf/session` must be installed and active
-  (`naf/form` depends on it for CSRF and memory handling)
+The plugin registers the built-in validator rules through the container, extends the guard
+with a CSRF service, hooks the check into `Event::CONTROLLER_CALLING`, and provides the view
+helpers. Tokens and remembered input are both stored in the session, which is why
+`naf/session` comes along with this package.
 
----
-
-## Summary
-
-* ✅ `csrf_token()` inserts a secure token in forms
-* ✅ CSRF validation is automatic for all unsafe methods
-* ✅ `memory()` restores previous user input after validation
-* ✅ `formError()` shows error messages for specific fields
+None of it needs configuration.

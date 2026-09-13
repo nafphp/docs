@@ -975,6 +975,95 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#asset-management-css-js" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Asset Management (CSS &amp; JS)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Asset Management (CSS &amp; JS)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-in-layout-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output in layout files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-gets-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What gets generated?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#helper-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helper Comparison
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internals_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Internals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configurable-view-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configurable view locations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1880,6 +1969,95 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#asset-management-css-js" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Asset Management (CSS &amp; JS)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Asset Management (CSS &amp; JS)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-in-layout-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output in layout files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-gets-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What gets generated?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#helper-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helper Comparison
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internals_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Internals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configurable-view-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configurable view locations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1911,7 +2089,7 @@
 It provides simple template inheritance, layout usage, and reusable content blocks — without needing a heavy engine like Blade or Twig.</p>
 <h2 id="rendering-a-view">Rendering a View<a class="headerlink" href="#rendering-a-view" title="Permanent link">&para;</a></h2>
 <p>You can render a view file using the <code>render()</code> helper function:</p>
-<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\render;</span>
+<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\View\render;</span>
 
 <span class="x">return render('hello', ['name' =&gt; 'World']);</span>
 </code></pre></div>
@@ -1925,7 +2103,7 @@ It provides simple template inheritance, layout usage, and reusable content bloc
 <h2 id="view-files">View Files<a class="headerlink" href="#view-files" title="Permanent link">&para;</a></h2>
 <p>View files are simple PHP templates with <code>.phtml</code> extension.</p>
 <p>Example: <code>app/views/hello.phtml</code></p>
-<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?php</span> <span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\s</span><span class="p">;</span> <span class="cp">?&gt;</span>
+<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?php</span> <span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\View\s</span><span class="p">;</span> <span class="cp">?&gt;</span>
 
 <span class="x">&lt;h1&gt;Hello, </span><span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">s</span><span class="p">(</span><span class="nv">$name</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x">!&lt;/h1&gt;</span>
 </code></pre></div>
@@ -1948,7 +2126,7 @@ It provides simple template inheritance, layout usage, and reusable content bloc
 <span class="x">&lt;/html&gt;</span>
 </code></pre></div>
 <p>In your view:</p>
-<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?php</span> <span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\s</span><span class="p">;</span> <span class="cp">?&gt;</span>
+<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?php</span> <span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\View\s</span><span class="p">;</span> <span class="cp">?&gt;</span>
 
 <span class="cp">&lt;?php</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">setLayout</span><span class="p">(</span><span class="s1">'layouts.main'</span><span class="p">)</span> <span class="cp">?&gt;</span>
 
@@ -1972,7 +2150,7 @@ It provides simple template inheritance, layout usage, and reusable content bloc
 <div class="language-php highlight"><pre><span></span><code><span class="x">return render('profile', ['user' =&gt; $user]);</span>
 </code></pre></div>
 <p>In <code>app/views/profile.phtml</code>:</p>
-<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?php</span> <span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\s</span><span class="p">;</span> <span class="cp">?&gt;</span>
+<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?php</span> <span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\View\s</span><span class="p">;</span> <span class="cp">?&gt;</span>
 
 <span class="x">&lt;h2&gt;Welcome, </span><span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">s</span><span class="p">(</span><span class="nv">$user</span><span class="p">[</span><span class="s1">'name'</span><span class="p">])</span> <span class="cp">?&gt;</span><span class="x">!&lt;/h2&gt;</span>
 </code></pre></div>
@@ -1980,7 +2158,7 @@ It provides simple template inheritance, layout usage, and reusable content bloc
 <h2 id="rendering-views-without-a-response">Rendering Views without a Response<a class="headerlink" href="#rendering-views-without-a-response" title="Permanent link">&para;</a></h2>
 <p>Sometimes you only need the raw HTML output of a view without wrapping it in a full Response object.<br />
 For this, you can use the <code>view()</code> helper:</p>
-<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\view;</span>
+<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\View\view;</span>
 
 <span class="x">$html = view('hello', ['name' =&gt; 'World']);</span>
 </code></pre></div>
@@ -1998,6 +2176,94 @@ For this, you can use the <code>view()</code> helper:</p>
 <li>Use <code>s()</code> to escape variables.</li>
 <li>Use <code>render()</code> for full responses and <code>view()</code> for raw HTML output.</li>
 </ul>
+<hr />
+<h2 id="asset-management-css-js">Asset Management (CSS &amp; JS)<a class="headerlink" href="#asset-management-css-js" title="Permanent link">&para;</a></h2>
+<p>The plugin includes a small, flexible asset collector used inside layouts to include CSS and JavaScript files.</p>
+<p>Assets are added inside views or controllers using the <code>asset()</code> helper:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">asset()-&gt;add('/assets/style.css');            // CSS</span>
+<span class="x">asset()-&gt;add('/assets/app.js');               // JavaScript (classic)</span>
+<span class="x">asset()-&gt;add('/assets/main.js', 'module');    // JavaScript ES module</span>
+</code></pre></div>
+<h3 id="output-in-layout-files">Output in layout files<a class="headerlink" href="#output-in-layout-files" title="Permanent link">&para;</a></h3>
+<p>Use <code>asset()-&gt;render('css')</code> or <code>asset()-&gt;render('js')</code> inside your layout:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">&lt;!doctype html&gt;</span>
+<span class="x">&lt;html&gt;</span>
+<span class="x">&lt;head&gt;</span>
+<span class="x">    </span><span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">asset</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">render</span><span class="p">(</span><span class="s1">'css'</span><span class="p">)</span> <span class="cp">?&gt;</span>
+<span class="x">&lt;/head&gt;</span>
+<span class="x">&lt;body&gt;</span>
+<span class="x">    </span><span class="cp">&lt;?</span><span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">renderBlock</span><span class="p">(</span><span class="s1">'content'</span><span class="p">)</span> <span class="cp">?&gt;</span>
+<span class="x">    </span><span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">asset</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">render</span><span class="p">(</span><span class="s1">'js'</span><span class="p">)</span> <span class="cp">?&gt;</span>
+<span class="x">&lt;/body&gt;</span>
+<span class="x">&lt;/html&gt;</span>
+</code></pre></div>
+<h3 id="what-gets-generated">What gets generated?<a class="headerlink" href="#what-gets-generated" title="Permanent link">&para;</a></h3>
+<p><strong>CSS:</strong></p>
+<div class="language-html highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"stylesheet"</span> <span class="na">href</span><span class="o">=</span><span class="s">"/assets/style.css"</span><span class="p">&gt;</span>
+</code></pre></div>
+<p><strong>Classic JS:</strong></p>
+<div class="language-html highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">"/assets/app.js"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+<p><strong>Module JS:</strong></p>
+<div class="language-html highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"module"</span> <span class="na">src</span><span class="o">=</span><span class="s">"/assets/main.js"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+<h3 id="internals">Internals<a class="headerlink" href="#internals" title="Permanent link">&para;</a></h3>
+<p><strong>All paths are automatically HTML-escaped via <code>s()</code>.</strong></p>
+<hr />
+<hr />
+<h2 id="helper-comparison">Helper Comparison<a class="headerlink" href="#helper-comparison" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Helper</th>
+<th>Returns</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>render()</code></td>
+<td><code>ResponseInterface</code></td>
+<td>Ideal for controller return values</td>
+</tr>
+<tr>
+<td><code>view()</code></td>
+<td><code>string</code></td>
+<td>For manual output or further processing</td>
+</tr>
+<tr>
+<td><code>asset()</code></td>
+<td><code>string</code></td>
+<td>Include CSS &amp; JS files in layouts</td>
+</tr>
+<tr>
+<td><code>s()</code></td>
+<td><code>string</code></td>
+<td>Escape output</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<hr />
+<h2 id="internals_1">Internals<a class="headerlink" href="#internals_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>view()</code> resolves and loads <code>.phtml</code> templates from the directories listed in <code>view:paths</code> (defaults to <code>views/</code> first with <code>app/views/</code> as a fallback) before checking any registered plugin or framework views.</li>
+<li><code>setLayout()</code> nests the rendered content into a wrapper view.</li>
+<li>Blocks are buffered and stored internally until rendered.</li>
+</ul>
+<h3 id="configurable-view-locations">Configurable view locations<a class="headerlink" href="#configurable-view-locations" title="Permanent link">&para;</a></h3>
+<p>Set the <code>view:paths</code> configuration to control where templates are resolved inside your application. This plugin ships with <code>src/config.php</code>, which defaults to:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">return [</span>
+<span class="x">    'view' =&gt; [</span>
+<span class="x">        'paths' =&gt; [</span>
+<span class="x">            'views',</span>
+<span class="x">            'app/views',</span>
+<span class="x">        ],</span>
+<span class="x">    ],</span>
+<span class="x">];</span>
+</code></pre></div>
+<p>The entries are resolved relative to <code>BASE_PATH</code> when they are not absolute paths, so you can place templates anywhere and order them however you need. The plugin checks each directory in order before falling back to registered plugin or framework view paths.</p>
+<hr />
 
 
 

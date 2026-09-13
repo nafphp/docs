@@ -13,7 +13,7 @@ You can define a controller as a simple PHP class with public methods.
 ```php
 namespace App\Controllers;
 
-use function Naf\render;
+use function Naf\View\render;
 
 class HelloController
 {
@@ -74,7 +74,7 @@ Controller example:
 ```php
 namespace App\Controllers;
 
-use function Naf\render;
+use function Naf\View\render;
 
 class UserController
 {

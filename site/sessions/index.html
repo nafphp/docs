@@ -1101,10 +1101,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
+  <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Summary
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-usage-in-controllers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional Usage in Controllers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internals
       
     </span>
   </a>
@@ -1854,10 +1876,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
+  <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Summary
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-usage-in-controllers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional Usage in Controllers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internals
       
     </span>
   </a>
@@ -1896,7 +1940,7 @@ You can easily work with session data, flash messages, and session control.</p>
 <hr />
 <h2 id="starting-a-session">Starting a Session<a class="headerlink" href="#starting-a-session" title="Permanent link">&para;</a></h2>
 <p>To start the PHP session, use the <code>session()</code> helper:</p>
-<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\session;</span>
+<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\Session\session;</span>
 
 <span class="x">session()-&gt;start();</span>
 </code></pre></div>
@@ -1938,13 +1982,41 @@ Useful for one-time notifications like success or error messages.</p>
 <li>Useful for logging out users or cleaning up session data manually.</li>
 </ul>
 <hr />
-<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p><code>src/config.php</code> exposes the following keys:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">return [</span>
+<span class="x">    'session' =&gt; [</span>
+<span class="x">        'storage'             =&gt; 'default', // switch to 'database' when using naf/database</span>
+<span class="x">        'trust_proxy_headers' =&gt; false,</span>
+<span class="x">        'trusted_proxies'     =&gt; [],</span>
+<span class="x">        'database_table'      =&gt; 'sessions',</span>
+<span class="x">    ],</span>
+<span class="x">];</span>
+</code></pre></div>
+<p>To use the database handler:</p>
+<ol>
+<li>Install <a href="https://github.com/nafphp/database">naf/database</a> and configure its <code>database</code> settings.</li>
+<li>Update the <code>session</code> config’s <code>storage</code> key to <code>database</code>.</li>
+<li>Run <code>vendor/bin/nix migrate up</code> (requires <code>naf/cli</code>) to apply the migration that creates the sessions table.</li>
+</ol>
+<hr />
+<h2 id="optional-usage-in-controllers">Optional Usage in Controllers<a class="headerlink" href="#optional-usage-in-controllers" title="Permanent link">&para;</a></h2>
+<p>You can also access the session directly from the container:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">$session = app()-&gt;container()-&gt;get(Session::class);</span>
+</code></pre></div>
+<p>But using the <code>session()</code> helper is the recommended way.</p>
+<hr />
+<hr />
+<h2 id="internals">Internals<a class="headerlink" href="#internals" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Sessions are manually started via <code>session()-&gt;start()</code>.</li>
-<li>Set and retrieve session data easily.</li>
-<li>Flash messages are built in via <code>flash()</code> and <code>getFlash()</code>.</li>
-<li>Sessions remain under your full control — only active when you want them.</li>
+<li>Automatically starts <code>session_start()</code> for web requests, with hardened cookie parameters and domain normalization.</li>
+<li>Offers <code>Session::regenerate()</code> so you can refresh the session ID during login flows without touching every request.</li>
+<li>Flash data is stored in a dedicated key and removed after access.</li>
+<li>Registers the <code>session()</code> helper and binds it in the service container.</li>
+<li>Provides <code>DatabaseSessionHandler</code> when the database plugin is configured.</li>
+<li>Registers the migration path with <code>naf/database</code> so <code>vendor/bin/nix migrate up/down</code> applies the session table changes.</li>
 </ul>
+<hr />
 
 
 

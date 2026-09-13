@@ -2,7 +2,7 @@
 
 In NAF, every route must return a valid HTTP response that implements `Psr\Http\Message\ResponseInterface`.
 
-To make this easy, NAF provides global helper functions for generating different types of responses.
+To make this easy, NAF provides helper functions for generating different types of responses. They live in the `Naf` namespace and are imported per file.
 
 ---
 
@@ -51,7 +51,7 @@ return json(['error' => 'Unauthorized'], 401);
 Use the `render()` helper to render a view and return it wrapped in a response:
 
 ```php
-use function Naf\render;
+use function Naf\View\render;
 
 return render('home', ['name' => 'World']);
 ```

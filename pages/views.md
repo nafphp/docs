@@ -12,7 +12,7 @@ It provides simple template inheritance, layout usage, and reusable content bloc
 You can render a view file using the `render()` helper function:
 
 ```php
-use function Naf\render;
+use function Naf\View\render;
 
 return render('hello', ['name' => 'World']);
 ```
@@ -32,7 +32,7 @@ View files are simple PHP templates with `.phtml` extension.
 Example: `app/views/hello.phtml`
 
 ```php
-<?php use function Naf\s; ?>
+<?php use function Naf\View\s; ?>
 
 <h1>Hello, <?= s($name) ?>!</h1>
 ```
@@ -63,7 +63,7 @@ Example: `app/views/layouts/main.phtml`
 In your view:
 
 ```php
-<?php use function Naf\s; ?>
+<?php use function Naf\View\s; ?>
 
 <?php $this->setLayout('layouts.main') ?>
 
@@ -95,7 +95,7 @@ return render('profile', ['user' => $user]);
 In `app/views/profile.phtml`:
 
 ```php
-<?php use function Naf\s; ?>
+<?php use function Naf\View\s; ?>
 
 <h2>Welcome, <?= s($user['name']) ?>!</h2>
 ```
@@ -108,7 +108,7 @@ Sometimes you only need the raw HTML output of a view without wrapping it in a f
 For this, you can use the `view()` helper:
 
 ```php
-use function Naf\view;
+use function Naf\View\view;
 
 $html = view('hello', ['name' => 'World']);
 ```
@@ -126,3 +126,100 @@ $html = view('hello', ['name' => 'World']);
 - Use `setLayout()` to attach layouts inside views.
 - Use `s()` to escape variables.
 - Use `render()` for full responses and `view()` for raw HTML output.
+
+---
+
+## Asset Management (CSS & JS)
+
+The plugin includes a small, flexible asset collector used inside layouts to include CSS and JavaScript files.
+
+Assets are added inside views or controllers using the `asset()` helper:
+
+```php
+asset()->add('/assets/style.css');            // CSS
+asset()->add('/assets/app.js');               // JavaScript (classic)
+asset()->add('/assets/main.js', 'module');    // JavaScript ES module
+```
+
+### Output in layout files
+
+Use `asset()->render('css')` or `asset()->render('js')` inside your layout:
+
+```php
+<!doctype html>
+<html>
+<head>
+    <?= asset()->render('css') ?>
+</head>
+<body>
+    <?= $this->renderBlock('content') ?>
+    <?= asset()->render('js') ?>
+</body>
+</html>
+```
+
+### What gets generated?
+
+**CSS:**
+
+```html
+<link rel="stylesheet" href="/assets/style.css">
+```
+
+**Classic JS:**
+
+```html
+<script src="/assets/app.js"></script>
+```
+
+**Module JS:**
+
+```html
+<script type="module" src="/assets/main.js"></script>
+```
+
+### Internals
+
+**All paths are automatically HTML-escaped via `s()`.**
+
+---
+
+---
+
+## Helper Comparison
+
+| Helper     | Returns             | Use case                                |
+| ---------- | ------------------- | --------------------------------------- |
+| `render()` | `ResponseInterface` | Ideal for controller return values   |
+| `view()`   | `string`            | For manual output or further processing |
+| `asset()` | `string`            | Include CSS & JS files in layouts       |
+| `s()`      | `string`            | Escape output                           |
+
+---
+
+---
+
+## Internals
+
+* `view()` resolves and loads `.phtml` templates from the directories listed in `view:paths` (defaults to `views/` first with `app/views/` as a fallback) before checking any registered plugin or framework views.
+* `setLayout()` nests the rendered content into a wrapper view.
+* Blocks are buffered and stored internally until rendered.
+
+### Configurable view locations
+
+Set the `view:paths` configuration to control where templates are resolved inside your application. This plugin ships with `src/config.php`, which defaults to:
+
+```php
+return [
+    'view' => [
+        'paths' => [
+            'views',
+            'app/views',
+        ],
+    ],
+];
+```
+
+The entries are resolved relative to `BASE_PATH` when they are not absolute paths, so you can place templates anywhere and order them however you need. The plugin checks each directory in order before falling back to registered plugin or framework view paths.
+
+---

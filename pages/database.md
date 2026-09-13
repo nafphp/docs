@@ -14,10 +14,10 @@ You are free to build your own database layer or plug in any external ORM if nee
 
 ## Accessing the Database
 
-The global `database()` helper gives you access to the PDO instance:
+The `database()` helper gives you access to the PDO instance. Import it first:
 
 ```php
-use function Naf\database;
+use function Naf\Database\database;
 
 $pdo = database();
 ```
@@ -107,3 +107,29 @@ try {
 - Configure database settings in `app/config.php` under the `database` key.
 - NAF uses native PDO for maximum flexibility.
 - You can integrate any external ORM if needed (e.g., Eloquent, Doctrine, etc.).
+
+---
+
+## Defaults applied
+
+The PDO instance comes with these options:
+
+```php
+[
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+]
+```
+
+---
+
+---
+
+## Internals
+
+* Loads config from `/app/config.php` from the key `database`
+* Builds DSN based on a given driver (`mysql`, `sqlite`)
+* Wraps PDO creation in a factory, handles exceptions gracefully
+* Registers `database` in the container and provides the `database()` helper
+
+---

@@ -4,7 +4,7 @@ NAF includes a central `Guard` class designed to simplify and secure common low-
 
 The `Guard` focuses on security-by-default, helping to protect your application against common attack vectors such as Local File Inclusion (LFI), Cross-Site Scripting (XSS), and Cross-Site Request Forgery (CSRF).
 
-You can access the `Guard` instance anywhere via the global helper:
+You can access the `Guard` instance anywhere via the `guard()` helper:
 
 ```php
 guard()
@@ -113,7 +113,7 @@ if (!guard()->csrf()->validate($_POST['_csrf'] ?? '')) {
 - It validates file paths safely, preventing file inclusion vulnerabilities.
 - It escapes output to prevent XSS without needing a full template engine.
 - It handles CSRF token generation and validation automatically and securely.
-- It is available globally via `guard()` for minimal boilerplate.
+- It is reached through `guard()`, imported with `use function Naf\guard;`.
 
 ---
 

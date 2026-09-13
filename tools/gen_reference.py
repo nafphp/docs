@@ -43,6 +43,7 @@ def scan(into):
             "suggests": sorted(k for k in (cj.get("suggest") or {}) if k.startswith("naf/")),
             "description": cj.get("description", ""),
             "php": (cj.get("require") or {}).get("php", ""),
+            "namespace": next(iter((cj.get("autoload") or {}).get("psr-4", {})), "").rstrip("\\"),
         }
         for dirpath, _, files in os.walk(os.path.join(root, "src")):
             for f in files:

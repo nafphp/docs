@@ -9,7 +9,8 @@ You manually retrieve and manage your dependencies.
 
 ## The Container
 
-The application container is accessible globally via the `app()->container()` helper.
+The application container is reached through the `app()` helper, imported with
+`use function Naf\app;`.
 
 ```php
 use function Naf\app;
@@ -69,7 +70,7 @@ Using it in a controller:
 namespace App\Controllers;
 
 use function Naf\app;
-use function Naf\render;
+use function Naf\View\render;
 
 class ProductController
 {

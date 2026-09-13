@@ -25,14 +25,15 @@ jobs:
 
       - run: pip install --quiet 'mkdocs-material~=9.7'   # 2.0 ist angekündigt und derzeit ohne Lizenz
 
-      # Funktionsindex und Paketübersicht aus den veröffentlichten Paketen,
-      # damit sie nicht von Hand gepflegt werden müssen und nicht veralten.
-      - name: Referenzseiten erzeugen
+      # Function index and package overview, read from the published packages so
+      # that neither has to be maintained by hand and neither can go stale.
+      - name: Generate the reference pages
         run: python tools/gen_reference.py
 
-      # Bricht ab, wenn eine Seite ein Paket voraussetzt, das es nicht gibt.
-      - name: requires-Deklarationen prüfen
-        run: python tools/check_requires.py
+      # Fails on a declared package that does not exist, or an import naming the
+      # wrong namespace — both were in the pages before this existed.
+      - name: Check pages against the published packages
+        run: python tools/check_pages.py
 
-      - name: Bauen und ausliefern
+      - name: Build and deploy
         run: mkdocs gh-deploy --force

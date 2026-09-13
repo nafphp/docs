@@ -18,7 +18,7 @@ Sessions are only started manually when you actually need them.
 To start the PHP session, use the `session()` helper:
 
 ```php
-use function Naf\session;
+use function Naf\Session\session;
 
 session()->start();
 ```
@@ -84,9 +84,50 @@ session()->forget('user_id');
 
 ---
 
-## Summary
+## Configuration
 
-- Sessions are manually started via `session()->start()`.
-- Set and retrieve session data easily.
-- Flash messages are built in via `flash()` and `getFlash()`.
-- Sessions remain under your full control — only active when you want them.
+`src/config.php` exposes the following keys:
+
+```php
+return [
+    'session' => [
+        'storage'             => 'default', // switch to 'database' when using naf/database
+        'trust_proxy_headers' => false,
+        'trusted_proxies'     => [],
+        'database_table'      => 'sessions',
+    ],
+];
+```
+
+To use the database handler:
+
+1. Install [naf/database](https://github.com/nafphp/database) and configure its `database` settings.
+2. Update the `session` config’s `storage` key to `database`.
+3. Run `vendor/bin/nix migrate up` (requires `naf/cli`) to apply the migration that creates the sessions table.
+
+---
+
+## Optional Usage in Controllers
+
+You can also access the session directly from the container:
+
+```php
+$session = app()->container()->get(Session::class);
+```
+
+But using the `session()` helper is the recommended way.
+
+---
+
+---
+
+## Internals
+
+* Automatically starts `session_start()` for web requests, with hardened cookie parameters and domain normalization.
+* Offers `Session::regenerate()` so you can refresh the session ID during login flows without touching every request.
+* Flash data is stored in a dedicated key and removed after access.
+* Registers the `session()` helper and binds it in the service container.
+* Provides `DatabaseSessionHandler` when the database plugin is configured.
+* Registers the migration path with `naf/database` so `vendor/bin/nix migrate up/down` applies the session table changes.
+
+---

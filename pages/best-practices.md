@@ -110,7 +110,7 @@ NAF encourages building **small, reusable tools** that fit your needs.
 Example:
 
 ```php
-use function Naf\s;
+use function Naf\View\s;
 
 <h1>Hello, <?= s($user->name) ?>!</h1>
 ```

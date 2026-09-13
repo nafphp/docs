@@ -1909,7 +1909,7 @@
 <h1 id="guard">Guard<a class="headerlink" href="#guard" title="Permanent link">&para;</a></h1>
 <p>NAF includes a central <code>Guard</code> class designed to simplify and secure common low-level operations like path validation, output escaping, and CSRF token handling.</p>
 <p>The <code>Guard</code> focuses on security-by-default, helping to protect your application against common attack vectors such as Local File Inclusion (LFI), Cross-Site Scripting (XSS), and Cross-Site Request Forgery (CSRF).</p>
-<p>You can access the <code>Guard</code> instance anywhere via the global helper:</p>
+<p>You can access the <code>Guard</code> instance anywhere via the <code>guard()</code> helper:</p>
 <div class="language-php highlight"><pre><span></span><code><span class="x">guard()</span>
 </code></pre></div>
 <hr />
@@ -2004,7 +2004,7 @@ You can generate and validate CSRF tokens easily:</p>
 <li>It validates file paths safely, preventing file inclusion vulnerabilities.</li>
 <li>It escapes output to prevent XSS without needing a full template engine.</li>
 <li>It handles CSRF token generation and validation automatically and securely.</li>
-<li>It is available globally via <code>guard()</code> for minimal boilerplate.</li>
+<li>It is reached through <code>guard()</code>, imported with <code>use function Naf\guard;</code>.</li>
 </ul>
 <hr />
 <blockquote>

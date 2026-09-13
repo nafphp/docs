@@ -31,7 +31,7 @@ You can override any default error page by creating a file in your project at:
 Example: Custom 404 page:
 
 ```php
-<?php use function Naf\s; ?>
+<?php use function Naf\View\s; ?>
 
 <h1>Page not found</h1>
 <p>The page <?= s($path) ?> does not exist.</p>
@@ -45,7 +45,7 @@ Example: Custom 404 page:
 ## Manually Aborting Requests
 
 Sometimes you want to stop execution manually and send an error response.  
-NAF provides the global `abort()` helper for this.
+NAF provides the `abort()` helper for this, imported with `use function Naf\abort;`.
 
 ```php
 use function Naf\abort;

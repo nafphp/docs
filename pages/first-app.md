@@ -46,7 +46,7 @@ route()->add('GET', '/', [App\Controllers\HomeController::class, 'index']);
 ```php
 namespace App\Controllers;
 
-use function Naf\render;
+use function Naf\View\render;
 
 class HomeController
 {
@@ -60,7 +60,7 @@ class HomeController
 3. Create a view in `app/views/home.phtml`:
 
 ```php
-<?php use function Naf\s; ?>
+<?php use function Naf\View\s; ?>
 
 <h1>Hello, <?= s($name) ?>!</h1>
 ```
