@@ -59,7 +59,7 @@ nav:
       - Your first application: first-app.md
   - Core:
       - Routing: routing.md
-      - Controller: controllers.md
+      - Controllers: controllers.md
       - Requests and responses: request-response.md
       - Configuration: configuration.md
       - Dependency Injection: dependency-injection.md

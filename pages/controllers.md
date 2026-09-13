@@ -1,3 +1,7 @@
+---
+title: Controllers
+---
+
 In NAF, a **controller** is anything that handles an incoming HTTP request.  
 This can be either:
 

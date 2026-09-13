@@ -1,3 +1,7 @@
+---
+title: Dependency Injection
+---
+
 # Dependency Injection
 
 A place to put the things your application needs, so a controller can ask for a mailer

@@ -1,3 +1,7 @@
+---
+title: Installation
+---
+
 # Installation
 
 NAF is installed into a project you already have, or started from a skeleton that wires

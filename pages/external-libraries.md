@@ -1,3 +1,7 @@
+---
+title: External libraries
+---
+
 # Using External Libraries
 
 NAF is designed to be minimal and flexible.  

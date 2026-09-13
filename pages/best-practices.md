@@ -1,3 +1,7 @@
+---
+title: Best practices
+---
+
 # Best Practices
 
 NAF gives you a lot of flexibility and freedom.  

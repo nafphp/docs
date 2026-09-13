@@ -1,3 +1,7 @@
+---
+title: Configuration
+---
+
 # Configuration
 
 Two things that are often confused: the **environment**, which differs per machine and

@@ -1,3 +1,7 @@
+---
+title: Serving files
+---
+
 # File Downloads
 
 Sometimes you want to send files to the browser for download instead of displaying them.  

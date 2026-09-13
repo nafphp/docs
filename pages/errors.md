@@ -1,3 +1,7 @@
+---
+title: Errors and aborting
+---
+
 # Error Handling
 
 What happens when a route does not match, a controller throws, or your own code decides

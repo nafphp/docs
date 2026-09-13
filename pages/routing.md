@@ -1,3 +1,7 @@
+---
+title: Routing
+---
+
 # Routing
 
 A route says which HTTP method and path lead to which piece of your code. There is no

@@ -56,7 +56,7 @@ array passed by accident leaves the placeholder standing instead of printing `Ar
 `t()` returns the key itself:
 
 ```php
-t('checkout.confirm')   // → "checkout.confirm" when the key is not in the file
+t('checkout.confirm');  // → "checkout.confirm" when the key is not in the file
 ```
 
 Untranslated text shows up in the interface rather than as an empty space, which is what

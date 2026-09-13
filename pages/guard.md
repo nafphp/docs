@@ -1,3 +1,7 @@
+---
+title: Guard
+---
+
 # Guard
 
 NAF includes a central `Guard` class designed to simplify and secure common low-level operations like path validation, output escaping, and CSRF token handling.
@@ -7,7 +11,7 @@ The `Guard` focuses on security-by-default, helping to protect your application 
 You can access the `Guard` instance anywhere via the `guard()` helper:
 
 ```php
-guard()
+guard();
 ```
 
 ---

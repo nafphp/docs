@@ -1,3 +1,7 @@
+---
+title: Events
+---
+
 # Events
 
 Points in the request where the framework stops and asks whether anybody wants to do

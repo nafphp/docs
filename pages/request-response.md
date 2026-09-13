@@ -1,3 +1,7 @@
+---
+title: Requests and responses
+---
+
 # Response Handling
 
 In NAF, every route must return a valid HTTP response that implements `Psr\Http\Message\ResponseInterface`.

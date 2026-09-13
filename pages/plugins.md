@@ -1,3 +1,7 @@
+---
+title: How plugins work
+---
+
 # Plugins
 
 A plugin is an ordinary Composer package that declares `"type": "naf-plugin"`. That type
