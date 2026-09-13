@@ -1,0 +1,206 @@
+{
+ "functions": {
+  "abort": "framework",
+  "app": "framework",
+  "asset": "view",
+  "auth": "auth",
+  "client": "client",
+  "command": "cli",
+  "config": "framework",
+  "csrf": "form",
+  "database": "database",
+  "em": "orm",
+  "env": "framework",
+  "error": "form",
+  "error_class": "form",
+  "event": "framework",
+  "guard": "framework",
+  "has_error": "form",
+  "is_post": "form",
+  "json": "framework",
+  "lang": "i18n",
+  "log": "framework",
+  "mail": "mail",
+  "mailer": "mail",
+  "memory": "form",
+  "memory_checked": "form",
+  "memory_selected": "form",
+  "oauth": "oauth-client",
+  "oauth_button": "oauth-client",
+  "oauth_token": "oauth-client",
+  "param": "framework",
+  "plugin": "framework",
+  "queue": "queue",
+  "redirect": "framework",
+  "refresh": "framework",
+  "render": "view",
+  "render_oauth_view": "oauth-client",
+  "repo": "orm",
+  "request": "framework",
+  "response": "framework",
+  "route": "framework",
+  "s": "view",
+  "scheduler": "schedule",
+  "session": "session",
+  "simple_render": "framework",
+  "simple_view": "framework",
+  "t": "i18n",
+  "token": "oauth-server",
+  "tokens": "mcp",
+  "tool": "mcp",
+  "translator": "i18n",
+  "validator": "form",
+  "view": "view"
+ },
+ "packages": {
+  "auth": {
+   "description": "Authentication and permission checks for NAF, with your own user model.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": [
+    "naf/orm",
+    "naf/session"
+   ]
+  },
+  "cli": {
+   "description": "NAF CLI Plugin for console applications.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": []
+  },
+  "client": {
+   "description": "NAF Client Plugin to make simple http requests.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": []
+  },
+  "database": {
+   "description": "NAF Database Plugin to work with various storage solutions.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": []
+  },
+  "form": {
+   "description": "NAF Form Plugin to make form handling easier.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework",
+    "naf/session"
+   ],
+   "suggests": []
+  },
+  "framework": {
+   "description": "NAF - the ultra-light, functional PHP framework for fast microservices and APIs.",
+   "php": ">=8.3",
+   "requires": [],
+   "suggests": []
+  },
+  "i18n": {
+   "description": "NAF Internationalization Plugin",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": []
+  },
+  "mail": {
+   "description": "NAF Mail Plugin for quick email communication.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": []
+  },
+  "mcp": {
+   "description": "NAF MCP Plugin for basic AI driven workflows.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": []
+  },
+  "oauth-client": {
+   "description": "Sign in with external OAuth2 and OpenID Connect providers, keeping your own user model.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/auth",
+    "naf/framework",
+    "naf/session"
+   ],
+   "suggests": [
+    "naf/cli",
+    "naf/client",
+    "naf/database",
+    "naf/view"
+   ]
+  },
+  "oauth-server": {
+   "description": "Run your application as an OAuth2 authorization server and protect its APIs.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/auth",
+    "naf/form",
+    "naf/framework",
+    "naf/session"
+   ],
+   "suggests": [
+    "naf/cli",
+    "naf/database",
+    "naf/view"
+   ]
+  },
+  "orm": {
+   "description": "NAF ORM Plugin.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/database",
+    "naf/framework"
+   ],
+   "suggests": []
+  },
+  "queue": {
+   "description": "NAF Queue Plugin for asynchronous jobs.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/cli",
+    "naf/framework"
+   ],
+   "suggests": []
+  },
+  "schedule": {
+   "description": "NAF Schedule Plugin for recurring Tasks.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework",
+    "naf/queue"
+   ],
+   "suggests": []
+  },
+  "session": {
+   "description": "NAF Session Plugin for storing data across requests.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": [
+    "naf/database"
+   ]
+  },
+  "view": {
+   "description": "NAF View Plugin with simple templating.",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": []
+  }
+ }
+}

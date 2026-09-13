@@ -1,6 +1,6 @@
 # Routing
 
-NixPHP provides a simple and powerful routing system based on HTTP methods and URIs.  
+NAF provides a simple and powerful routing system based on HTTP methods and URIs.  
 Routes map incoming requests to controller methods or closures with minimal configuration.
 
 ---
@@ -70,7 +70,7 @@ class UserController
 
 ## Supported HTTP Methods
 
-NixPHP supports all standard HTTP methods:
+NAF supports all standard HTTP methods:
 
 - `GET`
 - `POST`

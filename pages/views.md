@@ -1,4 +1,10 @@
-NixPHP comes with a lightweight native view system.  
+---
+title: Views und Templates
+requires:
+  - naf/view
+---
+
+NAF comes with a lightweight native view system.  
 It provides simple template inheritance, layout usage, and reusable content blocks — without needing a heavy engine like Blade or Twig.
 
 ## Rendering a View
@@ -6,7 +12,7 @@ It provides simple template inheritance, layout usage, and reusable content bloc
 You can render a view file using the `render()` helper function:
 
 ```php
-use function NixPHP\render;
+use function Naf\render;
 
 return render('hello', ['name' => 'World']);
 ```
@@ -26,7 +32,7 @@ View files are simple PHP templates with `.phtml` extension.
 Example: `app/views/hello.phtml`
 
 ```php
-<?php use function NixPHP\s; ?>
+<?php use function Naf\s; ?>
 
 <h1>Hello, <?= s($name) ?>!</h1>
 ```
@@ -46,7 +52,7 @@ Example: `app/views/layouts/main.phtml`
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?= $this->renderBlock('title', 'NixPHP App') ?></title>
+    <title><?= $this->renderBlock('title', 'NAF App') ?></title>
 </head>
 <body>
     <?= $this->renderBlock('content') ?>
@@ -57,7 +63,7 @@ Example: `app/views/layouts/main.phtml`
 In your view:
 
 ```php
-<?php use function NixPHP\s; ?>
+<?php use function Naf\s; ?>
 
 <?php $this->setLayout('layouts.main') ?>
 
@@ -89,7 +95,7 @@ return render('profile', ['user' => $user]);
 In `app/views/profile.phtml`:
 
 ```php
-<?php use function NixPHP\s; ?>
+<?php use function Naf\s; ?>
 
 <h2>Welcome, <?= s($user['name']) ?>!</h2>
 ```
@@ -102,7 +108,7 @@ Sometimes you only need the raw HTML output of a view without wrapping it in a f
 For this, you can use the `view()` helper:
 
 ```php
-use function NixPHP\view;
+use function Naf\view;
 
 $html = view('hello', ['name' => 'World']);
 ```

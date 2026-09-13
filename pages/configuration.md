@@ -1,6 +1,6 @@
 # Configuration
 
-NixPHP provides a simple yet flexible configuration system based on `.env` files, a lightweight environment service, and a powerful configuration loader.
+NAF provides a simple yet flexible configuration system based on `.env` files, a lightweight environment service, and a powerful configuration loader.
 
 You can manage different settings for local development, staging, and production environments.
 
@@ -8,7 +8,7 @@ You can manage different settings for local development, staging, and production
 
 ## Using `.env` Files
 
-NixPHP can automatically load environment variables from a `.env` file placed in the project root.
+NAF can automatically load environment variables from a `.env` file placed in the project root.
 
 ```dotenv
 APP_ENV=local
@@ -41,7 +41,7 @@ $host = env('DB_HOST', 'localhost');
 
 ## Environment Detection
 
-NixPHP includes a small `Environment` service to detect the current application environment.
+NAF includes a small `Environment` service to detect the current application environment.
 
 It supports four predefined environments:
 
@@ -75,7 +75,7 @@ Available methods:
 
 ## Application Configuration
 
-NixPHP loads application settings through a lightweight `Config` class.
+NAF loads application settings through a lightweight `Config` class.
 
 You can organize configuration into arrays and load them through the container.
 

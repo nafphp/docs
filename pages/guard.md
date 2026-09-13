@@ -1,6 +1,6 @@
 # Guard
 
-NixPHP includes a central `Guard` class designed to simplify and secure common low-level operations like path validation, output escaping, and CSRF token handling.
+NAF includes a central `Guard` class designed to simplify and secure common low-level operations like path validation, output escaping, and CSRF token handling.
 
 The `Guard` focuses on security-by-default, helping to protect your application against common attack vectors such as Local File Inclusion (LFI), Cross-Site Scripting (XSS), and Cross-Site Request Forgery (CSRF).
 

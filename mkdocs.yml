@@ -1,60 +1,96 @@
-site_name: NixPHP
-site_description: A modern, minimalist PHP microframework
+site_name: NAF
+site_description: Not Another Framework — a minimal, functional PHP microframework
+site_url: https://nafphp.github.io/docs/
+repo_url: https://github.com/nafphp/framework
+repo_name: nafphp/framework
+docs_dir: pages/
+
+hooks:
+  - hooks/requires.py
+
 theme:
   name: material
-  logo: assets/nixphp-logo-small-square.png
+  logo: assets/naf-logo-small-square.png
+  favicon: assets/naf-logo-small-square.png
   palette:
-    - scheme: default
-      primary: grey
-      accent: light blue
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle: { icon: material/weather-night, name: Dunkles Design }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle: { icon: material/weather-sunny, name: Helles Design }
   font:
-    text: Lato
-    code: Jetbrains Mono
+    text: IBM Plex Sans
+    code: IBM Plex Mono
   features:
-    - navigation.instant
     - navigation.sections
-    - toc.integrate
+    - navigation.top
+    - navigation.tracking
     - content.code.copy
     - content.tabs.link
-    - content.action.edit
     - search.highlight
     - search.suggest
+    - toc.follow
+
+extra_css:
+  - assets/extra.css
+
 markdown_extensions:
-  - pymdownx.highlight:
-      linenums: false
-      use_pygments: true
-      pygments_style: friendly
-      pygments_lang_class: true
-      line_spans: __span
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc: { permalink: true }
+  - pymdownx.highlight: { use_pygments: true, pygments_lang_class: true }
   - pymdownx.superfences
   - pymdownx.inlinehilite
-  - pymdownx.smartsymbols
   - pymdownx.snippets
-#extra_css:
-#  - assets/extra.css
+  - pymdownx.tabbed: { alternate_style: true }
+  - pymdownx.details
 
 nav:
-  - Introduction: index.md
-  - Installation: installation.md
-  - Configuration: configuration.md
-  - Routing: routing.md
-  - Controllers: controllers.md
-  - Response Handling: response_handling.md
-  - Dependency Injection: dependency_injection.md
-  - Events: events.md
-  - Plugins: plugins.md
-  - Error Handling: error_handling.md
-  - File Downloads: file_downloads.md
-  - Guard: guard.md
-  - Using External Libraries: external_libraries.md
-  - Best Practices: best_practices.md
-  - Optional Plugins:
-    - Views: views.md
-    - Form Handling: form_handling.md
-    - Database: database.md
-    - Session: sessions.md
-
-
-repo_url: https://github.com/nixphp/framework
-repo_name: nixphp/framework
-docs_dir: pages/
+  - Anfangen:
+      - Was NAF ist: what-naf-is.md
+      - Installieren: install.md
+      - Die erste Anwendung: first-app.md
+  - Kern:
+      - Routing: routing.md
+      - Controller: controllers.md
+      - Request und Response: request-response.md
+      - Konfiguration: configuration.md
+      - Dependency Injection: dependency-injection.md
+      - Events: events.md
+      - Fehler und Abbrüche: errors.md
+      - Guard: guard.md
+      - Dateien ausliefern: file-downloads.md
+      - Wie Plugins funktionieren: plugins.md
+      - Fremde Bibliotheken: external-libraries.md
+      - Bewährte Praxis: best-practices.md
+  - Darstellen:
+      - Views und Templates: views.md
+      - Formulare und Validierung: forms.md
+      - Übersetzungen: translations.md
+  - Speichern:
+      - Sessions: sessions.md
+      - Datenbank: database.md
+      - ORM und Repositories: orm.md
+  - Arbeiten lassen:
+      - Konsolenbefehle: console.md
+      - Queues und Worker: queues.md
+      - Zeitgesteuerte Jobs: scheduling.md
+      - E-Mail versenden: mail.md
+      - HTTP-Client: http-client.md
+  - Identität:
+      - Anmeldung und Rechte: auth.md
+      - Warum auth so aussieht: auth-architecture.md
+      - Mit fremdem Konto anmelden: oauth-client.md
+      - Selbst Provider sein: oauth-server.md
+  - Maschinen:
+      - MCP-Werkzeuge: mcp.md
+  - Nachschlagen:
+      - Funktionsindex: function-index.md
+      - Paketübersicht: packages.md
+      - Umstieg von NixPHP: upgrading-from-nixphp.md

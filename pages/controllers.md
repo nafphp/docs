@@ -1,4 +1,4 @@
-In NixPHP, a **controller** is anything that handles an incoming HTTP request.  
+In NAF, a **controller** is anything that handles an incoming HTTP request.  
 This can be either:
 
 - a **controller class** method, or
@@ -13,7 +13,7 @@ You can define a controller as a simple PHP class with public methods.
 ```php
 namespace App\Controllers;
 
-use function NixPHP\render;
+use function Naf\render;
 
 class HelloController
 {
@@ -36,7 +36,7 @@ class HelloController
 route()->add('GET', '/hello', [HelloController::class, 'index']);
 ```
 
-When a user visits `/hello`, NixPHP:
+When a user visits `/hello`, NAF:
 
 1. Instantiates the `HelloController`.
 2. Calls the `index()` method.
@@ -49,7 +49,7 @@ Instead of using a class, you can define a route directly with a Closure:
 ```php
 // app/routes.php
 
-use function NixPHP\response;
+use function Naf\response;
 
 route()->add('GET', '/ping', function () {
     return response('Pong!');
@@ -61,7 +61,7 @@ route()->add('GET', '/ping', function () {
 
 ## Route Parameters
 
-If your route contains dynamic segments, NixPHP passes them automatically to your handler:
+If your route contains dynamic segments, NAF passes them automatically to your handler:
 
 ```php
 // app/routes.php
@@ -74,7 +74,7 @@ Controller example:
 ```php
 namespace App\Controllers;
 
-use function NixPHP\render;
+use function Naf\render;
 
 class UserController
 {

@@ -1,6 +1,6 @@
 # Events
 
-NixPHP includes a minimal yet powerful event system that allows you to hook into different parts of the application lifecycle.
+NAF includes a minimal yet powerful event system that allows you to hook into different parts of the application lifecycle.
 
 You can register listeners for specific events and execute custom code when those events are fired.
 
@@ -11,7 +11,7 @@ You can register listeners for specific events and execute custom code when thos
 You can listen to events by calling the `listen()` method via the `event()` helper.
 
 ```php
-use function NixPHP\event;
+use function Naf\event;
 
 event()->listen('user.registered', function ($user) {
     // Handle the user registration event
@@ -30,7 +30,7 @@ You can register multiple listeners for the same event.
 You can fire (dispatch) events using the `dispatch()` method:
 
 ```php
-use function NixPHP\event;
+use function Naf\event;
 
 event()->dispatch('user.registered', $user);
 ```
@@ -44,7 +44,7 @@ event()->dispatch('user.registered', $user);
 ## Example: Custom Event Flow
 
 ```php
-use function NixPHP\event;
+use function Naf\event;
 
 // Register a listener
 event()->listen('product.created', function ($product) {
@@ -60,7 +60,7 @@ event()->dispatch('product.created', $product);
 
 ## Built-in Events
 
-NixPHP fires several built-in events during the request lifecycle.  
+NAF fires several built-in events during the request lifecycle.  
 You can hook into these to customize behavior without modifying core code.
 
 | Event Name | When it fires | Payload | Typical Use |
@@ -81,5 +81,5 @@ You can hook into these to customize behavior without modifying core code.
 - Use `event()->listen(event, callback)` to register event listeners.
 - Use `event()->dispatch(event, payload...)` to fire events.
 - Multiple listeners can be registered per event.
-- NixPHP fires several built-in events you can hook into for full control over the request flow.
+- NAF fires several built-in events you can hook into for full control over the request flow.
 - Event responses are collected and returned as an array.

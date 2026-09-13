@@ -1,2 +1,5 @@
 .idea/
 .DS_Store
+
+# Gebaute Ausgabe gehört nicht ins Quell-Repo, sie liegt im gh-pages-Branch
+site/
