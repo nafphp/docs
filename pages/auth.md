@@ -155,6 +155,9 @@ Name the columns only if yours differ:
 ],
 ```
 
+Accounts kept somewhere other than `naf/orm` need the explicit form below: `auth:users:store`
+understands `'orm'` and nothing else, and says so rather than guessing.
+
 `OrmProvider` reads the hash through your model's own getter (`getPassword()` for a `password`
 column) and falls back to the ORM's field map when there is none. When your model also has the
 matching setter, an outdated hash is silently upgraded to the current cost on the next login.
@@ -480,15 +483,18 @@ auth()->setIdentity($user, 'database');   // named: persisted like a normal logi
 auth()->setIdentity($user);               // unnamed: this request only
 ```
 
-`setIdentity()` trusts the supplied identity and does not verify credentials. With a provider
-name it also updates the session when persistence is enabled. Without a name it clears any
-previous persisted authentication and sets the identity for this request only.
+`setIdentity()` trusts the supplied identity and does not verify credentials — but it still
+refuses a suspended one, with an `InvalidArgumentException`. Verifying somebody some other way is
+not a reason to sign in an account that may not sign in, and whoever trusted the identity has to
+check that the account is open. With a provider name it also updates the session when persistence
+is enabled. Without a name it clears any previous persisted authentication and sets the identity
+for this request only.
 
 Need the model first — to look up who an external login belongs to, to impersonate somebody, or
 in a CLI tool? `auth()->load('database', '42')` reads it through the registered source and hands
 it back. It changes nothing: no login, no session, no store. It answers `null` for an unknown
-source, an empty identifier, a vanished account, or a provider that hands back somebody else —
-the same guarantee restoration relies on, because restoration now calls it.
+source, an empty identifier, a vanished account, a suspended one, or a provider that hands back
+somebody else — the same guarantee restoration relies on, because restoration now calls it.
 
 ---
 

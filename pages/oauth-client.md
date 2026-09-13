@@ -500,7 +500,8 @@ other bug in your application does — it is addressed to you, not to a visitor.
 ## Provider metadata
 
 Discovery documents and signing keys are cached under `storage/oauth` for a day, so a login
-costs no extra request. A token signed with a key id we have not seen reloads the key set once —
+costs no extra request. Point `oauth:cache_path` somewhere else when that directory is not
+writable, or when several servers should share one cache. A token signed with a key id we have not seen reloads the key set once —
 which is what a rotation looks like from here — and a cooldown keeps invented key ids from
 turning into a stream of outbound requests. A failed reload keeps using what is cached and backs off before trying again, so a provider that
 is down does not turn every login into another outbound request. It never degrades into

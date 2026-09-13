@@ -85,7 +85,19 @@ of them requires a permission: they ask to see who somebody is and what their ow
 not to do anything on their behalf. The person consenting is the person concerned.
 
 The sign-in page is found on its own when a route is named `login`; otherwise name it in
-`oauth_server:login_route`. Lifetimes, PKCE and the protocol errors are already set.
+`oauth_server:login_route`. PKCE and the protocol errors are already set.
+
+### Lifetimes
+
+Set, in seconds, and worth changing only when you know why:
+
+| Key | Default | |
+| --- | --- | --- |
+| `oauth_server:access_token_ttl` | `3600` | an hour. Shorter costs refreshes; longer widens the window a leaked token is useful in. |
+| `oauth_server:refresh_token_ttl` | `2592000` | thirty days. This is how long somebody stays signed in without returning to the consent screen. |
+| `oauth_server:id_token_ttl` | `3600` | an hour. Also what `oauth:keys:prune` counts a retired key's retention against. |
+| `oauth_server:code_ttl` | `60` | a minute. An authorization code is redeemed immediately or not at all. |
+| `oauth_server:consent_ttl` | `600` | ten minutes for somebody to read the screen and answer. |
 
 ### Saying more than "who"
 
@@ -227,6 +239,12 @@ usable token has no usable token, whatever else it carries.
 Off with `'oauth_server' => ['routes' => false]`. The endpoints stay reachable through the
 container.
 
+The protocol endpoints are exempt from the session-wide CSRF check, because they are called by
+programs: no session to ride on, no form to put a token in, so a check there refuses legitimate
+requests and protects nothing. The exemptions are a map, `csrf_exempt_routes`, rather than a
+list — several plugins can contribute without overwriting one another, and an application can
+switch one back off by name.
+
 Introspection is not open to every registered application: a token is somebody's authorization,
 and being registered here is no reason to learn about other people's. Grant it deliberately with
 `--grant=introspection`, to a confidential client.
@@ -286,6 +304,9 @@ is the whole point: a key that signed for a year and was replaced a minute ago h
 world for as long as those tokens live, and removing it would make every one of them
 unverifiable. The active key is never removed, and an age shorter than an ID token lives is
 refused.
+
+They live in `storage/oauth/keys` unless `oauth_server:key_path` says otherwise — which it has
+to, when several servers share one set: they are files, and nothing replicates them for you.
 
 Keys are files, not rows, and are never generated on demand. A key that appears when a request
 needs one is a key that differs on the second server, and every token signed by the one that
