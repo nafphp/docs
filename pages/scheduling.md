@@ -76,7 +76,7 @@ $scheduler->addScheduledJob(CleanupTempFiles::class, [
 Start the scheduler ticker via CLI:
 
 ```bash
-./bin/nix schedule:ticker
+./bin/naf schedule:ticker
 ```
 
 The ticker:
@@ -163,7 +163,7 @@ The scheduler **does not spawn queue workers by default**.
 You are expected to run queue workers independently, e.g. via Supervisor:
 
 ```bash
-./bin/nix queue:worker
+./bin/naf queue:consume
 ```
 
 This keeps the system flexible and avoids hidden background processes.
@@ -174,7 +174,7 @@ This keeps the system flexible and avoids hidden background processes.
 
 ```ini
 [program:naf-scheduler]
-command=php bin/nix schedule:ticker
+command=php bin/naf schedule:ticker
 directory=/path/to/your/app
 autostart=true
 autorestart=true

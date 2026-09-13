@@ -62,9 +62,9 @@ If `naf/cli` is installed, the plugin registers token commands
 automatically:
 
 ```bash
-vendor/bin/nix mcp:token:create "Local AI client" --scope "*"
-vendor/bin/nix mcp:token:list
-vendor/bin/nix mcp:token:revoke tok_...
+vendor/bin/naf mcp:token:create "Local AI client" --scope "*"
+vendor/bin/naf mcp:token:list
+vendor/bin/naf mcp:token:revoke tok_...
 ```
 
 Clients send the token as:

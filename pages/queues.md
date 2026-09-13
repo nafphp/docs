@@ -80,25 +80,25 @@ Ideal for emails, logging, notifications, or side-effects that should not block 
 Run the consuming worker and listen on the default channel:
 
 ```bash
-./bin/nix queue:consume
+./bin/naf queue:consume
 ```
 
 Listen on a specific channel:
 
 ```bash
-./bin/nix queue:consume --channel=emails
+./bin/naf queue:consume --channel=emails
 ```
 
 Listen on multiple channels (checked in order):
 
 ```bash
-./bin/nix queue:consume --channels=default,emails,mcp_out
+./bin/naf queue:consume --channels=default,emails,mcp_out
 ```
 
 Run a single job only:
 
 ```bash
-./bin/nix queue:consume --once
+./bin/naf queue:consume --once
 ```
 
 > 🔹 `--once` is also used internally by `pushAndRun()`.
@@ -116,20 +116,20 @@ If a job fails too often, it is written to a **deadletter directory per channel*
 Retry failed jobs for the default channel:
 
 ```bash
-./bin/nix queue:retry-failed
+./bin/naf queue:retry-failed
 ```
 
 Retry failed jobs for a specific channel:
 
 ```bash
-./bin/nix queue:retry-failed --channel=emails
+./bin/naf queue:retry-failed --channel=emails
 ```
 
 By default, retried jobs are removed from the deadletter queue.
 Use `--keep` to retain them:
 
 ```bash
-./bin/nix queue:retry-failed --channel=emails --keep
+./bin/naf queue:retry-failed --channel=emails --keep
 ```
 
 ---
@@ -170,7 +170,7 @@ To run the worker persistently in production, use [Supervisor](http://supervisor
 
 ```ini
 [program:naf-worker]
-command=php bin/nix queue:consume --channels=default,emails
+command=php bin/naf queue:consume --channels=default,emails
 directory=/path/to/your/app
 autostart=true
 autorestart=true

@@ -84,7 +84,7 @@ what is already there.
 Then ask what to register with the provider:
 
 ```bash
-vendor/bin/nix oauth:discover google
+vendor/bin/naf oauth:discover google
 ```
 
 It reads the provider's metadata, proves the setup resolves, and prints the callback URL to
@@ -214,7 +214,7 @@ The awkward part is that two sides have to change and they cannot do it in the s
 provider worth using holds both for a while — a `naf/oauth-server` does:
 
 ```bash
-vendor/bin/nix oauth:client:rotate-secret <client-id>
+vendor/bin/naf oauth:client:rotate-secret <client-id>
 ```
 
 Deploy the new value here before that window closes; when it lapses, the old secret simply stops
@@ -225,7 +225,7 @@ is the point, not a side effect.
 ### Check it before anybody tries
 
 ```bash
-vendor/bin/nix oauth:doctor
+vendor/bin/naf oauth:doctor
 ```
 
 It verifies the dependencies, the public URL, the user model and its contract, the link table,
@@ -411,7 +411,7 @@ between visits, and still working an hour later.
 ],
 ```
 
-`nix oauth:doctor` says how to generate the key; it deliberately does not print one. Everything in
+`naf oauth:doctor` says how to generate the key; it deliberately does not print one. Everything in
 `oauth_provider_tokens` is encrypted with it, so a copy of the database is not a copy of anybody's
 permissions — which is also why the key does not belong in that database. Losing it costs everybody
 a new consent screen.

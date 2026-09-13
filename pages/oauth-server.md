@@ -110,7 +110,7 @@ still says who somebody is; `sub` is the whole of what the specification require
 ## Registering an application
 
 ```bash
-vendor/bin/nix oauth:client:create "Acme Intranet" \
+vendor/bin/naf oauth:client:create "Acme Intranet" \
     --redirect=https://intranet.example.com/auth/callback \
     --scope=posts.read,posts.write
 ```
@@ -126,7 +126,7 @@ vendor/bin/nix oauth:client:create "Acme Intranet" \
 Add `--public` for an application that cannot keep a secret — a mobile or desktop client. It is
 then identified rather than authenticated, and PKCE is what protects its exchange.
 
-`vendor/bin/nix oauth:client:list` shows what is registered.
+`vendor/bin/naf oauth:client:list` shows what is registered.
 
 **A public client cannot be given `--grant=introspection`.** A client id is not a secret — it
 travels in every authorize URL — so a public client with that right would let anyone who has
@@ -136,9 +136,9 @@ the endpoint refuses it again.
 ### Rotating a client secret
 
 ```bash
-vendor/bin/nix oauth:client:rotate-secret 9f2c…              # old one keeps working for a day
-vendor/bin/nix oauth:client:rotate-secret 9f2c… --overlap=3600
-vendor/bin/nix oauth:client:rotate-secret 9f2c… --now        # after a leak
+vendor/bin/naf oauth:client:rotate-secret 9f2c…              # old one keeps working for a day
+vendor/bin/naf oauth:client:rotate-secret 9f2c… --overlap=3600
+vendor/bin/naf oauth:client:rotate-secret 9f2c… --now        # after a leak
 ```
 
 The client id does not change, and nothing already issued is affected. That is the difference
@@ -264,8 +264,8 @@ One key signs; every key stays published until you say otherwise. That is what m
 safe:
 
 ```bash
-vendor/bin/nix oauth:keys:generate    # the new key signs from now on
-vendor/bin/nix oauth:keys:prune       # remove the old ones, once their tokens have expired
+vendor/bin/naf oauth:keys:generate    # the new key signs from now on
+vendor/bin/naf oauth:keys:prune       # remove the old ones, once their tokens have expired
 ```
 
 `prune` counts from when a key **stopped signing**, not from when it was made. That distinction
@@ -341,7 +341,7 @@ API, families are rows of their own, and clients carry the secret they last repl
 be re-run rather than patched:
 
 ```bash
-vendor/bin/nix db:migrate up      # after dropping the oauth_* tables of an earlier run
+vendor/bin/naf db:migrate up      # after dropping the oauth_* tables of an earlier run
 ```
 
 On MySQL the identifier columns are given a binary collation, because the default one is

@@ -1,4 +1,26 @@
 {
+ "commands": [
+  "command:list",
+  "db:migrate",
+  "db:migration:create",
+  "mcp:token:create",
+  "mcp:token:list",
+  "mcp:token:revoke",
+  "oauth:client:create",
+  "oauth:client:list",
+  "oauth:client:rotate-secret",
+  "oauth:discover",
+  "oauth:doctor",
+  "oauth:keys:generate",
+  "oauth:keys:prune",
+  "oauth:server:doctor",
+  "oauth:server:setup",
+  "queue:consume",
+  "queue:retry-failed",
+  "route:debug",
+  "schedule:list",
+  "schedule:ticker"
+ ],
  "functions": {
   "abort": "framework",
   "app": "framework",

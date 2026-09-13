@@ -33,7 +33,7 @@ def install(names, into):
 
 def scan(into):
     """Funktion -> Paket, und Paket -> (requires, suggests)."""
-    fns, meta = {}, {}
+    fns, meta, cmds = {}, {}, set()
     vendor = os.path.join(into, "vendor", "naf")
     for pkg in sorted(os.listdir(vendor)):
         root = os.path.join(vendor, pkg)
@@ -51,7 +51,9 @@ def scan(into):
                 src = open(os.path.join(dirpath, f), encoding="utf-8", errors="replace").read()
                 for m in re.finditer(r'^function ([a-zA-Z_][a-zA-Z0-9_]*)\s*\(', src, re.M):
                     fns[m.group(1)] = pkg
-    return fns, meta
+                for m in re.finditer(r"const string NAME = '([^']+)'", src):
+                    cmds.add(m.group(1))
+    return fns, meta, sorted(cmds)
 
 def write_function_index(fns):
     by_pkg = {}
@@ -89,9 +91,9 @@ if __name__ == "__main__":
     print(f"  {len(names)} Pakete auf Packagist: {', '.join(n.split('/')[1] for n in names)}")
     with tempfile.TemporaryDirectory() as tmp:
         install(names, tmp)
-        fns, meta = scan(tmp)
+        fns, meta, cmds = scan(tmp)
     n = write_function_index(fns)
     p = write_packages(meta)
-    json.dump({"functions": fns, "packages": meta},
+    json.dump({"functions": fns, "packages": meta, "commands": cmds},
               open(os.path.join(os.path.dirname(__file__), "packages.json"), "w"), indent=1, sort_keys=True)
-    print(f"  function-index.md: {n} Funktionen · packages.md: {p} Pakete · tools/packages.json geschrieben")
+    print(f"  function-index.md: {n} functions · packages.md: {p} packages · {len(cmds)} commands · tools/packages.json written")

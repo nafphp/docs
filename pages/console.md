@@ -1,5 +1,6 @@
 ---
 title: Console commands
+example_commands: true    # this chapter invents command names on purpose
 requires:
   - naf/cli
 ---
