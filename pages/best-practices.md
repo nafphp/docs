@@ -114,17 +114,3 @@ use function Naf\View\s;
 
 <h1>Hello, <?= s($user->name) ?>!</h1>
 ```
-
----
-
-## Summary
-
-- Thin Controllers → Heavy Services
-- Use Events for extension and decoupling
-- Handle errors consistently with `abort()`
-- Manage all services via the container
-- Organize config cleanly
-- Build small reusable helpers when needed
-
-NAF gives you the freedom to structure your app your way —  
-following these best practices will help you build clean and scalable projects.

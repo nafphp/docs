@@ -25,9 +25,7 @@ This plugin provides a lightweight job queue system with CLI worker support and 
 
 ---
 
-## Usage
-
-### Queue a job (default channel)
+## Queue a job (default channel)
 
 Create a job class that implements the `QueueJobInterface`:
 
@@ -53,7 +51,7 @@ queue()->push(SendWelcomeEmail::class, ['email' => 'user@example.com']);
 
 ---
 
-### Using channels
+## Using channels
 
 Channels are **logical job streams** inside the same queue backend.
 They allow you to separate workloads (e.g. `emails`, `mcp_out`, `notifications`)
@@ -71,7 +69,7 @@ Internally, channels are handled by the queue driver.
 
 ---
 
-### Fire-and-forget (async)
+## Fire-and-forget (async)
 
 For **one-off asynchronous execution**, use:
 

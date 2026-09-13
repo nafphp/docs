@@ -26,7 +26,7 @@ your-plugin/
 
 ---
 
-## 🛠 Example `composer.json`
+## Example `composer.json`
 
 Below is a minimal but complete `composer.json` for a NAF plugin:
 
@@ -194,13 +194,3 @@ Visit: `http://yourapp.local/plugin-hello`
 1. App `app/config.php`
 2. Plugins `app/config.php`
 3. Framework `src/config.php`
-
----
-
-## Summary
-
-- Plugins mimic the structure of the main app (`app/config.php`, `app/views/`, `Controllers/`)
-- Auto-loaded by Composer if `"type": "naf-plugin"` is set
-- Can register routes, logic, templates, config – with no extra steps
-- Can be overridden by the app cleanly
-- `plugin()` helper gives access to metadata for advanced use

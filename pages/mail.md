@@ -24,9 +24,7 @@ This plugin provides a clean interface for sending emails in your NAF applicatio
 
 ---
 
-## Usage
-
-### Basic mail sending
+## Basic mail sending
 
 ```php
 $mail = mail()
@@ -40,7 +38,7 @@ mailer()->send($mail);
 
 ---
 
-### Add attachments
+## Add attachments
 
 ```php
 $mail = mail()
@@ -61,7 +59,7 @@ You can also attach images inline and reference them via `cid:`:
 
 ---
 
-### Use a custom transport
+## Use a custom transport
 
 To swap out the default `MailTransport`, inject your own:
 

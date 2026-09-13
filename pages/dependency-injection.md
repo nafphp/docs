@@ -88,13 +88,3 @@ class ProductController
 
 - Fetch your services **inside your methods**.
 - The service is automatically cached after the first retrieval.
-
----
-
-## Summary
-
-- Access the container via `app()->container()`.
-- Register services using **string keys** like `'productService'`, `'db'`, `'log'`, etc.
-- Fetch services manually when needed.
-- NAF does **not** automatically inject constructor arguments.
-- Services behave as singletons by default (one instance per request).

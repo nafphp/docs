@@ -24,9 +24,7 @@ This plugin gives you a clean CLI system with colored output, argument parsing, 
 
 ---
 
-## Usage
-
-### Run a command
+## Run a command
 
 ```bash
 vendor/bin/naf your:command
@@ -42,7 +40,7 @@ If you call the helper without arguments, it prints all available CLI commands.
 
 ---
 
-### Create a custom command
+## Create a custom command
 
 To create your own CLI command, add a class in the `app/Commands/` folder:
 

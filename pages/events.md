@@ -73,13 +73,3 @@ You can hook into these to customize behavior without modifying core code.
 | `controller.called` | After the controller action returns | `$controller`, `$method`, `$response` | Post-processing, adding headers |
 | `response.sending` | Before sending the response | `$response` | Caching, injecting headers, modifying output |
 | `request.end` | At the very end after sending response | Time measurement, memory usage | Logging, performance analysis |
-
----
-
-## Summary
-
-- Use `event()->listen(event, callback)` to register event listeners.
-- Use `event()->dispatch(event, payload...)` to fire events.
-- Multiple listeners can be registered per event.
-- NAF fires several built-in events you can hook into for full control over the request flow.
-- Event responses are collected and returned as an array.

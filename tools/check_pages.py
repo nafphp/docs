@@ -5,6 +5,7 @@
    sections came to claim `naf/framework >= 1.0` and PHP 8.1.
 2. A `use function` import naming the wrong namespace — fifteen of those were
    in the pages, every one of them a runtime error for anyone copying it.
+3. A `composer require naf/…` naming a package that was never published.
 
 Both are checked against the published packages, not against a list kept here.
 """
@@ -34,6 +35,11 @@ for path in sorted(glob.glob(os.path.join(HERE, "..", "pages", "*.md"))):
         for r in req:
             if not r.startswith("naf/") or r.split("/", 1)[1] not in pkgs:
                 problems.append(f"{name}: requires '{r}', which does not exist")
+
+    for m in re.finditer(r'composer require ((?:naf/[\w-]+ ?)+)', text):
+        for pkg in m.group(1).split():
+            if pkg.split("/", 1)[1] not in pkgs:
+                problems.append(f"{name}: 'composer require {pkg}' names a package that does not exist")
 
     imports = [(m.group(1), [n.strip() for n in m.group(2).split(",")]) for m in PAT_BRACE.finditer(text)]
     imports += [(m.group(1), [m.group(2)]) for m in PAT_SINGLE.finditer(text)]

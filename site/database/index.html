@@ -342,6 +342,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../choosing-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What do I actually need?
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../install/" class="md-nav__link">
         
   
@@ -1129,17 +1157,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#defaults-applied" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1151,10 +1168,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#internals" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Internals
+        How it works
       
     </span>
   </a>
@@ -1876,17 +1893,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#defaults-applied" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1898,10 +1904,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#internals" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Internals
+        How it works
       
     </span>
   </a>
@@ -2004,14 +2010,6 @@
 <li>Always use try/catch blocks when working with transactions.</li>
 </ul>
 <hr />
-<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Access the database via the <code>database()</code> helper.</li>
-<li>Configure database settings in <code>app/config.php</code> under the <code>database</code> key.</li>
-<li>NAF uses native PDO for maximum flexibility.</li>
-<li>You can integrate any external ORM if needed (e.g., Eloquent, Doctrine, etc.).</li>
-</ul>
-<hr />
 <h2 id="defaults-applied">Defaults applied<a class="headerlink" href="#defaults-applied" title="Permanent link">&para;</a></h2>
 <p>The PDO instance comes with these options:</p>
 <div class="language-php highlight"><pre><span></span><code><span class="x">[</span>
@@ -2021,14 +2019,13 @@
 </code></pre></div>
 <hr />
 <hr />
-<h2 id="internals">Internals<a class="headerlink" href="#internals" title="Permanent link">&para;</a></h2>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Loads config from <code>/app/config.php</code> from the key <code>database</code></li>
 <li>Builds DSN based on a given driver (<code>mysql</code>, <code>sqlite</code>)</li>
 <li>Wraps PDO creation in a factory, handles exceptions gracefully</li>
 <li>Registers <code>database</code> in the container and provides the <code>database()</code> helper</li>
 </ul>
-<hr />
 
 
 

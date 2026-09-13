@@ -12,7 +12,7 @@ guard()
 
 ---
 
-## Features
+## What it does
 
 The `Guard` provides several safety-focused utilities:
 
@@ -86,7 +86,7 @@ if (!guard()->csrf()->validate($_POST['_csrf'] ?? '')) {
 
 ---
 
-## 🛠 Example Usage
+## Example Usage
 
 **In a form:**
 
@@ -104,17 +104,3 @@ if (!guard()->csrf()->validate($_POST['_csrf'] ?? '')) {
     abort(419, 'Invalid CSRF token');
 }
 ```
-
----
-
-## Summary
-
-- The `Guard` protects your application at critical input/output boundaries.
-- It validates file paths safely, preventing file inclusion vulnerabilities.
-- It escapes output to prevent XSS without needing a full template engine.
-- It handles CSRF token generation and validation automatically and securely.
-- It is reached through `guard()`, imported with `use function Naf\guard;`.
-
----
-
-> ✅ Best practice: Always validate external input through `guard()` before using it in filesystem operations or rendering dynamic output.

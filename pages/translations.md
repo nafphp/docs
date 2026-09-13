@@ -26,11 +26,9 @@ It reads language files from disk, supports variable replacements, and falls bac
 
 ---
 
-## Usage
-
 >If you don't configure a language, the default language is English (`en`).
 
-### Translate
+## Translate
 
 ```php
 echo t('welcome');
@@ -49,7 +47,7 @@ You’ll see:
 
 ---
 
-### With replacements
+## With replacements
 
 ```php
 echo t('greeting', ['name' => 'John']);
@@ -68,7 +66,7 @@ Result:
 
 ---
 
-### Switch language
+## Switch language
 
 ```php
 use Naf\I18n\Support\Language;
@@ -88,7 +86,7 @@ Make sure `app/Resources/lang/de.json` exists.
 
 ---
 
-### Fallback
+## Fallback
 
 If a key is missing, the key itself is returned:
 

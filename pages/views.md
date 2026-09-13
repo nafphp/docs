@@ -119,16 +119,6 @@ $html = view('hello', ['name' => 'World']);
 
 ---
 
-## Summary
-
-- Views are located in `app/views/`.
-- Use dot notation when referencing views (e.g., `layouts.main`).
-- Use `setLayout()` to attach layouts inside views.
-- Use `s()` to escape variables.
-- Use `render()` for full responses and `view()` for raw HTML output.
-
----
-
 ## Asset Management (CSS & JS)
 
 The plugin includes a small, flexible asset collector used inside layouts to include CSS and JavaScript files.
@@ -199,7 +189,7 @@ Use `asset()->render('css')` or `asset()->render('js')` inside your layout:
 
 ---
 
-## Internals
+## How it works
 
 * `view()` resolves and loads `.phtml` templates from the directories listed in `view:paths` (defaults to `views/` first with `app/views/` as a fallback) before checking any registered plugin or framework views.
 * `setLayout()` nests the rendered content into a wrapper view.
@@ -221,5 +211,3 @@ return [
 ```
 
 The entries are resolved relative to `BASE_PATH` when they are not absolute paths, so you can place templates anywhere and order them however you need. The plugin checks each directory in order before falling back to registered plugin or framework view paths.
-
----

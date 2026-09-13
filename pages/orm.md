@@ -76,9 +76,7 @@ return [
 
 ---
 
-## Usage
-
-### Define your models
+## Define your models
 
 Models extend `AbstractModel`, which already implements `EntityInterface` via
 `EntityTrait`.
@@ -137,7 +135,7 @@ class Product extends AbstractModel
 }
 ```
 
-### Saving data
+## Saving data
 
 ```php
 use function Naf\ORM\em;
@@ -156,7 +154,7 @@ $product->addTag($tagB);
 em()->save($product);
 ```
 
-### Reading data
+## Reading data
 
 ```php
 use function Naf\ORM\repo;

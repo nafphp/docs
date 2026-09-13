@@ -145,14 +145,3 @@ if (env()->isProduction()) {
     error_reporting(E_ALL);
 }
 ```
-
----
-
-## Summary
-
-- Use `.env` files to store environment-specific settings.
-- Use the `env()` helper to access variables with optional default values.
-- The `Environment` service allows checking the current environment cleanly.
-- Use configuration arrays with optional `ENV:` references.
-- Access configuration values easily with the `config()` helper.
-- Configuration supports nested access via "namespace" keys (e.g., `api:key`).

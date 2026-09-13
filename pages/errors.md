@@ -85,12 +85,3 @@ If an uncaught exception occurs during request processing, NAF:
 3. Uses the custom `app/views/errors/500.phtml` page if available.
 
 You don't have to manually catch exceptions unless you want to customize behavior.
-
----
-
-## Summary
-
-- Create `app/views/errors/404.phtml` and/or `500.phtml` to override default error pages.
-- Use the `abort()` helper to manually stop execution and send an error response.
-- Uncaught exceptions automatically result in a 500 error page.
-- Always use the `s()` helper to safely escape any dynamic content in error pages.

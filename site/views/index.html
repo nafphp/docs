@@ -342,6 +342,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../choosing-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What do I actually need?
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../install/" class="md-nav__link">
         
   
@@ -965,17 +993,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#asset-management-css-js" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1037,15 +1054,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#internals_1" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Internals
+        How it works
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Internals">
+    <nav class="md-nav" aria-label="How it works">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1959,17 +1976,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#asset-management-css-js" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2031,15 +2037,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#internals_1" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Internals
+        How it works
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Internals">
+    <nav class="md-nav" aria-label="How it works">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2168,15 +2174,6 @@ For this, you can use the <code>view()</code> helper:</p>
 <li>Useful for building custom responses or templates manually.</li>
 </ul>
 <hr />
-<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Views are located in <code>app/views/</code>.</li>
-<li>Use dot notation when referencing views (e.g., <code>layouts.main</code>).</li>
-<li>Use <code>setLayout()</code> to attach layouts inside views.</li>
-<li>Use <code>s()</code> to escape variables.</li>
-<li>Use <code>render()</code> for full responses and <code>view()</code> for raw HTML output.</li>
-</ul>
-<hr />
 <h2 id="asset-management-css-js">Asset Management (CSS &amp; JS)<a class="headerlink" href="#asset-management-css-js" title="Permanent link">&para;</a></h2>
 <p>The plugin includes a small, flexible asset collector used inside layouts to include CSS and JavaScript files.</p>
 <p>Assets are added inside views or controllers using the <code>asset()</code> helper:</p>
@@ -2245,7 +2242,7 @@ For this, you can use the <code>view()</code> helper:</p>
 </table>
 <hr />
 <hr />
-<h2 id="internals_1">Internals<a class="headerlink" href="#internals_1" title="Permanent link">&para;</a></h2>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>view()</code> resolves and loads <code>.phtml</code> templates from the directories listed in <code>view:paths</code> (defaults to <code>views/</code> first with <code>app/views/</code> as a fallback) before checking any registered plugin or framework views.</li>
 <li><code>setLayout()</code> nests the rendered content into a wrapper view.</li>
@@ -2263,7 +2260,6 @@ For this, you can use the <code>view()</code> helper:</p>
 <span class="x">];</span>
 </code></pre></div>
 <p>The entries are resolved relative to <code>BASE_PATH</code> when they are not absolute paths, so you can place templates anywhere and order them however you need. The plugin checks each directory in order before falling back to registered plugin or framework view paths.</p>
-<hr />
 
 
 

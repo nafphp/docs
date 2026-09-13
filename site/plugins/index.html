@@ -342,6 +342,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../choosing-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What do I actually need?
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../install/" class="md-nav__link">
         
   
@@ -785,7 +813,7 @@
   <a href="#example-composerjson" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🛠 Example composer.json
+        Example composer.json
       
     </span>
   </a>
@@ -852,17 +880,6 @@
     <span class="md-ellipsis">
       
         Config Merge Order
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
       
     </span>
   </a>
@@ -1868,7 +1885,7 @@
   <a href="#example-composerjson" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🛠 Example composer.json
+        Example composer.json
       
     </span>
   </a>
@@ -1941,17 +1958,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -1992,7 +1998,7 @@
 <li><code>bootstrap.php</code> is automatically executed when the plugin is discovered.</li>
 </ul>
 <hr />
-<h2 id="example-composerjson">🛠 Example <code>composer.json</code><a class="headerlink" href="#example-composerjson" title="Permanent link">&para;</a></h2>
+<h2 id="example-composerjson">Example <code>composer.json</code><a class="headerlink" href="#example-composerjson" title="Permanent link">&para;</a></h2>
 <p>Below is a minimal but complete <code>composer.json</code> for a NAF plugin:</p>
 <div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vendor/naf-plugin-example"</span><span class="p">,</span>
@@ -2127,15 +2133,6 @@ Usage in the main application:
 <li>Plugins <code>app/config.php</code></li>
 <li>Framework <code>src/config.php</code></li>
 </ol>
-<hr />
-<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Plugins mimic the structure of the main app (<code>app/config.php</code>, <code>app/views/</code>, <code>Controllers/</code>)</li>
-<li>Auto-loaded by Composer if <code>"type": "naf-plugin"</code> is set</li>
-<li>Can register routes, logic, templates, config – with no extra steps</li>
-<li>Can be overridden by the app cleanly</li>
-<li><code>plugin()</code> helper gives access to metadata for advanced use</li>
-</ul>
 
 
 

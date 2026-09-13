@@ -69,11 +69,3 @@ return response(file_get_contents($pdfPath))
     ->withHeader('Content-Type', 'application/pdf')
     ->withHeader('Content-Disposition', 'attachment; filename="document.pdf"');
 ```
-
----
-
-## Summary
-
-- Use `response(file_get_contents($path))` to build file download responses.
-- Always set proper headers (`Content-Type`, `Content-Disposition`).
-- Always sanitize filenames to prevent security issues.

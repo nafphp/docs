@@ -342,6 +342,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../choosing-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What do I actually need?
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../install/" class="md-nav__link">
         
   
@@ -715,10 +743,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#what-it-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Features
+        What it does
       
     </span>
   </a>
@@ -762,18 +790,7 @@
   <a href="#example-usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🛠 Example Usage
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
+        Example Usage
       
     </span>
   </a>
@@ -1821,10 +1838,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#what-it-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Features
+        What it does
       
     </span>
   </a>
@@ -1868,18 +1885,7 @@
   <a href="#example-usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🛠 Example Usage
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
+        Example Usage
       
     </span>
   </a>
@@ -1913,7 +1919,7 @@
 <div class="language-php highlight"><pre><span></span><code><span class="x">guard()</span>
 </code></pre></div>
 <hr />
-<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<h2 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h2>
 <p>The <code>Guard</code> provides several safety-focused utilities:</p>
 <table>
 <thead>
@@ -1985,7 +1991,7 @@ You can generate and validate CSRF tokens easily:</p>
 <p>✅ The CSRF token stays valid across multiple forms and tabs, and only rotates manually (e.g., after login/logout).</p>
 </blockquote>
 <hr />
-<h2 id="example-usage">🛠 Example Usage<a class="headerlink" href="#example-usage" title="Permanent link">&para;</a></h2>
+<h2 id="example-usage">Example Usage<a class="headerlink" href="#example-usage" title="Permanent link">&para;</a></h2>
 <p><strong>In a form:</strong></p>
 <div class="language-php highlight"><pre><span></span><code><span class="x">&lt;form method="POST" action="/submit"&gt;</span>
 <span class="x">    &lt;input type="hidden" name="_csrf" value="</span><span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">guard</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">csrf</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">generate</span><span class="p">()</span> <span class="cp">?&gt;</span><span class="x">"&gt;</span>
@@ -1997,19 +2003,6 @@ You can generate and validate CSRF tokens easily:</p>
 <span class="x">    abort(419, 'Invalid CSRF token');</span>
 <span class="x">}</span>
 </code></pre></div>
-<hr />
-<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
-<ul>
-<li>The <code>Guard</code> protects your application at critical input/output boundaries.</li>
-<li>It validates file paths safely, preventing file inclusion vulnerabilities.</li>
-<li>It escapes output to prevent XSS without needing a full template engine.</li>
-<li>It handles CSRF token generation and validation automatically and securely.</li>
-<li>It is reached through <code>guard()</code>, imported with <code>use function Naf\guard;</code>.</li>
-</ul>
-<hr />
-<blockquote>
-<p>✅ Best practice: Always validate external input through <code>guard()</code> before using it in filesystem operations or rendering dynamic output.</p>
-</blockquote>
 
 
 

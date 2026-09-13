@@ -50,6 +50,7 @@ markdown_extensions:
 nav:
   - Getting started:
       - What NAF is: index.md
+      - What do I actually need?: choosing-packages.md
       - Installation: install.md
       - Your first application: first-app.md
   - Core:

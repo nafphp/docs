@@ -51,9 +51,7 @@ This design keeps the client:
 
 ---
 
-## Usage
-
-### Send a PSR-7 request
+## Send a PSR-7 request
 
 ```php
 use Nyholm\Psr7\Request;

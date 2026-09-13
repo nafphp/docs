@@ -121,7 +121,7 @@ But using the `session()` helper is the recommended way.
 
 ---
 
-## Internals
+## How it works
 
 * Automatically starts `session_start()` for web requests, with hardened cookie parameters and domain normalization.
 * Offers `Session::regenerate()` so you can refresh the session ID during login flows without touching every request.

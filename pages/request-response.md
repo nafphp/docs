@@ -95,13 +95,3 @@ return $response->withStatus(202);
 
 - Set custom headers, status codes, and body manually.
 - Useful for advanced use cases or non-standard responses.
-
----
-
-## Summary
-
-- Use `response(string)` for plain text or HTML.
-- Use `json(array|object)` for JSON API responses.
-- Use `render(view, variables)` to return rendered HTML views.
-- Use `redirect(url, status)` to redirect users to another page.
-- Always return a valid PSR-7 Response.
