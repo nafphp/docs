@@ -12,111 +12,115 @@ You write SQL and get back what PDO gives you.
 That is the whole of it. If you want rows to arrive as objects, [`naf/orm`](orm.md) sits
 on top of this package; if you want somebody else's ORM, nothing here is in the way.
 
-## Accessing the Database
-
-The `database()` helper gives you access to the PDO instance. Import it first:
+## Getting the connection
 
 ```php
 use function Naf\Database\database;
 
-$pdo = database();
+$rows = database()->query('SELECT * FROM users')->fetchAll();
 ```
 
-You can use standard PDO methods:
+`database()` hands you a `PDO` instance — not a wrapper, not a query builder. Everything
+PDO can do, you can do, and everything you already know about PDO applies.
+
+It is typed `?PDO`: you get `null` if no database is configured, rather than an exception
+from somewhere deeper.
+
+## Two defaults that change how you write queries
+
+The connection is created with:
 
 ```php
-$stmt = database()->query('SELECT * FROM users');
-$users = $stmt->fetchAll();
+PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
+PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
 ```
 
----
+**Errors throw.** A failed query raises `PDOException` instead of returning `false`, so
+`if (!$stmt)` is a branch that never runs. Wrap what you want to handle and let the rest
+reach the error handler.
 
-## Database Configuration
-
-Database settings are stored inside your application's `app/config.php` file under the `database` key.
-
-Example `app/config.php`:
-
-```php
-<?php
-
-return [
-    'database' => [
-        'driver'   => 'mysql',
-        'host'     => '127.0.0.1',
-        'database' => 'NAF',
-        'username' => 'root',
-        'password' => 'root',
-        'charset'  => 'utf8mb4',
-    ]
-];
-```
-
-NAF builds the PDO connection dynamically based on this configuration.
-
-- `driver`: e.g., `mysql`, `pgsql`, `sqlite`
-- `host`: database server hostname or IP
-- `database`: database name
-- `username`: database user
-- `password`: database password
-- `charset`: character set (default `utf8mb4`)
-
----
-
-## Example: Prepared Statements
-
-You can use prepared statements with bound parameters:
+**Rows arrive as associative arrays.** No `PDO::FETCH_ASSOC` on every call, and no numeric
+duplicates of every column.
 
 ```php
 $stmt = database()->prepare('SELECT * FROM users WHERE id = :id');
-$stmt->execute(['id' => 1]);
+$stmt->execute(['id' => 1]);      // throws on failure; its bool return is not the row
 $user = $stmt->fetch();
 ```
 
-- Prepared statements help protect against SQL injection.
-- Use named parameters (`:name`) or question marks (`?`).
+## Queries with values in them
 
----
+```php
+$stmt = database()->prepare('SELECT * FROM users WHERE email = :email');
+$stmt->execute(['email' => $email]);
+$user = $stmt->fetch();
+```
 
-## Using Transactions
+Named placeholders or `?` — PDO accepts both, but not mixed in one statement. The reason to
+prepare is not speed, it is that a prepared statement sends the query and the values
+separately, so no value can end up read as SQL.
 
-Transactions are fully supported:
+Do not build the other kind:
+
+```php
+database()->query("SELECT * FROM users WHERE email = '$email'");   // no
+```
+
+## Transactions
 
 ```php
 $pdo = database();
 $pdo->beginTransaction();
 
 try {
-    $pdo->exec('INSERT INTO users (name) VALUES ("John")');
-    $pdo->exec('INSERT INTO profiles (user_id) VALUES (LAST_INSERT_ID())');
+    $pdo->prepare('UPDATE accounts SET balance = balance - :n WHERE id = :from')
+        ->execute(['n' => 100, 'from' => 1]);
+    $pdo->prepare('UPDATE accounts SET balance = balance + :n WHERE id = :to')
+        ->execute(['n' => 100, 'to' => 2]);
     $pdo->commit();
-} catch (\Exception $e) {
+} catch (\Throwable $e) {
     $pdo->rollBack();
     throw $e;
 }
 ```
 
-- Transactions ensure atomic database operations.
-- Always use try/catch blocks when working with transactions.
+Because errors throw, the `catch` is the only place a failure can arrive — which is what
+makes this shape safe. Rethrow after rolling back: swallowing the exception leaves the
+caller believing the transfer happened.
 
----
-
-## Defaults applied
-
-The PDO instance comes with these options:
+## Configuration
 
 ```php
-[
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-]
+'database' => [
+    'driver'   => 'mysql',
+    'host'     => '127.0.0.1',
+    'database' => 'naf',
+    'username' => 'root',
+    'password' => '',
+    'charset'  => 'utf8mb4',
+],
 ```
 
----
+The port is filled in from the driver when you leave it out — 3306 for MySQL, 5432 for
+PostgreSQL.
 
-## How it works
+SQLite takes a path instead of a host, and defaults to an in-memory database when you give
+it none:
 
-* Loads config from `/app/config.php` from the key `database`
-* Builds DSN based on a given driver (`mysql`, `sqlite`)
-* Wraps PDO creation in a factory, handles exceptions gracefully
-* Registers `database` in the container and provides the `database()` helper
+```php
+'database' => [
+    'driver'   => 'sqlite',
+    'database' => '/var/data/app.sqlite',   // or ':memory:'
+],
+```
+
+An in-memory database is emptied when the process ends, which makes it right for tests and
+wrong for everything else.
+
+Credentials belong in `.env` and are read with `env()`, not written into a file you commit.
+
+## When the connection fails
+
+A connection that cannot be made throws `Naf\Database\Exceptions\DatabaseException`,
+wrapping the original `PDOException` message. It happens while the container builds the
+connection — so a wrong password surfaces on the first query, not at boot.

@@ -10,123 +10,93 @@ Data that has to survive from one request to the next: who is signed in, what so
 typed into the form that failed validation, the message that should appear once and then
 not again.
 
-Sessions start when you ask for one, not on every request. That is deliberate — a session
-started for a visitor who never needed one is a cookie you have to explain and a file you
-have to clean up.
+Installing this package means every web request gets a session. The plugin starts one
+during boot — you do not call `start()` yourself, and there is no lazy mode that waits
+until something is written.
 
-## Starting a Session
-
-To start the PHP session, use the `session()` helper:
+## Reading and writing
 
 ```php
 use function Naf\Session\session;
 
-session()->start();
-```
-
-- This starts `$_SESSION` if not already active.
-- You control exactly when session management begins.
-
----
-
-## Setting and Getting Session Data
-
-Set a session value:
-
-```php
 session()->set('user_id', 42);
+
+$id       = session()->get('user_id');
+$language = session()->get('language', 'en');   // default when the key is absent
+
+session()->forget('user_id');
+session()->clear();                              // everything
 ```
 
-Retrieve a session value:
+Keys are flat strings. `set()` writes straight into `$_SESSION`, so anything PHP can
+serialise goes in — but a session is a file read and written on every request, which is an
+argument for keeping it small.
 
-```php
-$userId = session()->get('user_id');
-```
-
-Retrieve a value with a default fallback:
-
-```php
-$language = session()->get('language', 'en');
-```
-
----
-
-## Flash Messages
-
-Flash messages are stored temporarily and removed after the next access.  
-Useful for one-time notifications like success or error messages.
-
-Set a flash message:
+## Messages that should appear once
 
 ```php
 session()->flash('success', 'Your profile has been updated.');
 ```
 
-Retrieve and automatically delete a flash message:
-
 ```php
-$successMessage = session()->getFlash('success');
+$message = session()->getFlash('success');       // returns it and deletes it
 ```
 
-- After calling `getFlash()`, the flash value is deleted automatically.
-- If no flash message is found, the optional default value is returned.
+`getFlash()` removes the value as it reads it, so a refresh does not show the message
+again. Read it once and put it in a variable — asking twice gives you the default the
+second time.
 
----
-
-## Forgetting Session Data
-
-To manually remove a value from the session:
+## Regenerating the session id
 
 ```php
-session()->forget('user_id');
+session()->regenerate();
 ```
 
-- Useful for logging out users or cleaning up session data manually.
+Issues a new session id and discards the old one, which is what closes the door on session
+fixation: an attacker who planted an id before sign-in no longer holds a valid one after.
+Call it when the trust level changes — at sign-in, at sign-out, when somebody becomes an
+administrator.
 
----
-
-## Configuration
-
-`src/config.php` exposes the following keys:
+It is rate-limited. The default refuses to regenerate more than once every 300 seconds, so
+calling it on every request is harmless rather than a way to lose sessions. Pass a different
+interval if you want another rhythm:
 
 ```php
-return [
-    'session' => [
-        'storage'             => 'default', // switch to 'database' when using naf/database
-        'trust_proxy_headers' => false,
-        'trusted_proxies'     => [],
-        'database_table'      => 'sessions',
-    ],
-];
+session()->regenerate(60);
 ```
 
-To use the database handler:
+## Storing sessions in the database
 
-1. Install [naf/database](https://github.com/nafphp/database) and configure its `database` settings.
-2. Update the `session` config’s `storage` key to `database`.
-3. Run `vendor/bin/nix migrate up` (requires `naf/cli`) to apply the migration that creates the sessions table.
-
----
-
-## Optional Usage in Controllers
-
-You can also access the session directly from the container:
+The default handler is PHP's own: files in whatever `session.save_path` points at. That
+breaks the moment a second web server enters the picture, because request two lands on a
+machine that cannot see request one's file.
 
 ```php
-$session = app()->container()->get(Session::class);
+'session' => [
+    'storage'        => 'database',
+    'database_table' => 'sessions',
+],
 ```
 
-But using the `session()` helper is the recommended way.
+This needs `naf/database`, and the table needs creating — the plugin registers a migration
+for it, so `naf db:migrate up` has one waiting.
 
----
+**If `naf/database` is not installed, this fails quietly.** The plugin writes a warning to
+the log and carries on with file storage. Your application works, your sessions are in
+files, and the only sign is a line in a log nobody reads. Check the log after switching.
 
-## How it works
+## Behind a proxy
 
-* Automatically starts `session_start()` for web requests, with hardened cookie parameters and domain normalization.
-* Offers `Session::regenerate()` so you can refresh the session ID during login flows without touching every request.
-* Flash data is stored in a dedicated key and removed after access.
-* Registers the `session()` helper and binds it in the service container.
-* Provides `DatabaseSessionHandler` when the database plugin is configured.
-* Registers the migration path with `naf/database` so `vendor/bin/nix migrate up/down` applies the session table changes.
+A load balancer terminating TLS speaks plain HTTP to your application, which then believes
+the connection was insecure and sets a cookie without the `Secure` flag.
 
----
+```php
+'session' => [
+    'trust_proxy_headers' => true,
+    'trusted_proxies'     => ['10.0.0.1'],
+],
+```
+
+Both together, and never `trust_proxy_headers` alone: `X-Forwarded-Proto` is a header like
+any other, and a client can send it. Trusting it without naming which addresses may set it
+lets anybody claim their connection was encrypted.
