@@ -14,172 +14,116 @@ Jobs are described with cron expressions and handed to the queue, so the schedul
 happens when the machine was off at eight — a scheduler that silently skips is a scheduler
 you find out about in the wrong week.
 
-## Basic idea
+## A scheduled job
 
-The scheduler **does not execute jobs directly**.
-
-Instead:
-
-1. The scheduler *decides* which jobs are due
-2. Due jobs are **queued**
-3. Queue workers execute them asynchronously
-
-This keeps scheduling and execution cleanly separated.
-
----
-
-## Defining scheduled jobs
-
-A scheduled job is a normal queue job that additionally implements
-`ScheduledJobInterface`:
+A scheduled job is a queue job that also says when it wants to run.
 
 ```php
-use Naf\Schedule\Core\ScheduledJobInterface;
-use Naf\Queue\QueueJobInterface;
+namespace App\Jobs;
 
-class CleanupTempFiles implements ScheduledJobInterface, QueueJobInterface
+use Naf\CLI\Core\Output;
+use Naf\Queue\Core\QueueJobInterface;
+use Naf\Schedule\Core\ScheduledJobInterface;
+
+final class RebuildSitemap implements QueueJobInterface, ScheduledJobInterface
 {
+    public function __construct(private array $payload = []) {}
+
     public function getCronExpression(): string
     {
-        return '0 * * * *'; // every hour
+        return '0 3 * * *';     // every day at 03:00
     }
 
-    public function execute(): void
+    public function execute(Output $output): void
     {
-        // cleanup logic
+        // rebuild it
     }
 }
 ```
 
----
-
-## Registering scheduled jobs
-
-Register scheduled jobs via the `Scheduler`:
+## Registering it
 
 ```php
-$scheduler->addScheduledJob(CleanupTempFiles::class);
+use function Naf\Schedule\scheduler;
+
+scheduler()->addScheduledJob(RebuildSitemap::class);
+scheduler()->addScheduledJob(SyncInventory::class, ['warehouse' => 'north']);
 ```
 
-Payloads can be passed as well:
+In your application's `bootstrap.php`. The optional payload reaches the job's constructor,
+which is how the same class serves several schedules with different arguments.
 
-```php
-$scheduler->addScheduledJob(CleanupTempFiles::class, [
-    'path' => '/tmp'
-]);
-```
+`vendor/bin/naf schedule:list` shows what is registered and when each one runs next.
 
----
+## Two processes, not one
 
-## Running the scheduler
-
-Start the scheduler ticker via CLI:
+**The scheduler does not run your jobs.** It decides that something is due and pushes it
+onto the queue; a queue worker picks it up. Both have to be running:
 
 ```bash
-./bin/naf schedule:ticker
+vendor/bin/naf schedule:ticker     # decides what is due
+vendor/bin/naf queue:consume       # actually runs it
 ```
 
-The ticker:
+A ticker without a worker fills the queue and nothing happens. This is the failure people
+hit first, and it looks exactly like a scheduler that is not working.
 
-* checks all registered jobs
-* evaluates cron expressions
-* queues jobs that are due
-
-It runs continuously and is usually managed by Supervisor or systemd.
-
----
-
-## Backlog handling (important)
-
-### The problem
-
-If the scheduler runs but queue workers are down, scheduled jobs can pile up.
-In most cases this is **not desired**:
-polling, syncing, rebuilding, or checking tasks usually only need to run *once* with the latest state.
-
-### The solution: automatic coalescing
-
-By default, the scheduler **coalesces scheduled jobs**:
-
-> If a job was scheduled multiple times while workers were unavailable,
-> only the **latest execution** is kept in the queue.
-
-This prevents useless backlogs and keeps execution predictable.
-
-### How it works (internally)
-
-The scheduler assigns a **deterministic job ID** based on:
-
-* job class
-* cron expression
-
-This causes older queued runs to be replaced automatically.
-
-No special configuration is required.
-Queue drivers remain fully generic.
-
----
-
-## Configuration
-
-You can control this behavior via configuration:
-
-```php
-// app/config.php
-return [
-    'queue' => [
-        // If true (default): only the latest scheduled job is kept
-        // If false: every scheduled run is queued and processed
-        'coalesce' => true,
-    ],
-];
-```
-
-### When to disable coalescing
-
-Set `coalesce` to `false` if:
-
-* every scheduled run must be processed (e.g. audits, snapshots)
-* time-based effects must not be skipped
-* backlog processing is intentional
-
----
-
-## Duplicate execution prevention
-
-The scheduler also tracks its own state internally to ensure that:
-
-* a job is only queued **once per cron minute**
-* restarts do not cause duplicate enqueues
-
-State is stored in a small JSON file (configurable).
-
----
-
-## Worker interaction
-
-The scheduler **does not spawn queue workers by default**.
-
-You are expected to run queue workers independently, e.g. via Supervisor:
+## Running the ticker
 
 ```bash
-./bin/naf queue:consume
+vendor/bin/naf schedule:ticker
 ```
 
-This keeps the system flexible and avoids hidden background processes.
-
----
-
-## Supervisor example (optional)
+| Option | What it does |
+|---|---|
+| `--max-jobs=N` | exit after queueing N jobs |
+| `--max-runtime=N` | exit after N seconds |
+| `--workers=N` | how many workers to assume |
 
 ```ini
-[program:naf-scheduler]
-command=php bin/naf schedule:ticker
-directory=/path/to/your/app
+[program:naf-schedule]
+command=php bin/naf schedule:ticker --max-runtime=3600
 autostart=true
 autorestart=true
-stderr_logfile=/var/log/naf/scheduler.err.log
-stdout_logfile=/var/log/naf/scheduler.out.log
 ```
 
----
+## What happens to a window that was missed
+
+Nothing. `isDue()` is asked about the minute the ticker is in, so a job due at 03:00 on a
+machine that was off until 03:05 does not run — it runs the next day.
+
+That is worth knowing before you rely on it for anything that must happen. If a run cannot
+be skipped, the job itself has to notice that it has not run since yesterday, because the
+scheduler will not tell it.
+
+## Why a backlog does not build up
+
+The interesting case is the other one: the ticker running while no worker is. Every minute
+a due job is queued again, and by the time a worker comes back there are six hundred copies
+of a sync that only ever needed the latest state.
+
+The scheduler gives each run a deterministic id — `sha1('schedule:' . $class . ':' . $expression)`
+— and the file driver uses that id as the job's filename. Queueing the same job again
+overwrites the same file, so what waits for the worker is one run, not six hundred.
+
+```php
+'schedule' => [
+    'queue' => [
+        'coalesce' => true,     // the default
+    ],
+],
+```
+
+Turning it off gives every run its own random id and every run reaches the worker, which is
+what you want for a job where each occurrence means something on its own — a billing tick,
+not a cache rebuild.
+
+!!! note "This depends on the driver"
+    Coalescing works because the file driver keys jobs by that id. A driver that ignores
+    `_job_id` and appends every job will not coalesce, no matter what the setting says.
+
+## Not running the same minute twice
+
+Within one minute a job is queued once, even if the ticker loops several times. The
+scheduler remembers the last minute each job ran in and persists that, so restarting the
+ticker mid-minute does not queue everything a second time.

@@ -13,138 +13,69 @@ What you get beyond a plain `include` is inheritance — a layout with named blo
 fills in — plus asset collection and an escaping helper. What you do not get is a compiler,
 a cache directory, or a syntax to learn.
 
-## Rendering a View
-
-You can render a view file using the `render()` helper function:
+## Rendering one
 
 ```php
 use function Naf\View\render;
 
-return render('hello', ['name' => 'World']);
+return render('product.detail', ['product' => $product]);
 ```
 
-- The first argument is the view name (relative to the `app/views/` folder, using dot notation).
-- The second argument is an optional array of variables to pass into the view.
-- `render()` automatically wraps the view in a proper Response object.
+That loads `app/views/product/detail.phtml` — dots become directory separators — and wraps
+the result in a response, which is what a controller returns.
 
-This will load `app/views/hello.phtml`.
+Views are searched in your application's view directory and in every plugin's, so a plugin
+can ship a template and your application can override it by putting a file at the same name.
+`config('view:paths')` adds directories of your own.
 
----
+## render() or view()
 
-## View Files
+```php
+render('mail.welcome', ['name' => $name]);  // → a PSR-7 ResponseInterface
+view('mail.welcome', ['name' => $name]);    // → a string
+```
 
-View files are simple PHP templates with `.phtml` extension.
+`render()` is for a controller answering a request. `view()` is for everywhere else: the
+body of an email, a fragment for a JSON payload, a template rendered in a queue job where
+there is no response to return.
 
-Example: `app/views/hello.phtml`
+Sending a `view()` result where a response belongs, or returning a `render()` result into an
+email, is the mistake the two names exist to prevent.
+
+## Escaping
 
 ```php
 <?php use function Naf\View\s; ?>
 
-<h1>Hello, <?= s($name) ?>!</h1>
+<h1><?= s($title) ?></h1>
 ```
 
-- Use the `s()` helper to safely escape variables for HTML output.
+`s()` escapes for HTML. It takes an array as well as a string and escapes every value, which
+saves a loop when you are dumping a row into a table.
 
----
+Nothing escapes automatically — this is PHP, not a template language, and `<?= $title ?>`
+puts exactly what is in `$title` on the page. Wrap anything that came from outside.
 
-## Layouts
+## Layouts and blocks
 
-You can create a layout and attach it to your view using `setLayout()`.
-
-Example: `app/views/layouts/main.phtml`
-
-```php
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><?= $this->renderBlock('title', 'NAF App') ?></title>
-</head>
-<body>
-    <?= $this->renderBlock('content') ?>
-</body>
-</html>
-```
-
-In your view:
+A view names its layout and fills the blocks the layout leaves open.
 
 ```php
-<?php use function Naf\View\s; ?>
-
 <?php $this->setLayout('layouts.main') ?>
 
-<?php $this->block('title') ?>
-Hello Page
-<?php $this->endblock('title') ?>
+<?php $this->block('title') ?>Products<?php $this->endblock('title') ?>
 
 <?php $this->block('content') ?>
-<h1>Hello, <?= s($name) ?>!</h1>
+    <h1>Everything we sell</h1>
 <?php $this->endblock('content') ?>
 ```
 
-- `setLayout('layouts.main')` specifies the layout file (dot notation).
-- `block('name')` and `endblock('name')` define a section.
-- `renderBlock('name')` renders the defined blocks into the layout.
-
----
-
-## Variables in Views
-
-All variables passed to `render()` are automatically extracted into the view.
-
-Example:
-
 ```php
-return render('profile', ['user' => $user]);
-```
-
-In `app/views/profile.phtml`:
-
-```php
-<?php use function Naf\View\s; ?>
-
-<h2>Welcome, <?= s($user['name']) ?>!</h2>
-```
-
----
-
-## Rendering Views without a Response
-
-Sometimes you only need the raw HTML output of a view without wrapping it in a full Response object.  
-For this, you can use the `view()` helper:
-
-```php
-use function Naf\View\view;
-
-$html = view('hello', ['name' => 'World']);
-```
-
-- `view()` returns the **rendered HTML** as a plain string.
-- It does not create a Response object.
-- Useful for building custom responses or templates manually.
-
----
-
-## Asset Management (CSS & JS)
-
-The plugin includes a small, flexible asset collector used inside layouts to include CSS and JavaScript files.
-
-Assets are added inside views or controllers using the `asset()` helper:
-
-```php
-asset()->add('/assets/style.css');            // CSS
-asset()->add('/assets/app.js');               // JavaScript (classic)
-asset()->add('/assets/main.js', 'module');    // JavaScript ES module
-```
-
-### Output in layout files
-
-Use `asset()->render('css')` or `asset()->render('js')` inside your layout:
-
-```php
-<!doctype html>
+<!-- app/views/layouts/main.phtml -->
+<!DOCTYPE html>
 <html>
 <head>
+    <title><?= $this->renderBlock('title', 'NAF') ?></title>
     <?= asset()->render('css') ?>
 </head>
 <body>
@@ -154,64 +85,38 @@ Use `asset()->render('css')` or `asset()->render('js')` inside your layout:
 </html>
 ```
 
-### What gets generated?
+`renderBlock()` takes a default for the blocks a view did not fill — a title, a sidebar,
+anything optional. Variables passed to the view reach the layout too.
 
-**CSS:**
-
-```html
-<link rel="stylesheet" href="/assets/style.css">
-```
-
-**Classic JS:**
-
-```html
-<script src="/assets/app.js"></script>
-```
-
-**Module JS:**
-
-```html
-<script type="module" src="/assets/main.js"></script>
-```
-
-### Internals
-
-**All paths are automatically HTML-escaped via `s()`.**
-
----
-
-## Helper Comparison
-
-| Helper     | Returns             | Use case                                |
-| ---------- | ------------------- | --------------------------------------- |
-| `render()` | `ResponseInterface` | Ideal for controller return values   |
-| `view()`   | `string`            | For manual output or further processing |
-| `asset()` | `string`            | Include CSS & JS files in layouts       |
-| `s()`      | `string`            | Escape output                           |
-
----
-
----
-
-## How it works
-
-* `view()` resolves and loads `.phtml` templates from the directories listed in `view:paths` (defaults to `views/` first with `app/views/` as a fallback) before checking any registered plugin or framework views.
-* `setLayout()` nests the rendered content into a wrapper view.
-* Blocks are buffered and stored internally until rendered.
-
-### Configurable view locations
-
-Set the `view:paths` configuration to control where templates are resolved inside your application. This plugin ships with `src/config.php`, which defaults to:
+## Assets
 
 ```php
-return [
-    'view' => [
-        'paths' => [
-            'views',
-            'app/views',
-        ],
-    ],
-];
+<?php use function Naf\View\asset; ?>
+
+<?php asset()->add('/css/app.css') ?>
+<?php asset()->add('/js/app.js') ?>
+<?php asset()->add('/js/editor.js', 'module') ?>
 ```
 
-The entries are resolved relative to `BASE_PATH` when they are not absolute paths, so you can place templates anywhere and order them however you need. The plugin checks each directory in order before falling back to registered plugin or framework view paths.
+Collect them anywhere — a view, a partial, a controller — and print them once in the layout:
+
+```php
+<?= asset()->render('css') ?>
+<?= asset()->render('js') ?>
+```
+
+The point is that a partial can require its own stylesheet without knowing whether the
+layout has already been sent. Duplicates are removed, so two partials asking for the same
+file produce one tag.
+
+JavaScript comes in two modes: `classic` renders a plain `<script src>`, `module` renders
+`type="module"`. An unrecognised mode falls back to `classic` rather than failing.
+
+## What this is not
+
+There is no compiler, no cache directory to clear and no syntax to learn — a view is a PHP
+file, and a PHP error in a template is a PHP error with the right line number.
+
+The price is that nothing is escaped for you and nothing stops a template from doing more
+than it should. A `.phtml` file can open a database connection. It should not, and the only
+thing preventing it is you.

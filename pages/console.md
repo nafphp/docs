@@ -12,28 +12,22 @@ import, a worker that needs to keep going. They run inside your application, so 
 container, the configuration and every plugin are there — unlike a bare PHP script
 sitting next to your project.
 
-Commands are discovered rather than registered: put the class where the plugin looks
-and it appears in the list.
-
-## Run a command
+## Running one
 
 ```bash
-vendor/bin/naf your:command
+vendor/bin/naf command:list
 ```
 
-Commands are discovered automatically if placed in your app’s `app/Commands/` directory.
+With no arguments at all, the binary prints the same list. Every installed plugin
+contributes its commands, so what you see depends on what you have installed.
 
-```bash
-vendor/bin/naf
-```
+The binary works from any directory: it finds its autoloader through Composer rather than
+through the directory you happen to be standing in.
 
-If you call the helper without arguments, it prints all available CLI commands.
+## Writing one
 
----
-
-## Create a custom command
-
-To create your own CLI command, add a class in the `app/Commands/` folder:
+A command is a class extending `AbstractCommand`, with a name, a `configure()` that
+declares its arguments, and a `run()` that does the work.
 
 ```php
 namespace App\Commands;
@@ -42,79 +36,90 @@ use Naf\CLI\Core\AbstractCommand;
 use Naf\CLI\Core\Input;
 use Naf\CLI\Core\Output;
 
-class HelloCommand extends AbstractCommand
+final class HelloCommand extends AbstractCommand
 {
-    public const NAME = 'hello:say';
+    public const string NAME = 'hello:say';
 
     protected function configure(): void
     {
-        $this->setTitle('Say Hello');
-        $this->addArgument('name');
+        $this->setTitle('Say hello')
+            ->setDescription('Greets somebody by name')
+            ->addArgument('name');
     }
 
     public function run(Input $input, Output $output): int
     {
-        $name = $input->getArgument('name');
-        $output->writeLine("Hello, {$name}!", 'ok');
+        $output->writeLine('Hello, ' . $input->getArgument('name') . '!', 'ok');
+
         return static::SUCCESS;
     }
 }
 ```
 
-No registration needed — as long as the class resides in `app/Commands/`, it will be picked up automatically.
+## Registering it
 
-Then run:
+```php
+use function Naf\CLI\command;
+
+command()->add(\App\Commands\HelloCommand::class);
+```
+
+In your application's `bootstrap.php`. **There is no directory that gets scanned** — putting
+a class in `app/Commands/` does nothing on its own. Plugins register theirs the same way,
+which is why a command appears the moment its package is installed and not before.
 
 ```bash
-vendor/bin/naf hello:say John
+vendor/bin/naf hello:say World
 ```
 
----
-
-## Colored output
-
-Use `$output->writeLine()` to print messages with color support:
-
-| Type         | Appearance              |
-| ------------ | ----------------------- |
-| `'ok'`       | ✅ Green                 |
-| `'error'`    | ❌ Red                   |
-| `'warning'`  | ⚠️ Yellow               |
-| `'title'`    | 💡 Light green on black |
-| `'headline'` | 📢 Light blue on black  |
-
-You can also draw horizontal lines:
+## Arguments and options
 
 ```php
-$output->drawStroke(30);
+protected function configure(): void
+{
+    $this->addArgument('name')                      // required
+        ->addArgument('greeting', optional: true)   // optional
+        ->addOption('shout', 's')                   // a flag
+        ->addOption('repeat', 'r', expectsValue: true);
+}
 ```
-
----
-
-## Interactive input
-
-You can prompt the user:
 
 ```php
-$name = $input->ask('What is your name?');
+$input->getArgument('name');      // ?string
+$input->getOption('shout');       // true when present, null when not
+$input->getOption('repeat');      // the value, or an array when given more than once
 ```
 
----
+An option can come back as an array, so a command that only ever wants one value should say
+so rather than assuming a string.
 
-## File structure
+## Asking a question
 
-A typical CLI setup might look like this:
-
-```text
-app/
-└── Commands/
-    └── HelloCommand.php
-
-vendor/
-└── bin/
-    └── nix
-
-bootstrap.php
+```php
+$name = $input->ask('What is your name? ');
 ```
 
----
+Blocks until somebody types something and presses return — which means a command that calls
+it cannot run from cron. Give anything scheduled its input as arguments.
+
+## Writing output
+
+```php
+$output->writeLine('Done.', 'ok');        // green
+$output->writeLine('Careful.', 'warning'); // yellow
+$output->writeLine('Failed.', 'error');    // red
+$output->writeLine('Report', 'title');     // light green background
+$output->writeLine('Section', 'headline'); // light blue background
+$output->writeLine('Plain text');          // no colour
+$output->writeEmptyLine();
+$output->drawStroke(40);                   // a line of dashes
+```
+
+## The exit status
+
+`run()` returns an integer, and that integer becomes the process's exit status.
+`static::SUCCESS` is 0, `static::ERROR` is 1.
+
+That matters more than it looks: cron, CI and shell `&&` all decide what happens next by
+reading it. A command that fails and returns SUCCESS is a deployment step that reports
+green while doing nothing.

@@ -14,121 +14,96 @@ Reach for this when you would otherwise write the same mapping and the same find
 hand for the fifth time — not because an object mapper is the correct way to talk to a
 database.
 
-## Configuration
-
-This plugin uses the shared PDO instance from [`naf/database`](https://github.com/nafphp/database).
-Make sure your `/app/config.php` contains a working `database` section.
-
-### Example: MySQL
+## A model
 
 ```php
-return [
-    // ...
-    'database' => [
-        'driver'   => 'mysql',
-        'host'     => '127.0.0.1',
-        'database' => 'myapp',
-        'username' => 'root',
-        'password' => '',
-        'charset'  => 'utf8mb4',
-    ]
-];
-```
+namespace App\Models;
 
-### Example: SQLite
+use Naf\ORM\Core\AbstractModel;
 
-```php
-return [
-    // ...
-    'database' => [
-        'driver'   => 'sqlite',
-        'database' => __DIR__ . '/../storage/database.sqlite',
-    ]
-];
-```
-
-Or for in-memory usage (great for testing):
-
-```php
-return [
-    // ...
-    'database' => [
-        'driver'   => 'sqlite',
-        'database' => ':memory:',
-    ]
-];
-```
-
----
-
-## Define your models
-
-Models extend `AbstractModel`, which already implements `EntityInterface` via
-`EntityTrait`.
-
-```php
-use Naf\ORM\Model\AbstractModel;
-use function Naf\ORM\repo;
-
-class Product extends AbstractModel
+final class Product extends AbstractModel
 {
     protected ?int $id = null;
     protected string $name = '';
-    protected ?int $category_id = null;
     protected ?Category $category = null;
     protected array $tags = [];
 
-    public function getName(): string
+    // getters and setters
+}
+```
+
+The table name follows from the class name, and the primary key is `id` unless the model
+says otherwise. A constructor taking an array is inherited, so a row can be hydrated
+straight into an instance.
+
+## A repository
+
+```php
+namespace App\Repositories;
+
+use Naf\ORM\Repository\AbstractRepository;
+
+final class ProductRepository extends AbstractRepository
+{
+    protected function getEntityClass(): string
     {
-        return $this->name;
-    }
-
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
-
-    public function setCategory(Category $category): void
-    {
-        $this->category = $category;
-    }
-
-    public function addTag(Tag $tag): void
-    {
-        $this->tags[] = $tag;
-    }
-
-    public function getTags(): array
-    {
-        if ($this->tags === [] && $this->id !== null) {
-            $this->tags = repo(TagRepository::class)
-                ->findByPivot(Product::class, $this->id);
-        }
-
-        return $this->tags;
-    }
-
-    public function getCategory(): ?Category
-    {
-        if ($this->category === null && $this->category_id !== null) {
-            $this->category = repo(CategoryRepository::class)
-                ->findOneBy('id', $this->category_id);
-        }
-
-        return $this->category;
+        return Product::class;
     }
 }
 ```
 
-## Saving data
+That is the whole of it for the common case. The finders below come with the base class.
+
+## Reading
+
+```php
+use function Naf\ORM\repo;
+
+$products = repo(ProductRepository::class);
+
+$all     = $products->findAll();
+$one     = $products->findOneBy('sku', 'ABC-1');            // ?EntityInterface
+$active  = $products->findBy('status', 'active');
+$recent  = $products->findBy(['status' => 'active'], null, ['created_at' => 'DESC'], 20);
+```
+
+`findBy()` and `findOneBy()` take either a field and a value, or an array of criteria.
+`findBy()` also takes an order, a limit and an offset — enough for a listing page without
+writing SQL, and no attempt to be a query builder for anything past that.
+
+Columns are checked against the table's own columns before they reach the statement, so a
+field name coming from a request cannot turn into SQL.
+
+## Reading through a pivot
+
+```php
+$productsWithTag = repo(ProductRepository::class)->findByPivot(Tag::class, $tagId);
+```
+
+The pivot table name is derived from the two singular table names in alphabetical order —
+`product_tag` for `Product` and `Tag`. When your table is called something else, say so on
+either entity:
+
+```php
+public array $pivotTables = [
+    Tag::class => 'article_tags',
+];
+```
+
+## Find or create
+
+```php
+$category = repo(CategoryRepository::class)->findOrCreateBy('name', 'Books');
+$tags     = repo(TagRepository::class)->findOrCreateManyBy('name', ['Bestseller', 'Limited']);
+```
+
+Useful exactly where you would otherwise write the same select-then-insert by hand — tags,
+categories, anything keyed by a natural name.
+
+## Saving
 
 ```php
 use function Naf\ORM\em;
-use function Naf\ORM\repo;
-
-$category = repo(CategoryRepository::class)->findOrCreateBy('name', 'Books');
-$tagA     = repo(TagRepository::class)->findOrCreateBy('name', 'Bestseller');
-$tagB     = repo(TagRepository::class)->findOrCreateBy('name', 'Limited');
 
 $product = new Product();
 $product->setName('NAF for Beginners');
@@ -139,41 +114,44 @@ $product->addTag($tagB);
 em()->save($product);
 ```
 
-## Reading data
+One call saves the whole graph. The entity manager walks the object: properties holding an
+entity become a foreign key on this row, following the `<parent>_id` convention; properties
+holding an array of entities become pivot rows.
+
+Saving is on the entity manager, not on the repository — the repository reads, the manager
+writes. Two objects rather than one, because a save that touches four tables is not a
+concern of the repository for any one of them.
+
+## Transactions
 
 ```php
-use function Naf\ORM\repo;
+em()->begin();
 
-$product = repo(ProductRepository::class)->findOneBy('id', 1);
-
-if ($product !== null) {
-    echo $product->getName();
-    print_r($product->getCategory());
-    print_r($product->getTags());
+try {
+    em()->save($order);
+    em()->save($invoice);
+    em()->commit();
+} catch (\Throwable $e) {
+    em()->rollback();
+    throw $e;
 }
 ```
 
-The getters above implement lazy-loading explicitly through repositories.
-When saving, entity-object properties and arrays of entities are discovered
-automatically. A child foreign key follows the `<parent>_id` convention; pivot
-table names are built from the two singular table names in alphabetical order.
-For a custom pivot name, define a public mapping on either entity:
+`save()` opens a transaction on its own when none is running, so a single save is already
+atomic across all the tables it touches. `begin()` is for spanning several.
 
-```php
-public array $pivotTables = [
-    Tag::class => 'article_tags',
-];
-```
+`em()->clear()` drops what the manager is holding — worth calling in a long-running worker
+that saves thousands of entities and would otherwise keep every one of them.
 
----
+## What this is not
 
-## Philosophy
+There is no lazy loading and no proxy objects. A getter that returns related entities asks
+its repository, which means you can see the query in your own code rather than discovering
+it in a profiler.
 
-This ORM is intentionally small and predictable.
-It provides just enough structure to manage entities and relations –
-without introducing complex abstractions or hidden behavior.
+There is also no migration generator: the ORM reads the schema, it does not write it. Use
+[`naf/database`](database.md) migrations for that.
 
-If you need validation, eager loading, event hooks, or advanced query building,
-you can integrate any larger ORM of your choice alongside it.
-
----
+Reach for this when you would otherwise write the same mapping and the same finders by hand
+for the fifth time — not because an object mapper is the correct way to talk to a database.
+When a query wants to be SQL, `database()` is one import away.

@@ -13,169 +13,121 @@ The default driver writes to files, so there is nothing to install before you ca
 Running the jobs is a command, which is why `naf/cli` comes along with this package: a
 queue nobody drains is just a directory filling up.
 
-## Queue a job (default channel)
+## A job
 
-Create a job class that implements the `QueueJobInterface`:
+A job is a class with one method. The payload it was queued with arrives in the
+constructor.
 
 ```php
-use Naf\Queue\QueueJobInterface;
+namespace App\Jobs;
 
-class SendWelcomeEmail implements QueueJobInterface
+use Naf\CLI\Core\Output;
+use Naf\Queue\Core\QueueJobInterface;
+
+final class SendWelcomeEmail implements QueueJobInterface
 {
-    public function __construct(protected array $payload) {}
+    public function __construct(private array $payload) {}
 
-    public function execute(): void
+    public function execute(Output $output): void
     {
-        // Send your email here
+        // send it
     }
 }
 ```
 
-Push it to the default queue:
+Throwing from `execute()` is how a job reports failure — the worker catches it and moves
+the job to the deadletter.
+
+## Queueing it
 
 ```php
+use function Naf\Queue\queue;
+
 queue()->push(SendWelcomeEmail::class, ['email' => 'user@example.com']);
 ```
 
----
+The payload is serialised, so it holds data and not objects. Pass an id, not the entity.
 
-## Using channels
+## Channels
 
-Channels are **logical job streams** inside the same queue backend.
-They allow you to separate workloads (e.g. `emails`, `mcp_out`, `notifications`)
-without running multiple queue systems.
-
-Push a job to a specific channel:
+A channel is a separate line of work. Without one everything shares a queue, and a thousand
+thumbnails delay the password-reset mail behind them.
 
 ```php
-queue('emails')->push(SendWelcomeEmail::class, [
-    'email' => 'user@example.com'
-]);
+queue('emails')->push(SendWelcomeEmail::class, ['email' => $email]);
 ```
 
-Internally, channels are handled by the queue driver.
-
----
-
-## Fire-and-forget (async)
-
-For **one-off asynchronous execution**, use:
-
-```php
-queue('emails')->pushAndRun(
-    SendWelcomeEmail::class,
-    ['email' => 'user@example.com']
-);
-```
-
-This queues the job and immediately runs it in the background via a short-lived CLI process,
-automatically passing the channel to the worker.
-
-Ideal for emails, logging, notifications, or side-effects that should not block a request.
-
----
-
-## Start the worker
-
-Run the consuming worker and listen on the default channel:
+Then run a worker per channel, or one worker across several:
 
 ```bash
-./bin/naf queue:consume
+vendor/bin/naf queue:consume --channel=emails
+vendor/bin/naf queue:consume --channels=default,emails,thumbnails
 ```
 
-Listen on a specific channel:
+## Running the worker
 
 ```bash
-./bin/naf queue:consume --channel=emails
+vendor/bin/naf queue:consume
 ```
 
-Listen on multiple channels (checked in order):
+It keeps going until you stop it. The options that matter for running it under a process
+supervisor:
+
+| Option | What it does |
+|---|---|
+| `--once` | take one job and exit |
+| `--max-jobs=N` | exit after N jobs |
+| `--max-runtime=N` | exit after N seconds |
+| `--channel=name` | one channel |
+| `--channels=a,b,c` | several |
+| `--verbose`, `-v` | print each job |
+
+`--max-jobs` and `--max-runtime` exist because a long-running PHP process accumulates
+memory. Let it exit on its own terms and have the supervisor start a fresh one, rather than
+waiting for the OOM killer to decide.
+
+```ini
+[program:naf-queue]
+command=php bin/naf queue:consume --channels=default,emails --max-jobs=500
+autostart=true
+autorestart=true
+```
+
+## Jobs that failed
+
+A job whose `execute()` throws goes to the deadletter instead of being retried forever.
 
 ```bash
-./bin/naf queue:consume --channels=default,emails,mcp_out
+vendor/bin/naf queue:retry-failed          # put them back in the queue
+vendor/bin/naf queue:retry-failed --keep   # ...and keep the deadletter copy
 ```
 
-Run a single job only:
+`--keep` is worth it while you are still finding out why they failed: without it, a second
+failure is the only record you have left.
 
-```bash
-./bin/naf queue:consume --once
-```
+!!! warning "There is no per-channel retry"
+    `queue:retry-failed` takes no `--channel`. The driver can do it — the interface has
+    `retryFailedFrom()` — but the command does not pass one through, so anything you give it
+    is ignored and every failed job is retried regardless of channel.
 
-> 🔹 `--once` is also used internally by `pushAndRun()`.
+## Where the jobs live
 
----
+The default driver writes files under your application's base path — one directory for the
+queue, one for the deadletter. Nothing to install, and you can look at what is waiting.
 
-## Deadletter & Retry (channel-aware)
-
-If a job fails too often, it is written to a **deadletter directory per channel**:
-
-```
-/path/to/app/storage/queue/deadletter/<channel>/<job-id>.job
-```
-
-Retry failed jobs for the default channel:
-
-```bash
-./bin/naf queue:retry-failed
-```
-
-Retry failed jobs for a specific channel:
-
-```bash
-./bin/naf queue:retry-failed --channel=emails
-```
-
-By default, retried jobs are removed from the deadletter queue.
-Use `--keep` to retain them:
-
-```bash
-./bin/naf queue:retry-failed --channel=emails --keep
-```
-
----
-
-## Drivers
-
-The queue system is driver-based.
-Included drivers:
-
-| Driver       | Description                            | Suitable for            |
-| ------------ | -------------------------------------- | ----------------------- |
-| `FileDriver` | Stores jobs as `.job` files in folders | Local use, no DB needed |
-| *(planned)*  | SQLite / Redis / others                | Larger or shared setups |
-
-To register a custom driver, configure it in your `bootstrap.php`:
+It is also the reason a file-backed queue does not survive being spread over two machines:
+the second server cannot see the first server's directory. The package ships an
+`SQLiteDriver` as well, and the driver is a single interface, so a Redis or database one is
+a class and a rebinding away:
 
 ```php
 use Naf\Queue\Core\Queue;
-use Naf\Queue\Drivers\FileDriver;
+use function Naf\app;
 
-app()->container()->set(Queue::class, function () {
-    return new Queue(
-        new FileDriver(
-            app()->getBasePath() . FileDriver::DEFAULT_QUEUE_PATH,
-            app()->getBasePath() . FileDriver::DEFAULT_DEADLETTER_PATH
-        )
-    );
-});
+app()->container()->set(Queue::class, fn() => new Queue(new MyRedisDriver()));
 ```
 
-> 📁 The file paths are only relevant for `FileDriver`.
-
----
-
-## Supervisor example (optional)
-
-To run the worker persistently in production, use [Supervisor](http://supervisord.org):
-
-```ini
-[program:naf-worker]
-command=php bin/naf queue:consume --channels=default,emails
-directory=/path/to/your/app
-autostart=true
-autorestart=true
-stderr_logfile=/var/log/naf/worker.err.log
-stdout_logfile=/var/log/naf/worker.out.log
-```
-
----
+Channels and the deadletter are separate interfaces on top of the basic one
+(`ChannelQueueDriverInterface`, `QueueDeadletterDriverInterface`). A driver that implements
+only the basic contract still works — it just has no channels and no deadletter, and
+`queue:retry-failed` tells you so rather than failing.
