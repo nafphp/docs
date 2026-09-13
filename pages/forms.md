@@ -21,8 +21,8 @@ installation with:
 composer require 'naf/form:^0.2.1'
 ```
 
-No compatibility alias is needed with 0.2.1. [Your first application](first-app.md) includes
-this dependency step.
+No compatibility alias is needed with 0.2.1. Starter 0.2.2 already includes a newer compatible
+version; see [Installation](install.md) when updating an older starter.
 
 ## The helpers are namespaced
 

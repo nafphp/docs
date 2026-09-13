@@ -473,7 +473,7 @@
     "naf/orm",
     "naf/session"
    ],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   },
   "cli": {
    "description": "NAF CLI Plugin for console applications.",
@@ -483,7 +483,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   },
   "client": {
    "description": "NAF Client Plugin to make simple http requests.",
@@ -493,7 +493,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   },
   "database": {
    "description": "NAF Database Plugin to work with various storage solutions.",
@@ -503,7 +503,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   },
   "form": {
    "description": "NAF Form Plugin to make form handling easier.",
@@ -514,7 +514,7 @@
     "naf/session"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "framework": {
    "description": "NAF - the ultra-light, functional PHP framework for fast microservices and APIs.",
@@ -522,7 +522,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
@@ -532,7 +532,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   },
   "mail": {
    "description": "NAF Mail Plugin for quick email communication.",
@@ -542,7 +542,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   },
   "mcp": {
    "description": "NAF MCP Plugin for basic AI driven workflows.",
@@ -552,7 +552,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "oauth-client": {
    "description": "Sign in with external OAuth2 and OpenID Connect providers, keeping your own user model.",
@@ -569,7 +569,7 @@
     "naf/database",
     "naf/view"
    ],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "oauth-server": {
    "description": "Run your application as an OAuth2 authorization server and protect its APIs.",
@@ -586,7 +586,7 @@
     "naf/database",
     "naf/view"
    ],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "orm": {
    "description": "NAF ORM Plugin.",
@@ -597,7 +597,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   },
   "queue": {
    "description": "NAF Queue Plugin for asynchronous jobs.",
@@ -608,7 +608,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "schedule": {
    "description": "NAF Schedule Plugin for recurring Tasks.",
@@ -619,7 +619,7 @@
     "naf/queue"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "session": {
    "description": "NAF Session Plugin for storing data across requests.",
@@ -631,7 +631,7 @@
    "suggests": [
     "naf/database"
    ],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   },
   "view": {
    "description": "NAF View Plugin with simple templating.",
@@ -641,7 +641,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.0"
+   "version": "v0.2.1"
   }
  }
 }

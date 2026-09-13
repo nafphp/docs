@@ -133,6 +133,26 @@ def test_first(client):
     expect(client.request('/does-not-exist')[0] == 404, 'Unknown HTML route')
 
 
+def test_starter(client):
+    """Check create-project before any command can replace its locked dependencies."""
+    home = client.request('/')
+    expect(home[0] == 200 and 'Welcome to your new App!' in home[2], 'Untouched starter home')
+    expect(client.request('/css/naf.css')[0] == 200, 'Untouched starter CSS')
+    contact = client.request('/contact')
+    expect(contact[0] == 200, 'Untouched starter contact page')
+    invalid = client.form('/contact', {'_csrf': csrf(contact), 'firstname': 'Ada',
+                                      'lastname': 'Lovelace', 'message': 'short'})
+    expect(invalid[0] == 200 and 'At least 10' in invalid[2], 'Untouched starter form validation')
+    valid = client.form('/contact', {'_csrf': csrf(client.request('/contact')), 'firstname': 'Ada',
+                                    'lastname': 'Lovelace', 'message': 'A local starter test.'})
+    expect(valid[0] == 302 and valid[1]['Location'] == '/contact', 'Untouched starter redirect')
+    expect(client.form('/api', {'name': 'Ada'})[0] == 400, 'Untouched starter CSRF guard')
+    invalid = client.form('/api', {'_csrf': csrf(client.request('/contact')), 'name': ''})
+    expect(invalid[0] == 422 and 'name' in json.loads(invalid[2])['fields'], 'Untouched starter API validation')
+    valid = client.form('/api', {'_csrf': csrf(client.request('/contact')), 'name': 'Ada'})
+    expect(valid[0] == 200 and json.loads(valid[2]) == {'data': {'hello': 'Ada'}}, 'Untouched starter API JSON')
+
+
 def test_contact(root, client):
     token = csrf(client.request('/contact'))
     expect(client.form('/contact', {'name': 'Ada'})[0] == 400, 'Missing CSRF rejected')
@@ -217,9 +237,14 @@ def main():
             shutil.copytree(args.starter / 'vendor', starter / 'vendor')
         else:
             run([*COMPOSER, 'create-project', 'naf/app', str(starter), '--no-interaction', '--prefer-dist'], root)
+            with server(starter) as client:
+                test_starter(client)
+            print('PASS untouched published starter', flush=True)
             run([*COMPOSER, 'require', 'naf/auth', 'naf/orm', 'naf/mail', '--no-interaction', '--prefer-dist'], starter)
-        # Documented first-app dependency step, also applied to copied older starters.
-        run([*COMPOSER, 'require', 'naf/form:^0.2.1', '--no-interaction', '--prefer-dist'], starter)
+        if args.starter:
+            # Reused older starters need the same upgrade documented in the installation guide.
+            run([*COMPOSER, 'require', 'naf/framework:^0.2.2', 'naf/form:^0.2.1',
+                 '--with-all-dependencies', '--no-interaction', '--prefer-dist'], starter)
         for feature in ('first-app', 'contact', 'login', 'orm'):
             fixture = root / feature
             shutil.copytree(starter, fixture)

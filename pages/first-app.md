@@ -8,12 +8,9 @@ requires:
 
 Start with [Installation](install.md#start-with-the-application-skeleton). The skeleton already
 includes `naf/view`, so you do not need to run the package command above again.
-The form recipes use `naf/form` **0.2.1 or newer**; this command also updates older starter
-installations that still contain 0.2.0:
-
-```bash
-composer require 'naf/form:^0.2.1'
-```
+The tutorial requires `naf/framework` **0.2.2 or newer** and `naf/form` **0.2.1 or newer**.
+Starter 0.2.2 already includes compatible dependencies. For an older application, follow the
+[dependency update](install.md#start-with-the-application-skeleton) before continuing.
 
 This tutorial replaces the starter's demonstration routes with an HTML home page and a JSON
 endpoint. Each titled code block is the complete contents of that file. Create missing
@@ -46,22 +43,11 @@ The starter's `composer.json` maps `App\` to `app/`. Composer can therefore load
 define('BASE_PATH', __DIR__);
 require __DIR__ . '/vendor/autoload.php';
 
-use Naf\Core\Event;
-use Psr\Http\Message\ResponseInterface;
-use function Naf\{app, event, request};
+use function Naf\app;
 
 // Register application services here, before run() handles the request.
-// naf/framework 0.2.1 redirects carry HTTP/2; PHP's local server needs HTTP/1.x.
-event()->listen(Event::RESPONSE_HEADER, static fn(ResponseInterface $response) =>
-    $response->withProtocolVersion(request()->getProtocolVersion()));
-
 app()->run();
 ```
-
-The response listener keeps the outgoing protocol consistent with the request. In
-`naf/framework` **0.2.1**, `redirect()` creates an HTTP/2 response; emitted by `php -S` this
-produces an invalid HTTP/1.x status line. The listener makes redirects usable with the
-documented development server.
 
 ```php title="public/index.php"
 <?php

@@ -39,6 +39,35 @@ previous_tag='vA.B.C'
 
 ## 2. Prepare, verify and push the RC branch
 
+### Coordinate dependent packages and the starter
+
+For a release spanning multiple packages, determine dependency order from each published
+`composer.json`. Release prerequisites first and verify each tag and source commit on
+Packagist before resolving dependants. Publish `naf/app` last: unlike a library's own lock
+file, the starter's `composer.lock` is copied into new projects and used by `create-project`.
+A new library release alone does not update that starter lock.
+
+Keep library `require` constraints compatible with the versions they actually need. Raise a
+minimum when code depends on a newer API or bug fix; a documentation-only patch does not
+require forcing every consumer to that patch. Composer ignores a dependency library's own
+lock file when resolving a consuming application's dependencies.
+
+On the starter's RC branch, exclude known-broken dependencies through suitable minimum
+constraints, then run `composer update --with-all-dependencies` after the needed releases
+are available. Review and commit both `composer.json` and `composer.lock`. Do not add an
+explicit package `version`; Composer derives the distributed version from the release tag.
+
+Test the starter with `composer install` and its checked-in lock, then test separately with
+latest compatible and minimum supported dependencies. The starter's `composer test` and CI
+exercise real HTTP requests. Test in disposable copies so alternate resolutions cannot
+replace the lock intended for release. After publishing the starter, run an unversioned
+`composer create-project naf/app` in a fresh directory and test it **before any update or
+require command**. Confirm its lock contains the intended versions; an update during this
+check would hide a stale release. Review installation instructions and remove obsolete
+compatibility workarounds only after these checks pass.
+
+### Implement the package change
+
 Create the branch **before editing**. Use the fetched remote base so a stale local `main`
 cannot accidentally become the release base:
 

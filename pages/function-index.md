@@ -14,7 +14,7 @@ for services exposed through these helpers.
 
 ## naf/framework
 
-Version **v0.2.2** · [Core](first-app.md)
+Version **v0.2.3** · [Core](first-app.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -36,7 +36,7 @@ Version **v0.2.2** · [Core](first-app.md)
 
 ## naf/auth
 
-Version **v0.2.0** · [Authentication and permissions](auth.md)
+Version **v0.2.1** · [Authentication and permissions](auth.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -44,7 +44,7 @@ Version **v0.2.0** · [Authentication and permissions](auth.md)
 
 ## naf/cli
 
-Version **v0.2.0** · [Console commands](console.md)
+Version **v0.2.1** · [Console commands](console.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -52,7 +52,7 @@ Version **v0.2.0** · [Console commands](console.md)
 
 ## naf/client
 
-Version **v0.2.0** · [HTTP client](http-client.md)
+Version **v0.2.1** · [HTTP client](http-client.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -60,7 +60,7 @@ Version **v0.2.0** · [HTTP client](http-client.md)
 
 ## naf/database
 
-Version **v0.2.0** · [Database](database.md)
+Version **v0.2.1** · [Database](database.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -68,7 +68,7 @@ Version **v0.2.0** · [Database](database.md)
 
 ## naf/form
 
-Version **v0.2.1** · [Forms and validation](forms.md)
+Version **v0.2.2** · [Forms and validation](forms.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -84,7 +84,7 @@ Version **v0.2.1** · [Forms and validation](forms.md)
 
 ## naf/i18n
 
-Version **v0.2.0** · [Translations](translations.md)
+Version **v0.2.1** · [Translations](translations.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -94,7 +94,7 @@ Version **v0.2.0** · [Translations](translations.md)
 
 ## naf/mail
 
-Version **v0.2.0** · [Sending mail](mail.md)
+Version **v0.2.1** · [Sending mail](mail.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -103,7 +103,7 @@ Version **v0.2.0** · [Sending mail](mail.md)
 
 ## naf/mcp
 
-Version **v0.2.1** · [MCP tools](mcp.md)
+Version **v0.2.2** · [MCP tools](mcp.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -112,7 +112,7 @@ Version **v0.2.1** · [MCP tools](mcp.md)
 
 ## naf/oauth-client
 
-Version **v0.2.1** · [Signing in with a provider](oauth-client.md)
+Version **v0.2.2** · [Signing in with a provider](oauth-client.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -122,7 +122,7 @@ Version **v0.2.1** · [Signing in with a provider](oauth-client.md)
 
 ## naf/oauth-server
 
-Version **v0.2.1** · [Being the provider](oauth-server.md)
+Version **v0.2.2** · [Being the provider](oauth-server.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -130,7 +130,7 @@ Version **v0.2.1** · [Being the provider](oauth-server.md)
 
 ## naf/orm
 
-Version **v0.2.0** · [ORM and repositories](orm.md)
+Version **v0.2.1** · [ORM and repositories](orm.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -139,7 +139,7 @@ Version **v0.2.0** · [ORM and repositories](orm.md)
 
 ## naf/queue
 
-Version **v0.2.1** · [Queues and workers](queues.md)
+Version **v0.2.2** · [Queues and workers](queues.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -147,7 +147,7 @@ Version **v0.2.1** · [Queues and workers](queues.md)
 
 ## naf/schedule
 
-Version **v0.2.1** · [Scheduled jobs](scheduling.md)
+Version **v0.2.2** · [Scheduled jobs](scheduling.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -155,7 +155,7 @@ Version **v0.2.1** · [Scheduled jobs](scheduling.md)
 
 ## naf/session
 
-Version **v0.2.0** · [Sessions](sessions.md)
+Version **v0.2.1** · [Sessions](sessions.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -163,7 +163,7 @@ Version **v0.2.0** · [Sessions](sessions.md)
 
 ## naf/view
 
-Version **v0.2.0** · [Views and templates](views.md)
+Version **v0.2.1** · [Views and templates](views.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
