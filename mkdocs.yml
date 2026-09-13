@@ -54,7 +54,12 @@ markdown_extensions:
 nav:
   - Getting started:
       - What NAF is: index.md
-      - What do I actually need?: choosing-packages.md
+      - What do I actually need?:
+          - Which packages: choosing-packages.md
+          - Handling a POST request: recipes/post-requests.md
+          - A contact form: recipes/contact-form.md
+          - A login form: recipes/login-form.md
+          - A JSON API: recipes/json-api.md
       - Installation: install.md
       - Your first application: first-app.md
   - Core:
