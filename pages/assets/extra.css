@@ -11,6 +11,7 @@
   --naf-teal:      #0e8874;
   --naf-hairline:  #e2e6e9;
   --naf-surface:   #f7f9fa;
+  --naf-nav-section: #10151a;   /* deutlich dunkler als die Links darunter */
 
   --md-primary-fg-color:        #262c31;
   --md-primary-fg-color--light: #39434a;
@@ -25,6 +26,7 @@
   --naf-teal:      #2fc3a8;
   --naf-hairline:  #2b333a;
   --naf-surface:   hsla(var(--md-hue), 12%, 14%, 1);
+  --naf-nav-section: hsla(var(--md-hue), 20%, 98%, 1);  /* heller als die Links darunter */
 
   --md-primary-fg-color:        #14181c;
   --md-primary-fg-color--light: #232a30;
@@ -45,9 +47,21 @@
 .md-nav__title { font-size: .66rem; font-weight: 600; letter-spacing: .08em;
   text-transform: uppercase; color: var(--md-default-fg-color--lighter); }
 .md-nav__link { padding: .24rem 0; }
-.md-nav--primary .md-nav__item--section > .md-nav__link {
-  color: var(--md-default-fg-color); font-weight: 600; }
-.md-nav__link--active, .md-nav__link--active:focus { font-weight: 600; }
+
+/* Section headings carry the hierarchy: same family, a clear step up in size,
+   weight and contrast, with air above so the group reads as a group. */
+.md-nav--primary .md-nav__item--section > .md-nav__link,
+.md-nav--primary .md-nav__item--section > label.md-nav__link {
+  color: var(--naf-nav-section);
+  font-weight: 700;
+  font-size: .8rem;
+  letter-spacing: -.005em;
+  margin-top: 1rem;
+  cursor: default;
+}
+.md-nav--primary .md-nav__item--section:first-of-type > .md-nav__link { margin-top: 0; }
+.md-nav__link--active, .md-nav__link--active:focus {
+  color: var(--naf-teal); font-weight: 600; }
 
 /* --- Prose --- */
 .md-typeset { font-size: .78rem; line-height: 1.72; }
