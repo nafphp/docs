@@ -2,122 +2,87 @@
 title: Controllers
 ---
 
-In NAF, a **controller** is anything that handles an incoming HTTP request.  
-This can be either:
+# Controllers
 
-- a **controller class** method, or
-- an **anonymous function (Closure)**.
+A controller is a class method or closure returning `Psr\Http\Message\ResponseInterface`.
+No base controller is required. [Your first application](first-app.md) provides a complete example.
 
-This section explains both options.
+## Controller classes
 
-## Controller Classes
-
-You can define a controller as a simple PHP class with public methods.
+Save this as `app/Controllers/HelloController.php` in an application mapping `App\\` to `app/`:
 
 ```php
+<?php
 namespace App\Controllers;
 
-use function Naf\View\render;
+use Psr\Http\Message\ResponseInterface;
+use function Naf\json;
 
-class HelloController
+final class HelloController
 {
-    public function index()
+    public function show(string $name): ResponseInterface
     {
-        return render('hello', ['name' => 'World']);
+        return json(['hello' => $name]);
     }
 }
 ```
 
-- **Namespace**: Controllers are typically placed in `App\Controllers`.
-- **Method**: The method name should match the one you defined in your route.
-- **Return**: The method must return a `Psr\Http\Message\ResponseInterface`.
-
-### Defining a Route to a Controller
+Register it in `app/routes.php`:
 
 ```php
-// app/routes.php
+use App\Controllers\HelloController;
+use function Naf\route;
 
-route()->add('GET', '/hello', [HelloController::class, 'index']);
+route()->add('GET', '/hello/{name}', [HelloController::class, 'show'], 'hello');
 ```
 
-When a user visits `/hello`, NAF:
+The placeholder `{name}` matches the argument `$name`. These are **named arguments**, so
+changing the method argument to `$person` without changing the route will fail.
 
-1. Instantiates the `HelloController`.
-2. Calls the `index()` method.
-3. Sends the returned Response to the browser.
-
-## Closures as Controllers
-
-Instead of using a class, you can define a route directly with a Closure:
+## Closures
 
 ```php
-// app/routes.php
+use function Naf\{response, route};
 
-use function Naf\response;
-
-route()->add('GET', '/ping', function () {
-    return response('Pong!');
-});
+route()->add('GET', '/ping', fn() => response('Pong!'), 'ping');
 ```
 
-- Closures must also return a `Psr\Http\Message\ResponseInterface`.
-- Useful for small endpoints, quick APIs, or simple prototyping.
+Return a response even when the handler has no work to do. `response('', 204)` creates an
+empty success response; `json($data)` creates JSON with the correct content type.
+`Naf\View\render()` returns an HTML response when `naf/view` is installed.
 
-## Route Parameters
+## Dependencies
 
-If your route contains dynamic segments, NAF passes them automatically to your handler:
-
-```php
-// app/routes.php
-
-route()->add('GET', '/user/{id}', [UserController::class, 'profile']);
-```
-
-Controller example:
+With NAF's default `AutoResolvingContainer`, controllers are built through `make()`.
+Declare services in the constructor; concrete classes with resolvable dependencies need no
+container registration:
 
 ```php
 namespace App\Controllers;
 
-use function Naf\View\render;
+use App\Services\ProductService;
+use Psr\Http\Message\ResponseInterface;
+use function Naf\json;
 
-class UserController
+final class ProductController
 {
-    public function profile($id)
+    public function __construct(private ProductService $products) {}
+
+    public function index(): ResponseInterface
     {
-        return render('user-profile', ['id' => $id]);
+        return json($this->products->all());
     }
 }
 ```
 
-Closure example:
+`ProductService` is your application class, with an `all()` method returning product data.
+Register `[ProductController::class, 'index']` as the route handler. NAF constructs the
+controller, the service and its resolvable concrete dependencies automatically.
 
-```php
-route()->add('GET', '/order/{orderId}', function ($orderId) {
-    return response("Order ID: {$orderId}");
-});
-```
+Bind required interfaces to implementations in `bootstrap.php`. For dependencies needing
+scalar configuration or custom setup, register a factory under the dependency's class or
+interface name. Scalar constructor parameters are not looked up by name in the container.
 
-- Parameters are injected based on their **order**.
-- Parameter names in methods or closures do not have to match the URL placeholders — only the **position** matters.
-
-## Returning Responses
-
-Every handler (whether class method or closure) must return a `Psr\Http\Message\ResponseInterface`.
-
-Helper functions available:
-
-| Helper | Description |
-|:---|:---|
-| `render($template, $variables = [])` | Renders a view and returns an HTML Response |
-| `response($content)` | Creates a basic text response |
-
-## When to use Controller Classes vs. Closures
-
-| Use Case | Recommended Approach |
-|:---|:---|
-| Larger, structured application logic | Controller class |
-| Handling multiple related routes (e.g., UserController, PostController) | Controller class |
-| Small, isolated endpoints | Closure |
-| Quick API prototypes or testing | Closure |
-| You want to group logic and share methods | Controller class |
-| You just need a quick one-off response | Closure |
+Injection is into the constructor; action method arguments still come from route parameters.
+See [Dependency Injection](dependency-injection.md) for resolution rules and the difference
+between `get()` and `make()`.
