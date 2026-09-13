@@ -4,151 +4,94 @@ title: Configuration
 
 # Configuration
 
-Two things that are often confused: the **environment**, which differs per machine and
-holds credentials, and the **configuration**, which is part of your application and gets
-committed.
+Configuration files return PHP arrays. NAF merges the core defaults, plugin configuration,
+and finally `app/config.php`, so your application has the last word.
 
-Environment values come from `.env` and are read with `env()`. Configuration comes from PHP
-files that return arrays — the core's, then each plugin's, then your application's — merged
-in that order, so a plugin ships a working default and you override only what you disagree
-with.
+## Environment files
 
-## Using `.env` Files
-
-NAF can automatically load environment variables from a `.env` file placed in the project root.
+Place local values in `.env` at the project root:
 
 ```dotenv
-APP_ENV=local
-APP_DEBUG=true
-DB_HOST=localhost
-DB_USER=root
-DB_PASS=secret
+APP_ENV=dev
+DB_HOST=127.0.0.1
+DB_USER=my_app
+DB_PASS=change-me
 ```
 
-- Each line defines a key-value pair.
-- Lines starting with `#` are treated as comments.
-- Values can be referenced inside configuration files or application code.
+If `.env.local` exists, it is loaded **instead of** `.env`; the two are not merged.
+The loader runs when the application first boots. Existing `$_ENV` entries are preserved.
+Values are simple strings: do not rely on shell interpolation, automatic boolean conversion
+or stripping quotes. Keep secret files out of version control.
 
-The `.env` file is loaded automatically during the bootstrap phase.
+## Read environment values
 
----
-
-## Accessing Environment Variables
-
-You can access environment variables anywhere in your code using the `env()` helper:
+Inside application configuration, which is loaded after the environment file:
 
 ```php
-$host = env('DB_HOST', 'localhost');
-```
-
-- The first argument is the environment variable name.
-- The second argument is an optional default value if the variable is not set.
-
----
-
-## Environment Detection
-
-NAF includes a small `Environment` service to detect the current application environment.
-
-It supports four predefined environments:
-
-| Name | Typical Usage |
-|:---|:---|
-| `local` | Local development machine |
-| `staging` | Preview system before going live |
-| `production` | Live/real system |
-| `testing` | Automated test environment |
-
-You can check the environment using helper methods:
-
-```php
-if (env()->isLocal()) {
-    ini_set('display_errors', '1');
-}
-
-if (env()->isProduction()) {
-    ini_set('display_errors', '0');
-}
-```
-
-Available methods:
-
-- `isLocal()`
-- `isStaging()`
-- `isProduction()`
-- `isTesting()`
-
----
-
-## Application Configuration
-
-Application settings are loaded through the `Config` class.
-
-You can organize configuration into arrays and load them through the container.
-
-A typical configuration file might look like this:
-
-```php
+// app/config.php
 return [
-    'name' => 'My App',
-    'api' => [
-        'key' => 'ENV:API_KEY',
-        'url' => 'https://api.example.com',
+    'database' => [
+        'host' => $_ENV['DB_HOST'] ?? '127.0.0.1',
+        'username' => $_ENV['DB_USER'] ?? '',
+        'password' => $_ENV['DB_PASS'] ?? '',
     ],
+    'api' => ['key' => 'ENV:API_KEY'],
 ];
 ```
 
-- Values prefixed with `ENV:` will be automatically resolved from environment variables.
-- Nested arrays are supported.
+`ENV:API_KEY` resolves from `$_ENV`, recursively, when the configuration is built. An absent
+value becomes `null`. For operating-system variables not populated into `$_ENV`, use
+`getenv('NAME')` explicitly and handle its `false` result.
 
----
+## Application environment
 
-## Accessing Configuration Values
-
-You can access configuration values using the `config()` helper:
-
-```php
-// Get a full configuration array
-$fullConfig = config();
-
-// Get a single config value
-$appName = config('name');
-
-// Access nested configuration using "namespace" syntax
-$apiKey = config('api:key');
-
-// Provide a default value if the key is not found
-$apiUrl = config('api:url', 'https://default.example.com');
-```
-
-- If the key contains a colon `:`, it is treated as a namespace separator.
-- Nested configuration is traversed automatically.
-
----
-
-## Internals: How Configuration Works
-
-The `Config` class:
-
-- Accepts an array on construction.
-- Resolves all `ENV:` placeholders recursively.
-- Provides `get($key, $default)` and `all()` methods for access.
-- Supports simple "namespace" lookups via `:` syntax.
-
-The `config()` helper fetches the instance from the container and allows quick access anywhere in your code.
-
----
-
-## Example: Setting Error Display Based on Environment
-
-You can configure error reporting inside `bootstrap.php` depending on the current environment:
+`env()` returns the **environment name as a string**. It does not read arbitrary keys and
+it does not return an object with `isProduction()` methods.
 
 ```php
-if (env()->isProduction()) {
-    ini_set('display_errors', '0');
-    error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
-} else {
-    ini_set('display_errors', '1');
-    error_reporting(E_ALL);
+use Naf\Core\Environment;
+use function Naf\env;
+
+if (env() === Environment::PROD) {
+    // Production-specific application behaviour.
 }
 ```
+
+| Value | Constant | Error output |
+|---|---|---|
+| `dev` | `Environment::DEV` | Detailed diagnostics for local development |
+| `test` | `Environment::TEST` | Sanitized HTTP error output |
+| `prod` | `Environment::PROD` | Sanitized HTTP error output |
+
+Use **`APP_ENV=prod`** in production. Other nonempty values, including `production` and
+`staging`, are treated as development-like values by the error renderer and can expose
+diagnostics. If the value is absent, the error renderer uses sanitized output, but you
+should still configure the environment explicitly before using `env()`.
+
+## Read configuration
+
+```php
+use function Naf\config;
+
+$all = config();
+$name = config('name', 'My application');
+$key = config('api:key');
+$url = config('api:url', 'https://api.example.com');
+```
+
+Colons traverse nested arrays. The default is used when a value is absent or `null`.
+Configuration is created lazily and cached; edit the files for the next request rather
+than treating `config()` as a runtime setter.
+
+## Merge order
+
+The merge is `array_replace_recursive(core, plugins, app)`. Application values win.
+Numeric arrays are replaced by position, not appended. This is why settings such as
+`csrf_exempt_routes` use named keys:
+
+```php
+return ['csrf_exempt_routes' => ['oauth.token' => false]];
+```
+
+Use [plugin ordering](plugins.md#boot-order) when bootstraps depend on each other, and
+[Errors and aborting](errors.md) for custom error responses.

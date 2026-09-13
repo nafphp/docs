@@ -28,6 +28,7 @@ theme:
     code: IBM Plex Mono
   features:
     - navigation.sections
+    - navigation.footer
     - navigation.top
     - navigation.tracking
     - content.code.copy
@@ -54,14 +55,14 @@ markdown_extensions:
 nav:
   - Getting started:
       - What NAF is: index.md
-      - What do I actually need?:
-          - Which packages: choosing-packages.md
-          - Handling a POST request: recipes/post-requests.md
-          - A contact form: recipes/contact-form.md
-          - A login form: recipes/login-form.md
-          - A JSON API: recipes/json-api.md
       - Installation: install.md
       - Your first application: first-app.md
+      - Which packages do I need?: choosing-packages.md
+  - Worked examples:
+      - Handling a POST request: recipes/post-requests.md
+      - A contact form: recipes/contact-form.md
+      - A login form: recipes/login-form.md
+      - A JSON API: recipes/json-api.md
   - Core:
       - Routing: routing.md
       - Controllers: controllers.md
@@ -100,3 +101,11 @@ nav:
       - Function index: function-index.md
       - Package overview: packages.md
       - Upgrading from NixPHP: upgrading-from-nixphp.md
+
+validation:
+  nav:
+    omitted_files: warn
+  links:
+    not_found: warn
+    anchors: warn
+    unrecognized_links: warn

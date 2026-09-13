@@ -1,17 +1,8 @@
 #!/usr/bin/env python3
-"""Fails the build on two mistakes the old documentation made for a year.
+"""Check all documentation pages, including nested recipes, against the release snapshot.
 
-1. A page declaring a package that does not exist — how the old Requirements
-   sections came to claim `naf/framework >= 1.0` and PHP 8.1.
-2. A `use function` import naming the wrong namespace — fifteen of those were
-   in the pages, every one of them a runtime error for anyone copying it.
-3. A `composer require naf/…` naming a package that was never published.
-4. A registered command that no chapter mentions, and a `bin/naf <command>` no package registers — the docs told people to run
-   `queue:worker`, which does not exist; the command is `queue:consume`. A page
-   whose examples are deliberately invented says so with `example_commands: true`
-   in its front matter.
-
-Both are checked against the published packages, not against a list kept here.
+Validate package requirements, helper namespaces, imported NAF classes and command names.
+Use gen_reference.py to refresh the snapshot; test_examples.py exercises complete recipes.
 """
 import glob, json, os, re, sys
 
@@ -25,8 +16,8 @@ PAT_BRACE  = re.compile(r'use function ([\w\\]+?)\\\{([\w, ]+)\}')
 PAT_SINGLE = re.compile(r'use function ([\w\\]+?)\\(\w+)\s*;')
 problems = []
 
-for path in sorted(glob.glob(os.path.join(HERE, "..", "pages", "*.md"))):
-    name = os.path.basename(path)
+for path in sorted(glob.glob(os.path.join(HERE, "..", "pages", "**", "*.md"), recursive=True)):
+    name = os.path.relpath(path, os.path.join(HERE, "..", "pages"))
     text = open(path, encoding="utf-8").read()
 
     if text.startswith("---"):
@@ -46,6 +37,21 @@ for path in sorted(glob.glob(os.path.join(HERE, "..", "pages", "*.md"))):
             if pkg.split("/", 1)[1] not in pkgs:
                 problems.append(f"{name}: 'composer require {pkg}' names a package that does not exist")
 
+    for m in re.finditer(r'composer create-project ([\w-]+/[\w-]+)', text):
+        if m.group(1) != 'naf/app':
+            problems.append(f"{name}: unknown starter package '{m.group(1)}'")
+
+    known_classes = set(data.get('classes', []))
+    if known_classes:
+        class_imports = []
+        for m in re.finditer(r'^use (Naf\\[\w\\]+)\s*;', text, re.M):
+            class_imports.append(m.group(1))
+        for m in re.finditer(r'^use (Naf\\[\w\\]+)\\\{([\w, ]+)\};', text, re.M):
+            class_imports.extend(m.group(1) + '\\' + n.strip() for n in m.group(2).split(','))
+        for imported in class_imports:
+            if imported not in known_classes:
+                problems.append(f"{name}: imports unknown class/interface/trait {imported}")
+
     invented = re.search(r'^example_commands:\s*true\b', text, re.M) is not None
     for m in re.finditer(r'bin/naf ([a-z][a-z:_-]+)', text):
         if cmds and not invented and m.group(1) not in cmds:
@@ -64,7 +70,7 @@ for path in sorted(glob.glob(os.path.join(HERE, "..", "pages", "*.md"))):
 # The other direction: a command nobody wrote about. The old documentation drifted
 # because nothing noticed; a build that fails is the only thing that demonstrably did.
 documented = set()
-for path in glob.glob(os.path.join(HERE, "..", "pages", "*.md")):
+for path in glob.glob(os.path.join(HERE, "..", "pages", "**", "*.md"), recursive=True):
     text = open(path, encoding="utf-8").read()
     for c in cmds:
         if c in text:
@@ -77,4 +83,5 @@ if problems:
     for p in problems:
         print("  " + p, file=sys.stderr)
     sys.exit(1)
-print(f"  pages check: {len(pkgs)} packages, {len(fns)} functions, {len(cmds)} commands, nothing out of step")
+pages_count = len(glob.glob(os.path.join(HERE, "..", "pages", "**", "*.md"), recursive=True))
+print(f"  pages check: {pages_count} pages, {len(pkgs)} packages, {len(fns)} functions, {len(cmds)} commands, nothing out of step")

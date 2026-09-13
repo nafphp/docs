@@ -3,3 +3,6 @@
 
 # The built output does not belong in the source repo; it lives in gh-pages
 site/
+
+.venv/
+__pycache__/

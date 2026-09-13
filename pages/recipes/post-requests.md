@@ -7,14 +7,16 @@ requires:
 # Handling a POST request
 
 Every form, every API call that changes something, arrives the same way: a request with a body,
-which you read, check, act on, and answer. This page is the shape all the others on this page
-follow.
+which you read, check, act on, and answer. This page explains the flow; the linked recipes
+supply complete files. Start with [Your first application](../first-app.md), including its
+form dependency update and bootstrap correction for the released redirect helper.
 
 ## One route or two
 
 A form that renders and submits at the same URL needs both methods registered:
 
 ```php
+use App\Controllers\ContactController;
 use function Naf\route;
 
 route()->add('GET',  '/contact', [ContactController::class, 'show'],   'contact');
@@ -22,7 +24,8 @@ route()->add('POST', '/contact', [ContactController::class, 'submit'], 'contact.
 ```
 
 Two methods, two names, one path. Naming them separately matters because `route('contact')` is
-what your form's `action` resolves to — you want the GET URL there, not the POST one.
+what your form's `action` resolves to. Both names produce the same URL here; the HTTP method
+selects the handler.
 
 You can also point both at one method and branch inside it with `is_post()`. Two methods is
 usually easier to read; one method is easier when the form and its handling are three lines.
@@ -30,7 +33,7 @@ usually easier to read; one method is easier when the form and its handling are 
 ## Reading the body
 
 `param()` is the one to reach for. It merges the query string, the form body and — when the
-request says `Content-Type: application/json` — the decoded JSON body, in that order, so the
+request says `Content-Type: application/json` and the parsed body is empty — the decoded JSON body, so the
 same controller reads a browser form and an API client without caring which it got:
 
 ```php
@@ -45,8 +48,8 @@ The default is returned when the key is absent, so `get()` never surprises you w
 notice.
 
 `request()->getParsedBody()` is still there when you want the body and nothing else — no query
-parameters merged in. Use it when a value arriving in the URL instead of the body would be
-wrong.
+parameters merged in. For JSON, decode `(string) request()->getBody()` explicitly instead;
+see [Requests and responses](../request-response.md#read-the-request).
 
 ## Checking it
 
@@ -74,20 +77,21 @@ request rather than quietly pass everything.
 
 ## CSRF is already handled
 
-With `naf/form` installed, a listener checks the token on every state-changing request before
+With `naf/form` installed, a listener checks POST, PUT and DELETE before
 your controller runs. You put the token in the form, and that is the whole of your part:
 
 ```php
+<?php use function Naf\Form\csrf; ?>
 <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
 ```
 
-Requests that authenticate themselves some other way — a bearer token on an API route — need
-exempting rather than a token they have no session to hold. [Forms and
+Bearer requests skip the CSRF check automatically; the endpoint still has to verify their
+credentials. Explicit named exemptions are available for other protocol endpoints. [Forms and
 validation](../forms.md#requests-that-carry-their-own-credentials) covers how.
 
 ## Answering
 
-Do not render a page as the answer to a POST. Redirect:
+After a successful browser form submission, redirect:
 
 ```php
 use function Naf\redirect;

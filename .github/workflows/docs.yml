@@ -3,37 +3,46 @@ name: NAF Docs
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  deploy:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+          extensions: mbstring, pdo_sqlite
           tools: composer
-
-      - run: pip install --quiet 'mkdocs-material~=9.7'   # 2.0 ist angekündigt und derzeit ohne Lizenz
-
-      # Function index and package overview, read from the published packages so
-      # that neither has to be maintained by hand and neither can go stale.
-      - name: Generate the reference pages
+      - run: pip install --quiet -r requirements.txt
+      - name: Refresh the reference from published packages
         run: python tools/gen_reference.py
-
-      # Fails on a declared package that does not exist, or an import naming the
-      # wrong namespace — both were in the pages before this existed.
-      - name: Check pages against the published packages
+      - name: Check all pages, including recipes
         run: python tools/check_pages.py
+      - name: Copy examples into fresh apps and test HTTP behavior
+        run: python tools/test_examples.py
+      - name: Build and validate navigation and links
+        run: mkdocs build --strict
 
-      - name: Build and deploy
-        run: mkdocs gh-deploy --force
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet -r requirements.txt
+      # Deploy the reviewed reference snapshot committed alongside the prose.
+      - run: mkdocs gh-deploy --strict --force

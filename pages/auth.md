@@ -67,100 +67,154 @@ click — permissions can never go stale.
 
 ## Quickstart
 
-Two steps: a table, and a model. Nothing else is written by hand.
+This example starts from [Your first application](first-app.md) and uses SQLite, so no
+separate database server is needed. Install the ORM and session integration explicitly:
 
-### 1. A table
-
-```sql
-CREATE TABLE users (
-    id       INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(190) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    roles    VARCHAR(255) NOT NULL DEFAULT ''
-);
+```bash
+composer require naf/auth naf/orm naf/session
+mkdir -p app/Models bin storage
 ```
 
-Columns are yours to name — the provider is told which is which in step 3.
+PHP needs `pdo_sqlite`. Each titled block below is a complete file. If you already configured
+other features, merge the `database` and `auth` keys into your config and retain other service
+bindings before `app()->run()`.
 
-### 2. Your user model
+### 1. Configure the connection and model
 
-One interface, five methods. Everything else on the class stays yours.
+```php title="app/config.php"
+<?php
 
-```php
+use App\Models\User;
+
+return [
+    'database' => [
+        'driver' => 'sqlite',
+        'database' => BASE_PATH . '/storage/app.sqlite',
+    ],
+    'auth' => [
+        'users' => ['model' => User::class],
+    ],
+];
+```
+
+```php title="bootstrap.php"
+<?php
+
+define('BASE_PATH', __DIR__);
+require __DIR__ . '/vendor/autoload.php';
+
+use Naf\Core\Event;
+use Psr\Http\Message\ResponseInterface;
+use function Naf\{app, event, request};
+use function Naf\Database\database;
+
+// The auth model factory resolves PDO by its class name. Bind the same connection
+// that naf/database and naf/orm use; neither plugin supplies this PDO alias itself.
+app()->container()->set(PDO::class, static fn() => database()
+    ?? throw new RuntimeException('Configure a database connection.'));
+
+// naf/framework 0.2.1 redirects carry HTTP/2; PHP's local server needs HTTP/1.x.
+event()->listen(Event::RESPONSE_HEADER, static fn(ResponseInterface $response) =>
+    $response->withProtocolVersion(request()->getProtocolVersion()));
+
+app()->run();
+```
+
+### 2. Define your user model
+
+```php title="app/Models/User.php"
+<?php
+
+namespace App\Models;
+
 use Naf\Auth\Identity\{UserInterface, UserProfile};
 use Naf\ORM\Model\AbstractModel;
 
-class User extends AbstractModel implements UserInterface
+final class User extends AbstractModel implements UserInterface
 {
     protected string $username = '';
     protected string $password = '';
-    protected string $roles    = '';
-    protected int    $suspended = 0;
+    protected string $roles = '';
+    protected int $suspended = 0;
+    protected string $name = '';
+    protected string $email = '';
+    protected int $email_verified = 0;
 
     public function getIdentifier(): string { return (string) $this->id; }
-
     public function getRoles(): iterable
     {
         return $this->roles === '' ? [] : explode(',', $this->roles);
     }
-
-    /** Return [] until you actually need permissions. */
     public function getPermissions(): iterable { return []; }
-
     public function isActive(): bool { return $this->suspended === 0; }
-
     public function getProfile(): UserProfile
     {
         return new UserProfile($this->name, $this->email, $this->email_verified === 1);
     }
-
     public function getUsername(): string { return $this->username; }
     public function getPassword(): string { return $this->password; }
     public function setPassword(string $password): void { $this->password = $password; }
 }
 ```
 
-**`isActive()` is asked every time the account is loaded**, so suspending somebody takes effect
-on their next request rather than when their session happens to expire. It applies to every way
-of signing in — password, external provider, API token — because the question is asked once, in
-`auth()`, rather than in each of them.
+`UserInterface` extends `IdentityInterface`. `isActive()` rejects suspended accounts both at
+login and on restoration. `getProfile()` deliberately selects the fields an OAuth consent
+screen or UserInfo response may expose.
 
-**`getProfile()` is what may be shown**, chosen deliberately. It is not a getter over the model:
-a profile crosses boundaries — a consent screen, an ID token, a UserInfo answer — and a field
-that reflected the model would export the next column somebody adds. Identity stays separate:
-the identifier, the roles and the permissions answer "who is this and what may they do", the
-profile answers "what may be said about them".
+### 3. Create a local test account
 
-### 3. Point at the model
+This CLI script creates the matching table and inserts a **local demo account** once. It
+preserves an existing account on reruns. Do not seed these public credentials on a deployed
+site; account creation there must hash the user's own password.
 
-```php
-// app/config.php
-return ['auth' => [
-    'users' => ['model' => User::class],
-]];
+```php title="bin/seed-demo.php"
+<?php
+
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit;
+}
+
+require dirname(__DIR__) . '/bootstrap.php';
+
+use function Naf\Database\database;
+
+$pdo = database();
+$pdo->exec('CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    roles TEXT NOT NULL DEFAULT \'\',
+    suspended INTEGER NOT NULL DEFAULT 0,
+    name TEXT NOT NULL DEFAULT \'\',
+    email TEXT NOT NULL DEFAULT \'\',
+    email_verified INTEGER NOT NULL DEFAULT 0
+)');
+$stmt = $pdo->prepare('INSERT INTO users (username, password, roles, name, email)
+    VALUES (:username, :password, :roles, :name, :email)
+    ON CONFLICT(username) DO NOTHING');
+$stmt->execute([
+    'username' => 'demo',
+    'password' => password_hash('local-demo-password', PASSWORD_DEFAULT),
+    'roles' => 'member',
+    'name' => 'Demo User',
+    'email' => 'demo@example.com',
+]);
+echo "Demo account ready.\n";
 ```
 
-That is the whole configuration. No repository class, no factory, no provider name: the
-repository is built from the model, the connection comes from the ORM, and the source is
-registered under the name **`users`** — which is what ends up in the session record and in
-account links.
-
-Name the columns only if yours differ:
-
-```php
-'users' => [
-    'model' => User::class,
-    'username_field' => 'email',
-    'password_field' => 'password_hash',
-],
+```bash
+composer dump-autoload
+php bin/seed-demo.php
 ```
 
-Accounts kept somewhere other than `naf/orm` need the explicit form below: `auth:users:store`
-understands `'orm'` and nothing else, and says so rather than guessing.
+Expect `Demo account ready.`. Continue with [A login form](recipes/login-form.md) to sign in
+as **demo** with **local-demo-password**, view a protected page and sign out.
 
-`OrmProvider` reads the hash through your model's own getter (`getPassword()` for a `password`
-column) and falls back to the ORM's field map when there is none. When your model also has the
-matching setter, an outdated hash is silently upgraded to the current cost on the next login.
+The source name is **`users`** when only `auth:users:model` is set. If your columns differ,
+set `username_field` and `password_field` under `auth:users` and update the model and schema
+together. A matching password setter lets `OrmProvider` upgrade an outdated hash after login.
+`auth:users:store` currently accepts only `'orm'`; other account stores use explicit providers.
 
 ### The older, explicit form
 
@@ -169,12 +223,13 @@ several:
 
 ```php
 return ['auth' => [
-    'providers' => ['database' => OrmProvider::class],
-    'orm' => ['repository' => UserRepository::class],
+    'providers' => ['database' => \Naf\Auth\Provider\OrmProvider::class],
+    'orm' => ['repository' => \App\Repositories\UserRepository::class],
 ]];
 ```
 
-An application written against this keeps working unchanged, including the source name it chose.
+This fragment assumes an application-defined `UserRepository` and the ORM/database setup above.
+It retains the chosen source name in session records.
 
 ### Without an ORM: plain PDO
 
@@ -242,11 +297,8 @@ password resets. No schema or migration is installed. Integration tests use SQLi
 use Naf\Auth\Credentials\PasswordCredentials;
 use function Naf\Auth\auth;
 
-if (!auth()->authenticate(new PasswordCredentials($username, $password))) {
-    return render('login', ['error' => 'Invalid username or password.']);
-}
-
-return redirect('/dashboard');
+// Inside a handler, after validating the submitted strings:
+$authenticated = auth()->authenticate(new PasswordCredentials($username, $password));
 ```
 
 `authenticate()` returns `false` for wrong credentials and never says which half was wrong. An unknown
@@ -540,7 +592,7 @@ Everything the plugin exposes.
 | `Exceptions` | `UnauthenticatedException` | 401. |
 | `Exceptions` | `ForbiddenException` | 403. |
 
-See [Warum auth so aussieht](auth-architecture.md) for the decisions behind this shape and the exact
+See [Why auth has this shape](auth-architecture.md) for the decisions behind this shape and the exact
 restore and rotation semantics.
 
 ---

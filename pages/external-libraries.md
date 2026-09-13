@@ -31,10 +31,13 @@ Install Blade via Composer:
 composer require jenssegers/blade
 ```
 
-Create a simple service registration:
+These are integration fragments, not a complete application. Create the views, writable cache
+directory and library-specific configuration first. Put this registration in `bootstrap.php`
+after the autoloader and before `app()->run()`:
 
 ```php
 use Jenssegers\Blade\Blade;
+use function Naf\app;
 
 app()->container()->set('blade', function () {
     return new Blade(BASE_PATH . '/app/views', BASE_PATH . '/storage/cache/views');
@@ -44,6 +47,8 @@ app()->container()->set('blade', function () {
 Now you can use Blade inside your controllers:
 
 ```php
+use function Naf\{app, response};
+
 $blade = app()->container()->get('blade');
 
 return response($blade->render('home', ['name' => 'World']));
@@ -59,10 +64,12 @@ Install Eloquent via Composer:
 composer require illuminate/database
 ```
 
-Configure and initialize Eloquent:
+Configure the `database` values shown below in `app/config.php` for your database, then register
+Eloquent in `bootstrap.php` before `app()->run()`:
 
 ```php
 use Illuminate\Database\Capsule\Manager as Capsule;
+use function Naf\{app, config};
 
 app()->container()->set('db', function () {
     $capsule = new Capsule;
@@ -89,8 +96,10 @@ app()->container()->set('db', function () {
 Use models as usual:
 
 ```php
-use App\Models\User;
+use App\Models\User; // Your Eloquent model, extending Illuminate\Database\Eloquent\Model.
+use function Naf\app;
 
+app()->container()->get('db'); // Resolve the lazy factory before calling a static model finder.
 $user = User::find(1);
 ```
 

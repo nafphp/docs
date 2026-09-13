@@ -26,7 +26,9 @@ the result in a response, which is what a controller returns.
 
 Views are searched in your application's view directory and in every plugin's, so a plugin
 can ship a template and your application can override it by putting a file at the same name.
-`config('view:paths')` adds directories of your own.
+`config('view:paths')` replaces the default application search paths (`views`, `app/views`).
+Include those entries too if you want to keep them alongside custom directories; plugin
+view paths are still searched afterwards.
 
 ## render() or view()
 
@@ -71,6 +73,7 @@ A view names its layout and fills the blocks the layout leaves open.
 ```
 
 ```php
+<?php use function Naf\View\asset; ?>
 <!-- app/views/layouts/main.phtml -->
 <!DOCTYPE html>
 <html>

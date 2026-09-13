@@ -9,23 +9,84 @@ requires:
 
 # A contact form
 
-A page with a form, a message that arrives by mail, and a thank-you that survives a reload.
-Everything here is the shape from [Handling a POST request](post-requests.md), filled in.
+Start from [Your first application](../first-app.md), then run `composer require naf/mail`.
+The starter already supplies the other packages listed above. Each titled block is a complete
+file; create missing directories and replace the tutorial's corresponding files. If you combine
+recipes, merge their routes and service bindings instead of discarding the existing ones.
+
+This local exercise writes messages to `storage/mail/` and shows a thank-you after redirecting.
+It works without a mail server and sends nothing externally. For automated tests that only
+need an in-memory list, see [the dummy transport](../mail.md#testing-without-a-mail-server). [Handling a POST
+request](post-requests.md) explains the underlying request flow.
+
+## A local mail outbox
+
+```bash
+mkdir -p app/Mail storage/mail
+```
+
+```php title="app/Mail/FileTransport.php"
+<?php
+
+namespace App\Mail;
+
+use Naf\Mail\Core\TransportInterface;
+use Naf\Mail\Models\Mail;
+
+final class FileTransport implements TransportInterface
+{
+    public function sendMail(Mail $mail): bool
+    {
+        $data = json_encode([
+            'from' => $mail->getFrom(), 'to' => $mail->getRecipients(),
+            'replyTo' => $mail->getReplyTo(), 'subject' => $mail->getSubject(),
+            'content' => $mail->getContent(), 'isHtml' => $mail->isHtml(),
+        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+        $file = BASE_PATH . '/storage/mail/' . bin2hex(random_bytes(12)) . '.json';
+        return file_put_contents($file, $data, LOCK_EX) !== false;
+    }
+}
+```
+
+```php title="bootstrap.php"
+<?php
+
+define('BASE_PATH', __DIR__);
+require __DIR__ . '/vendor/autoload.php';
+
+use App\Mail\FileTransport;
+use Naf\Mail\Core\Mailer;
+use Naf\Core\Event;
+use Psr\Http\Message\ResponseInterface;
+use function Naf\{app, event, request};
+
+app()->container()->set(Mailer::class, static fn() => new Mailer(new FileTransport()));
+// naf/framework 0.2.1 redirects carry HTTP/2; PHP's local server needs HTTP/1.x.
+event()->listen(Event::RESPONSE_HEADER, static fn(ResponseInterface $response) =>
+    $response->withProtocolVersion(request()->getProtocolVersion()));
+
+app()->run();
+```
 
 ## The routes
 
-```php
-// app/routes.php
+```php title="app/routes.php"
+<?php
+use App\Controllers\HomeController;
 use App\Controllers\ContactController;
 use function Naf\route;
 
+route()->add('GET', '/', [HomeController::class, 'index'], 'home');
+route()->add('GET', '/hello/{name}', [HomeController::class, 'hello'], 'hello');
 route()->add('GET',  '/contact', [ContactController::class, 'show'],   'contact');
 route()->add('POST', '/contact', [ContactController::class, 'submit'], 'contact.submit');
 ```
 
 ## The controller
 
-```php
+```php title="app/Controllers/ContactController.php"
+<?php
+
 namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
@@ -34,7 +95,7 @@ use function Naf\Mail\mail;
 use function Naf\Mail\mailer;
 use function Naf\Session\session;
 use function Naf\View\render;
-use function Naf\param;
+use function Naf\{abort, param};
 use function Naf\redirect;
 use function Naf\route;
 
@@ -47,6 +108,12 @@ final class ContactController
 
     public function submit(): ResponseInterface
     {
+        foreach (['name', 'email', 'message'] as $field) {
+            if (!is_string(param()->get($field, ''))) {
+                abort(400, 'Form fields must be strings.');
+            }
+        }
+
         $check = validator()->validate(param()->all(), [
             'name'    => 'required|max:80',
             'email'   => 'required|email',
@@ -56,17 +123,19 @@ final class ContactController
         if (!$check->isValid()) {
             // Back to the form. What was typed is still in the request, so
             // memory() finds it — see the template below.
-            return render('contact', ['check' => $check]);
+            return render('contact', ['check' => $check])->withStatus(422);
         }
 
         $mail = mail()
             ->setFrom('website@example.com')
             ->addTo('office@example.com')
             ->setReplyTo(param()->get('email'))
-            ->setSubject('Contact form: ' . param()->get('name'))
-            ->setContent(nl2br(htmlspecialchars(param()->get('message'))));
+            ->setSubject('New contact message')
+            ->setContent('From: ' . param()->get('name') . "\n\n" . param()->get('message'), false);
 
-        mailer()->send($mail);
+        if (!mailer()->send($mail)) {
+            throw new \RuntimeException('Could not write the local mail preview.');
+        }
 
         session()->flash('notice', 'Thank you — we will get back to you.');
 
@@ -82,27 +151,27 @@ address you do not control is what every receiving mail server treats as forgery
 land your mail in a spam folder or nowhere at all. The visitor's address belongs in
 `setReplyTo()`, which is what hitting Reply should use anyway.
 
-**The message is escaped before it is sent.** `setContent()` defaults to HTML, so unescaped
-input from a form is an HTML injection into your own inbox. Either escape it, as here, or pass
-`false` as the second argument and send plain text.
+**The body is plain text.** Passing `false` to `setContent()` avoids interpreting submitted
+text as HTML. The subject is fixed; visitor text belongs in the body.
 
 **The success path redirects.** The thank-you lives in a flash message, which survives exactly
 one request — the redirect's — and is gone on the next reload.
 
 ## The template
 
-```php
+```php title="app/views/contact.phtml"
 <?php
 use function Naf\Form\csrf;
 use function Naf\Form\error;
 use function Naf\Form\error_class;
 use function Naf\Form\memory;
+use function Naf\View\s;
 use function Naf\Session\session;
 use function Naf\route;
 ?>
 
 <?php if ($notice = session()->getFlash('notice')): ?>
-    <p class="notice"><?= $notice ?></p>
+    <p class="notice"><?= s($notice) ?></p>
 <?php endif; ?>
 
 <form action="<?= route('contact') ?>" method="post">
@@ -110,18 +179,18 @@ use function Naf\route;
     <label for="name">Your name</label>
     <input id="name" type="text" name="name"
            class="<?= error_class('name', $check) ?>"
-           value="<?= memory('name') ?>">
+           value="<?= s(memory('name') ?? '') ?>">
     <?= error('name', $check) ?>
 
     <label for="email">Your email address</label>
     <input id="email" type="email" name="email"
            class="<?= error_class('email', $check) ?>"
-           value="<?= memory('email') ?>">
+           value="<?= s(memory('email') ?? '') ?>">
     <?= error('email', $check) ?>
 
     <label for="message">Message</label>
     <textarea id="message" name="message" rows="8"
-              class="<?= error_class('message', $check) ?>"><?= memory('message') ?></textarea>
+              class="<?= error_class('message', $check) ?>"><?= s(memory('message') ?? '') ?></textarea>
     <?= error('message', $check) ?>
 
     <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
@@ -132,15 +201,23 @@ use function Naf\route;
 
 `memory()` reads what was submitted, so a rejected form comes back filled in rather than blank —
 the difference between fixing one field and typing everything again. `error()` renders the
-message for one field, and `error_class()` gives you a class name to hang styling on. All three
+message for one field, and `error_class()` gives you a class name to hang styling on. `error()` and `error_class()`
 take the validator the controller passed down, which is why `show()` passes an unused one: the
 same template serves both requests, and on the first there is simply nothing to report.
 
-## What it needs
+## Try it
 
-`naf/form` for validation and CSRF, `naf/view` for the template, `naf/session` for the flash
-message, and `naf/mail` to send it. Mail needs a transport configured before anything leaves the
-machine — see [Sending mail](../mail.md).
+```bash
+composer dump-autoload
+php -S 127.0.0.1:8000 -t public
+```
 
-For a form that arrives many times a minute, or a mail server that is slow, hand the sending to
-a [queue](../queues.md) instead of making the visitor wait for it.
+Open **http://127.0.0.1:8000/contact**. Invalid fields return HTTP 422 with errors and the
+submitted values. A valid name, email and message of at least ten characters redirects back
+with a thank-you. Inspect the new JSON file in `storage/mail/`; it contains the message.
+Reloading removes the flash message. A POST without a valid `_csrf` token returns 400.
+
+The local outbox is application code for development, not a built-in NAF transport. To deliver
+real mail, replace its `Mailer` binding with a configured transport from [Sending mail](../mail.md)
+and use sender/recipient addresses you control. Check the boolean result before reporting
+success. Use a [queue](../queues.md) when delivery should happen outside the request.
