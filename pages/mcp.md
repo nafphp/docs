@@ -22,7 +22,7 @@ Installing the plugin adds one route, under two methods:
 | | |
 | --- | --- |
 | `POST /mcp` | the JSON-RPC endpoint — everything happens here |
-| `GET /mcp` | the streaming endpoint clients open first |
+| `GET /mcp` | returns 405 with `Allow: POST` after authentication; server-initiated streaming is not implemented |
 
 That URL is what you hand a client. Everything below is what travels over it.
 

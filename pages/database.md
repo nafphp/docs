@@ -91,6 +91,11 @@ caller believing the transfer happened.
 ## Migrations
 
 A migration is a class with `up()` and `down()`, and it lives in `app/Migrations`.
+The commands require the optional CLI package first:
+
+```bash
+composer require naf/cli
+```
 
 ```bash
 vendor/bin/naf db:migration:create
@@ -149,7 +154,8 @@ it none:
 An in-memory database is emptied when the process ends, which makes it right for tests and
 wrong for everything else.
 
-Credentials belong in `.env` and are read with `env()`, not written into a file you commit.
+Credentials belong in `.env`. Read `$_ENV['DB_PASSWORD'] ?? ''` or use an
+`ENV:DB_PASSWORD` config value; `env()` returns the application environment name.
 
 ## When the connection fails
 

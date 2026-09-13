@@ -37,7 +37,7 @@ return $response;
 ```php
 namespace App\Controllers;
 
-use function Naf\response;
+use function Naf\{abort, response};
 
 class FileController
 {
@@ -45,7 +45,7 @@ class FileController
     {
         $path = BASE_PATH . '/storage/files/' . basename($filename);
 
-        if (!file_exists($path)) {
+        if (!is_file($path) || !is_readable($path)) {
             abort(404, 'File not found.');
         }
 
@@ -56,7 +56,8 @@ class FileController
 }
 ```
 
-- Always use `basename()` to prevent directory traversal attacks.
+- This example serves flat filenames from an application-owned directory. `basename()` strips
+  directory components; it does not check symlinks or authorize access to private files.
 - Always check if the file actually exists before sending it.
 
 ---

@@ -4,107 +4,61 @@ title: Guard
 
 # Guard
 
-NAF includes a central `Guard` class designed to simplify and secure common low-level operations like path validation, output escaping, and CSRF token handling.
-
-The `Guard` focuses on security-by-default, helping to protect your application against common attack vectors such as Local File Inclusion (LFI), Cross-Site Scripting (XSS), and Cross-Site Request Forgery (CSRF).
-
-You can access the `Guard` instance anywhere via the `guard()` helper:
+The guard is a registry of small validation functions. Core rules cover paths and HTML output;
+plugins can add rules of their own.
 
 ```php
-guard();
+use function Naf\guard;
+
+$path = guard()->safePath('user.profile');
+$text = guard()->safeOutput('<script>'); // &lt;script&gt;
 ```
 
----
+## Path validation
 
-## What it does
+`safePath()` rejects empty paths, `..`, absolute paths, stream wrappers and characters outside
+`[A-Za-z0-9_/.-]`. It throws `InvalidArgumentException` on rejection.
 
-The `Guard` provides several safety-focused utilities:
+This is a lexical path check, not a filesystem sandbox: it does not resolve symlinks or prove
+that an existing file is inside an allowed directory. Check that separately for file access.
 
-| Method | Purpose |
-|:-------|:--------|
-| `guard()->safePath($path)` | Validate paths against traversal, stream wrappers, and illegal characters |
-| `guard()->safeOutput($value)` | Escape strings or arrays for safe HTML output |
-| `guard()->csrf()` | Access CSRF token generation and validation |
+## HTML escaping
 
----
+`safeOutput()` uses `htmlspecialchars()` with `ENT_QUOTES` and UTF-8. It accepts a string or
+a flat array of string values; nested arrays are not recursively supported. The view plugin's
+`Naf\View\s()` helper delegates to it.
 
-## Path Safety: `safePath()`
+Core guard rules are registered for HTTP requests, not during normal CLI boot. If you render
+HTML in a command, use an appropriate explicit escaping function or register the required rules.
+
+## CSRF comes from naf/form
+
+`guard()->csrf()` is registered by `naf/form`, which also installs `naf/session`. It is not
+available in a core-only application. Prefer the form helper in templates:
 
 ```php
-guard()->safePath('user.profile');
+<?php use function Naf\Form\csrf; ?>
+<input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
 ```
 
-Validates that a given path:
-- Is non-empty
-- Does not contain traversal (`..`)
-- Is not an absolute path
-- Does not contain stream wrappers (`://`)
-- Only contains `[A-Za-z0-9_/.-]` characters
+Every `generate()` call creates a new token and replaces the session's previous one. If a
+page contains multiple forms, generate once and reuse that value for the page. Generating a
+new token in another tab invalidates the earlier tab's token.
 
-> ✅ If the path is unsafe, an `InvalidArgumentException` is thrown.
+See [Forms and validation](forms.md#csrf-protection) for the actual checked methods,
+header support and named-route exemptions.
 
-Typical usage includes view resolution, file loading, and any file system operation that relies on user-provided input.
-
----
-
-## Output Escaping: `safeOutput()`
+## Register a rule
 
 ```php
-guard()->safeOutput('Hello <script>alert("xss")</script>');
-// Outputs: Hello &lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;
+use function Naf\guard;
 
-guard()->safeOutput(['title' => 'My <b>Title</b>']);
-```
+guard()->register('positiveId', function (int $id): int {
+    if ($id < 1) {
+        throw new \InvalidArgumentException('An ID must be positive.');
+    }
+    return $id;
+});
 
-- If given a **string**, escapes it for safe HTML output using `htmlspecialchars()`.
-- If given an **array**, recursively escapes each element.
-- Always uses `UTF-8` encoding and `ENT_QUOTES` mode for maximum compatibility.
-
-> ✅ Protects your templates and outputs against accidental XSS.
-
----
-
-## CSRF Token Management: `csrf()`
-
-The `Guard` also handles CSRF protection internally.  
-You can generate and validate CSRF tokens easily:
-
-```php
-$token = guard()->csrf()->generate();
-```
-
-This:
-- Starts the session (if not already started)
-- Creates a CSRF token if none exists
-- Returns the token for use in forms
-
-When validating a submitted token:
-
-```php
-if (!guard()->csrf()->validate($_POST['_csrf'] ?? '')) {
-    abort(419, 'Invalid CSRF token');
-}
-```
-
-> ✅ The CSRF token stays valid across multiple forms and tabs, and only rotates manually (e.g., after login/logout).
-
----
-
-## Example Usage
-
-**In a form:**
-
-```php
-<form method="POST" action="/submit">
-    <input type="hidden" name="_csrf" value="<?= guard()->csrf()->generate() ?>">
-    ...
-</form>
-```
-
-**When processing the request:**
-
-```php
-if (!guard()->csrf()->validate($_POST['_csrf'] ?? '')) {
-    abort(419, 'Invalid CSRF token');
-}
+$id = guard()->positiveId(42);
 ```

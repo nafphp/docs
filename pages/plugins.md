@@ -50,7 +50,7 @@ Below is a minimal but complete `composer.json` for a NAF plugin:
   ],
   "require": {
     "php": ">=8.3",
-    "fkde/NAF": "dev-main"
+    "naf/framework": "^0.2"
   },
   "autoload": {
     "psr-4": {
@@ -91,9 +91,13 @@ No manual registration is needed.
 ## Accessing Plugin Metadata
 
 ```php
-plugin()->getMeta('viewPaths');
-plugin()->getMeta('configPaths');
-plugin()->getMeta('bootstraps');
+use function Naf\plugin;
+
+$plugins = plugin(); // array<string, Naf\Support\Plugin>
+$view = plugin('naf/view'); // Plugin; ask only for an installed package
+$view->getViewPaths();
+$view->getConfigPaths();
+$view->getBootstrapFile();
 ```
 
 For internal use or debugging only – no need to register anything yourself.
@@ -111,19 +115,21 @@ my-event-plugin/
 ``` php
 namespace MyEventPlugin\Listeners;
 
+use function Naf\log;
+
 class UserListener
 {
     public function onUserRegistered($user)
     {
         // Log registration, send welcome email, etc.
-        logger()->info('New user registered: ' . $user->email);
+        log()->info('New user registered: ' . $user->email);
     }
 }
 ```
 **bootstrap.php:**
 ``` php
 use MyEventPlugin\Listeners\UserListener;
-use function Naf\event;
+use function Naf\{event, log};
 
 // Register the event listener
 $listener = new UserListener();
@@ -131,12 +137,12 @@ event()->listen('user.registered', [$listener, 'onUserRegistered']);
 
 // You can also use closure-based listeners
 event()->listen('user.login', function($user) {
-    logger()->info('User logged in: ' . $user->email);
+    log()->info('User logged in: ' . $user->email);
 });
 ```
 Usage in the main application:
 ``` php
-use function Naf\event;
+use function Naf\{event, log};
 
 // After successful user registration:
 $user = new User(); // Your user object
@@ -181,7 +187,7 @@ class HelloController
 use MyHelloPlugin\Controllers\HelloController;
 use function Naf\route;
 
-route()->add('GET', '/plugin-hello', [HelloController::class, 'index']);
+route()->add('GET', '/plugin-hello', [HelloController::class, 'index'], 'plugin.hello');
 ```
 
 Visit: `http://yourapp.local/plugin-hello`
@@ -197,6 +203,29 @@ Visit: `http://yourapp.local/plugin-hello`
 
 ## Config Merge Order
 
-1. App `app/config.php`
-2. Plugins `app/config.php`
-3. Framework `src/config.php`
+1. Framework defaults
+2. Plugin configuration, in plugin order
+3. Application configuration (`app/config.php`, or `src/config.php` as a fallback)
+
+Later values override earlier values recursively. See [Configuration](configuration.md).
+
+## Boot order
+
+All discovered plugins are registered before any bootstrap runs. `hasPlugin()` says that a
+plugin is registered; it does not say that its bootstrap has already run. Prefer lazy service
+factories so a dependency is resolved after registration has finished.
+
+When boot order matters, create `app/plugins.php` returning the package names to load first:
+
+```php
+<?php
+
+return ['naf/session', 'naf/form'];
+```
+
+Other installed plugins follow. This orders installed plugins; it does not install packages or
+act as an allow-list. Application routes load after plugin bootstraps. Application service
+bindings belong in the root `bootstrap.php`, after the autoloader and before `app()->run()`.
+
+The loader also accepts `src/config.php`, `src/routes.php` and `src/functions.php` when their
+`app/` counterparts are absent. Keep one layout per package to avoid competing files.

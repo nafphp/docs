@@ -4,78 +4,63 @@ title: Events
 
 # Events
 
-Points in the request where the framework stops and asks whether anybody wants to do
-something. A listener is a callable; there is no event class hierarchy to learn and no
-subscriber interface to implement.
-
-This is also how plugins work on your application rather than around it: the CSRF check is
-a listener on `controller.calling`, not a layer wrapped around your controller. Anything a
-plugin does at these points, your own code can do the same way.
-
-## Listening for Events
-
-You can listen to events by calling the `listen()` method via the `event()` helper.
+Listeners are callables registered during bootstrap. Custom events can carry any payload:
 
 ```php
-use function Naf\event;
+use function Naf\{event, log};
 
-event()->listen('user.registered', function ($user) {
-    // Handle the user registration event
-});
-```
-
-- The first argument is the event name (a string).
-- The second argument is a callable that will be executed when the event is dispatched.
-
-You can register multiple listeners for the same event.
-
----
-
-## Dispatching Events
-
-You can fire (dispatch) events using the `dispatch()` method:
-
-```php
-use function Naf\event;
-
-event()->dispatch('user.registered', $user);
-```
-
-- The first argument is the event name.
-- Additional arguments are passed to the listeners as parameters.
-- All listener responses are collected into an array and returned.
-
----
-
-## Example: Custom Event Flow
-
-```php
-use function Naf\event;
-
-// Register a listener
-event()->listen('product.created', function ($product) {
-    logger()->info('Product created: ' . $product->id);
+event()->listen('product.created', function (object $product) {
+    log()->info('Product created', ['id' => $product->id]);
 });
 
-// Dispatch the event
-$product = new Product();
+// After your application creates a product:
 event()->dispatch('product.created', $product);
 ```
 
----
+`listen($event, $listener, $priority = 0)` runs higher priorities first.
+`dispatch()` returns an array of listener results. Use closures or `[ListenerClass::class, 'handle']`;
+NAF constructs class-based listeners through the default container.
 
-## Built-in Events
+## Request lifecycle
 
-NAF fires several built-in events during the request lifecycle.  
-You can hook into these to customize behavior without modifying core code.
+The following events describe the normal HTTP path. Payload order is part of the API.
 
-| Event Name | When it fires | Payload | Typical Use |
-|:---|:---|:---|:---|
-| `request.start` | At the very beginning of `run()` or `forward()` | `$_SERVER`, optional request objects | Logging, preprocessing global request data |
-| `route.matching` | Before route matching starts | `$uri`, `$method` | URL rewriting, redirections, special cases |
-| `route.matched` | After a route has been found | `$route` (array or object) | Auth checks, feature toggles |
-| `route.not_found` | If no route is found | `$uri`, `$method` | Custom 404 handling, statistics |
-| `controller.calling` | Before calling the controller action | `$controller`, `$method`, `$params` | Controller overloading, parameter manipulation |
-| `controller.called` | After the controller action returns | `$controller`, `$method`, `$response` | Post-processing, adding headers |
-| `response.sending` | Before sending the response | `$response` | Caching, injecting headers, modifying output |
-| `request.end` | At the very end after sending response | Time measurement, memory usage | Logging, performance analysis |
+| Event | Payload | When |
+|---|---|---|
+| `request.start` | `$request` | After creating and registering the request in `App::run()` |
+| `route.matching` | `$uri, $method` | Before searching routes |
+| `route.matched` | `$route` array | After finding a match |
+| `route.not_found` | `$uri, $method` | When no route matches |
+| `controller.calling` | `$request, $controller, $action` | Before invoking the handler; controller is null for a closure |
+| `controller.called` | `$request, $controller, $action, $response` | After invoking the handler |
+| `exception` | `$exception` | When request handling throws |
+| `response.send` | `$response` | During response finalization |
+| `response.header` | `$response` | Before sending HTTP headers |
+| `response.body` | `$response` | Before writing the body, after headers |
+| `response.end` | `$response` | After writing the body |
+
+`request.end` and `request.body` are declared constants but are not dispatched by the current
+request path. There is no `response.sending` event.
+
+## Change a response
+
+PSR-7 responses are immutable: `withHeader()` returns a new response. Return it from a
+`response.header` listener:
+
+```php
+use Naf\Core\Event;
+use Psr\Http\Message\ResponseInterface;
+use function Naf\event;
+
+event()->listen(Event::RESPONSE_HEADER, function (ResponseInterface $response) {
+    return $response->withHeader('X-Application', 'My NAF app');
+});
+```
+
+The last returned response is used. Returning a response from `controller.called` or
+`response.send` does not replace the response being sent. The `exception` hook also supports
+returned responses; see [Errors and aborting](errors.md).
+
+The response-body and response-end events are too late to change headers. Raw fatal-error
+emission can bypass this normal event path; do not depend on these listeners for cleanup
+that must run after every possible PHP failure.

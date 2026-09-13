@@ -1,4 +1,200 @@
 {
+ "classes": [
+  "Naf\\Auth\\Auth",
+  "Naf\\Auth\\Credentials\\CredentialsInterface",
+  "Naf\\Auth\\Credentials\\PasswordCredentials",
+  "Naf\\Auth\\Exceptions\\ForbiddenException",
+  "Naf\\Auth\\Exceptions\\UnauthenticatedException",
+  "Naf\\Auth\\Identity\\Identity",
+  "Naf\\Auth\\Identity\\IdentityInterface",
+  "Naf\\Auth\\Identity\\UserInterface",
+  "Naf\\Auth\\Identity\\UserProfile",
+  "Naf\\Auth\\Provider\\DatabaseProvider",
+  "Naf\\Auth\\Provider\\ModelRepository",
+  "Naf\\Auth\\Provider\\OrmProvider",
+  "Naf\\Auth\\Provider\\PasswordProvider",
+  "Naf\\Auth\\Provider\\ProviderInterface",
+  "Naf\\Auth\\Session\\SessionStateStore",
+  "Naf\\Auth\\Session\\StateStoreInterface",
+  "Naf\\Auth\\Support\\PasswordHasher",
+  "Naf\\CLI\\Commands\\ListCommand",
+  "Naf\\CLI\\Commands\\RouteDebugCommand",
+  "Naf\\CLI\\Core\\AbstractCommand",
+  "Naf\\CLI\\Core\\Console",
+  "Naf\\CLI\\Core\\Input",
+  "Naf\\CLI\\Core\\Output",
+  "Naf\\CLI\\Exception\\ConsoleException",
+  "Naf\\CLI\\Support\\CommandRegistry",
+  "Naf\\Client\\Core\\Client",
+  "Naf\\Client\\Exception\\ClientException",
+  "Naf\\Client\\Transports\\CurlTransport",
+  "Naf\\Client\\Transports\\StreamTransport",
+  "Naf\\Client\\Transports\\TransportInterface",
+  "Naf\\Core\\App",
+  "Naf\\Core\\Config",
+  "Naf\\Core\\Container",
+  "Naf\\Core\\Dispatcher",
+  "Naf\\Core\\Environment",
+  "Naf\\Core\\ErrorHandler",
+  "Naf\\Core\\Event",
+  "Naf\\Core\\EventManager",
+  "Naf\\Core\\Log",
+  "Naf\\Core\\ResponseEmitter",
+  "Naf\\Core\\Route",
+  "Naf\\Database\\Commands\\MigrateCommand",
+  "Naf\\Database\\Commands\\Migration",
+  "Naf\\Database\\Commands\\MigrationCreateCommand",
+  "Naf\\Database\\Core\\AbstractMigration",
+  "Naf\\Database\\Core\\Database",
+  "Naf\\Database\\Core\\MigrationInterface",
+  "Naf\\Database\\Exceptions\\DatabaseException",
+  "Naf\\Database\\Support\\MigrationRegistry",
+  "Naf\\Decorators\\AutoResolvingContainer",
+  "Naf\\Exceptions\\AbortException",
+  "Naf\\Exceptions\\ContainerException",
+  "Naf\\Exceptions\\DispatcherException",
+  "Naf\\Exceptions\\HttpException",
+  "Naf\\Exceptions\\RouteNotFoundException",
+  "Naf\\Exceptions\\ServiceNotFoundException",
+  "Naf\\Form\\Core\\Validator",
+  "Naf\\Form\\Events\\CsrfListener",
+  "Naf\\Form\\Support\\Csrf",
+  "Naf\\I18n\\Core\\Translator",
+  "Naf\\I18n\\Events\\CookieSetListener",
+  "Naf\\I18n\\Events\\LocaleListener",
+  "Naf\\I18n\\Support\\Language",
+  "Naf\\MCP\\Auth\\AuthenticationException",
+  "Naf\\MCP\\Auth\\AuthenticatorInterface",
+  "Naf\\MCP\\Auth\\BearerTokenAuthenticator",
+  "Naf\\MCP\\Auth\\DisabledAuthenticator",
+  "Naf\\MCP\\Auth\\McpIdentity",
+  "Naf\\MCP\\Commands\\CreateTokenCommand",
+  "Naf\\MCP\\Commands\\ListTokensCommand",
+  "Naf\\MCP\\Commands\\RevokeTokenCommand",
+  "Naf\\MCP\\Core\\MCPController",
+  "Naf\\MCP\\Core\\MCPRouter",
+  "Naf\\MCP\\Store\\CreatedToken",
+  "Naf\\MCP\\Store\\FileTokenStore",
+  "Naf\\MCP\\Store\\TokenRecord",
+  "Naf\\MCP\\Store\\TokenStoreInterface",
+  "Naf\\MCP\\Support\\FilesystemStore",
+  "Naf\\MCP\\Support\\Schema",
+  "Naf\\MCP\\Support\\TokenGenerator",
+  "Naf\\MCP\\Support\\TokenHasher",
+  "Naf\\MCP\\Support\\ToolRegistry",
+  "Naf\\MCP\\Support\\ToolResult",
+  "Naf\\MCP\\Tools\\ScopedToolInterface",
+  "Naf\\MCP\\Tools\\ToolInterface",
+  "Naf\\Mail\\Core\\Mailer",
+  "Naf\\Mail\\Core\\TransportInterface",
+  "Naf\\Mail\\Core\\Transport\\MailTransport",
+  "Naf\\Mail\\Core\\Transport\\Trait\\MailMessageRenderer",
+  "Naf\\Mail\\Exceptions\\MailException",
+  "Naf\\Mail\\Models\\Mail",
+  "Naf\\OAuth\\Client\\Account\\AccountLink",
+  "Naf\\OAuth\\Client\\Account\\AccountLinkStoreInterface",
+  "Naf\\OAuth\\Client\\Account\\Accounts",
+  "Naf\\OAuth\\Client\\Account\\PdoAccountLinks",
+  "Naf\\OAuth\\Client\\Commands\\DiscoverCommand",
+  "Naf\\OAuth\\Client\\Commands\\DoctorCommand",
+  "Naf\\OAuth\\Client\\Controllers\\OAuthController",
+  "Naf\\OAuth\\Client\\Core\\Callback",
+  "Naf\\OAuth\\Client\\Core\\Flow",
+  "Naf\\OAuth\\Client\\Core\\IdToken",
+  "Naf\\OAuth\\Client\\Core\\Metadata",
+  "Naf\\OAuth\\Client\\Core\\OAuth",
+  "Naf\\OAuth\\Client\\Core\\SessionTransactions",
+  "Naf\\OAuth\\Client\\Core\\TransactionStoreInterface",
+  "Naf\\OAuth\\Client\\Core\\UserInfo",
+  "Naf\\OAuth\\Client\\Exception\\ConfigurationException",
+  "Naf\\OAuth\\Client\\Exception\\OAuthException",
+  "Naf\\OAuth\\Client\\Identity\\ExternalIdentity",
+  "Naf\\OAuth\\Client\\Migrations\\OAuthIdentitiesMigration",
+  "Naf\\OAuth\\Client\\Migrations\\OAuthProviderTokensMigration",
+  "Naf\\OAuth\\Client\\Provider\\Presets",
+  "Naf\\OAuth\\Client\\Provider\\ProviderConfig",
+  "Naf\\OAuth\\Client\\Provider\\UserInfoSource",
+  "Naf\\OAuth\\Client\\Token\\Cipher",
+  "Naf\\OAuth\\Client\\Token\\PdoTokens",
+  "Naf\\OAuth\\Client\\Token\\ProviderToken",
+  "Naf\\OAuth\\Client\\Token\\TokenStoreInterface",
+  "Naf\\OAuth\\Client\\Token\\Tokens",
+  "Naf\\OAuth\\Server\\Commands\\ClientCreateCommand",
+  "Naf\\OAuth\\Server\\Commands\\ClientListCommand",
+  "Naf\\OAuth\\Server\\Commands\\ClientRotateSecretCommand",
+  "Naf\\OAuth\\Server\\Commands\\DoctorCommand",
+  "Naf\\OAuth\\Server\\Commands\\KeysGenerateCommand",
+  "Naf\\OAuth\\Server\\Commands\\KeysPruneCommand",
+  "Naf\\OAuth\\Server\\Commands\\SetupCommand",
+  "Naf\\OAuth\\Server\\Controllers\\AuthorizeController",
+  "Naf\\OAuth\\Server\\Controllers\\OpenIdController",
+  "Naf\\OAuth\\Server\\Controllers\\TokenController",
+  "Naf\\OAuth\\Server\\Core\\Authorization",
+  "Naf\\OAuth\\Server\\Core\\Claims",
+  "Naf\\OAuth\\Server\\Core\\ClientAuthenticator",
+  "Naf\\OAuth\\Server\\Core\\Consent",
+  "Naf\\OAuth\\Server\\Core\\Discovery",
+  "Naf\\OAuth\\Server\\Core\\IdTokenIssuer",
+  "Naf\\OAuth\\Server\\Core\\ResourceServer",
+  "Naf\\OAuth\\Server\\Core\\ScopePolicy",
+  "Naf\\OAuth\\Server\\Core\\TokenContext",
+  "Naf\\OAuth\\Server\\Core\\TokenEndpoint",
+  "Naf\\OAuth\\Server\\Core\\UserInfoEndpoint",
+  "Naf\\OAuth\\Server\\Core\\Users",
+  "Naf\\OAuth\\Server\\Exception\\ConfigurationException",
+  "Naf\\OAuth\\Server\\Exception\\OAuthError",
+  "Naf\\OAuth\\Server\\Migrations\\OAuthServerMigration",
+  "Naf\\OAuth\\Server\\Model\\AuthorizationRequest",
+  "Naf\\OAuth\\Server\\Model\\Client",
+  "Naf\\OAuth\\Server\\Model\\IssuedTokens",
+  "Naf\\OAuth\\Server\\Model\\SigningKey",
+  "Naf\\OAuth\\Server\\Model\\TokenRecord",
+  "Naf\\OAuth\\Server\\Store\\ClientStoreInterface",
+  "Naf\\OAuth\\Server\\Store\\FileKeys",
+  "Naf\\OAuth\\Server\\Store\\KeyStoreInterface",
+  "Naf\\OAuth\\Server\\Store\\PdoClients",
+  "Naf\\OAuth\\Server\\Store\\PdoTokens",
+  "Naf\\OAuth\\Server\\Store\\TokenStoreInterface",
+  "Naf\\OAuth\\Server\\Support\\Views",
+  "Naf\\ORM\\Core\\EntityInterface",
+  "Naf\\ORM\\Core\\EntityManager",
+  "Naf\\ORM\\Core\\EntityTrait",
+  "Naf\\ORM\\Exception\\DatabaseException",
+  "Naf\\ORM\\Model\\AbstractModel",
+  "Naf\\ORM\\Repository\\AbstractRepository",
+  "Naf\\ORM\\Repository\\RepositoryFactory",
+  "Naf\\ORM\\Support\\DatabaseHelper",
+  "Naf\\Queue\\Commands\\QueueConsumeCommand",
+  "Naf\\Queue\\Commands\\QueueRetryFailedCommand",
+  "Naf\\Queue\\Core\\Queue",
+  "Naf\\Queue\\Core\\QueueJobInterface",
+  "Naf\\Queue\\Decorators\\Drivers\\ChannelDeadletterDriverInterface",
+  "Naf\\Queue\\Decorators\\Drivers\\ChannelDriver",
+  "Naf\\Queue\\Decorators\\Drivers\\ChannelQueueDriverInterface",
+  "Naf\\Queue\\Drivers\\FileDriver",
+  "Naf\\Queue\\Drivers\\QueueDeadletterDriverInterface",
+  "Naf\\Queue\\Drivers\\QueueDriverInterface",
+  "Naf\\Queue\\Drivers\\SQLiteDriver",
+  "Naf\\Schedule\\Commands\\ScheduleListCommand",
+  "Naf\\Schedule\\Commands\\ScheduleTickerCommand",
+  "Naf\\Schedule\\Core\\JobRepository",
+  "Naf\\Schedule\\Core\\ScheduledJobInterface",
+  "Naf\\Schedule\\Core\\Scheduler",
+  "Naf\\Schedule\\Support\\CronParser",
+  "Naf\\Session\\Core\\Session",
+  "Naf\\Session\\Migrations\\SessionTableMigration",
+  "Naf\\Session\\Storage\\DatabaseSessionHandler",
+  "Naf\\Support\\AppHolder",
+  "Naf\\Support\\Collection",
+  "Naf\\Support\\Cookie",
+  "Naf\\Support\\CoreFileLoader",
+  "Naf\\Support\\Guard",
+  "Naf\\Support\\Plugin",
+  "Naf\\Support\\RequestParameter",
+  "Naf\\Support\\Stopwatch",
+  "Naf\\View\\Core\\Asset",
+  "Naf\\View\\Core\\View"
+ ],
  "commands": [
   "command:list",
   "db:migrate",
@@ -21,6 +217,200 @@
   "schedule:list",
   "schedule:ticker"
  ],
+ "function_details": {
+  "abort": {
+   "namespace": "Naf",
+   "signature": "abort(int $statusCode = 404, string $message = ''): never"
+  },
+  "app": {
+   "namespace": "Naf",
+   "signature": "app(): Naf\\Core\\App"
+  },
+  "asset": {
+   "namespace": "Naf\\View",
+   "signature": "asset(): Naf\\View\\Core\\Asset"
+  },
+  "auth": {
+   "namespace": "Naf\\Auth",
+   "signature": "auth(): Naf\\Auth\\Auth"
+  },
+  "client": {
+   "namespace": "Naf\\Client",
+   "signature": "client(): Naf\\Client\\Core\\Client"
+  },
+  "command": {
+   "namespace": "Naf\\CLI",
+   "signature": "command(): Naf\\CLI\\Support\\CommandRegistry"
+  },
+  "config": {
+   "namespace": "Naf",
+   "signature": "config(?string $key = null, mixed $default = null): mixed"
+  },
+  "csrf": {
+   "namespace": "Naf\\Form",
+   "signature": "csrf(): Naf\\Form\\Support\\Csrf"
+  },
+  "database": {
+   "namespace": "Naf\\Database",
+   "signature": "database(): ?PDO"
+  },
+  "em": {
+   "namespace": "Naf\\ORM",
+   "signature": "em(): Naf\\ORM\\Core\\EntityManager"
+  },
+  "env": {
+   "namespace": "Naf",
+   "signature": "env(): string"
+  },
+  "error": {
+   "namespace": "Naf\\Form",
+   "signature": "error($field, Naf\\Form\\Core\\Validator $validator): ?string"
+  },
+  "error_class": {
+   "namespace": "Naf\\Form",
+   "signature": "error_class($field, Naf\\Form\\Core\\Validator $validator): string"
+  },
+  "event": {
+   "namespace": "Naf",
+   "signature": "event(): Naf\\Core\\EventManager"
+  },
+  "guard": {
+   "namespace": "Naf",
+   "signature": "guard(): Naf\\Support\\Guard"
+  },
+  "has_error": {
+   "namespace": "Naf\\Form",
+   "signature": "has_error($field, Naf\\Form\\Core\\Validator $validator): bool"
+  },
+  "is_post": {
+   "namespace": "Naf\\Form",
+   "signature": "is_post(): bool"
+  },
+  "json": {
+   "namespace": "Naf",
+   "signature": "json(mixed $data, int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "lang": {
+   "namespace": "Naf\\I18n",
+   "signature": "lang(): ?string"
+  },
+  "log": {
+   "namespace": "Naf",
+   "signature": "log(): Psr\\Log\\LoggerInterface"
+  },
+  "mail": {
+   "namespace": "Naf\\Mail",
+   "signature": "mail(): Naf\\Mail\\Models\\Mail"
+  },
+  "mailer": {
+   "namespace": "Naf\\Mail",
+   "signature": "mailer(): Naf\\Mail\\Core\\Mailer"
+  },
+  "memory": {
+   "namespace": "Naf\\Form",
+   "signature": "memory(string $key, mixed $default = null): ?string"
+  },
+  "memory_checked": {
+   "namespace": "Naf\\Form",
+   "signature": "memory_checked(string $key, mixed $value = 'on'): string"
+  },
+  "memory_selected": {
+   "namespace": "Naf\\Form",
+   "signature": "memory_selected(string $key, mixed $expectedValue): string"
+  },
+  "oauth": {
+   "namespace": "Naf\\OAuth\\Client",
+   "signature": "oauth(string $provider): Naf\\OAuth\\Client\\Core\\Flow"
+  },
+  "oauth_button": {
+   "namespace": "Naf\\OAuth\\Client",
+   "signature": "oauth_button(string $provider, ?string $label = null, ?string $next = null): string"
+  },
+  "oauth_token": {
+   "namespace": "Naf\\OAuth\\Client",
+   "signature": "oauth_token(string $provider): ?Naf\\OAuth\\Client\\Token\\ProviderToken"
+  },
+  "param": {
+   "namespace": "Naf",
+   "signature": "param(): Naf\\Support\\RequestParameter"
+  },
+  "plugin": {
+   "namespace": "Naf",
+   "signature": "plugin(?string $name = null): Naf\\Support\\Plugin|array"
+  },
+  "queue": {
+   "namespace": "Naf\\Queue",
+   "signature": "queue(?string $channel = null): Naf\\Queue\\Core\\Queue"
+  },
+  "redirect": {
+   "namespace": "Naf",
+   "signature": "redirect(string $url, int $status = 302): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "refresh": {
+   "namespace": "Naf",
+   "signature": "refresh(): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "render": {
+   "namespace": "Naf\\View",
+   "signature": "render(string $template, array $vars = []): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "repo": {
+   "namespace": "Naf\\ORM",
+   "signature": "repo(string $repository): Naf\\ORM\\Repository\\AbstractRepository"
+  },
+  "request": {
+   "namespace": "Naf",
+   "signature": "request(): Psr\\Http\\Message\\ServerRequestInterface|Psr\\Http\\Message\\RequestInterface"
+  },
+  "response": {
+   "namespace": "Naf",
+   "signature": "response(mixed $content = '', int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "route": {
+   "namespace": "Naf",
+   "signature": "route(?string $name = null, array $params = []): Naf\\Core\\Route|string"
+  },
+  "s": {
+   "namespace": "Naf\\View",
+   "signature": "s(array|string|null $value): array|string|null"
+  },
+  "scheduler": {
+   "namespace": "Naf\\Schedule",
+   "signature": "scheduler(): Naf\\Schedule\\Core\\Scheduler"
+  },
+  "session": {
+   "namespace": "Naf\\Session",
+   "signature": "session(): Naf\\Session\\Core\\Session"
+  },
+  "t": {
+   "namespace": "Naf\\I18n",
+   "signature": "t(string $key, array $params = []): string"
+  },
+  "token": {
+   "namespace": "Naf\\OAuth\\Server",
+   "signature": "token(): Naf\\OAuth\\Server\\Core\\TokenContext"
+  },
+  "tokens": {
+   "namespace": "Naf\\MCP",
+   "signature": "tokens(): Naf\\MCP\\Store\\TokenStoreInterface"
+  },
+  "tool": {
+   "namespace": "Naf\\MCP",
+   "signature": "tool(): Naf\\MCP\\Support\\ToolRegistry"
+  },
+  "translator": {
+   "namespace": "Naf\\I18n",
+   "signature": "translator(): Naf\\I18n\\Core\\Translator"
+  },
+  "validator": {
+   "namespace": "Naf\\Form",
+   "signature": "validator(): Naf\\Form\\Core\\Validator"
+  },
+  "view": {
+   "namespace": "Naf\\View",
+   "signature": "view(string $tpl, array $vars = []): string"
+  }
+ },
  "functions": {
   "abort": "framework",
   "app": "framework",
@@ -56,7 +446,6 @@
   "redirect": "framework",
   "refresh": "framework",
   "render": "view",
-  "render_oauth_view": "oauth-client",
   "repo": "orm",
   "request": "framework",
   "response": "framework",
@@ -64,8 +453,6 @@
   "s": "view",
   "scheduler": "schedule",
   "session": "session",
-  "simple_render": "framework",
-  "simple_view": "framework",
   "t": "i18n",
   "token": "oauth-server",
   "tokens": "mcp",
@@ -85,7 +472,8 @@
    "suggests": [
     "naf/orm",
     "naf/session"
-   ]
+   ],
+   "version": "v0.2.0"
   },
   "cli": {
    "description": "NAF CLI Plugin for console applications.",
@@ -94,7 +482,8 @@
    "requires": [
     "naf/framework"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.0"
   },
   "client": {
    "description": "NAF Client Plugin to make simple http requests.",
@@ -103,7 +492,8 @@
    "requires": [
     "naf/framework"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.0"
   },
   "database": {
    "description": "NAF Database Plugin to work with various storage solutions.",
@@ -112,7 +502,8 @@
    "requires": [
     "naf/framework"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.0"
   },
   "form": {
    "description": "NAF Form Plugin to make form handling easier.",
@@ -122,14 +513,16 @@
     "naf/framework",
     "naf/session"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.1"
   },
   "framework": {
    "description": "NAF - the ultra-light, functional PHP framework for fast microservices and APIs.",
    "namespace": "Naf",
    "php": ">=8.3",
    "requires": [],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.1"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
@@ -138,7 +531,8 @@
    "requires": [
     "naf/framework"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.0"
   },
   "mail": {
    "description": "NAF Mail Plugin for quick email communication.",
@@ -147,7 +541,8 @@
    "requires": [
     "naf/framework"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.0"
   },
   "mcp": {
    "description": "NAF MCP Plugin for basic AI driven workflows.",
@@ -156,7 +551,8 @@
    "requires": [
     "naf/framework"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.1"
   },
   "oauth-client": {
    "description": "Sign in with external OAuth2 and OpenID Connect providers, keeping your own user model.",
@@ -172,7 +568,8 @@
     "naf/client",
     "naf/database",
     "naf/view"
-   ]
+   ],
+   "version": "v0.2.1"
   },
   "oauth-server": {
    "description": "Run your application as an OAuth2 authorization server and protect its APIs.",
@@ -188,7 +585,8 @@
     "naf/cli",
     "naf/database",
     "naf/view"
-   ]
+   ],
+   "version": "v0.2.0"
   },
   "orm": {
    "description": "NAF ORM Plugin.",
@@ -198,7 +596,8 @@
     "naf/database",
     "naf/framework"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.0"
   },
   "queue": {
    "description": "NAF Queue Plugin for asynchronous jobs.",
@@ -208,7 +607,8 @@
     "naf/cli",
     "naf/framework"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.1"
   },
   "schedule": {
    "description": "NAF Schedule Plugin for recurring Tasks.",
@@ -218,7 +618,8 @@
     "naf/framework",
     "naf/queue"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.1"
   },
   "session": {
    "description": "NAF Session Plugin for storing data across requests.",
@@ -229,7 +630,8 @@
    ],
    "suggests": [
     "naf/database"
-   ]
+   ],
+   "version": "v0.2.0"
   },
   "view": {
    "description": "NAF View Plugin with simple templating.",
@@ -238,7 +640,8 @@
    "requires": [
     "naf/framework"
    ],
-   "suggests": []
+   "suggests": [],
+   "version": "v0.2.0"
   }
  }
 }

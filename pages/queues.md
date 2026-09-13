@@ -88,10 +88,13 @@ waiting for the OOM killer to decide.
 
 ```ini
 [program:naf-queue]
-command=php bin/naf queue:consume --channels=default,emails --max-jobs=500
+directory=/var/www/my-app
+command=php /var/www/my-app/vendor/bin/naf queue:consume --channels=default,emails --max-jobs=500
 autostart=true
 autorestart=true
 ```
+
+Replace `/var/www/my-app` with the absolute path of your deployed application.
 
 ## Jobs that failed
 

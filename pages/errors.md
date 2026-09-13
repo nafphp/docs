@@ -2,90 +2,74 @@
 title: Errors and aborting
 ---
 
-# Error Handling
+# Errors and aborting
 
-What happens when a route does not match, a controller throws, or your own code decides
-the request should stop. All three end in a response rather than a stack trace on a white
-page — and which response is yours to define.
+An unknown route, a thrown exception or `abort()` reaches the error-handling path.
+The default response uses the exception's `getStatusCode()` when available, otherwise 500.
 
-`abort()` is the deliberate case: a controller that has decided the answer is 404 says so
-and stops, instead of returning a value that every caller above it has to check.
-
-## Default Error Pages
-
-If an error occurs, NAF will:
-
-1. First check for a custom error page in your `app/views/errors/` directory.
-2. If no custom page exists, it falls back to the default built-in page.
-
-Built-in default pages exist for:
-
-- `404` — Not Found
-- `500` — Internal Server Error
-
----
-
-## Overriding Error Pages
-
-You can override any default error page by creating a file in your project at:
-
-- `app/views/errors/404.phtml`
-- `app/views/errors/500.phtml`
-
-Example: Custom 404 page:
-
-```php
-<?php use function Naf\View\s; ?>
-
-<h1>Page not found</h1>
-<p>The page <?= s($path) ?> does not exist.</p>
-```
-
-- NAF automatically passes basic information like the requested path into your error view.
-- Use the `s()` helper to safely escape any output.
-
----
-
-## Manually Aborting Requests
-
-Sometimes you want to stop execution manually and send an error response.  
-NAF provides the `abort()` helper for this, imported with `use function Naf\abort;`.
+## Abort a request
 
 ```php
 use function Naf\abort;
 
-abort(404, 'The requested page was not found.');
+abort(404, 'The requested item was not found.');
 ```
 
-- Immediately stops execution.
-- Sends the specified error page (e.g., 404, 500, etc.).
-- Optionally pass a custom message.
+`abort()` throws `Naf\Exceptions\AbortException`; it does not render a template or send a
+response itself. Code after the call is not executed unless an outer layer catches the exception.
+Avoid catching and discarding it inside a broad `catch (Throwable)`.
 
-### abort() Function
+## Default output
+
+The core supplies diagnostic and sanitized error templates. `APP_ENV=prod` and `APP_ENV=test`
+use sanitized output; `dev` shows diagnostics. Use the exact names documented in
+[Configuration](configuration.md#application-environment).
+
+Placing `app/views/errors/404.phtml` in your application **does not automatically override**
+the core error handler. To customize an error, return a response from the `exception` event.
+
+## Customize an HTTP error
+
+Register this in `bootstrap.php`, after the autoloader and before `app()->run()`:
 
 ```php
-function abort(int $statusCode = 404, string $message = ''): never
-{
-    $response = response(view('errors.' . $statusCode, [
-        'statusCode' => $statusCode,
-        'message' => s($message)
-    ]), 500);
-    send_response($response);
-    exit(0);
-}
+use Naf\Core\{ErrorHandler, Event};
+use function Naf\{event, response};
+
+event()->listen(Event::EXCEPTION, function (\Throwable $exception) {
+    if (ErrorHandler::resolveStatusCode($exception) !== 404) {
+        return null; // Keep the default response for other failures.
+    }
+
+    return response('<h1>Page not found</h1>', 404, [
+        'Content-Type' => 'text/html; charset=UTF-8',
+    ]);
+});
 ```
 
-- Renders the error view from `app/views/errors/{$statusCode}.phtml`.
-- Sends the response immediately and exits the application.
+With `naf/view`, you can instead return `Naf\View\render('errors.404')->withStatus(404)`.
+Pass any template data explicitly; no `$path` variable is injected automatically.
 
----
+## JSON errors for an API
 
-## Handling Uncaught Exceptions
+For expected validation failures, return `json($payload, 422)` from your handler. To cover
+uncaught exceptions as well, register this before `app()->run()`:
 
-If an uncaught exception occurs during request processing, NAF:
+```php
+use Naf\Core\{ErrorHandler, Event};
+use function Naf\{event, json, log, request};
 
-1. Automatically catches the exception.
-2. Sends a `500 Internal Server Error` response.
-3. Uses the custom `app/views/errors/500.phtml` page if available.
+event()->listen(Event::EXCEPTION, function (\Throwable $exception) {
+    if (!str_starts_with(request()->getUri()->getPath(), '/api/')) {
+        return null;
+    }
 
-You don't have to manually catch exceptions unless you want to customize behavior.
+    log()->error('API request failed', ['exception' => $exception]);
+    $status = ErrorHandler::resolveStatusCode($exception);
+    return json(['error' => $status >= 500 ? 'Internal server error' : 'Request refused'], $status);
+});
+```
+
+Do not expose unexpected exception messages to clients. When a listener returns its own
+response, it should also perform any logging you need. This hook handles failures during the
+request cycle; a parse error in the bootstrap itself may occur before the listener exists.

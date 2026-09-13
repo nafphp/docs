@@ -4,73 +4,104 @@ title: Installation
 
 # Installation
 
-NAF is installed into a project you already have, or started from a skeleton that wires
-the usual pieces together for you. Both take one command.
-
-Which packages belong in that command depends on what you are building —
-[the scenarios](choosing-packages.md) answer that first.
-
-## Install via Composer
-
-```bash
-composer require naf/framework
-```
-
-This will:
-
-- Download the NAF core (framework logic inside `/src`)
-- Make it available via Composer autoloading
-- Allow you to use NAF components in your own project structure
-
----
-
-## Set up your project structure
-
-NAF leaves the project organization completely up to you.  
-A typical structure could look like this:
-
-```
-/app
-    /Controllers
-    /Models
-    /Views
-    config.php
-    routes.php
-/public
-    index.php
-bootstrap.php
-composer.json
-```
-
-But you are free to organize it however you like.
-
----
-
-## First Steps
-
-You typically:
-
-- Create a `bootstrap.php` to initialize NAF
-- Set up your `routes.php`
-- Create a `public/index.php` as your web entry point
-
-Example:
-
-```php
-// /bootstrap.php
-
-define('BASE_PATH', __DIR__);
-
-require __DIR__ . '/../vendor/autoload.php';
-
-use function Naf\app;
-
-app()->run(); // Start the application
-```
-
----
+Use the starter for a website, or install only the core for a small HTTP service.
+The Composer vendor is **`naf`**; `nafphp` is the GitHub organisation.
 
 ## Requirements
 
-- PHP 8.3 or higher
-- Composer
+- PHP 8.3 or newer and Composer.
+- PHP's JSON and PDO extensions. Forms also use `mbstring`; database access needs the PDO driver for your database.
+- A writable project directory. Sessions and logs need writable storage at runtime.
+
+## Start with the application skeleton
+
+Run this from the directory in which you keep your projects:
+
+```bash
+composer create-project naf/app nafphp-demo
+cd nafphp-demo
+php -S 127.0.0.1:8000 -t public
+```
+
+Open **http://127.0.0.1:8000/**. You should see the NAF welcome page. Stop the development
+server with Ctrl+C. Keep it bound to localhost; on a deployed site, configure the web server's
+document root as this project's `public/` directory.
+
+The starter installs `naf/framework`, `naf/view` and `naf/form`; `naf/session` arrives through
+the form package. It also registers the `App\` namespace with Composer.
+
+The starter 0.2.1 includes form and API examples. With `naf/framework` 0.2.1, successful form
+redirects still need a protocol correction when using PHP's development server. The tutorial
+below supplies that correction and replaces the starter routes with the documented exercise.
+
+Continue with [Your first application](first-app.md). It replaces the starter demonstration
+with complete files you can copy, then verifies both an HTML page and a JSON endpoint.
+
+## Core-only project
+
+For a service without templates or browser forms, create an empty directory and these files.
+This is a separate starting point; do not replace the starter's Composer file with this one.
+
+```bash
+mkdir naf-api
+cd naf-api
+mkdir -p app public
+```
+
+```json title="composer.json"
+{
+    "name": "example/naf-api",
+    "require": { "php": ">=8.3", "naf/framework": "^0.2" },
+    "autoload": { "psr-4": { "App\\": "app/" } }
+}
+```
+
+```bash
+composer install
+```
+
+```php title="bootstrap.php"
+<?php
+
+define('BASE_PATH', __DIR__);
+require __DIR__ . '/vendor/autoload.php';
+
+use function Naf\app;
+
+app()->run();
+```
+
+```php title="public/index.php"
+<?php
+
+require dirname(__DIR__) . '/bootstrap.php';
+```
+
+```php title="app/routes.php"
+<?php
+
+use function Naf\{json, route};
+
+route()->add('GET', '/', fn() => json(['ok' => true]), 'home');
+```
+
+```dotenv title=".env"
+APP_ENV=dev
+```
+
+```bash
+php -S 127.0.0.1:8000 -t public
+```
+
+In another terminal, `curl http://127.0.0.1:8000/` should return `{"ok": true}`
+(with whitespace for readability). This path needs no view, form, session or database plugin.
+
+## Environment and next steps
+
+Use `APP_ENV=dev` locally, `APP_ENV=test` for tests and **`APP_ENV=prod`** in production.
+Use these exact values: `production` is not the production constant. Keep `.env` and
+`.env.local` out of version control. See [Configuration](configuration.md).
+
+- [Your first application](first-app.md) — a website and a JSON endpoint.
+- [Choosing packages](choosing-packages.md) — add only what your application needs.
+- [Requests and responses](request-response.md) — read incoming data and return a response.

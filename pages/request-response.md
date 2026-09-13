@@ -2,57 +2,98 @@
 title: Requests and responses
 ---
 
-# Response Handling
+# Requests and responses
 
-In NAF, every route must return a valid HTTP response that implements `Psr\Http\Message\ResponseInterface`.
+NAF exposes a PSR-7 server request and expects a PSR-7 response from every handler.
+Import helpers in each PHP file that uses them.
 
-To make this easy, NAF provides helper functions for generating different types of responses. They live in the `Naf` namespace and are imported per file.
-
----
-
-## The response() Helper
-
-The `response()` function creates a simple HTTP response with a body.
+## Read the request
 
 ```php
-use function Naf\response;
+use function Naf\request;
 
-return response('Hello World');
+$method = request()->getMethod();
+$path = request()->getUri()->getPath();
+$query = request()->getQueryParams();
+$authorization = request()->getHeaderLine('Authorization');
+$form = request()->getParsedBody() ?? [];
+$rawBody = (string) request()->getBody();
 ```
 
-- Accepts a **string** for plain text or HTML content.
-- Sets the `Content-Type` header to `text/html; charset=UTF-8` by default.
+`getParsedBody()` exposes parsed form data. It does **not** automatically decode JSON.
+For a JSON-only endpoint, decode the body explicitly and reject invalid input:
 
-**Important:**  
-If you want to send JSON data, you must use the `json()` helper explicitly.
+```php
+use function Naf\{json, request};
 
----
+try {
+    $data = json_decode((string) request()->getBody(), true, 512, JSON_THROW_ON_ERROR);
+} catch (\JsonException) {
+    return json(['error' => 'Invalid JSON'], 400);
+}
+if (!is_array($data)) {
+    return json(['error' => 'Expected an object or array'], 400);
+}
+```
 
-## The json() Helper
+## Combined request parameters
 
-Use the `json()` helper to create a proper JSON HTTP response:
+```php
+use function Naf\param;
+
+$email = param()->get('email');
+$city = param()->get('address.city', 'unknown');
+$data = param()->all();
+```
+
+`param()` merges query parameters and parsed form data. If the parsed body is empty and
+`Content-Type` contains `application/json`, it decodes JSON and merges those values instead.
+Body values override query values at the top level. Invalid JSON contributes no values;
+use explicit decoding when malformed JSON must be distinguished from missing fields.
+A literal key containing a dot takes precedence over a nested lookup.
+
+Use the body directly when a value from the query string should not be accepted.
+[Handling a POST request](recipes/post-requests.md) applies this to forms.
+
+## Uploaded files
+
+```php
+use function Naf\{json, request};
+
+$file = request()->getUploadedFiles()['document'] ?? null;
+if ($file === null || $file->getError() !== UPLOAD_ERR_OK) {
+    return json(['error' => 'Upload failed'], 400);
+}
+
+// The application creates this private directory and decides which file types to accept.
+$destination = BASE_PATH . '/storage/uploads/' . bin2hex(random_bytes(16));
+$file->moveTo($destination);
+```
+
+Uploads are PSR-7 `UploadedFileInterface` objects. Do not use the client-supplied filename as
+an unchecked filesystem path. Validate type and size according to your application's needs.
+
+## Responses
+
+```php
+use function Naf\{json, response};
+
+return response('Hello', 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+```
+
+`response($content = '', $status = 200, $headers = [])` accepts a PSR-7-compatible body.
+The helper sets no default content type; state it explicitly when it matters.
 
 ```php
 use function Naf\json;
 
-return json(['message' => 'Success']);
+return json(['message' => 'Created'], 201);
 ```
 
-- Serializes the given array or object to JSON.
-- Sets the `Content-Type` header to `application/json; charset=UTF-8`.
-- Allows you to optionally set a custom status code.
+`json()` serializes the value and sets `Content-Type: application/json; charset=UTF-8`.
+For a response with no body use `response('', 204)`, not `json(null, 204)`.
 
-Example with a custom status:
-
-```php
-return json(['error' => 'Unauthorized'], 401);
-```
-
----
-
-## The render() Helper
-
-Use the `render()` helper to render a view and return it wrapped in a response:
+## HTML views
 
 ```php
 use function Naf\View\render;
@@ -60,42 +101,51 @@ use function Naf\View\render;
 return render('home', ['name' => 'World']);
 ```
 
-- Loads the specified view from `app/views/` using dot notation.
-- Escapes variables safely using `s()`.
-- Wraps the output into a `text/html` response.
+This needs `naf/view`. `render()` returns a response; `view()` returns a string.
+Templates must escape untrusted values explicitly with `Naf\View\s()`.
+See [Views and templates](views.md).
 
----
+## Redirect and refresh
 
-## Redirect Responses
+```php
+use function Naf\{redirect, refresh};
 
-You can create a redirect response using the `redirect()` helper:
+return redirect('/login');       // 302
+return redirect('/new-url', 301);
+return refresh();               // 302 to the current URL path, without its query string
+```
+
+## Custom responses
+
+```php
+use Nyholm\Psr7\Response;
+
+return new Response(202, ['Content-Type' => 'text/plain'], 'Accepted');
+```
+
+PSR-7 methods such as `withStatus()` and `withHeader()` return a new object. Return or assign
+that new response. See [Events](events.md#change-a-response) for response-header listeners.
+
+## Logging
+
+```php
+use function Naf\log;
+
+log()->info('Import finished', ['count' => 12]);
+```
+
+The default PSR-3 logger writes to `logs/app.log` under the application root. The directory
+must be writable. `log()` is the NAF helper; there is no `logger()` helper.
+
+## Redirects on the PHP development server
+
+The released `naf/framework` **0.2.1** sets the protocol of `redirect()` and `refresh()` to
+HTTP/2. PHP's built-in HTTP/1.x server cannot emit that status line correctly. The bootstrap
+in [Your first application](first-app.md) normalizes outgoing responses to the incoming
+request's protocol. If you use a different bootstrap, normalize the individual response:
 
 ```php
 use function Naf\redirect;
 
-return redirect('/login');
+return redirect('/login')->withProtocolVersion('1.1');
 ```
-
-- Sends a 302 redirect by default.
-- Optionally, you can specify a different HTTP status code (e.g., 301).
-
-Example:
-
-```php
-return redirect('/dashboard', 301);
-```
-
----
-
-## Custom Responses
-
-For full control, you can manually create responses:
-
-```php
-$response = new \Naf\Http\Response();
-$response->getBody()->write('Custom content');
-return $response->withStatus(202);
-```
-
-- Set custom headers, status codes, and body manually.
-- Useful for advanced use cases or non-standard responses.

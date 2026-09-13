@@ -9,19 +9,26 @@ requires:
 
 # A login form
 
-The same shape as [a contact form](contact-form.md), with one difference at the end: instead of
-sending something, it starts a session that later requests recognise.
+First complete [the authentication quickstart](../auth.md#quickstart), including its SQLite
+config, PDO binding, user model and seed command. It builds on [Your first
+application](../first-app.md). These steps provide the account **demo** with password
+**local-demo-password** for local use. The packages above supply the form and session.
 
-This page assumes accounts already exist and your model implements `UserInterface`. If it does
-not yet, [Authentication and permissions](../auth.md) is the page that sets that up — one line
-of configuration in the ordinary case.
+Each titled block below is a complete file. Keep the authentication bootstrap and config.
+Replace the routes, or merge the named routes when combining recipes.
 
 ## The routes
 
-```php
+```php title="app/routes.php"
+<?php
+
+use App\Controllers\HomeController;
 use App\Controllers\SessionController;
 use function Naf\route;
 
+route()->add('GET', '/', [HomeController::class, 'index'], 'home');
+route()->add('GET', '/hello/{name}', [HomeController::class, 'hello'], 'hello');
+route()->add('GET', '/account', [SessionController::class, 'account'], 'account');
 route()->add('GET',  '/login',  [SessionController::class, 'show'],   'login');
 route()->add('POST', '/login',  [SessionController::class, 'submit'], 'login.submit');
 route()->add('POST', '/logout', [SessionController::class, 'logout'], 'logout');
@@ -37,16 +44,17 @@ and a CSRF token like every other form.
 
 ## The controller
 
-```php
+```php title="app/Controllers/SessionController.php"
+<?php
+
 namespace App\Controllers;
 
 use Naf\Auth\Credentials\PasswordCredentials;
 use Psr\Http\Message\ResponseInterface;
 use function Naf\Auth\auth;
 use function Naf\Form\validator;
-use function Naf\Session\session;
 use function Naf\View\render;
-use function Naf\param;
+use function Naf\{abort, param};
 use function Naf\redirect;
 use function Naf\route;
 
@@ -55,21 +63,27 @@ final class SessionController
     public function show(): ResponseInterface
     {
         if (auth()->check()) {
-            return redirect('/');
+            return redirect(route('account'));
         }
 
-        return render('login', ['check' => validator()]);
+        return render('login', ['check' => validator(), 'loginError' => null]);
     }
 
     public function submit(): ResponseInterface
     {
+        foreach (['username', 'password'] as $field) {
+            if (!is_string(param()->get($field, ''))) {
+                abort(400, 'Credentials must be strings.');
+            }
+        }
+
         $check = validator()->validate(param()->all(), [
             'username' => 'required',
             'password' => 'required',
         ]);
 
         if (!$check->isValid()) {
-            return render('login', ['check' => $check]);
+            return render('login', ['check' => $check, 'loginError' => null])->withStatus(422);
         }
 
         $credentials = new PasswordCredentials(
@@ -78,12 +92,18 @@ final class SessionController
         );
 
         if (!auth()->authenticate($credentials)) {
-            session()->flash('error', 'Those details did not match an account.');
-
-            return redirect(route('login'));
+            return render('login', [
+                'check' => $check, 'loginError' => 'Those details did not match an account.',
+            ])->withStatus(422);
         }
 
-        return redirect('/');
+        return redirect(route('account'));
+    }
+
+    public function account(): ResponseInterface
+    {
+        auth()->requireLogin();
+        return render('account', ['user' => auth()->user()]);
     }
 
     public function logout(): ResponseInterface
@@ -112,23 +132,23 @@ to do.
 
 ## The template
 
-```php
+```php title="app/views/login.phtml"
 <?php
 use function Naf\Form\csrf;
 use function Naf\Form\error;
 use function Naf\Form\memory;
-use function Naf\Session\session;
+use function Naf\View\s;
 use function Naf\route;
 ?>
 
-<?php if ($error = session()->getFlash('error')): ?>
-    <p class="error"><?= $error ?></p>
+<?php if ($loginError !== null): ?>
+    <p class="error"><?= s($loginError) ?></p>
 <?php endif; ?>
 
 <form action="<?= route('login') ?>" method="post">
 
     <label for="username">Username</label>
-    <input id="username" type="text" name="username" value="<?= memory('username') ?>">
+    <input id="username" type="text" name="username" value="<?= s(memory('username') ?? '') ?>">
     <?= error('username', $check) ?>
 
     <label for="password">Password</label>
@@ -144,6 +164,31 @@ use function Naf\route;
 The username comes back through `memory()` after a failed attempt; the password deliberately
 does not. Putting a password back into the HTML writes it into the page source, the browser's
 back-forward cache and any proxy that logs bodies, to save one field of typing.
+
+## The protected page and logout form
+
+```php title="app/views/account.phtml"
+<?php
+use function Naf\Form\csrf;
+use function Naf\View\s;
+use function Naf\route;
+?>
+<h1>Signed in as <?= s($user->getUsername()) ?></h1>
+<form action="<?= route('logout') ?>" method="post">
+    <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
+    <button type="submit">Sign out</button>
+</form>
+```
+
+```bash
+composer dump-autoload
+php -S 127.0.0.1:8000 -t public
+```
+
+Open **http://127.0.0.1:8000/login**. Wrong credentials return 422 and retain the username.
+The demo credentials redirect to `/account`; reloading keeps you signed in. The logout button
+returns you to `/login`, and `/account` then returns 401. Submissions without a valid CSRF token
+return 400. Only call `csrf()->generate()` once per page; reuse that token if you add more forms.
 
 ## Requiring a login elsewhere
 
