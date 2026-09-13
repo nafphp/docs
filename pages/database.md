@@ -88,6 +88,38 @@ Because errors throw, the `catch` is the only place a failure can arrive — whi
 makes this shape safe. Rethrow after rolling back: swallowing the exception leaves the
 caller believing the transfer happened.
 
+## Migrations
+
+A migration is a class with `up()` and `down()`, and it lives in `app/Migrations`.
+
+```bash
+vendor/bin/naf db:migration:create
+```
+
+writes a skeleton there for you to fill in.
+
+```bash
+vendor/bin/naf db:migrate up       # apply what has not run
+vendor/bin/naf db:migrate down     # roll back
+```
+
+The direction is an argument, given once. `db:migrate up up` is not a thing.
+
+To run a single one:
+
+```bash
+vendor/bin/naf db:migrate up --name=CreateProductsTable
+```
+
+### Plugins bring their own
+
+`app/Migrations` is not the only source. A plugin that needs a table registers its own
+directory, so `naf/session` with database storage, `naf/oauth-client` and `naf/oauth-server`
+all contribute migrations that `db:migrate up` runs alongside yours.
+
+That is why a fresh install of one of those packages usually ends with a migration step, and
+why you do not have to copy anybody's schema into your own migrations folder.
+
 ## Configuration
 
 ```php

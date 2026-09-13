@@ -81,3 +81,15 @@ NAF supports all standard HTTP methods:
 - `PATCH`
 - `DELETE`
 - (others like `OPTIONS` or `HEAD` are also possible)
+
+## Seeing what is registered
+
+```bash
+vendor/bin/naf route:debug
+```
+
+Prints every route the application knows, with its method, path and name. Useful when a
+request hits a 404 you did not expect: either the route is not there, or it is there under
+a path that differs from the one you are asking for.
+
+It needs [`naf/cli`](console.md).

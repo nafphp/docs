@@ -6,7 +6,7 @@
 2. A `use function` import naming the wrong namespace — fifteen of those were
    in the pages, every one of them a runtime error for anyone copying it.
 3. A `composer require naf/…` naming a package that was never published.
-4. A `bin/naf <command>` no package registers — the docs told people to run
+4. A registered command that no chapter mentions, and a `bin/naf <command>` no package registers — the docs told people to run
    `queue:worker`, which does not exist; the command is `queue:consume`. A page
    whose examples are deliberately invented says so with `example_commands: true`
    in its front matter.
@@ -60,6 +60,17 @@ for path in sorted(glob.glob(os.path.join(HERE, "..", "pages", "*.md"))):
                 problems.append(f"{name}: imports {ns}\\{n}(), which no package provides")
             elif want != ns:
                 problems.append(f"{name}: imports {ns}\\{n}(), but it lives in {want}")
+
+# The other direction: a command nobody wrote about. The old documentation drifted
+# because nothing noticed; a build that fails is the only thing that demonstrably did.
+documented = set()
+for path in glob.glob(os.path.join(HERE, "..", "pages", "*.md")):
+    text = open(path, encoding="utf-8").read()
+    for c in cmds:
+        if c in text:
+            documented.add(c)
+for c in sorted(cmds - documented):
+    problems.append(f"command '{c}' is registered by a package but appears in no chapter")
 
 if problems:
     print("Pages do not match the published packages:", file=sys.stderr)

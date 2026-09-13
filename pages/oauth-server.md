@@ -107,6 +107,19 @@ still says who somebody is; `sub` is the whole of what the specification require
 
 ---
 
+## Setting it up
+
+```bash
+vendor/bin/naf oauth:server:setup
+```
+
+Creates the signing key if there is none and tells you what is still missing. Run it once
+after installing; it is the shortest path from an installed package to a server that can
+issue a token.
+
+`vendor/bin/naf oauth:server:doctor` answers the same question later, when something has
+stopped working and you want to know which part.
+
 ## Registering an application
 
 ```bash
