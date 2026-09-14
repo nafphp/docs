@@ -12,8 +12,8 @@ No package release is authorized by preparing this guide.
 ## Installation and configuration
 
 After release, install with `composer require naf/storage`. PHP 8.3+ and
-`naf/framework ^0.2` are required. The package currently retains an earlier upload
-prototype, which also requires `fileinfo` and `mbstring`.
+`naf/framework ^0.2` are required. Storage adds no runtime libraries or extension
+requirements beyond the framework.
 
 Storage uses NAF's normal plugin discovery, config and container. The default private
 disk uses `BASE_PATH . '/storage'`. Directories are created on first write. No manual
@@ -29,19 +29,19 @@ use Naf\Storage\Adapters\LocalAdapter;
 return [
     'storage' => [
         'default' => 'local',
-        'disks' => [
+        'disks'   => [
             'local' => [
                 'adapter' => LocalAdapter::class,
-                'root' => BASE_PATH . '/storage',
+                'root'    => BASE_PATH . '/storage',
             ],
             'documents' => [
                 'adapter' => LocalAdapter::class,
-                'root' => BASE_PATH . '/storage/documents',
+                'root'    => BASE_PATH . '/storage/documents',
             ],
             'public' => [
                 'adapter' => LocalAdapter::class,
-                'root' => BASE_PATH . '/storage/public',
-                'url' => '/storage',
+                'root'    => BASE_PATH . '/storage/public',
+                'url'     => '/storage',
             ],
         ],
     ],
@@ -51,6 +51,11 @@ return [
 Plugin defaults and application config merge recursively; application values win.
 Use `null` to remove an inherited public `url` prefix. Read settings through NAF's
 `config('storage:default')`; it is not a configuration setter.
+
+Configuring the adapter is enough; NAF wires the rest. Internally, `StorageManager`
+selects the disk, `Filesystem` provides the returned object's `put()`/`get()`/`url()`
+API, and `LocalAdapter` performs local file I/O. `Filesystem` holds no second backend.
+Applications use `storage()` without constructing these classes themselves.
 
 ## Store and retrieve files
 
@@ -164,8 +169,7 @@ backend; any future use must stay internal to a NAF adapter.
 
 HTTP upload validation, quotas, MIME rules and application metadata are not adapter
 responsibilities. The disk facade currently has no `UploadedFileInterface` overload.
-Existing `LocalStorage` upload staging is preserved separately as legacy workspace
-code and does not determine the disk API.
+There is no separate upload-staging service in this package.
 
 ## Publication checklist
 
