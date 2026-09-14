@@ -75,7 +75,8 @@ Supply an installation-specific state path when constructing `Scheduler`. State 
 
 ## Optional new plugins
 
-The Nafinity integration uses `naf/storage`'s `LocalStorage` class for private flat storage and bounded PSR-7 upload validation. The concurrently prepared named-disk API remains a separate package capability; its documentation must preserve that distinction. The host supplies an absolute root outside public. Opaque random keys are separate from display filenames. Promotion and deletion are retryable; the host owns metadata, project authorization, quotas and the staged/ready/deleting lifecycle. MIME/extension checks are not malware scanning. The initial allow-list covers text, Markdown, CSV, PDF, PNG/JPEG/WebP and ZIP; archives are never extracted.
+Nafinity uses the current named-disk API: `Naf\Storage\storage('attachments')`. The configured private `Storage` instance delegates stream I/O, moves and deletion to the local adapter. The concurrently prepared plugin removed its obsolete upload lifecycle class; Nafinity now owns upload MIME/extension/size validation, opaque keys, retention enumeration and SQL/file lifecycle decisions in application services. The plugin remains provider-neutral. No public URL is configured for the attachment disk; controllers authorize and stream downloads. MIME checks are not malware scanning.
+
 
 `naf/rate-limit` contains an atomic PDO fixed-window counter. The host supplies namespaced keys, limits and windows and owns the 429 response. Raw account/IP keys are hashed for persistence. Fixed windows permit a boundary burst. Counter consumption runs outside domain transactions. Nafinity uses direct peer addresses rather than trusting arbitrary forwarded headers.
 
@@ -93,4 +94,4 @@ The Nafinity checkout records the exact runtime, local source proof, database/HT
 
 After the package maintainer merges and releases the RCs: refresh published metadata, create the distribution lock from a clean install, build the stable runtime, apply these changes to the corresponding guides, run `check_pages.py`, strict MkDocs and the documented HTTP examples, then publish and verify the docs deployment. Preserve the separate existing mail documentation branch.
 
-The three new plugin repositories remain local by explicit maintainer choice. Existing package RC branches were pushed for review without merging or releasing them. The application integration passed 371 package tests (833 assertions), 28 real-engine cases per MariaDB/PostgreSQL and 28 HTTP cases; additional process tests exercised a killed worker, recovery and missing-class deadletters.
+The limiter and LDAP repositories remain local by explicit maintainer choice. Storage was independently advanced and pushed in a parallel maintainer task; this application uses its current Storage/StorageManager API. Existing package RC branches were pushed for review without merging or releasing them. The application integration passed 371 package tests (833 assertions), 28 real-engine cases per MariaDB/PostgreSQL and 28 HTTP cases; additional process tests exercised a killed worker, recovery and missing-class deadletters.
