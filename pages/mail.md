@@ -6,12 +6,35 @@ requires:
 
 # Sending mail
 
-The default transport uses PHP's `mail()` and needs a server configured to deliver mail.
-For local development, first configure [the dummy transport](#testing-without-a-mail-server)
-or use [the contact form's file outbox](recipes/contact-form.md#a-local-mail-outbox).
-Both let you exercise the application without a mail server or external delivery.
+`naf/mail` builds messages with recipients, HTML or plain text, and attachments.
+A `Mailer` delivers them through a `TransportInterface` implementation. The package includes
+`MailTransport` for PHP's `mail()` and, since **0.2.2**, `DummyTransport` for local tests.
 
-If the person who triggered real delivery should not wait for it, use [a queue](queues.md).
+## Choosing the transport
+
+**The transport is passed to `new Mailer($transport)`.** The plugin's default registration
+creates `new Mailer(new MailTransport())`; PHP's `mail()` needs a server configured for delivery.
+
+For the whole application, register your mailer in the root **`bootstrap.php`**, after
+requiring `vendor/autoload.php` and before `app()->run()`:
+
+```php
+use Naf\Mail\Core\Mailer;
+use Naf\Mail\Core\Transport\MailTransport;
+use function Naf\app;
+
+$transport = new MailTransport();
+app()->container()->set(Mailer::class, static fn() => new Mailer($transport));
+```
+
+The `$transport` line selects delivery; the next line connects it to the shared `mailer()`
+helper and constructor-injected `Mailer` services. Replace `new MailTransport()` with the
+transport you want. Register it before application services receive their mailer.
+Binding only `TransportInterface::class` does not change the default mailer.
+
+For an individual operation, construct a separate `$mailer = new Mailer($transport)` and
+call `$mailer->send($message)`. This leaves the application default in place.
+The `mailer()` helper currently takes no transport argument.
 
 ## Sending a message
 
@@ -56,8 +79,10 @@ method to remove a recipient — build the message with the ones you want.
 ->setContent('Welcome!', false)          // plain text
 ```
 
-There is no multipart alternative: a message is one or the other. If your recipients need
-both, that is a transport concern, not this object's.
+The message stores one body; calling `setContent()` again replaces it. HTML and plain-text
+alternatives cannot be supplied together with the current API. Escape user input before
+including it in HTML, or use plain text. For an HTML template, pass the string returned by
+[`Naf\View\view()`](views.md) to `setContent()`; this requires `naf/view`.
 
 ## Attachments
 
@@ -75,11 +100,13 @@ mail()
     ->setContent('<img src="cid:logo.png">');
 ```
 
-The `cid:` reference uses the name you gave, not the path.
+The `cid:` reference uses the name you gave, not the path. `addAttachment()` reads the file
+immediately and stores its encoded contents in the message; a missing or unreadable file
+throws `MailException`.
 
 ## When it does not go out
 
-`send()` is typed to return `bool`, but the shipped transport never returns `false` — it
+`send()` is typed to return `bool`, but `MailTransport` never returns `false` — it
 throws `Naf\Mail\Exceptions\MailException` when PHP's `mail()` refuses the message.
 
 ```php
@@ -87,149 +114,57 @@ use Naf\Mail\Exceptions\MailException;
 use function Naf\Mail\mailer;
 
 try {
-    mailer()->send($message);
+    if (!mailer()->send($message)) {
+        // A custom transport reported failure.
+    }
 } catch (MailException $e) {
     // log it, queue a retry, tell somebody
 }
 ```
 
-Checking the return value instead will not catch a failure. A transport of your own may
-return `false`, so if you write one, decide which of the two you mean and be consistent.
+Handle both paths when your application supports different transports. A successful return
+means the transport accepted the message; it does not confirm arrival in the recipient's inbox.
 
 ## Testing without a mail server
 
-Start from [Your first application](first-app.md), then install `naf/mail`. Create the
-following files; each titled block contains the complete file contents:
-
-```bash
-composer require naf/mail
-mkdir -p app/Mail bin
-```
-
-### Create a dummy transport
-
-`DummyTransport` below is application code you add yourself. Its `sendMail()` method records
-a copy of the message and returns `true`; it does not connect to a mail server or send mail.
-The copy lets a test inspect what was submitted even if the original message is changed later.
-
-```php title="app/Mail/DummyTransport.php"
-<?php
-
-namespace App\Mail;
-
-use Naf\Mail\Core\TransportInterface;
-use Naf\Mail\Models\Mail;
-
-final class DummyTransport implements TransportInterface
-{
-    /** @var list<Mail> */
-    public array $messages = [];
-
-    public function sendMail(Mail $mail): bool
-    {
-        $this->messages[] = clone $mail;
-        return true;
-    }
-}
-```
-
-### Register it once
-
-Register both the dummy and the mailer so application code and tests retrieve the same
-transport instance. Rebinding `Mailer::class` makes the normal `mailer()` helper use it.
-
-```php title="app/mail-dummy.php"
-<?php
-
-use App\Mail\DummyTransport;
-use Naf\Mail\Core\Mailer;
-use function Naf\app;
-
-$container = app()->container();
-$container->set(DummyTransport::class, static fn() => new DummyTransport());
-$container->set(Mailer::class, static fn() => new Mailer(
-    $container->get(DummyTransport::class),
-));
-```
-
-In the root **`bootstrap.php`**, after requiring `vendor/autoload.php` and before
-`app()->run()`, add:
+`DummyTransport` is included in **naf/mail 0.2.2+**. It records messages in memory and returns
+`true` without sending mail. In a bootstrapped application:
 
 ```php
-require_once BASE_PATH . '/app/mail-dummy.php';
-```
+use Naf\Mail\Core\Mailer;
+use Naf\Mail\Core\Transport\DummyTransport;
 
-Keep the other bootstrap code from your application. Choose one mailer binding: if you
-previously added the contact recipe's `FileTransport` binding, replace it with this include.
-A later binding would replace the dummy again. Register the transport before application
-services resolve the mailer.
+$transport = new DummyTransport();
+$mailer = new Mailer($transport);
 
-### Run a local check
-
-This CLI script uses the same registration. `require_once` also makes it safe to run before
-you add the include to the web bootstrap; it always selects the dummy before sending.
-
-```php title="bin/mail-demo.php"
-<?php
-
-require dirname(__DIR__) . '/bootstrap.php';
-require_once BASE_PATH . '/app/mail-dummy.php';
-
-use App\Mail\DummyTransport;
-use function Naf\app;
-use function Naf\Mail\{mail, mailer};
-
-$message = mail()
+$message = $mailer->createMail()
     ->setFrom('hello@example.com')
     ->addTo('reader@example.com')
-    ->setSubject('Hello from NAF')
-    ->setContent('A local test message.', false);
+    ->setSubject('A local test')
+    ->setContent('Hello', false);
 
-if (!mailer()->send($message)) {
-    throw new RuntimeException('The transport reported a failure.');
-}
+$mailer->send($message);
 
-$dummy = app()->container()->get(DummyTransport::class);
-echo 'Stored messages: ' . count($dummy->messages) . PHP_EOL;
-echo 'Subject: ' . $dummy->messages[0]->getSubject() . PHP_EOL;
+$messages = $transport->getMessages();
+echo $messages[0]->getSubject(); // A local test
+$transport->clear();
 ```
 
-```bash
-composer dump-autoload
-php bin/mail-demo.php
-```
+For application-wide testing, use `new DummyTransport()` in the
+[bootstrap registration above](#choosing-the-transport). Calls to `mailer()->send($message)`
+then use that instance, whose `getMessages()` you can inspect in the same process.
 
-Expected output:
-
-```text
-Stored messages: 1
-Subject: Hello from NAF
-```
-
-A test can inspect `$dummy->messages[0]->getRecipients()`, `getContent()` and the other
-message getters on the recorded `Mail` object. Returning `true` simulates
-successful transport acceptance; it does not establish whether real mail would be delivered.
-
-### Inspect messages after browser requests
-
-The in-memory list belongs to the current PHP request/process. A subsequent browser request
-cannot retrieve the previous request's list. For manual browser testing, use the
-[complete `FileTransport` example](recipes/contact-form.md#a-local-mail-outbox): it writes a
-JSON preview to `storage/mail/`, which remains available after the response or redirect.
-
-Neither transport is built into the package. Both implement `TransportInterface` and can be
-replaced without changing calls to `mailer()->send($message)` in your controllers.
+Captures are copies made at send time. `clear()` discards them between tests or worker jobs.
+For previews that survive browser requests, use the contact form's
+[file outbox recipe](recipes/contact-form.md#a-local-mail-outbox).
 
 ## Switching to real delivery
 
-Remove the `app/mail-dummy.php` include when you want actual delivery. If there is no other
-application binding, the package's default `MailTransport` uses PHP's `mail()`. For SMTP or
-an external provider, implement `TransportInterface::sendMail(Mail $mail): bool` using your
-chosen library and register a `Mailer` with that transport in the same place in bootstrap.
-
-Keep test transports confined to development or tests: their successful return values mean
-the simulation accepted the message. Constructing a separate `new Mailer(...)` in one
-controller does not change the shared `mailer()` helper; replace the container binding.
+Select `new MailTransport()` in the same bootstrap registration to use PHP's `mail()`.
+For SMTP or a provider API, supply an adapter implementing
+`TransportInterface::sendMail(Mail $mail): bool`, and pass it to `new Mailer($transport)`
+in that registration. The package does not include an SMTP or provider-specific transport.
+Your message-building and sending calls stay the same.
 
 ## Not making somebody wait for it
 
