@@ -20,7 +20,7 @@ Run this from the directory in which you keep your projects:
 ```bash
 composer create-project naf/app nafphp-demo
 cd nafphp-demo
-php -S 127.0.0.1:8000 -t public
+APP_ENV=dev php -S 127.0.0.1:8000 -t public
 ```
 
 Open **http://127.0.0.1:8000/**. You should see the NAF welcome page. Stop the development
@@ -30,9 +30,21 @@ document root as this project's `public/` directory.
 The starter installs `naf/framework`, `naf/view` and `naf/form`; `naf/session` arrives through
 the form package. It also registers the `App\` namespace with Composer.
 
-The starter 0.2.1 includes form and API examples. With `naf/framework` 0.2.1, successful form
-redirects still need a protocol correction when using PHP's development server. The tutorial
-below supplies that correction and replaces the starter routes with the documented exercise.
+Starter **0.2.2** ships a working dependency lock: framework 0.2.3, form 0.2.2, session 0.2.1
+and view 0.2.1. It also excludes Nyholm PSR-7 below 1.8.2 to avoid PHP 8.4+ deprecation errors.
+The welcome page, `/contact` form and POST `/api` demonstration work directly
+after installation; no extra Composer update or response listener is needed. The contact
+example validates input and redirects; it does not send or store a message.
+
+For an application created from an older starter, update the required minimum versions:
+
+```bash
+composer require 'naf/framework:^0.2.2' 'naf/form:^0.2.1' --with-all-dependencies
+```
+
+For later compatible updates, run `composer update` and test your application before
+deploying it. Commit `composer.lock`; deployments should use `composer install` to reproduce
+that tested dependency set.
 
 Continue with [Your first application](first-app.md). It replaces the starter demonstration
 with complete files you can copy, then verifies both an HTML page and a JSON endpoint.

@@ -56,14 +56,9 @@ require __DIR__ . '/vendor/autoload.php';
 
 use App\Mail\FileTransport;
 use Naf\Mail\Core\Mailer;
-use Naf\Core\Event;
-use Psr\Http\Message\ResponseInterface;
-use function Naf\{app, event, request};
+use function Naf\app;
 
 app()->container()->set(Mailer::class, static fn() => new Mailer(new FileTransport()));
-// naf/framework 0.2.1 redirects carry HTTP/2; PHP's local server needs HTTP/1.x.
-event()->listen(Event::RESPONSE_HEADER, static fn(ResponseInterface $response) =>
-    $response->withProtocolVersion(request()->getProtocolVersion()));
 
 app()->run();
 ```

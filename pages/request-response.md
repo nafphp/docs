@@ -139,13 +139,16 @@ must be writable. `log()` is the NAF helper; there is no `logger()` helper.
 
 ## Redirects on the PHP development server
 
-The released `naf/framework` **0.2.1** sets the protocol of `redirect()` and `refresh()` to
-HTTP/2. PHP's built-in HTTP/1.x server cannot emit that status line correctly. The bootstrap
-in [Your first application](first-app.md) normalizes outgoing responses to the incoming
-request's protocol. If you use a different bootstrap, normalize the individual response:
+Use `naf/framework` **0.2.2 or newer**. These releases create redirects with a valid HTTP/1.1
+status line, including on PHP's development server. Framework 0.2.1 used HTTP/2 here, which
+caused malformed responses with `php -S`. Update older installations using the
+[installation guide](install.md#start-with-the-application-skeleton), then remove the old
+protocol-normalization listener if you copied it from an earlier tutorial.
+
+No manual protocol override is needed with the supported versions:
 
 ```php
 use function Naf\redirect;
 
-return redirect('/login')->withProtocolVersion('1.1');
+return redirect('/login');
 ```

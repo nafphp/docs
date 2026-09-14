@@ -71,9 +71,10 @@ export COMPOSER_COMMAND='php -n /absolute/path/to/composer'
 ```
 
 Use `-n` only if the required extensions are compiled into that PHP binary; otherwise supply a
-working INI configuration. The tutorial requires the corrected `naf/form` 0.2.1 helper and includes compatibility handling
-for the `naf/framework` 0.2.1 redirect protocol. Remove that response listener only after a fixed
-framework release is available and the examples pass against it.
+working INI configuration. The tutorial requires framework 0.2.2+ and form 0.2.1+; starter
+0.2.2 already locks newer compatible versions. Redirects use the framework directly, without
+the old protocol-normalization listener. The test runner exercises the untouched published
+starter before adding recipe dependencies, so a broken starter lock cannot be hidden by an update.
 
 ## Contributor and agent guidance
 

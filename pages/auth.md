@@ -103,19 +103,13 @@ return [
 define('BASE_PATH', __DIR__);
 require __DIR__ . '/vendor/autoload.php';
 
-use Naf\Core\Event;
-use Psr\Http\Message\ResponseInterface;
-use function Naf\{app, event, request};
+use function Naf\app;
 use function Naf\Database\database;
 
 // The auth model factory resolves PDO by its class name. Bind the same connection
 // that naf/database and naf/orm use; neither plugin supplies this PDO alias itself.
 app()->container()->set(PDO::class, static fn() => database()
     ?? throw new RuntimeException('Configure a database connection.'));
-
-// naf/framework 0.2.1 redirects carry HTTP/2; PHP's local server needs HTTP/1.x.
-event()->listen(Event::RESPONSE_HEADER, static fn(ResponseInterface $response) =>
-    $response->withProtocolVersion(request()->getProtocolVersion()));
 
 app()->run();
 ```
