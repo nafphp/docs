@@ -87,6 +87,7 @@
   "Naf\\MCP\\Tools\\ToolInterface",
   "Naf\\Mail\\Core\\Mailer",
   "Naf\\Mail\\Core\\TransportInterface",
+  "Naf\\Mail\\Core\\Transport\\DummyTransport",
   "Naf\\Mail\\Core\\Transport\\MailTransport",
   "Naf\\Mail\\Core\\Transport\\Trait\\MailMessageRenderer",
   "Naf\\Mail\\Exceptions\\MailException",
@@ -304,7 +305,7 @@
   },
   "mailer": {
    "namespace": "Naf\\Mail",
-   "signature": "mailer(): Naf\\Mail\\Core\\Mailer"
+   "signature": "mailer(?Naf\\Mail\\Core\\TransportInterface $transport = null): Naf\\Mail\\Core\\Mailer"
   },
   "memory": {
    "namespace": "Naf\\Form",
@@ -542,7 +543,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "dev-v0.2.2-rc"
   },
   "mcp": {
    "description": "NAF MCP Plugin for basic AI driven workflows.",

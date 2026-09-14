@@ -12,29 +12,51 @@ A `Mailer` delivers them through a `TransportInterface` implementation. The pack
 
 ## Choosing the transport
 
-**The transport is passed to `new Mailer($transport)`.** The plugin's default registration
-creates `new Mailer(new MailTransport())`; PHP's `mail()` needs a server configured for delivery.
-
-For the whole application, register your mailer in the root **`bootstrap.php`**, after
-requiring `vendor/autoload.php` and before `app()->run()`:
+Transport selection through configuration and the helper argument requires **naf/mail 0.2.2+**.
+The plugin supplies this default, which an application can override in **`app/config.php`**:
 
 ```php
-use Naf\Mail\Core\Mailer;
 use Naf\Mail\Core\Transport\MailTransport;
-use function Naf\app;
 
-$transport = new MailTransport();
-app()->container()->set(Mailer::class, static fn() => new Mailer($transport));
+return [
+    'mail' => [
+        'transport' => MailTransport::class,
+    ],
+];
 ```
 
-The `$transport` line selects delivery; the next line connects it to the shared `mailer()`
-helper and constructor-injected `Mailer` services. Replace `new MailTransport()` with the
-transport you want. Register it before application services receive their mailer.
-Binding only `TransportInterface::class` does not change the default mailer.
+`MailTransport` calls PHP's `mail()` and needs a server configured for delivery. The value of
+`mail.transport` is a **class name implementing `TransportInterface`**, never an instance.
+NAF reads the nested setting as `config('mail:transport')`.
 
-For an individual operation, construct a separate `$mailer = new Mailer($transport)` and
-call `$mailer->send($message)`. This leaves the application default in place.
-The `mailer()` helper currently takes no transport argument.
+`mailer()` retrieves the shared mailer. On first use, that mailer resolves the selected
+transport: it uses the class's container registration when present, otherwise it constructs
+the class with NAF's `make()`, including constructor autowiring. A simple transport therefore
+needs no registration. Constructor-injected `Mailer` services use the same shared mailer.
+
+If your transport needs scalar configuration, register a factory under **that transport's
+class name** in the root `bootstrap.php`, after requiring `vendor/autoload.php` and before
+`app()->run()`. Its required interface dependencies also need bindings. Register these before
+any application service resolves the mailer. A generic `TransportInterface::class` binding
+does not override the class selected by the config.
+
+For an individual operation, pass a transport instance:
+
+```php
+use function Naf\Mail\mailer;
+
+$mailer = mailer($transport);
+$mailer->send($message);
+```
+
+**The argument wins.** It creates a separate mailer and bypasses config and the shared mailer;
+neither is changed. Without an argument, the configured shared mailer is used. There is no
+fallback transport: invalid configuration, a wrong container result or failed construction
+raises an exception. `MailTransport` is the explicit plugin default, not an error fallback.
+
+The same resolution works with `new Mailer()`; `new Mailer($transport)` uses the supplied
+instance directly. Existing application overrides of `Mailer::class` continue to work,
+though selecting the transport in config usually removes the need for such an override.
 
 ## Sending a message
 
@@ -131,11 +153,11 @@ means the transport accepted the message; it does not confirm arrival in the rec
 `true` without sending mail. In a bootstrapped application:
 
 ```php
-use Naf\Mail\Core\Mailer;
 use Naf\Mail\Core\Transport\DummyTransport;
+use function Naf\Mail\mailer;
 
 $transport = new DummyTransport();
-$mailer = new Mailer($transport);
+$mailer = mailer($transport);
 
 $message = $mailer->createMail()
     ->setFrom('hello@example.com')
@@ -150,9 +172,10 @@ echo $messages[0]->getSubject(); // A local test
 $transport->clear();
 ```
 
-For application-wide testing, use `new DummyTransport()` in the
-[bootstrap registration above](#choosing-the-transport). Calls to `mailer()->send($message)`
-then use that instance, whose `getMessages()` you can inspect in the same process.
+For application-wide testing, set `mail.transport` to `DummyTransport::class` in
+[the config above](#choosing-the-transport). To inspect captures outside the sending code,
+register your dummy instance under `DummyTransport::class` in bootstrap; the configured
+mailer and the test then use that same instance.
 
 Captures are copies made at send time. `clear()` discards them between tests or worker jobs.
 For previews that survive browser requests, use the contact form's
@@ -160,11 +183,10 @@ For previews that survive browser requests, use the contact form's
 
 ## Switching to real delivery
 
-Select `new MailTransport()` in the same bootstrap registration to use PHP's `mail()`.
-For SMTP or a provider API, supply an adapter implementing
-`TransportInterface::sendMail(Mail $mail): bool`, and pass it to `new Mailer($transport)`
-in that registration. The package does not include an SMTP or provider-specific transport.
-Your message-building and sending calls stay the same.
+Set `mail.transport` to `MailTransport::class` to use PHP's `mail()`. For SMTP or a provider
+API, select the class of your adapter implementing `TransportInterface::sendMail(Mail $mail): bool`
+and register its factory if needed. The package does not include an SMTP or provider-specific
+transport. Your message-building and sending calls stay the same.
 
 ## Not making somebody wait for it
 

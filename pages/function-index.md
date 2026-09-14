@@ -94,12 +94,12 @@ Version **v0.2.1** · [Translations](translations.md)
 
 ## naf/mail
 
-Version **v0.2.1** · [Sending mail](mail.md)
+Version **dev-v0.2.2-rc** · [Sending mail](mail.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
 | <code>mail(): Naf\Mail\Models\Mail</code> | `Naf\Mail` |
-| <code>mailer(): Naf\Mail\Core\Mailer</code> | `Naf\Mail` |
+| <code>mailer(?Naf\Mail\Core\TransportInterface $transport = null): Naf\Mail\Core\Mailer</code> | `Naf\Mail` |
 
 ## naf/mcp
 

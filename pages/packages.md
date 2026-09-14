@@ -16,7 +16,7 @@ What there is, what it requires and what it suggests. Generated from the
 | **`naf/database`**<br><span style="font-weight:400">NAF Database Plugin to work with various storage solutions.</span> | `v0.2.1` | `naf/framework` | — | `>=8.3` |
 | **`naf/form`**<br><span style="font-weight:400">NAF Form Plugin to make form handling easier.</span> | `v0.2.2` | `naf/framework`, `naf/session` | — | `>=8.3` |
 | **`naf/i18n`**<br><span style="font-weight:400">NAF Internationalization Plugin</span> | `v0.2.1` | `naf/framework` | — | `>=8.3` |
-| **`naf/mail`**<br><span style="font-weight:400">NAF Mail Plugin for quick email communication.</span> | `v0.2.1` | `naf/framework` | — | `>=8.3` |
+| **`naf/mail`**<br><span style="font-weight:400">NAF Mail Plugin for quick email communication.</span> | `dev-v0.2.2-rc` | `naf/framework` | — | `>=8.3` |
 | **`naf/mcp`**<br><span style="font-weight:400">NAF MCP Plugin for basic AI driven workflows.</span> | `v0.2.2` | `naf/framework` | — | `>=8.3` |
 | **`naf/oauth-client`**<br><span style="font-weight:400">Sign in with external OAuth2 and OpenID Connect providers, keeping your own user model.</span> | `v0.2.2` | `naf/auth`, `naf/framework`, `naf/session` | `naf/cli`, `naf/client`, `naf/database`, `naf/view` | `>=8.3` |
 | **`naf/oauth-server`**<br><span style="font-weight:400">Run your application as an OAuth2 authorization server and protect its APIs.</span> | `v0.2.2` | `naf/auth`, `naf/form`, `naf/framework`, `naf/session` | `naf/cli`, `naf/database`, `naf/view` | `>=8.3` |
