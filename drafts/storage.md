@@ -53,8 +53,8 @@ Use `null` to remove an inherited public `url` prefix. Read settings through NAF
 `config('storage:default')`; it is not a configuration setter.
 
 Configuring the adapter is enough; NAF wires the rest. Internally, `StorageManager`
-selects the disk, `Filesystem` provides the returned object's `put()`/`get()`/`url()`
-API, and `LocalAdapter` performs local file I/O. `Filesystem` holds no second backend.
+selects the disk, `Storage` provides the returned object's `put()`/`get()`/`url()`
+API, and `LocalAdapter` performs local file I/O. `Storage` holds no second backend.
 Applications use `storage()` without constructing these classes themselves.
 
 ## Store and retrieve files
@@ -151,7 +151,7 @@ PHP warnings from the local adapter. NAF may wrap service-factory errors in its
 
 ## DI and extending storage
 
-Inject `Naf\Storage\Filesystem` for the default disk or `StorageManager` for named
+Inject `Naf\Storage\Storage` for the default disk or `StorageManager` for named
 disks. `storage()` uses `StorageManager::disk(?string $name = null)`. The manager and
 disks are lazy and cached. Register application service overrides before first use.
 
