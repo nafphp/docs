@@ -236,7 +236,9 @@ For plugin contributions, follow the shared
 [NAF code style](https://github.com/nafphp/docs/blob/main/CODE_STYLE.md): PER Coding Style 3.0
 with descriptive local names, separate logical steps and locally aligned assignments.
 The guide includes a formatter configuration and Composer commands for individual packages.
-Adoption is incremental; check the package's own scripts and instructions.
+The September 2026 rollout adds `composer style:check`, `composer style:fix` and a CI check
+to all 22 workspace plugins. These changes are on RC branches; released packages may not
+yet contain the commands. Check the package's own scripts and instructions.
 
 Keep ordinary PHP operations simple. Add a helper or service when it has a useful
 responsibility, and preserve the package's public API, evaluation order and cleanup behavior
