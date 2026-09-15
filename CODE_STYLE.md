@@ -3,8 +3,9 @@
 NAF packages use [PER Coding Style 3.0](https://github.com/php-fig/per-coding-style/blob/3.0.0/spec.md),
 the [successor to PSR-12](https://www.php-fig.org/per/coding-style/meta/), with the same
 readability rules as Nafinity. Keep syntax compatible with the package's minimum PHP version.
-Existing packages adopt the rules on their own RC branches; this document does not claim
-that every existing file already conforms.
+The September 2026 rollout applies these rules to all 22 workspace plugins on their RC
+branches. Released versions can still have the previous formatting; see the
+[rollout record](reviews/plugin-readability-2026-09-15.md#completed-rollout).
 
 ## Keep code easy to follow
 
@@ -40,8 +41,9 @@ fixer. Logical grouping, naming and SQL layout remain review work.
 Copy [the configuration template](tools/php-cs-fixer.dist.php) to the package root as
 `.php-cs-fixer.dist.php`. Its finder covers PHP and PHTML, excluding vendor directories
 and hidden caches. Add package-specific generated/runtime directories to its exclusions;
-review the file list before applying it. The template is copied so standalone clones do
-not require a sibling documentation checkout.
+include extensionless PHP entry points such as `bin/naf`, and review the file list before
+applying it. The template is copied so standalone clones do not require a sibling
+documentation checkout.
 
 Install the development tool in that package:
 
