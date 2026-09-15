@@ -24,6 +24,15 @@ Respect each package's supported PHP versions/extensions. Keep optional dependen
 Do not edit installed vendor files. Verify published package versions before documenting
 behavior found only in a development checkout.
 
+## Code style and readability
+
+Follow [the shared code style](CODE_STYLE.md): PER Coding Style 3.0 with the readability
+rules used in Nafinity. Separate logical steps, use descriptive local names and keep
+simple operations in ordinary PHP. Formatting must preserve public signatures, evaluation
+order, escaping and resource/transaction boundaries. Apply the shared formatter template
+per package, run its style and behavior checks, and keep formatting commits separate
+from behavioral changes. Existing packages adopt it incrementally on their RC branches.
+
 ## Working and publishing
 
 - Inspect Git status and fetch the correct remote. Preserve other contributors' changes;
