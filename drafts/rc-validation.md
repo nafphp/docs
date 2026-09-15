@@ -15,7 +15,7 @@ No stable package release is made by this review.
 | database | v0.2.2-rc | PostgreSQL DSNs, lazy PDO binding, global migration order, legacy history and CLI selection |
 | form | v0.2.3-rc | Unsafe-method CSRF, stable tokens and scalar/date validation |
 | mail | v0.2.2-rc | Configured transport classes, explicit transports, shared mailer and capturing DummyTransport |
-| orm | v0.2.2-rc | Entity table contract and caller-owned PDO transactions |
+| orm | v0.2.2-rc | Entity table contract, retained public `$table` overrides and caller-owned PDO transactions |
 | queue | v0.2.3-rc | Durable PDO reservations, retries, fencing, recovery and worker exit status |
 | schedule | v0.2.3-rc | Failed-enqueue recovery, locked state and actual child workers |
 | session | v0.2.2-rc | Portable schema/upserts and repeatable PostgreSQL setup |
@@ -46,9 +46,50 @@ remains at least once. Storage is a disk API, not an upload lifecycle subsystem.
   Limits are validated and converted before starting workers. Child output uses the
   application's logs/queue directory without requiring non-PSR methods on its logger.
   Direct process arguments also let cleanup terminate the PHP child without a shell wrapper.
+- `orm`: changing repository lookup to `getTableName()` dropped existing public `$table`
+  overrides, including models used by the auth provider. Repository lookup now preserves
+  those overrides before falling back to `getTableName()`. The regression and auth suites
+  exercise both forms of table mapping.
 
 Each correction includes regression coverage. Package READMEs describe the candidate
 behavior; database/form AGENTS.md guidance was corrected where the existing text was stale.
+
+## Guard integration follow-up
+
+The guard registry and its four standard guards remain in `naf/framework`. Existing
+`guard()->register()` support is sufficient for plugin extensions; no core change, new
+guards package or framework 0.3 migration is part of this candidate.
+
+The local, unpublished `naf/rate-limit` candidate registers `rateLimit` through its root
+bootstrap. It lazily binds `PdoLimiter::class` to the host's `PDO::class`, preserving existing
+bindings and later overrides. The host still migrates the counter table explicitly and
+chooses the key, limit, window and HTTP response. Installation does not open a connection,
+create tables or intercept requests. Direct limiter calls remain compatible.
+
+After explicitly configuring PDO and migrating the table, a handler can call:
+
+```php
+$decision = \Naf\guard()->rateLimit('export:account:' . $accountId, 10, 60);
+if (!$decision['allowed']) {
+    return \Naf\json(['error' => 'Too many requests'], 429)
+        ->withHeader('Retry-After', (string) $decision['retry_after']);
+}
+```
+
+Here `$accountId` is an already verified identity's ID. The result retains the existing
+`allowed`, `remaining` and `retry_after` fields; test `allowed`, not array truthiness.
+Complete setup and contract-test instructions live in the local package README. Both
+`naf/rate-limit` and `naf/auth-ldap` remain local as requested; do not publish installation
+instructions for them yet.
+
+Follow-up verification uses the original framework/plugin RCs, with no extraction prototype
+installed. Limiter contract checks pass, including lazy boot, existing guards, binding
+overrides, exhausted windows and transaction protection. ORM passes 33 tests / 92 assertions;
+auth against the corrected ORM RC passes 99 tests / 290 assertions. A fresh demo test copy
+passes all 29 existing HTTP checks plus three explicit guard calls (200, 200, 429 with
+Retry-After), retaining CSRF and all four standard guards. Nafinity passes 29 scenarios each
+on disposable MariaDB 11.4 and PostgreSQL 17 databases, including a shared direct/guard bucket.
+Application source and data remain unchanged; these checks do not establish publication.
 
 ## Migration notes for public guides after release
 
