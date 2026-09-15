@@ -229,3 +229,15 @@ bindings belong in the root `bootstrap.php`, after the autoloader and before `ap
 
 The loader also accepts `src/config.php`, `src/routes.php` and `src/functions.php` when their
 `app/` counterparts are absent. Keep one layout per package to avoid competing files.
+
+## Code style and readability
+
+For plugin contributions, follow the shared
+[NAF code style](https://github.com/nafphp/docs/blob/main/CODE_STYLE.md): PER Coding Style 3.0
+with descriptive local names, separate logical steps and locally aligned assignments.
+The guide includes a formatter configuration and Composer commands for individual packages.
+Adoption is incremental; check the package's own scripts and instructions.
+
+Keep ordinary PHP operations simple. Add a helper or service when it has a useful
+responsibility, and preserve the package's public API, evaluation order and cleanup behavior
+when improving readability.

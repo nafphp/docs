@@ -82,3 +82,6 @@ Read [the shared workflow](AGENT_WORKFLOW.md) for NAF conventions and contributi
 and [the release procedure](RELEASING.md) when preparing or publishing a package. Each plugin
 repository provides its own `AGENTS.md` with its API, extension points and verification commands.
 These contributor documents are maintained here so standalone plugin clones can link to one source.
+
+[Code style](CODE_STYLE.md) defines the shared PER Coding Style 3.0 rules, readability
+guidance and a formatter template for plugin repositories.
