@@ -1,0 +1,3282 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Not Another Framework — a minimal, functional PHP microframework">
+      
+      
+      
+        <link rel="canonical" href="https://nafphp.github.io/docs/oauth-client/">
+      
+      
+        <link rel="prev" href="../auth-architecture/">
+      
+      
+        <link rel="next" href="../oauth-server/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/naf-logo-small-square.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Signing in with a provider - NAF</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:300,300i,400,400i,700,700i%7CIBM+Plex+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"IBM Plex Sans";--md-code-font:"IBM Plex Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#signing-in-with-a-provider" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="NAF" class="md-header__button md-logo" aria-label="NAF" data-md-component="logo">
+      
+  <img src="../assets/naf-logo-small-square.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NAF
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Signing in with a provider
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/nafphp/framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    nafphp/framework
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="NAF" class="md-nav__button md-logo" aria-label="NAF" data-md-component="logo">
+      
+  <img src="../assets/naf-logo-small-square.png" alt="logo">
+
+    </a>
+    NAF
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/nafphp/framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    nafphp/framework
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What NAF is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../first-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your first application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choosing-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Which packages do I need?
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Worked examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Worked examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/post-requests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Handling a POST request
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/contact-form/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A contact form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/login-form/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A login form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/json-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A JSON API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../routing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Routing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../controllers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controllers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../request-response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requests and responses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dependency-injection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependency Injection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Errors and aborting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file-downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serving files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How plugins work
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../external-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    External libraries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Best practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Presenting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Presenting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../views/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Views and templates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../forms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forms and validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../translations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Translations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sessions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sessions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../orm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ORM and repositories
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doing work
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Doing work
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../console/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Console commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../queues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Queues and workers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scheduling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduled jobs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mail/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sending mail
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../http-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HTTP client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Identity
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication and permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auth-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why auth has this shape
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Signing in with a provider
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Signing in with a provider
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-plugin-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this plugin is
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#google" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-provider-several-logins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One provider, several logins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#microsoft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Microsoft
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#any-other-openid-connect-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Any other OpenID Connect provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-and-other-providers-without-openid-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub, and other providers without OpenID Connect
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitHub, and other providers without OpenID Connect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-trust-paths-and-the-difference-between-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two trust paths, and the difference between them
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-provider-rotates-your-client-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a provider rotates your client secret
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-it-before-anybody-tries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check it before anybody tries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-older-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The older configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#everything-else-has-a-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Everything else has a default
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-button" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The button
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#which-account-is-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which account is this?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Which account is this?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-rules-it-enforces-for-you" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two rules it enforces for you
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#doing-it-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doing it yourself
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#several-tabs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Several tabs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-comes-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What comes back
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calling-the-provider-afterwards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Calling the provider afterwards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Calling the provider afterwards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#without-consent-there-is-no-access-and-consent-is-not-what-you-asked-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Without consent there is no access, and consent is not what you asked for
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ask-when-the-feature-is-used-not-at-the-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ask when the feature is used, not at the login
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-things-that-catch-people-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two things that catch people out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-it-does-not-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When it does not verify
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#provider-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-is-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this is not
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What this is not">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-credentials-belong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where credentials belong
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-known-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A known limit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#not-here-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Not here yet
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../oauth-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Being the provider
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machines
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Machines
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../function-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Function index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Package overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading-from-nixphp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrading from NixPHP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-plugin-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this plugin is
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#google" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-provider-several-logins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One provider, several logins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#microsoft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Microsoft
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#any-other-openid-connect-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Any other OpenID Connect provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-and-other-providers-without-openid-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub, and other providers without OpenID Connect
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitHub, and other providers without OpenID Connect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-trust-paths-and-the-difference-between-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two trust paths, and the difference between them
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-provider-rotates-your-client-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a provider rotates your client secret
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-it-before-anybody-tries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check it before anybody tries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-older-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The older configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#everything-else-has-a-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Everything else has a default
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-button" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The button
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#which-account-is-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which account is this?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Which account is this?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-rules-it-enforces-for-you" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two rules it enforces for you
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#doing-it-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doing it yourself
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#several-tabs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Several tabs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-comes-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What comes back
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calling-the-provider-afterwards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Calling the provider afterwards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Calling the provider afterwards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#without-consent-there-is-no-access-and-consent-is-not-what-you-asked-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Without consent there is no access, and consent is not what you asked for
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ask-when-the-feature-is-used-not-at-the-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ask when the feature is used, not at the login
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-things-that-catch-people-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two things that catch people out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-it-does-not-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When it does not verify
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#provider-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-is-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this is not
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What this is not">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-credentials-belong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where credentials belong
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-known-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A known limit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#not-here-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Not here yet
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<div class="admonition info">
+<p class="admonition-title">This chapter needs an extra package</p>
+<div class="language-bash highlight"><pre><span></span><code>composer<span class="w"> </span>require<span class="w"> </span>naf/oauth-client
+</code></pre></div>
+<p>Also installs these transitive dependencies: <code>naf/auth</code>, <code>naf/session</code>.</p>
+</div>
+<h1 id="signing-in-with-a-provider">Signing in with a provider<a class="headerlink" href="#signing-in-with-a-provider" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>Sign people in with Google, Microsoft or any OpenID Connect provider — and keep your own user model.</strong></p>
+</blockquote>
+<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">oauth_button</span><span class="p">(</span><span class="s1">'google'</span><span class="p">)</span> <span class="cp">?&gt;</span>
+</code></pre></div>
+<p>That is the whole integration. The routes, the protocol and the account lookup are already
+wired; what is left for you is the one decision nobody else can make — see
+<a href="#which-account-is-this">Which account is this?</a></p>
+<blockquote>
+<p>Install it when people should sign in with an account they already have.</p>
+</blockquote>
+<hr />
+<h2 id="what-this-plugin-is">What this plugin is<a class="headerlink" href="#what-this-plugin-is" title="Permanent link">&para;</a></h2>
+<p>It answers one question — <strong>who does the provider say this is?</strong> — and hands back an
+<code>ExternalIdentity</code>: an issuer, a subject, and the claims that came with them.</p>
+<p>Everything the protocol asks for in between is not configurable, because none of it is a
+decision an application should be making:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PKCE</strong></td>
+<td>S256, always, for confidential clients too</td>
+</tr>
+<tr>
+<td><strong><code>state</code></strong></td>
+<td>random, stored server-side, consumed once</td>
+</tr>
+<tr>
+<td><strong><code>nonce</code></strong></td>
+<td>issued and checked against the ID token</td>
+</tr>
+<tr>
+<td><strong>Signature</strong></td>
+<td>always verified against the provider's published keys, wherever there is an ID token</td>
+</tr>
+<tr>
+<td><strong>Algorithm</strong></td>
+<td>pinned to what the provider publishes, never read from the token's own header</td>
+</tr>
+<tr>
+<td><strong>Claims</strong></td>
+<td><code>iss</code>, <code>aud</code>, <code>exp</code>, <code>iat</code>, <code>nonce</code>, <code>sub</code> are checked; <code>azp</code> is checked when present</td>
+</tr>
+<tr>
+<td><strong>Metadata</strong></td>
+<td>the document has to name the issuer you configured before anything in it is used</td>
+</tr>
+<tr>
+<td><strong>Redirect URI</strong></td>
+<td>derived from your public URL, sent exactly, never taken from a request</td>
+</tr>
+<tr>
+<td><strong>Transport</strong></td>
+<td>https only, and no redirects followed while credentials are in flight</td>
+</tr>
+<tr>
+<td><strong>Key rotation</strong></td>
+<td>an unknown key id reloads the key set, once, with a cooldown</td>
+</tr>
+</tbody>
+</table>
+<p>A provider whose keys cannot be read makes the login <strong>fail</strong>. It never makes the check optional.</p>
+<p>The configured issuer is the trust anchor — the one thing you actually stated about a provider.
+Everything else, endpoints and signing keys included, arrives over the network, so a discovery
+document has to prove it belongs to that issuer before anything in it is used and before a
+client secret is sent to an address it names.</p>
+<p>Signing somebody in is the whole of it by default, and stores nothing the provider issued. An
+application that also has to <em>act</em> at the provider afterwards — read a calendar, list
+repositories — can keep those tokens instead; that is opt-in and lives in
+<a href="#calling-the-provider-afterwards">Calling the provider afterwards</a>.</p>
+<hr />
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<h3 id="google">Google<a class="headerlink" href="#google" title="Permanent link">&para;</a></h3>
+<p>The whole thing:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">// app/config.php</span>
+<span class="x">return [</span>
+<span class="x">    'public_url' =&gt; 'https://example.com',</span>
+<span class="x">    'auth' =&gt; [</span>
+<span class="x">        'users'  =&gt; ['model' =&gt; App\Models\User::class],</span>
+<span class="x">        'logins' =&gt; [</span>
+<span class="x">            'google' =&gt; [</span>
+<span class="x">                'client_id'     =&gt; $_ENV['GOOGLE_CLIENT_ID'],</span>
+<span class="x">                'client_secret' =&gt; $_ENV['GOOGLE_CLIENT_SECRET'],</span>
+<span class="x">            ],</span>
+<span class="x">        ],</span>
+<span class="x">    ],</span>
+<span class="x">];</span>
+</code></pre></div>
+<p>Two things: where your accounts live, and which logins you offer. The connection, the callback
+routes, the session, the link table, the HTTP transport and the landing page are all taken from
+what is already there.</p>
+<p>The diagnostic commands need <code>composer require naf/cli</code>.
+For the API-call example later, also install <code>naf/client</code>.</p>
+<p>Then ask what to register with the provider:</p>
+<div class="language-bash highlight"><pre><span></span><code>vendor/bin/naf<span class="w"> </span>oauth:discover<span class="w"> </span>google
+</code></pre></div>
+<p>It reads the provider's metadata, proves the setup resolves, and prints the callback URL to
+paste into their console.</p>
+<p><strong><code>public_url</code> is required and has no default.</strong> Inside a request the only candidates are the
+<code>Host</code> and <code>X-Forwarded-*</code> headers, and those are set by whoever is calling. Every redirect URI
+is built from this one value, so it is stated once rather than guessed.</p>
+<h3 id="one-provider-several-logins">One provider, several logins<a class="headerlink" href="#one-provider-several-logins" title="Permanent link">&para;</a></h3>
+<p>The key names the login; <code>driver</code> says which provider is behind it. Keeping them apart is what
+lets you offer the same provider twice under names of your choosing:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">'logins' =&gt; [</span>
+<span class="x">    'staff'    =&gt; ['driver' =&gt; 'microsoft', 'tenant' =&gt; 'acme.example', 'client_id' =&gt; …, 'client_secret' =&gt; …],</span>
+<span class="x">    'partners' =&gt; ['driver' =&gt; 'microsoft', 'tenant' =&gt; 'partner.example', 'client_id' =&gt; …, 'client_secret' =&gt; …],</span>
+<span class="x">],</span>
+</code></pre></div>
+<p>Each gets its own callback (<code>/auth/staff/callback</code>, <code>/auth/partners/callback</code>), its own button
+and its own credentials. Without a <code>driver</code>, the key is the driver — which is why <code>google</code> above
+needs nothing else.</p>
+<h3 id="microsoft">Microsoft<a class="headerlink" href="#microsoft" title="Permanent link">&para;</a></h3>
+<p>Microsoft needs one more thing: <strong>which accounts may sign in.</strong></p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">'microsoft' =&gt; [</span>
+<span class="x">    'client_id'     =&gt; $_ENV['MS_CLIENT_ID'],</span>
+<span class="x">    'client_secret' =&gt; $_ENV['MS_CLIENT_SECRET'],</span>
+<span class="x">    'tenant'        =&gt; '8f3a1c94-…',   // directory id, or a verified domain</span>
+<span class="x">],</span>
+</code></pre></div>
+<p>A single named tenant pins the issuer by itself. The multi-tenant values — <code>common</code>,
+<code>organizations</code>, <code>consumers</code> — mean <em>any</em> organisation in the world may sign in, so they will
+not start without you saying who:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">'tenant'          =&gt; 'common',</span>
+<span class="x">'allowed_tenants' =&gt; ['8f3a1c94-…', 'b21d…'],   // or ['*'] to accept everyone</span>
+</code></pre></div>
+<p>Without <code>allowed_tenants</code> the setup raises a <code>ConfigurationException</code> naming the key. This is
+deliberate: with <code>common</code>, Microsoft's discovery document gives its issuer as a <em>template</em>, and
+the real issuer is only known from the token's own tenant id. Substituting it is safe <strong>because</strong>
+the tenant is then checked against your list.</p>
+<h3 id="any-other-openid-connect-provider">Any other OpenID Connect provider<a class="headerlink" href="#any-other-openid-connect-provider" title="Permanent link">&para;</a></h3>
+<p>One extra line — the issuer. Endpoints and keys come from its discovery document.</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">'keycloak' =&gt; [</span>
+<span class="x">    'issuer'        =&gt; 'https://id.example.com/realms/main',</span>
+<span class="x">    'client_id'     =&gt; …,</span>
+<span class="x">    'client_secret' =&gt; …,</span>
+<span class="x">],</span>
+</code></pre></div>
+<h3 id="github-and-other-providers-without-openid-connect">GitHub, and other providers without OpenID Connect<a class="headerlink" href="#github-and-other-providers-without-openid-connect" title="Permanent link">&para;</a></h3>
+<div class="language-php highlight"><pre><span></span><code><span class="x">'github' =&gt; [</span>
+<span class="x">    'client_id'     =&gt; $_ENV['GITHUB_CLIENT_ID'],</span>
+<span class="x">    'client_secret' =&gt; $_ENV['GITHUB_CLIENT_SECRET'],</span>
+<span class="x">],</span>
+</code></pre></div>
+<p>GitHub has no discovery document and issues no ID token, so its endpoints are named in the
+preset rather than read from it. Its quirks are handled for you: the credentials go where GitHub
+documents them, its API version header is sent, and an address the person has not made public is
+fetched from their verified address list instead of coming back empty.</p>
+<p><strong>Naming a profile endpoint does not make a provider plain OAuth2.</strong> Protocol and profile are
+separate: give an OpenID Connect provider a <code>userinfo_url</code> and it stays OpenID Connect — the ID
+token is verified first, the profile is fetched afterwards, and it is only accepted if it
+describes the same subject. It adds to a verified identity; it never establishes one.</p>
+<p>A provider is plain OAuth2 when it has no issuer. Such a provider takes three URLs and, if it
+does not call its identifier <code>sub</code>, the field that holds it:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">'acme' =&gt; [</span>
+<span class="x">    'client_id'     =&gt; …,</span>
+<span class="x">    'client_secret' =&gt; …,</span>
+<span class="x">    'authorize_url' =&gt; 'https://acme.test/oauth/authorize',</span>
+<span class="x">    'token_url'     =&gt; 'https://acme.test/oauth/token',</span>
+<span class="x">    'userinfo_url'  =&gt; 'https://acme.test/api/me',</span>
+<span class="x">    'subject_field' =&gt; 'user_id',</span>
+<span class="x">],</span>
+</code></pre></div>
+<p><strong>GitLab needs none of this</strong> — it publishes an OpenID Connect discovery document, so
+<code>'issuer' =&gt; 'https://gitlab.com'</code> is the whole configuration.</p>
+<h4 id="two-trust-paths-and-the-difference-between-them">Two trust paths, and the difference between them<a class="headerlink" href="#two-trust-paths-and-the-difference-between-them" title="Permanent link">&para;</a></h4>
+<p>With OpenID Connect the provider signs a statement addressed to this application, and both the
+signature and the address are verified. Without it there is nothing to sign: the identity comes
+from an authenticated call to the provider's API with the access token just exchanged for the
+code.</p>
+<p>For the authorization-code flow that is sound — the token was minted for this client id, against
+this redirect URI, with this PKCE verifier, so no token from anywhere else can reach that call.
+It is weaker in kind rather than in strength: there is no audience-bound assertion to re-check
+later, and nothing binds the answer to this particular login beyond the token itself. That is
+also why no <code>nonce</code> is sent to such a provider — there would be nothing to bind it to.</p>
+<p>One consequence worth knowing: a plain-OAuth2 provider states no issuer, so identities are filed
+under <code>oauth:&lt;provider key&gt;</code>. <strong>Renaming the key in your configuration detaches existing links.</strong>
+With OpenID Connect the issuer is the provider's own and renaming is harmless.</p>
+<h3 id="when-a-provider-rotates-your-client-secret">When a provider rotates your client secret<a class="headerlink" href="#when-a-provider-rotates-your-client-secret" title="Permanent link">&para;</a></h3>
+<p>Change the one line and deploy. Nothing else moves: the <code>client_id</code> stays, the callback URL stays,
+every account link stays, and nobody is signed out. A client secret is only ever used at the token
+endpoint, between your server and theirs — it never reaches a browser and never identifies anyone.</p>
+<p>There is nothing to clear either. The secret is read from the configuration on the request that
+needs it; what gets cached is discovery documents and signing keys, and neither contains it.</p>
+<p>The awkward part is that two sides have to change and they cannot do it in the same instant. A
+provider worth using holds both for a while — a <code>naf/oauth-server</code> does:</p>
+<div class="language-bash highlight"><pre><span></span><code>vendor/bin/naf<span class="w"> </span>oauth:client:rotate-secret<span class="w"> </span>&lt;client-id&gt;
+</code></pre></div>
+<p>Deploy the new value here before that window closes; when it lapses, the old secret simply stops
+being accepted and nothing has to run for that to happen. After a leak the server's <code>--now</code> ends
+it immediately, and this application stops authenticating until the new secret is deployed — which
+is the point, not a side effect.</p>
+<h3 id="check-it-before-anybody-tries">Check it before anybody tries<a class="headerlink" href="#check-it-before-anybody-tries" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code>vendor/bin/naf<span class="w"> </span>oauth:doctor
+</code></pre></div>
+<p>It verifies the dependencies, the public URL, the user model and its contract, the link table,
+and every configured login — including whether the provider's metadata is reachable and belongs
+to the issuer you configured. It prints the callback URL to register, and never prints a secret.</p>
+<h3 id="the-older-configuration">The older configuration<a class="headerlink" href="#the-older-configuration" title="Permanent link">&para;</a></h3>
+<p><code>oauth:providers</code> is the previous spelling of <code>auth:logins</code> and still works; it is used when
+<code>auth:logins</code> is absent, and the error messages then name the keys you actually wrote.
+<code>auth:providers</code> likewise still names account sources explicitly. Nothing has to be migrated.</p>
+<h3 id="everything-else-has-a-default">Everything else has a default<a class="headerlink" href="#everything-else-has-a-default" title="Permanent link">&para;</a></h3>
+<p><code>callback_url</code>, <code>scope</code>, <code>label</code>, <code>after_login</code>, <code>error_route</code>, the table name and the cache
+location are derived or defaulted. Set them when you actually need something else.</p>
+<hr />
+<h2 id="the-button">The button<a class="headerlink" href="#the-button" title="Permanent link">&para;</a></h2>
+<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\OAuth\Client\oauth_button;</span>
+</code></pre></div>
+<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">oauth_button</span><span class="p">(</span><span class="s1">'google'</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x">                          &lt;!-- "Mit Google anmelden" --&gt;</span>
+<span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">oauth_button</span><span class="p">(</span><span class="s1">'google'</span><span class="p">,</span> <span class="s1">'Continue with Google'</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x">  &lt;!-- explicit text wins --&gt;</span>
+<span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">oauth_button</span><span class="p">(</span><span class="s1">'google'</span><span class="p">,</span> <span class="nb">next</span><span class="o">:</span> <span class="s1">'/projects/7'</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x">     &lt;!-- land there afterwards --&gt;</span>
+</code></pre></div>
+<p>The wording is settled highest-first: what you pass in, then your own
+<code>oauth/button.phtml</code> in the application's view directory, then
+<code>oauth:providers:&lt;key&gt;:label</code>, then the provider's own name. Copy the shipped view to change
+the markup — yours wins, and nothing in the central configuration has to change for it.</p>
+<p>A label is only ever a label. It never reaches an issuer, a client id, a redirect URI or a
+subject.</p>
+<hr />
+<h2 id="the-routes">The routes<a class="headerlink" href="#the-routes" title="Permanent link">&para;</a></h2>
+<p>Shipped, named, and off with <code>'oauth' =&gt; ['routes' =&gt; false]</code>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /auth/{provider}</code></td>
+<td>start a login</td>
+</tr>
+<tr>
+<td><code>GET /auth/{provider}/callback</code></td>
+<td>what the provider sends back</td>
+</tr>
+<tr>
+<td><code>GET /auth/{provider}/connect</code></td>
+<td>attach this provider to the account already signed in</td>
+</tr>
+</tbody>
+</table>
+<p>All three take <code>?next=/somewhere</code> — always a local path. Anything else falls back to
+<code>oauth:after_login</code>, and "anything else" includes embedded control characters: browsers strip
+tabs and newlines while normalising a URL, so <code>/\r//evil.test</code> would otherwise arrive as
+<code>//evil.test</code>.</p>
+<p>A provider reporting a failure is treated like any other answer: its <code>state</code> is checked and
+consumed. A cancelled login therefore ends rather than sitting pending until it expires, and
+nobody can drive the callback by appending <code>?error=</code> to it.</p>
+<p>A refused login redirects to <code>oauth:error_route</code> with the reason flashed into the session as
+<code>oauth_error</code>, rather than raising an error page. A cancelled login is something a person did,
+not a server fault:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?php</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$reason</span> <span class="o">=</span> <span class="nx">session</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getFlash</span><span class="p">(</span><span class="s1">'oauth_error'</span><span class="p">))</span><span class="o">:</span> <span class="cp">?&gt;</span>
+<span class="x">    &lt;p&gt;</span><span class="cp">&lt;?</span><span class="o">=</span> <span class="nv">$reason</span> <span class="o">===</span> <span class="s1">'not_linked'</span>
+        <span class="o">?</span> <span class="s1">'No account is linked to that login yet.'</span>
+        <span class="o">:</span> <span class="s1">'That login could not be completed.'</span> <span class="cp">?&gt;</span><span class="x">&lt;/p&gt;</span>
+<span class="cp">&lt;?php</span> <span class="k">endif</span> <span class="cp">?&gt;</span>
+</code></pre></div>
+<hr />
+<h2 id="which-account-is-this">Which account is this?<a class="headerlink" href="#which-account-is-this" title="Permanent link">&para;</a></h2>
+<p>The one decision left to you. Three answers are possible and only one is safe by default:</p>
+<ul>
+<li><strong>somebody linked it before</strong> → that account is signed in. Nothing to write.</li>
+<li><strong>nobody did, and you allow it</strong> → you create the account, the link is written, they are
+  signed in.</li>
+<li><strong>nobody did</strong> → refused with <code>not_linked</code>, so they can sign in normally and connect it.</li>
+</ul>
+<p>Turning on the middle one is one setting and one function:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">'oauth' =&gt; ['accounts' =&gt; [</span>
+<span class="x">    'auto_register' =&gt; true,</span>
+<span class="x">    'create' =&gt; static fn(ExternalIdentity $external) =&gt; $users-&gt;create([</span>
+<span class="x">        'email' =&gt; $external-&gt;email,</span>
+<span class="x">        'name'  =&gt; $external-&gt;name,</span>
+<span class="x">    ]),</span>
+<span class="x">]],</span>
+</code></pre></div>
+<p>With several account sources registered in <code>auth:providers</code>, name the one that owns external
+logins in <code>oauth:accounts:provider</code>. With one, it is used without being named.</p>
+<h3 id="two-rules-it-enforces-for-you">Two rules it enforces for you<a class="headerlink" href="#two-rules-it-enforces-for-you" title="Permanent link">&para;</a></h3>
+<p><strong>Identities are keyed on <code>(issuer, subject)</code>, never on <code>subject</code> alone.</strong> A subject is only
+unique within its issuer; two providers can hand you the same string. The link table's primary
+key <em>is</em> that pair, so two simultaneous first logins cannot both create a link.</p>
+<p><strong>Creating an account and linking it are one act.</strong> They run in one transaction, so a failed
+link takes the half-made account with it — otherwise every retry leaves another orphan beside
+the last one. The new account is then read back through the configured source before it signs
+in: what signs in has to be what the next request will load, and the source is what decides who
+may sign in at all.</p>
+<p><strong>A matching e-mail address is never a link.</strong> Not even a verified one: anybody who can get a
+provider to assert an address could then walk into the account that uses it. Attaching a second
+provider is a separate act, performed by somebody already signed in — and the person who
+finishes it must be the person who started it:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">&lt;a href="</span><span class="cp">&lt;?</span><span class="o">=</span> <span class="nx">route</span><span class="p">(</span><span class="s1">'oauth.connect'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'provider'</span> <span class="o">=&gt;</span> <span class="s1">'github'</span><span class="p">])</span> <span class="cp">?&gt;</span><span class="x">"&gt;Connect GitHub&lt;/a&gt;</span>
+</code></pre></div>
+<hr />
+<h2 id="doing-it-yourself">Doing it yourself<a class="headerlink" href="#doing-it-yourself" title="Permanent link">&para;</a></h2>
+<p>Nothing above is mandatory. <code>oauth()</code> gives you the same flow with none of the routing:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\Auth\auth;</span>
+<span class="x">use function Naf\OAuth\Client\oauth;</span>
+
+<span class="x">return redirect(oauth('google')-&gt;authorizationUrl());</span>
+
+<span class="x">$callback = oauth('google')-&gt;callback();   // throws unless everything verifies</span>
+<span class="x">$external = $callback-&gt;identity;</span>
+
+<span class="x">$user = $yourAccounts-&gt;findBySubject($external-&gt;issuer, $external-&gt;subject)</span>
+<span class="x">    ?? throw new RuntimeException('Not linked.');</span>
+
+<span class="x">auth()-&gt;setIdentity($user, 'database');</span>
+
+<span class="x">return redirect($callback-&gt;redirectTo);</span>
+</code></pre></div>
+<p>Writing the callback yourself means storing provider tokens yourself too — the shipped route calls
+<code>Tokens::remember($callback)</code> after the sign-in has succeeded, and nothing else does. Keep that
+order: a callback nobody is allowed to finish must not leave a working credential behind.</p>
+<hr />
+<h2 id="several-tabs">Several tabs<a class="headerlink" href="#several-tabs" title="Permanent link">&para;</a></h2>
+<p>Logins are keyed by their own <code>state</code>, so a person with three tabs open finishes all three.
+Each entry is consumed on use and expires after ten minutes, which is also what makes a
+replayed callback fail.</p>
+<hr />
+<h2 id="what-comes-back">What comes back<a class="headerlink" href="#what-comes-back" title="Permanent link">&para;</a></h2>
+<p><code>Callback</code>: <code>identity</code>, <code>purpose</code> (<code>LOGIN</code> or <code>LINK</code>), <code>initiator</code>, <code>redirectTo</code>, <code>token</code>.</p>
+<p><code>ExternalIdentity</code>: <code>provider</code>, <code>issuer</code>, <code>subject</code>, <code>claims</code>, and <code>email</code> / <code>emailVerified</code> /
+<code>name</code> for convenience. <code>emailVerified</code> is true only for a literal <code>true</code> — providers have sent
+<code>"true"</code>, <code>1</code> and <code>"1"</code> there.</p>
+<hr />
+<h2 id="calling-the-provider-afterwards">Calling the provider afterwards<a class="headerlink" href="#calling-the-provider-afterwards" title="Permanent link">&para;</a></h2>
+<p>A login needs none of this. The identity is checked once and your own session is the authority
+from then on, which is why signing in stores no provider tokens at all.</p>
+<p>It is a different question when the application has to <em>act</em> at the provider — read somebody's
+calendar, list their repositories, post on their behalf. That needs what the provider issued, kept
+between visits, and still working an hour later.</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">// app/config.php</span>
+<span class="x">'oauth' =&gt; [</span>
+<span class="x">    'tokens' =&gt; [</span>
+<span class="x">        'store' =&gt; true,</span>
+<span class="x">        'key'   =&gt; 'BASE64_OF_32_RANDOM_BYTES',</span>
+<span class="x">    ],</span>
+<span class="x">],</span>
+</code></pre></div>
+<p><code>naf oauth:doctor</code> says how to generate the key; it deliberately does not print one. Everything in
+<code>oauth_provider_tokens</code> is encrypted with it, so a copy of the database is not a copy of anybody's
+permissions — which is also why the key does not belong in that database. Losing it costs everybody
+a new consent screen.</p>
+<p>Then, wherever the API call happens:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="x">use function Naf\OAuth\Client\oauth;</span>
+<span class="x">use function Naf\OAuth\Client\oauth_token;</span>
+<span class="x">use function Naf\Auth\auth;</span>
+<span class="x">use function Naf\Client\client;</span>
+<span class="x">use function Naf\redirect;</span>
+<span class="x">use Nyholm\Psr7\Request;</span>
+
+<span class="x">$token = oauth_token('google');</span>
+
+<span class="x">if ($token === null || !$token-&gt;grants('https://www.googleapis.com/auth/calendar.readonly')) {</span>
+<span class="x">    return redirect(oauth('google')-&gt;grantUrl(</span>
+<span class="x">        ['https://www.googleapis.com/auth/calendar.readonly'],</span>
+<span class="x">        auth()-&gt;providerName(),</span>
+<span class="x">        (string) auth()-&gt;id(),</span>
+<span class="x">    ));</span>
+<span class="x">}</span>
+
+<span class="x">$response = client()-&gt;sendRequest(new Request(</span>
+<span class="x">    'GET',</span>
+<span class="x">    'https://www.googleapis.com/calendar/v3/calendars/primary/events',</span>
+<span class="x">    ['Authorization' =&gt; 'Bearer ' . $token-&gt;accessToken],</span>
+<span class="x">));</span>
+</code></pre></div>
+<p><code>oauth_token()</code> hands out something usable or nothing: an expired access token is renewed on the
+way out and the renewal written back. A provider that cannot be reached throws rather than
+answering null, because an outage is not a withdrawn permission and must not send people through a
+consent screen that cannot help.</p>
+<h3 id="without-consent-there-is-no-access-and-consent-is-not-what-you-asked-for">Without consent there is no access, and consent is not what you asked for<a class="headerlink" href="#without-consent-there-is-no-access-and-consent-is-not-what-you-asked-for" title="Permanent link">&para;</a></h3>
+<p>What the application may do is decided entirely by the scopes on the consent screen. Ask for
+nothing beyond <code>openid email profile</code> — the default — and there is no API access at all.</p>
+<p>Asking is not getting. RFC 6749 §5.1 obliges a provider to state the scope it actually issued
+whenever it differs from the request, and Google lets people untick individual permissions. So
+<code>$token-&gt;scope</code> is the granted scope, never the requested one, and <code>$token-&gt;grants(...)</code> is worth
+asking before a call rather than after a 403 that will not explain itself.</p>
+<h3 id="ask-when-the-feature-is-used-not-at-the-login">Ask when the feature is used, not at the login<a class="headerlink" href="#ask-when-the-feature-is-used-not-at-the-login" title="Permanent link">&para;</a></h3>
+<p><code>grantUrl()</code> exists so that extra permissions are requested at the moment they are needed. "Wants
+to see your calendar" makes sense after somebody pressed a calendar button; at a login it reads as
+a reason not to sign in. It returns through the ordinary callback, so there is no second route to
+add.</p>
+<p>A grant replaces the stored token with what the provider issued for it. Google is asked with
+<code>include_granted_scopes</code>, so its answer carries the earlier permissions too; a provider that does
+not do this issues a token for the new scope alone, and the previous one is gone.</p>
+<h3 id="two-things-that-catch-people-out">Two things that catch people out<a class="headerlink" href="#two-things-that-catch-people-out" title="Permanent link">&para;</a></h3>
+<p><strong>The refresh token arrives once.</strong> Google returns it on the first consent and never again unless
+consent is forced — <code>grantUrl()</code> forces it, the login does not. An installation that turns
+<code>oauth:tokens:store</code> on <em>after</em> people have signed in has no refresh token for any of them until
+they grant something again.</p>
+<p><strong>Unlinking is not revoking.</strong> Deleting the link only makes the application forget; the permission
+stays listed in the person's account at the provider, looking current. <code>Tokens::forget()</code> tells the
+provider first and then deletes, and belongs wherever an account is unlinked.</p>
+<hr />
+<h2 id="when-it-does-not-verify">When it does not verify<a class="headerlink" href="#when-it-does-not-verify" title="Permanent link">&para;</a></h2>
+<p>Every failure is an <code>OAuthException</code> carrying a short, stable <code>reason</code> alongside its message, so
+an error page can tell a cancelled login from an expired one without matching on prose:</p>
+<p><code>provider_error</code>, <code>state_missing</code>, <code>state_unknown</code>, <code>code_missing</code>, <code>provider_mismatch</code>,
+<code>token_request_failed</code>, <code>id_token_missing</code>, <code>id_token_invalid</code>, <code>nonce_mismatch</code>,
+<code>issuer_mismatch</code>, <code>audience_mismatch</code>, <code>tenant_not_allowed</code>, <code>subject_missing</code>, <code>no_keys</code>,
+<code>metadata_unavailable</code>, <code>no_session</code>, <code>access_token_missing</code>, <code>userinfo_unavailable</code>,
+<code>subject_mismatch</code>, <code>not_linked</code>, <code>already_linked</code>, <code>initiator_mismatch</code>, <code>no_initiator</code>,
+<code>account_unavailable</code>, <code>registration_refused</code>, <code>consent_required</code>, <code>refresh_failed</code>, <code>no_scopes</code>.</p>
+<p><code>already_linked</code> means exactly that — an integrity violation and nothing else. A dropped
+connection or a value too long for its column surfaces as the database error it is, rather than
+hiding a broken installation behind a message that sounds like ordinary use.</p>
+<p>A misconfiguration raises <code>ConfigurationException</code> instead, and is left to surface the way every
+other bug in your application does — it is addressed to you, not to a visitor.</p>
+<hr />
+<h2 id="provider-metadata">Provider metadata<a class="headerlink" href="#provider-metadata" title="Permanent link">&para;</a></h2>
+<p>Discovery documents and signing keys are cached under <code>storage/oauth</code> for a day, so a login
+costs no extra request. Point <code>oauth:cache_path</code> somewhere else when that directory is not
+writable, or when several servers should share one cache. A token signed with a key id we have not seen reloads the key set once —
+which is what a rotation looks like from here — and a cooldown keeps invented key ids from
+turning into a stream of outbound requests. A failed reload keeps using what is cached and backs off before trying again, so a provider that
+is down does not turn every login into another outbound request. It never degrades into
+accepting an unverified token — and it does not lean on stale metadata forever either: once the
+cache has been expired for a day without the provider answering, logins fail with something an
+operator can act on.</p>
+<hr />
+<h2 id="what-this-is-not">What this is not<a class="headerlink" href="#what-this-is-not" title="Permanent link">&para;</a></h2>
+<p><strong>There is no LDAP adapter here.</strong> Names like <code>ldap</code> appear in tests and in <code>naf/auth</code>'s
+examples as stand-ins for "a second account source"; that is not support, and nothing in these
+packages speaks LDAP.</p>
+<p>What does exist is the part that matters for adding one: every way of signing in ends at the
+same local contract, <code>UserInterface</code>. A directory bind would not be an OAuth provider and must
+not be forced through a redirect flow — it verifies a password against a server and then hands
+over a user, which is what <code>auth()-&gt;setIdentity()</code> is for. The protocol differs; what a
+signed-in person is does not.</p>
+<h3 id="where-credentials-belong">Where credentials belong<a class="headerlink" href="#where-credentials-belong" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local passwords</td>
+<td>hashed, never recoverable — <code>PasswordHasher</code></td>
+</tr>
+<tr>
+<td>Directory passwords</td>
+<td>verified against the directory, never stored locally</td>
+</tr>
+<tr>
+<td>Provider secrets, bind accounts</td>
+<td>server-side configuration, out of the repository</td>
+</tr>
+<tr>
+<td>Account links</td>
+<td>stable external ids — <code>(issuer, subject)</code>, never an e-mail address</td>
+</tr>
+<tr>
+<td>Your own tokens</td>
+<td>the token store, as hashes</td>
+</tr>
+<tr>
+<td>Providers' refresh tokens</td>
+<td>only when you actually call their APIs — <code>oauth_provider_tokens</code>, encrypted with <code>oauth:tokens:key</code></td>
+</tr>
+<tr>
+<td>Your own client secrets</td>
+<td>server-side configuration; rotated by changing one line, see above</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="a-known-limit">A known limit<a class="headerlink" href="#a-known-limit" title="Permanent link">&para;</a></h2>
+<p>Taking a pending login out of the session is read-modify-write, and what makes that indivisible
+is the session backend holding a lock for the request. PHP's own file handler does;
+<code>naf/session</code>'s database handler does not. Two callbacks arriving for the same <code>state</code> in the
+same instant could therefore both find it there.</p>
+<p>Every check after that still applies — the authorization code is single-use at the provider, and
+the ID token still has to verify — so this narrows the replay guarantee rather than opening a way
+through it. A locking session backend closes it.</p>
+<hr />
+<h2 id="not-here-yet">Not here yet<a class="headerlink" href="#not-here-yet" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Rotating <code>oauth:tokens:key</code>.</strong> Changing it makes every stored grant unreadable, and everybody
+  affected has to grant access again. Re-encrypting in place would need both keys held at once.</li>
+</ul>
+<hr />
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../auth-architecture/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Why auth has this shape">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Why auth has this shape
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../oauth-server/" class="md-footer__link md-footer__link--next" aria-label="Next: Being the provider">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Being the provider
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.footer", "navigation.top", "navigation.tracking", "content.code.copy", "content.tabs.link", "search.highlight", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
