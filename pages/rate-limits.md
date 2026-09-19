@@ -1,17 +1,8 @@
 ---
-title: Rate limits (draft)
----
-
-Contributor draft. `naf/rate-limit` v0.1.0 is tagged and its repository is public, but the
-package has not been registered on Packagist yet, so `tools/check_pages.py` rejects a page
-that requires it. Move this file to `pages/rate-limits.md`, restore the `requires:` front
-matter below, add it to `mkdocs.yml` under "Doing work", regenerate the reference and rerun
-the checks once the package resolves.
-
-```yaml
+title: Rate limits
 requires:
   - naf/rate-limit
-```
+---
 
 # Rate limits
 

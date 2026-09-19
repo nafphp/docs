@@ -91,6 +91,7 @@ nav:
       - Scheduled jobs: scheduling.md
       - Sending mail: mail.md
       - HTTP client: http-client.md
+      - Rate limits: rate-limits.md
   - Identity:
       - Authentication and permissions: auth.md
       - Why auth has this shape: auth-architecture.md

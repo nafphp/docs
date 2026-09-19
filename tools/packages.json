@@ -184,6 +184,7 @@
   "Naf\\Queue\\Drivers\\QueueDeadletterDriverInterface",
   "Naf\\Queue\\Drivers\\QueueDriverInterface",
   "Naf\\Queue\\Drivers\\SQLiteDriver",
+  "Naf\\RateLimit\\PdoLimiter",
   "Naf\\Schedule\\Commands\\ScheduleListCommand",
   "Naf\\Schedule\\Commands\\ScheduleTickerCommand",
   "Naf\\Schedule\\Core\\JobRepository",
@@ -651,6 +652,16 @@
    ],
    "suggests": [],
    "version": "v0.2.3"
+  },
+  "rate-limit": {
+   "description": "Atomic PDO fixed-window rate limits for NAF hosts.",
+   "namespace": "Naf\\RateLimit",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": [],
+   "version": "v0.1.0"
   },
   "schedule": {
    "description": "NAF Schedule Plugin for recurring Tasks.",

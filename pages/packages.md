@@ -23,6 +23,7 @@ What there is, what it requires and what it suggests. Generated from the
 | **`naf/oauth-server`**<br><span style="font-weight:400">Run your application as an OAuth2 authorization server and protect its APIs.</span> | `v0.2.2` | `naf/auth`, `naf/form`, `naf/framework`, `naf/session` | `naf/cli`, `naf/database`, `naf/view` | `>=8.3` |
 | **`naf/orm`**<br><span style="font-weight:400">NAF ORM Plugin.</span> | `v0.2.2` | `naf/database`, `naf/framework` | — | `>=8.3` |
 | **`naf/queue`**<br><span style="font-weight:400">NAF Queue Plugin for asynchronous jobs.</span> | `v0.2.3` | `naf/cli`, `naf/framework` | — | `>=8.3` |
+| **`naf/rate-limit`**<br><span style="font-weight:400">Atomic PDO fixed-window rate limits for NAF hosts.</span> | `v0.1.0` | `naf/framework` | — | `>=8.3` |
 | **`naf/schedule`**<br><span style="font-weight:400">NAF Schedule Plugin for recurring Tasks.</span> | `v0.2.3` | `naf/framework`, `naf/queue` | — | `>=8.3` |
 | **`naf/session`**<br><span style="font-weight:400">NAF Session Plugin for storing data across requests.</span> | `v0.2.2` | `naf/framework` | `naf/database` | `>=8.3` |
 | **`naf/storage`**<br><span style="font-weight:400">Provider-independent file storage with named disks and streams for NAF.</span> | `v0.1.0` | `naf/framework` | `naf/client` | `>=8.3` |
