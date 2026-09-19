@@ -125,6 +125,26 @@ all contribute migrations that `db:migrate up` runs alongside yours.
 That is why a fresh install of one of those packages usually ends with a migration step, and
 why you do not have to copy anybody's schema into your own migrations folder.
 
+### Migrations and transactions
+
+Migrations run in the order every registered path agrees on, are tracked by class name, and
+roll back in the reverse of the order they were applied.
+
+How much of that is transactional depends on the engine, and the difference matters when one
+fails halfway:
+
+| Engine | Behaviour |
+|---|---|
+| PostgreSQL, SQLite | schema changes and the tracking happen in one transaction — a failure leaves nothing behind |
+| MySQL, MariaDB | DDL commits implicitly, so a failed migration can leave part of its work applied |
+
+Write MySQL migrations so that running them again after a failure is safe. There is no
+transaction to undo the statements that already committed.
+
+!!! warning "Do not run migrations inside your own transaction"
+    The runner manages its own, and nesting one inside an application transaction leaves the
+    tracking and the schema able to disagree with each other.
+
 ## Configuration
 
 ```php
