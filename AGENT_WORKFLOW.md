@@ -43,8 +43,10 @@ from behavioral changes. Existing packages adopt it incrementally on their RC br
 - Implement, add meaningful regression coverage, run declared package checks, commit and
   push. Use the existing `Preparations for vX.Y.Z - ...` subject convention for release work.
   Keep the configured author and attribute the actual contributing agent when applicable.
-- The maintainer merges package code through GitHub. Do not merge source-code PRs or enable
-  auto-merge for them unless the user explicitly delegates that step.
+- Open the pull request for package code once the branch is pushed — that is where the
+  maintainer reviews the diff and the checks — and then stop. The maintainer merges package
+  code through GitHub. Do not merge source-code PRs or enable auto-merge for them unless the
+  user explicitly delegates that step.
 - Verified documentation-only work, including plugin `AGENTS.md` guidance, is delegated:
   commit, push, create or reuse a PR, review its full diff/current checks, merge using an
   allowed method, and verify publication. Do not request the same approval again. A mixed

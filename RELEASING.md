@@ -101,14 +101,20 @@ git diff --cached --check
 git diff --cached
 # Commit the reviewed changes with the subject and attribution described above.
 git push --set-upstream origin "$release_branch"
+# Reuse the pull request when one already exists for this branch, otherwise open it.
 gh pr list --repo "$release_repo" --head "$release_branch" --state open
+gh pr create --repo "$release_repo" --base main --head "$release_branch" \
+  --title "$release_branch" --body "<what changed, which checks ran, and their results>"
 ```
 
-Report tests and the PR or the comparison URL
-`https://github.com/<owner>/<repo>/compare/main...<release-branch>`.
-The maintainer merges the package PR through GitHub. Preparing and pushing the branch does not publish
-the package. If the current task also authorizes a release, continue after the merge has
-actually occurred; otherwise hand over the branch without tagging it.
+Opening the pull request is part of handing the branch over: it is where the maintainer
+reviews the diff and the checks. **Create it, then stop.** Do not merge it and do not enable
+auto-merge, as [the shared workflow](AGENT_WORKFLOW.md) requires for package code.
+
+Report tests and the pull request URL.
+The maintainer merges the package PR through GitHub. Preparing, pushing and opening the PR does
+not publish the package. If the current task also authorizes a release, continue after the merge
+has actually occurred; otherwise hand the PR over without tagging it.
 
 ## 3. Verify the merged commit and CI
 
