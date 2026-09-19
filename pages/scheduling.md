@@ -77,9 +77,29 @@ vendor/bin/naf schedule:ticker
 
 | Option | What it does |
 |---|---|
+| `--once` | run one scheduling pass and exit |
 | `--max-jobs=N` | exit after queueing N jobs |
 | `--max-runtime=N` | exit after N seconds |
-| `--workers=N` | how many workers to assume |
+| `--workers=N` | start this many workers alongside the ticker |
+
+`--workers` is not a hint: the ticker starts that many real `queue:consume` processes and
+owns them. They write to the host's `logs/queue/` directory and use whatever PSR-3 logger
+you configured. When the ticker exits — cleanly or by failing — it closes its children
+rather than leaving orphaned workers behind.
+
+That makes `schedule:ticker --workers=1` a way to run the pair under one supervisor entry
+instead of two. Running separate `queue:consume` processes is still the more flexible
+arrangement, because you can scale and restart them independently.
+
+```ini
+[program:naf-schedule]
+directory=/var/www/my-app
+command=php /var/www/my-app/vendor/bin/naf schedule:ticker --max-runtime=3600
+autostart=true
+autorestart=true
+```
+
+Replace `/var/www/my-app` with your application path.
 
 ```ini
 [program:naf-schedule]
@@ -131,3 +151,17 @@ not a cache rebuild.
 Within one minute a job is queued once, even if the ticker loops several times. The
 scheduler remembers the last minute each job ran in and persists that, so restarting the
 ticker mid-minute does not queue everything a second time.
+
+That state is held under a file lock and replaced atomically, so two tickers cannot both
+decide a minute is theirs, and a crash mid-write does not leave a half-written file. If
+queueing a job fails, the minute is deliberately *not* marked complete — the next pass tries
+again rather than silently skipping it.
+
+!!! note "Crossing the crash boundary needs a durable job id"
+    The guarantee covers the ticker's own state. A crash between enqueueing and recording
+    that minute can still deliver a job twice. If that matters, give the job a durable id so
+    the consumer can recognise the duplicate — the same at-least-once thinking the queue
+    asks for.
+
+Setting `schedule:heartbeat_file` in the configuration has the ticker record that it is
+polling, which gives a health check something to read.

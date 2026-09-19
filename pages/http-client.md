@@ -78,6 +78,55 @@ You can hand the client its transports directly, in the order you want them trie
 new Client([new MyTransport(), new CurlTransport()]);
 ```
 
+## Large bodies do not go through memory
+
+The cURL transport streams. It transfers a PSR-7 request body in chunks from its current
+position, and spools the response into a temporary file that is deleted for you. That is
+what makes an upload or a download bigger than your memory limit possible at all.
+
+Two things follow from it, and both bite quietly if you do not know them:
+
+```php
+$response = client()->sendRequest($request);
+$body     = $response->getBody();
+
+while (!$body->eof()) {
+    fwrite($target, $body->read(8192));
+}
+
+$body->close();          // the temporary file goes away here
+```
+
+Close the body when you are done. And `(string) $response->getBody()` still loads the whole
+thing into memory — casting undoes the streaming, which is fine for a JSON answer and not
+for a 2 GB file. A request stream you opened yourself stays open; the client does not close
+what it did not create.
+
+!!! note "The temporary filesystem has to be big enough"
+    The response is spooled before `sendRequest()` returns, so the network transfer is
+    finished by then. What you need free is disk, not memory.
+
+Existing `TransportInterface` implementations and string-based `send()` calls keep working
+unchanged. A custom transport can additionally implement `StreamingTransportInterface`, and
+if your code must not silently fall back to buffering, say so:
+
+```php
+$streaming = client()->withOptions(['streaming' => true]);
+```
+
+That requires a transport with the capability rather than accepting the buffering fallback.
+The stream-wrapper transport remains string-based.
+
+A few sharp edges worth knowing:
+
+| Situation | Behaviour |
+|---|---|
+| A retry after a failure | seeks the request body back to where it started |
+| A non-seekable streaming request | never retried automatically — it cannot be rewound |
+| `'decode_content' => false` | keeps the encoded bytes, for passing straight to object or file storage |
+| Redirects | only the final response's headers and body are kept |
+| `'max_redirects' => 0` | do not follow redirects at all |
+
 ## TLS and HTTP versions
 
 ```php

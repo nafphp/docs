@@ -82,6 +82,25 @@ supervisor:
 | `--channels=a,b,c` | several |
 | `--verbose`, `-v` | print each job |
 
+With `--once`, the exit code tells you what happened: nonzero when the job failed, including
+when its class is missing. A supervisor or a CI step can act on that instead of parsing
+output. The failure is still kept for retry or the deadletter — a nonzero exit does not mean
+the work was thrown away.
+
+`--max-jobs` and `--max-runtime` exist because a long-running PHP process accumulates
+memory. Let it exit on its own terms and have the supervisor start a fresh one, rather than
+waiting for the OOM killer to decide.
+
+```ini
+[program:naf-queue]
+directory=/var/www/my-app
+command=php /var/www/my-app/vendor/bin/naf queue:consume --channels=default,emails --max-jobs=500
+autostart=true
+autorestart=true
+```
+
+Replace `/var/www/my-app` with the absolute path of your deployed application.
+
 `--max-jobs` and `--max-runtime` exist because a long-running PHP process accumulates
 memory. Let it exit on its own terms and have the supervisor start a fresh one, rather than
 waiting for the OOM killer to decide.
@@ -134,3 +153,41 @@ Channels and the deadletter are separate interfaces on top of the basic one
 (`ChannelQueueDriverInterface`, `QueueDeadletterDriverInterface`). A driver that implements
 only the basic contract still works — it just has no channels and no deadletter, and
 `queue:retry-failed` tells you so rather than failing.
+
+### The database driver, for more than one machine
+
+`PDODriver` is the answer to the directory problem above: the queue lives in your database,
+so every server sees the same work. It implements `LeaseQueueDriverInterface`, which adds
+reserve, acknowledge, release and renew on top of the basic contract.
+
+```php
+use Naf\Queue\Core\Queue;
+use Naf\Queue\Drivers\PDODriver;
+use function Naf\app;
+
+$driver = new PDODriver(app()->container()->get(PDO::class), 300);
+$driver->install();                       // once, creates the tables
+
+app()->container()->set(Queue::class, fn() => new Queue($driver));
+```
+
+A claim is a lease, not a deletion. PostgreSQL and MariaDB take a row lock with
+`SKIP LOCKED` so two workers never pick the same job; SQLite gets a serialized
+implementation of the same contract. If a worker crashes mid-job, the lease expires and the
+work becomes available again on its own — nobody has to clean up after it. Fenced tokens
+make the late acknowledgement of a crashed worker bounce instead of marking finished work
+that somebody else has since redone.
+
+Two rules follow from that, and both are easy to get wrong:
+
+!!! warning "Claim outside a transaction, finish inside the lease"
+    Enqueueing takes part in a caller transaction, so queueing a job and writing the row it
+    refers to commit together. **Claiming** must happen outside one. And a job has to finish
+    within its lease or call renew — otherwise the lease expires while the job is still
+    running and a second worker starts the same work. Delivery is at least once, so make the
+    job itself tolerate being run twice.
+
+`queue:consume` handles all of this and acknowledges only after the job succeeded. If you
+write your own consumer around `dequeue()`, acknowledging the reservation you were given is
+your job. Setting `queue:heartbeat_file` in the configuration has the worker record that it
+is polling, which is what a health check can look at.

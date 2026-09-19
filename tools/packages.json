@@ -29,6 +29,7 @@
   "Naf\\Client\\Exception\\ClientException",
   "Naf\\Client\\Transports\\CurlTransport",
   "Naf\\Client\\Transports\\StreamTransport",
+  "Naf\\Client\\Transports\\StreamingTransportInterface",
   "Naf\\Client\\Transports\\TransportInterface",
   "Naf\\Core\\App",
   "Naf\\Core\\Config",
@@ -42,11 +43,11 @@
   "Naf\\Core\\ResponseEmitter",
   "Naf\\Core\\Route",
   "Naf\\Database\\Commands\\MigrateCommand",
-  "Naf\\Database\\Commands\\Migration",
   "Naf\\Database\\Commands\\MigrationCreateCommand",
   "Naf\\Database\\Core\\AbstractMigration",
   "Naf\\Database\\Core\\Database",
   "Naf\\Database\\Core\\MigrationInterface",
+  "Naf\\Database\\Core\\MigrationRunner",
   "Naf\\Database\\Exceptions\\DatabaseException",
   "Naf\\Database\\Support\\MigrationRegistry",
   "Naf\\Decorators\\AutoResolvingContainer",
@@ -59,10 +60,12 @@
   "Naf\\Form\\Core\\Validator",
   "Naf\\Form\\Events\\CsrfListener",
   "Naf\\Form\\Support\\Csrf",
+  "Naf\\Form\\Support\\DefaultRules",
   "Naf\\I18n\\Core\\Translator",
   "Naf\\I18n\\Events\\CookieSetListener",
   "Naf\\I18n\\Events\\LocaleListener",
   "Naf\\I18n\\Support\\Language",
+  "Naf\\I18n\\Support\\TranslationPathRegistry",
   "Naf\\MCP\\Auth\\AuthenticationException",
   "Naf\\MCP\\Auth\\AuthenticatorInterface",
   "Naf\\MCP\\Auth\\BearerTokenAuthenticator",
@@ -87,6 +90,7 @@
   "Naf\\MCP\\Tools\\ToolInterface",
   "Naf\\Mail\\Core\\Mailer",
   "Naf\\Mail\\Core\\TransportInterface",
+  "Naf\\Mail\\Core\\Transport\\DummyTransport",
   "Naf\\Mail\\Core\\Transport\\MailTransport",
   "Naf\\Mail\\Core\\Transport\\Trait\\MailMessageRenderer",
   "Naf\\Mail\\Exceptions\\MailException",
@@ -172,6 +176,8 @@
   "Naf\\Queue\\Decorators\\Drivers\\ChannelDriver",
   "Naf\\Queue\\Decorators\\Drivers\\ChannelQueueDriverInterface",
   "Naf\\Queue\\Drivers\\FileDriver",
+  "Naf\\Queue\\Drivers\\LeaseQueueDriverInterface",
+  "Naf\\Queue\\Drivers\\PDODriver",
   "Naf\\Queue\\Drivers\\QueueDeadletterDriverInterface",
   "Naf\\Queue\\Drivers\\QueueDriverInterface",
   "Naf\\Queue\\Drivers\\SQLiteDriver",
@@ -304,7 +310,7 @@
   },
   "mailer": {
    "namespace": "Naf\\Mail",
-   "signature": "mailer(): Naf\\Mail\\Core\\Mailer"
+   "signature": "mailer(?Naf\\Mail\\Core\\TransportInterface $transport = null): Naf\\Mail\\Core\\Mailer"
   },
   "memory": {
    "namespace": "Naf\\Form",
@@ -398,6 +404,10 @@
    "namespace": "Naf\\MCP",
    "signature": "tool(): Naf\\MCP\\Support\\ToolRegistry"
   },
+  "translation_paths": {
+   "namespace": "Naf\\I18n",
+   "signature": "translation_paths(): Naf\\I18n\\Support\\TranslationPathRegistry"
+  },
   "translator": {
    "namespace": "Naf\\I18n",
    "signature": "translator(): Naf\\I18n\\Core\\Translator"
@@ -473,7 +483,7 @@
     "naf/orm",
     "naf/session"
    ],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "cli": {
    "description": "NAF CLI Plugin for console applications.",
@@ -483,7 +493,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "client": {
    "description": "NAF Client Plugin to make simple http requests.",
@@ -493,7 +503,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "database": {
    "description": "NAF Database Plugin to work with various storage solutions.",
@@ -503,7 +513,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "form": {
    "description": "NAF Form Plugin to make form handling easier.",
@@ -514,7 +524,7 @@
     "naf/session"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "framework": {
    "description": "NAF - the ultra-light, functional PHP framework for fast microservices and APIs.",
@@ -522,7 +532,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.3"
+   "version": "v0.2.5"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
@@ -532,7 +542,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "mail": {
    "description": "NAF Mail Plugin for quick email communication.",
@@ -542,7 +552,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "mcp": {
    "description": "NAF MCP Plugin for basic AI driven workflows.",
@@ -552,7 +562,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "oauth-client": {
    "description": "Sign in with external OAuth2 and OpenID Connect providers, keeping your own user model.",
@@ -569,7 +579,7 @@
     "naf/database",
     "naf/view"
    ],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "oauth-server": {
    "description": "Run your application as an OAuth2 authorization server and protect its APIs.",
@@ -597,7 +607,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "queue": {
    "description": "NAF Queue Plugin for asynchronous jobs.",
@@ -608,7 +618,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "schedule": {
    "description": "NAF Schedule Plugin for recurring Tasks.",
@@ -619,7 +629,7 @@
     "naf/queue"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "session": {
    "description": "NAF Session Plugin for storing data across requests.",
@@ -631,7 +641,7 @@
    "suggests": [
     "naf/database"
    ],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   },
   "view": {
    "description": "NAF View Plugin with simple templating.",
@@ -641,7 +651,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.1"
+   "version": "v0.2.2"
   }
  }
 }
