@@ -161,6 +161,14 @@ Version **v0.2.2** · [Sessions](sessions.md)
 | --- | --- |
 | <code>session(): Naf\Session\Core\Session</code> | `Naf\Session` |
 
+## naf/storage
+
+Version **v0.1.0** · [storage](first-app.md)
+
+| Signature | Namespace to import from |
+| --- | --- |
+| <code>storage(?string $name = null): Naf\Storage\Storage</code> | `Naf\Storage` |
+
 ## naf/view
 
 Version **v0.2.2** · [Views and templates](views.md)
@@ -174,4 +182,4 @@ Version **v0.2.2** · [Views and templates](views.md)
 
 </div>
 
-*48 public functions across 16 packages.*
+*49 public functions across 17 packages.*
