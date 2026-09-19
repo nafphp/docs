@@ -65,6 +65,33 @@ navigation for every behavior change and release. Correct and extend them alongs
 implementation. If nothing needs updating, state why. Keep plugin `AGENTS.md` instructions
 accurate when their public API, extension points, structure or test commands change.
 
+### Where documentation goes
+
+**This repository holds the documentation. A package `README.md` only points at it.**
+
+Every package README has the same three sections and nothing else: a short introduction
+saying what the package is, `## Documentation` linking here, `## Install`, and `## License`.
+Documenting behaviour in a README scatters the same subject over twenty repositories, where
+it drifts apart and nobody finds it. Add the page here instead, under the chapter the
+subject belongs to.
+
+Two things a README must never carry:
+
+- **Release state.** No branch names, no "unreleased", no "not a published release yet", no
+  version the text will outlive. A README ships inside the Composer package, so a sentence
+  that is true on a branch and false after the merge becomes a defect in every later tag.
+  `naf/framework` v0.2.4 was tagged from such a file and told everyone who installed it that
+  the version they had just installed was unreleased. Release state belongs in the pull
+  request, the release notes or the changelog, which stay attached to the moment they
+  describe.
+- **Contributor guidance.** Style rules, test commands and CI matrices go in that package's
+  `AGENTS.md`, which is where an agent looks for them.
+
+Behaviour that is not released yet has nowhere to go in `pages/` either, because the
+published site describes published releases. Park it in `drafts/`, which is outside
+`docs_dir` and outside the page checks, and say in the file which release it waits for.
+Move it into `pages/` after that release, and rerun the documented checks.
+
 Follow [README.md](README.md) for documentation checks: check pages, build MkDocs strictly,
 and execute the documented examples. Refresh generated package/function references when
 releases or signatures change. New examples outside the automated runner need their own
