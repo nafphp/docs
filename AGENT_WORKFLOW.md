@@ -65,6 +65,16 @@ navigation for every behavior change and release. Correct and extend them alongs
 implementation. If nothing needs updating, state why. Keep plugin `AGENTS.md` instructions
 accurate when their public API, extension points, structure or test commands change.
 
+A package `README.md` is shipped inside the Composer package, so whatever it says reaches
+every installation of every later tag. Extend it only to describe what the code does. Never
+write release state into it — no branch names, no "unreleased", no "not a published release
+yet", no version that the text will outlive. Those belong in the pull request, the release
+notes or the changelog, all of which stay attached to the moment they describe. A README
+sentence that is true on a branch and false after the merge is a defect that ships.
+
+What a package does, how it is configured and what it needs belongs in the documentation
+repository, which every package README already links to. Prefer putting it there.
+
 Follow [README.md](README.md) for documentation checks: check pages, build MkDocs strictly,
 and execute the documented examples. Refresh generated package/function references when
 releases or signatures change. New examples outside the automated runner need their own
