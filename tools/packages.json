@@ -9,6 +9,9 @@
   "Naf\\Auth\\Identity\\IdentityInterface",
   "Naf\\Auth\\Identity\\UserInterface",
   "Naf\\Auth\\Identity\\UserProfile",
+  "Naf\\Auth\\Ldap\\DirectoryInterface",
+  "Naf\\Auth\\Ldap\\LdapProvider",
+  "Naf\\Auth\\Ldap\\NativeDirectory",
   "Naf\\Auth\\Provider\\DatabaseProvider",
   "Naf\\Auth\\Provider\\ModelRepository",
   "Naf\\Auth\\Provider\\OrmProvider",
@@ -181,6 +184,7 @@
   "Naf\\Queue\\Drivers\\QueueDeadletterDriverInterface",
   "Naf\\Queue\\Drivers\\QueueDriverInterface",
   "Naf\\Queue\\Drivers\\SQLiteDriver",
+  "Naf\\RateLimit\\PdoLimiter",
   "Naf\\Schedule\\Commands\\ScheduleListCommand",
   "Naf\\Schedule\\Commands\\ScheduleTickerCommand",
   "Naf\\Schedule\\Core\\JobRepository",
@@ -190,6 +194,20 @@
   "Naf\\Session\\Core\\Session",
   "Naf\\Session\\Migrations\\SessionTableMigration",
   "Naf\\Session\\Storage\\DatabaseSessionHandler",
+  "Naf\\Storage\\Adapters\\LocalAdapter",
+  "Naf\\Storage\\Adapters\\S3Adapter",
+  "Naf\\Storage\\Adapters\\WebDavAdapter",
+  "Naf\\Storage\\Exceptions\\FileNotFoundException",
+  "Naf\\Storage\\Exceptions\\StorageException",
+  "Naf\\Storage\\Exceptions\\UnableToWriteException",
+  "Naf\\Storage\\PublicUrlProviderInterface",
+  "Naf\\Storage\\Storage",
+  "Naf\\Storage\\StorageAdapterInterface",
+  "Naf\\Storage\\StorageManager",
+  "Naf\\Storage\\Support\\Http",
+  "Naf\\Storage\\Support\\Path",
+  "Naf\\Storage\\Support\\S3HttpHandler",
+  "Naf\\Storage\\Support\\Streams",
   "Naf\\Support\\AppHolder",
   "Naf\\Support\\Collection",
   "Naf\\Support\\Cookie",
@@ -388,6 +406,10 @@
    "namespace": "Naf\\Session",
    "signature": "session(): Naf\\Session\\Core\\Session"
   },
+  "storage": {
+   "namespace": "Naf\\Storage",
+   "signature": "storage(?string $name = null): Naf\\Storage\\Storage"
+  },
   "t": {
    "namespace": "Naf\\I18n",
    "signature": "t(string $key, array $params = []): string"
@@ -463,6 +485,7 @@
   "s": "view",
   "scheduler": "schedule",
   "session": "session",
+  "storage": "storage",
   "t": "i18n",
   "token": "oauth-server",
   "tokens": "mcp",
@@ -484,6 +507,16 @@
     "naf/session"
    ],
    "version": "v0.2.2"
+  },
+  "auth-ldap": {
+   "description": "Optional TLS LDAP provider using the existing NAF Auth contract.",
+   "namespace": "Naf\\Auth\\Ldap",
+   "php": ">=8.3",
+   "requires": [
+    "naf/auth"
+   ],
+   "suggests": [],
+   "version": "v0.1.0"
   },
   "cli": {
    "description": "NAF CLI Plugin for console applications.",
@@ -620,6 +653,16 @@
    "suggests": [],
    "version": "v0.2.3"
   },
+  "rate-limit": {
+   "description": "Atomic PDO fixed-window rate limits for NAF hosts.",
+   "namespace": "Naf\\RateLimit",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": [],
+   "version": "v0.1.0"
+  },
   "schedule": {
    "description": "NAF Schedule Plugin for recurring Tasks.",
    "namespace": "Naf\\Schedule",
@@ -642,6 +685,18 @@
     "naf/database"
    ],
    "version": "v0.2.2"
+  },
+  "storage": {
+   "description": "Provider-independent file storage with named disks and streams for NAF.",
+   "namespace": "Naf\\Storage",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": [
+    "naf/client"
+   ],
+   "version": "v0.1.0"
   },
   "view": {
    "description": "NAF View Plugin with simple templating.",
