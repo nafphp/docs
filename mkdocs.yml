@@ -84,6 +84,7 @@ nav:
       - Sessions: sessions.md
       - Database: database.md
       - ORM and repositories: orm.md
+      - File storage: file-storage.md
   - Doing work:
       - Console commands: console.md
       - Queues and workers: queues.md
@@ -93,6 +94,7 @@ nav:
   - Identity:
       - Authentication and permissions: auth.md
       - Why auth has this shape: auth-architecture.md
+      - Signing in against a directory: auth-ldap.md
       - Signing in with a provider: oauth-client.md
       - Being the provider: oauth-server.md
   - Machines:
