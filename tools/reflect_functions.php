@@ -26,7 +26,10 @@ foreach (get_defined_functions()['user'] as $name) {
         }
         $params[] = preg_replace('/\s+/', ' ', $text);
     }
-    $result[$fn->getShortName()] = [
+    // Keyed by the fully qualified name. Two packages may both offer a
+    // `token()`, and keying by the short one silently drops whichever was
+    // read second -- from the index as well as from the checker.
+    $result[$fn->getName()] = [
         'namespace' => $fn->getNamespaceName(),
         'signature' => $fn->getShortName() . '(' . implode(', ', $params) . ')'
             . ($fn->hasReturnType() ? ': ' . $fn->getReturnType() : ''),

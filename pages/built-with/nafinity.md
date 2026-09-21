@@ -1,5 +1,4 @@
 ---
-external_classes: true
 title: Nafinity
 ---
 
@@ -64,6 +63,26 @@ into `app/public/` rather than checked in. A package added later is registered a
 at the same moment, which a browser reports as a 404 on a module tag — which is to say
 silently. `make health` compares the two and turns that silence into a sentence.
 
+## The commands it brings
+
+`make` wraps the ones a development installation needs daily; these are what it wraps, and
+what a deployment runs directly.
+
+| Command | What it does |
+|---|---|
+| `nafinity:seed` | Demo data, and only into a database that has none |
+| `nafinity:assets:publish` | Copy every package's stylesheets and scripts into `app/public/` |
+| `nafinity:assets:check` | Report registered assets that were never published — a 404 on a module tag is otherwise silent |
+| `nafinity:assets:remove` | Take published files back out, from the record written when they went in; works after the package is gone, which is the point |
+| `nafinity:user` | Create an account, reading its password from standard input |
+| `nafinity:admin` | Grant the admin role to an existing account, while nobody holds it yet |
+| `nafinity:grant-default` | Give accounts holding no role at all the one an ordinary account has |
+| `nafinity:migrations:rename` | Rewrite the namespace recorded for applied migrations, after renaming your own |
+
+The first four are what `make assets`, `make seed` and `make health` call. The rest are for
+the moments an installation is being set up or repaired, which is why they are commands rather
+than screens.
+
 ## Making it yours
 
 **Your own code** goes in `app/src/` under the `Nafinity\` namespace. The namespace is
@@ -107,10 +126,8 @@ reason it is worth reading as an example.
 | [`naf/cli`](../console.md) | `nafinity:seed`, `nafinity:assets:publish` and friends |
 | [`naf/rate-limit`](../rate-limits.md) | Slowing down sign-in attempts |
 | [`naf/mcp`](../mcp.md) | Exposing tools to a local model |
-
-Roles and permissions come from `naf/rbac`, live updates from `naf/websocket`. Both are
-developed alongside the board rather than ahead of it, and each is documented with its own
-source until it has a chapter here.
+| [`naf/rbac`](../rbac.md) | Roles and permissions an installation can edit |
+| [`naf/websocket`](../websocket.md) | Live updates, and who else is on a board |
 
 ## Where the rest is written
 

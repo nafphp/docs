@@ -18,6 +18,9 @@ KAPITEL = {
     "mcp": ("MCP tools", "mcp.md"), "auth": ("Authentication and permissions", "auth.md"),
     "oauth-client": ("Signing in with a provider", "oauth-client.md"),
     "oauth-server": ("Being the provider", "oauth-server.md"),
+    "rbac": ("Roles and permissions", "rbac.md"),
+    "websocket": ("Live updates", "websocket.md"),
+    "board": ("Nafinity", "built-with/nafinity.md"),
 }
 
 def vendor_packages():
@@ -57,10 +60,16 @@ def scan(into):
                 if namespace:
                     for declaration in re.finditer(r'^(?:(?:abstract|final|readonly) )*(?:class|interface|trait|enum) (\w+)', src, re.M):
                         classes.add(namespace[1] + '\\' + declaration[1])
-                if re.search(r'^function ', src, re.M):
+                # Indented too: a helper guarded by `if (!function_exists(...))`
+                # is the ordinary way to ship one, and anchoring to the margin
+                # missed every such function a package has. A class method can
+                # match this as well, which costs nothing -- the reflection below
+                # lists functions only, and anything it does not know is dropped.
+                if re.search(r'^\s*function ', src, re.M):
                     function_files.append(os.path.join(dirpath, f))
-                for m in re.finditer(r'^function ([a-zA-Z_][a-zA-Z0-9_]*)\s*\(', src, re.M):
-                    fns[m.group(1)] = pkg
+                for m in re.finditer(r'^\s*function ([a-zA-Z_][a-zA-Z0-9_]*)\s*\(', src, re.M):
+                    if namespace:
+                        fns[namespace[1] + '\\' + m.group(1)] = pkg
                 for m in re.finditer(r"const string NAME = '([^']+)'", src):
                     cmds.add(m.group(1))
     reflected = subprocess.run(
