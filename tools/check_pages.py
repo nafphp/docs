@@ -3,6 +3,12 @@
 
 Validate package requirements, helper namespaces, imported NAF classes and command names.
 Use gen_reference.py to refresh the snapshot; test_examples.py exercises complete recipes.
+
+Two front-matter flags turn a check off where it would be wrong rather than useful:
+`example_commands: true` for a page whose commands are invented for the example, and
+`external_classes: true` for a page about an application whose own packages are not in
+the snapshot of published ones. Requirements, `composer require` lines and the starter
+are still checked on those pages, because those name published packages either way.
 """
 import glob, json, os, re, sys
 
@@ -41,8 +47,14 @@ for path in sorted(glob.glob(os.path.join(HERE, "..", "pages", "**", "*.md"), re
         if m.group(1) != 'naf/app':
             problems.append(f"{name}: unknown starter package '{m.group(1)}'")
 
+    # A page about an application built with NAF names classes from that
+    # application's own packages, which are not in a snapshot of published ones.
+    # Saying so is better than either lying to the snapshot or leaving the page
+    # without the imports a reader needs to copy.
+    external = re.search(r'^external_classes:\s*true\b', text, re.M) is not None
+
     known_classes = set(data.get('classes', []))
-    if known_classes:
+    if known_classes and not external:
         class_imports = []
         for m in re.finditer(r'^use (Naf\\[\w\\]+)\s*;', text, re.M):
             class_imports.append(m.group(1))
@@ -63,6 +75,8 @@ for path in sorted(glob.glob(os.path.join(HERE, "..", "pages", "**", "*.md"), re
         for n in names:
             want = ns_of.get(n)
             if want is None:
+                if external:
+                    continue
                 problems.append(f"{name}: imports {ns}\\{n}(), which no package provides")
             elif want != ns:
                 problems.append(f"{name}: imports {ns}\\{n}(), but it lives in {want}")
