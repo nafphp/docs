@@ -16,7 +16,14 @@ HERE = os.path.dirname(__file__)
 data = json.load(open(os.path.join(HERE, "packages.json"), encoding="utf-8"))
 pkgs, fns = data["packages"], data["functions"]
 cmds = set(data.get("commands", []))
-ns_of = {f: pkgs[p]["namespace"] for f, p in fns.items() if p in pkgs}
+# The index is keyed by fully qualified name, because two packages may both
+# offer a `token()`. Short names are kept beside it only to say where one lives
+# when a page imported it from the wrong place.
+known_functions = set(fns)
+by_short: dict[str, list[str]] = {}
+for fqn in fns:
+    namespace, _, short = fqn.rpartition("\\")
+    by_short.setdefault(short, []).append(namespace)
 
 PAT_BRACE  = re.compile(r'use function ([\w\\]+?)\\\{([\w, ]+)\}')
 PAT_SINGLE = re.compile(r'use function ([\w\\]+?)\\(\w+)\s*;')
@@ -73,13 +80,13 @@ for path in sorted(glob.glob(os.path.join(HERE, "..", "pages", "**", "*.md"), re
     imports += [(m.group(1), [m.group(2)]) for m in PAT_SINGLE.finditer(text)]
     for ns, names in imports:
         for n in names:
-            want = ns_of.get(n)
-            if want is None:
-                if external:
-                    continue
+            if f"{ns}\\{n}" in known_functions or external:
+                continue
+            if n in by_short:
+                where = ", ".join(sorted(by_short[n]))
+                problems.append(f"{name}: imports {ns}\\{n}(), but it lives in {where}")
+            else:
                 problems.append(f"{name}: imports {ns}\\{n}(), which no package provides")
-            elif want != ns:
-                problems.append(f"{name}: imports {ns}\\{n}(), but it lives in {want}")
 
 # The other direction: a command nobody wrote about. The old documentation drifted
 # because nothing noticed; a build that fails is the only thing that demonstrably did.

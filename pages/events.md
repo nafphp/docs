@@ -21,6 +21,39 @@ event()->dispatch('product.created', $product);
 `dispatch()` returns an array of listener results. Use closures or `[ListenerClass::class, 'handle']`;
 NAF constructs class-based listeners through the default container.
 
+## An event can be an object
+
+Since **v0.2.6** the event may be an object, in which case its class is the name and the
+object itself is the payload:
+
+```php
+final class OrderShipped
+{
+    public function __construct(public string $order) {}
+}
+
+event()->listen(OrderShipped::class, fn(OrderShipped $shipped) => log()->info($shipped->order));
+event()->dispatch(new OrderShipped('A-1'));
+```
+
+`listen()` needs nothing for this — `::class` is a string like any other name — so an
+application converts one event at a time or none. Nothing is required of the class: no
+interface, no base class, no marker.
+
+What it buys is what a string cannot. A misspelled class is an error where it is written,
+while a misspelled event name is a listener that never runs and never says so. An IDE can find
+every listener of an event and rename one as a refactoring. And the payload has a declared
+shape instead of a docblock describing variadic arguments — which matters most for events a
+listener is meant to change something in, where the shape of what may be edited *is* the
+contract.
+
+One thing to know before converting an event that already exists: names and class names share
+one key space, so converting is a **rename**. A listener registered on the old string stops
+hearing it, silently. Convert the listeners in the same change.
+
+Priorities, class listeners, return values and `dispatchForResponse()` behave identically
+either way.
+
 ## Request lifecycle
 
 The following events describe the normal HTTP path. Payload order is part of the API.

@@ -20,6 +20,213 @@
   "Naf\\Auth\\Session\\SessionStateStore",
   "Naf\\Auth\\Session\\StateStoreInterface",
   "Naf\\Auth\\Support\\PasswordHasher",
+  "Naf\\Board\\Ai\\CoreToolProvider",
+  "Naf\\Board\\Ai\\ProjectTool",
+  "Naf\\Board\\Commands\\AdminCommand",
+  "Naf\\Board\\Commands\\AssetCommand",
+  "Naf\\Board\\Commands\\CheckAssetsCommand",
+  "Naf\\Board\\Commands\\CreateUserCommand",
+  "Naf\\Board\\Commands\\GrantDefaultCommand",
+  "Naf\\Board\\Commands\\PublishAssetsCommand",
+  "Naf\\Board\\Commands\\RemoveAssetsCommand",
+  "Naf\\Board\\Commands\\RenameMigrationNamespaceCommand",
+  "Naf\\Board\\Commands\\SeedCommand",
+  "Naf\\Board\\Contracts\\AccessInterface",
+  "Naf\\Board\\Contracts\\AccountServiceInterface",
+  "Naf\\Board\\Contracts\\AiServiceInterface",
+  "Naf\\Board\\Contracts\\AiToolProviderInterface",
+  "Naf\\Board\\Contracts\\AttachmentServiceInterface",
+  "Naf\\Board\\Contracts\\BoardQueryInterface",
+  "Naf\\Board\\Contracts\\CommentServiceInterface",
+  "Naf\\Board\\Contracts\\ExporterInterface",
+  "Naf\\Board\\Contracts\\ExtensionProviderInterface",
+  "Naf\\Board\\Contracts\\FieldTypeInterface",
+  "Naf\\Board\\Contracts\\NotificationServiceInterface",
+  "Naf\\Board\\Contracts\\PageRendererInterface",
+  "Naf\\Board\\Contracts\\PreferenceServiceInterface",
+  "Naf\\Board\\Contracts\\ProjectServiceInterface",
+  "Naf\\Board\\Contracts\\ProjectToolInterface",
+  "Naf\\Board\\Contracts\\RoleServiceInterface",
+  "Naf\\Board\\Contracts\\SettingSectionProviderInterface",
+  "Naf\\Board\\Contracts\\SettingsServiceInterface",
+  "Naf\\Board\\Contracts\\SettingsStoreInterface",
+  "Naf\\Board\\Contracts\\TicketMetadataReaderInterface",
+  "Naf\\Board\\Contracts\\TicketMetadataStoreInterface",
+  "Naf\\Board\\Contracts\\TicketServiceInterface",
+  "Naf\\Board\\Contracts\\TimerServiceInterface",
+  "Naf\\Board\\Contracts\\UiDataProviderInterface",
+  "Naf\\Board\\Controllers\\AiController",
+  "Naf\\Board\\Controllers\\AppController",
+  "Naf\\Board\\Controllers\\ProfileController",
+  "Naf\\Board\\Controllers\\SettingsApiController",
+  "Naf\\Board\\Definition\\ActivityType",
+  "Naf\\Board\\Definition\\AiToolProviderDefinition",
+  "Naf\\Board\\Definition\\AssetDefinition",
+  "Naf\\Board\\Definition\\AssetPackage",
+  "Naf\\Board\\Definition\\BoardFilterDefinition",
+  "Naf\\Board\\Definition\\EstimationScale",
+  "Naf\\Board\\Definition\\ExporterDefinition",
+  "Naf\\Board\\Definition\\NavigationItem",
+  "Naf\\Board\\Definition\\PermissionDefinition",
+  "Naf\\Board\\Definition\\PriorityDefinition",
+  "Naf\\Board\\Definition\\SettingDefinition",
+  "Naf\\Board\\Definition\\SettingSection",
+  "Naf\\Board\\Definition\\TicketFieldDefinition",
+  "Naf\\Board\\Definition\\UiContribution",
+  "Naf\\Board\\Definition\\ViewOverride",
+  "Naf\\Board\\Domain\\Change",
+  "Naf\\Board\\Domain\\Estimation",
+  "Naf\\Board\\Domain\\Failure",
+  "Naf\\Board\\Domain\\Placement",
+  "Naf\\Board\\Domain\\ProjectPermissions",
+  "Naf\\Board\\Domain\\ProjectScope",
+  "Naf\\Board\\Domain\\Status",
+  "Naf\\Board\\Events\\ActivityListener",
+  "Naf\\Board\\Export\\CsvExporter",
+  "Naf\\Board\\Export\\ExportLine",
+  "Naf\\Board\\Export\\JsonExporter",
+  "Naf\\Board\\ExtensionContext",
+  "Naf\\Board\\ExtensionRegistry",
+  "Naf\\Board\\Jobs\\AccountSecurityNoticeJob",
+  "Naf\\Board\\Jobs\\DeliverNotificationJob",
+  "Naf\\Board\\Jobs\\FinalizeAttachmentJob",
+  "Naf\\Board\\Jobs\\MaintenanceJob",
+  "Naf\\Board\\Migrations\\M202609140001Nafinity",
+  "Naf\\Board\\Migrations\\M202609140002Queue",
+  "Naf\\Board\\Migrations\\M202609140003RateLimits",
+  "Naf\\Board\\Migrations\\M202609150001ProjectRoles",
+  "Naf\\Board\\Migrations\\M202609150002AccountProfile",
+  "Naf\\Board\\Migrations\\M202609160001TicketDetails",
+  "Naf\\Board\\Migrations\\M202609160002RichTextStorage",
+  "Naf\\Board\\Migrations\\M202609160003ProjectTicketKey",
+  "Naf\\Board\\Migrations\\M202609170001EstimationScale",
+  "Naf\\Board\\Migrations\\M202609170002TicketTimers",
+  "Naf\\Board\\Migrations\\M202609180001TicketTransfer",
+  "Naf\\Board\\Migrations\\M202609180002PluginSettings",
+  "Naf\\Board\\Migrations\\M202609180003TicketMetadata",
+  "Naf\\Board\\Migrations\\M202609180004ScaleIdentifiers",
+  "Naf\\Board\\Migrations\\M202609210001DropGlobalRole",
+  "Naf\\Board\\Migrations\\M202609210002ProjectRolesToRbac",
+  "Naf\\Board\\Migrations\\M202609210003OpenPriorities",
+  "Naf\\Board\\Migrations\\M202609210004LiveUpdates",
+  "Naf\\Board\\Migrations\\M202609210005NewTicketPlacement",
+  "Naf\\Board\\Migrations\\M202609210006AuditLog",
+  "Naf\\Board\\Migrations\\M202609210007Presence",
+  "Naf\\Board\\Models\\Ticket",
+  "Naf\\Board\\Models\\User",
+  "Naf\\Board\\Modules\\Attachments\\AttachmentsModule",
+  "Naf\\Board\\Modules\\CoreActivity",
+  "Naf\\Board\\Modules\\CoreAi",
+  "Naf\\Board\\Modules\\CoreAssets",
+  "Naf\\Board\\Modules\\CoreBoard",
+  "Naf\\Board\\Modules\\CoreEstimation",
+  "Naf\\Board\\Modules\\CoreExport",
+  "Naf\\Board\\Modules\\CoreFieldTypes",
+  "Naf\\Board\\Modules\\CoreGrantAudit",
+  "Naf\\Board\\Modules\\CoreLive",
+  "Naf\\Board\\Modules\\CoreNavigation",
+  "Naf\\Board\\Modules\\CorePermissions",
+  "Naf\\Board\\Modules\\CorePriorities",
+  "Naf\\Board\\Modules\\CoreSettings",
+  "Naf\\Board\\Modules\\CoreTicket",
+  "Naf\\Board\\Modules\\NafinityDefaults",
+  "Naf\\Board\\Modules\\Providers\\AiSectionProvider",
+  "Naf\\Board\\Modules\\Providers\\LanguagePickerProvider",
+  "Naf\\Board\\Modules\\Providers\\MembersSectionProvider",
+  "Naf\\Board\\Modules\\Providers\\Names",
+  "Naf\\Board\\Modules\\Providers\\PersonalSectionProvider",
+  "Naf\\Board\\Modules\\Providers\\ProfileTriggerProvider",
+  "Naf\\Board\\Modules\\Providers\\ProjectSectionProvider",
+  "Naf\\Board\\Modules\\Providers\\RolesSectionProvider",
+  "Naf\\Board\\Modules\\Providers\\StructureSectionProvider",
+  "Naf\\Board\\Modules\\Providers\\TimerChipProvider",
+  "Naf\\Board\\Modules\\Providers\\UsersSectionProvider",
+  "Naf\\Board\\Policies\\ProjectPolicy",
+  "Naf\\Board\\Rbac\\Boards",
+  "Naf\\Board\\Rbac\\Grants",
+  "Naf\\Board\\Rbac\\Installation",
+  "Naf\\Board\\Rbac\\Project",
+  "Naf\\Board\\Registry\\ActivityTypeRegistry",
+  "Naf\\Board\\Registry\\AiToolRegistry",
+  "Naf\\Board\\Registry\\AssetPackageRegistry",
+  "Naf\\Board\\Registry\\AssetRegistry",
+  "Naf\\Board\\Registry\\BoardFilterRegistry",
+  "Naf\\Board\\Registry\\DefinitionRegistry",
+  "Naf\\Board\\Registry\\EstimationScaleRegistry",
+  "Naf\\Board\\Registry\\ExporterRegistry",
+  "Naf\\Board\\Registry\\FieldTypeRegistry",
+  "Naf\\Board\\Registry\\NavigationRegistry",
+  "Naf\\Board\\Registry\\PermissionRegistry",
+  "Naf\\Board\\Registry\\PriorityRegistry",
+  "Naf\\Board\\Registry\\SettingRegistry",
+  "Naf\\Board\\Registry\\SettingSectionRegistry",
+  "Naf\\Board\\Registry\\TicketFieldRegistry",
+  "Naf\\Board\\Registry\\UiRegistry",
+  "Naf\\Board\\Registry\\ViewRegistry",
+  "Naf\\Board\\Repositories\\TicketRepository",
+  "Naf\\Board\\Services\\Access",
+  "Naf\\Board\\Services\\AccountService",
+  "Naf\\Board\\Services\\AiService",
+  "Naf\\Board\\Services\\AttachmentService",
+  "Naf\\Board\\Services\\AuditLog",
+  "Naf\\Board\\Services\\BoardQuery",
+  "Naf\\Board\\Services\\CommentService",
+  "Naf\\Board\\Services\\ExportService",
+  "Naf\\Board\\Services\\NotificationService",
+  "Naf\\Board\\Services\\PageRenderer",
+  "Naf\\Board\\Services\\PreferenceService",
+  "Naf\\Board\\Services\\ProjectService",
+  "Naf\\Board\\Services\\RoleService",
+  "Naf\\Board\\Services\\SettingsService",
+  "Naf\\Board\\Services\\SlotRenderer",
+  "Naf\\Board\\Services\\TicketMetadataReader",
+  "Naf\\Board\\Services\\TicketMetadataWriter",
+  "Naf\\Board\\Services\\TicketService",
+  "Naf\\Board\\Services\\TimerService",
+  "Naf\\Board\\Settings",
+  "Naf\\Board\\Support\\Abbreviation",
+  "Naf\\Board\\Support\\AccountStateStore",
+  "Naf\\Board\\Support\\ActivityDetail",
+  "Naf\\Board\\Support\\ActivityLabel",
+  "Naf\\Board\\Support\\AiToolContext",
+  "Naf\\Board\\Support\\Assets\\AssetPublisher",
+  "Naf\\Board\\Support\\AttachmentStorage",
+  "Naf\\Board\\Support\\BoardFilterContext",
+  "Naf\\Board\\Support\\BoardSlotContext",
+  "Naf\\Board\\Support\\CardContext",
+  "Naf\\Board\\Support\\ContainerLogger",
+  "Naf\\Board\\Support\\Duration",
+  "Naf\\Board\\Support\\Fields\\AbstractFieldType",
+  "Naf\\Board\\Support\\Fields\\BooleanType",
+  "Naf\\Board\\Support\\Fields\\DateType",
+  "Naf\\Board\\Support\\Fields\\IntegerType",
+  "Naf\\Board\\Support\\Fields\\MultiselectType",
+  "Naf\\Board\\Support\\Fields\\SelectType",
+  "Naf\\Board\\Support\\Fields\\TextType",
+  "Naf\\Board\\Support\\Fields\\TextareaType",
+  "Naf\\Board\\Support\\Format",
+  "Naf\\Board\\Support\\Icon",
+  "Naf\\Board\\Support\\InlineFieldRenderer",
+  "Naf\\Board\\Support\\Input",
+  "Naf\\Board\\Support\\LiveConnection",
+  "Naf\\Board\\Support\\Locales",
+  "Naf\\Board\\Support\\Mentions",
+  "Naf\\Board\\Support\\PageSlotContext",
+  "Naf\\Board\\Support\\PasswordRule",
+  "Naf\\Board\\Support\\Presence",
+  "Naf\\Board\\Support\\ProjectSlotContext",
+  "Naf\\Board\\Support\\Resolver",
+  "Naf\\Board\\Support\\RichText",
+  "Naf\\Board\\Support\\ServiceDefaults",
+  "Naf\\Board\\Support\\SettingsContext",
+  "Naf\\Board\\Support\\Settings\\DatabaseSettingsStore",
+  "Naf\\Board\\Support\\Settings\\PreferenceStore",
+  "Naf\\Board\\Support\\SlotContextInterface",
+  "Naf\\Board\\Support\\SqlCondition",
+  "Naf\\Board\\Support\\TicketSlotContext",
+  "Naf\\Board\\Support\\Ticket\\DatabaseTicketMetadataStore",
+  "Naf\\Board\\Support\\UiContext",
+  "Naf\\Board\\Support\\Version",
   "Naf\\CLI\\Commands\\ListCommand",
   "Naf\\CLI\\Commands\\RouteDebugCommand",
   "Naf\\CLI\\Core\\AbstractCommand",
@@ -185,6 +392,32 @@
   "Naf\\Queue\\Drivers\\QueueDriverInterface",
   "Naf\\Queue\\Drivers\\SQLiteDriver",
   "Naf\\RateLimit\\PdoLimiter",
+  "Naf\\Rbac\\Commands\\SyncCommand",
+  "Naf\\Rbac\\Contracts\\PermissionInterface",
+  "Naf\\Rbac\\Contracts\\RoleInterface",
+  "Naf\\Rbac\\Contracts\\ScopeSourceInterface",
+  "Naf\\Rbac\\Definition\\Permission",
+  "Naf\\Rbac\\Definition\\PermissionDefinition",
+  "Naf\\Rbac\\Definition\\Role",
+  "Naf\\Rbac\\Definition\\RoleDefinition",
+  "Naf\\Rbac\\Events\\GrantsChanged",
+  "Naf\\Rbac\\Exceptions\\PrivilegedActionDenied",
+  "Naf\\Rbac\\Http\\GrantController",
+  "Naf\\Rbac\\Http\\RoleController",
+  "Naf\\Rbac\\Identity\\GrantedInterface",
+  "Naf\\Rbac\\Identity\\ResolvesGrants",
+  "Naf\\Rbac\\Migrations\\M202609200001Rbac",
+  "Naf\\Rbac\\Permissions\\Everything",
+  "Naf\\Rbac\\Permissions\\ManageOwnRoles",
+  "Naf\\Rbac\\Permissions\\ManageRoles",
+  "Naf\\Rbac\\Policy\\PrivilegePolicy",
+  "Naf\\Rbac\\Rbac",
+  "Naf\\Rbac\\Registry\\PermissionRegistry",
+  "Naf\\Rbac\\Registry\\RoleRegistry",
+  "Naf\\Rbac\\Repository\\AssignmentRepository",
+  "Naf\\Rbac\\Repository\\RoleRepository",
+  "Naf\\Rbac\\Scope",
+  "Naf\\Rbac\\Service\\GrantWriter",
   "Naf\\Schedule\\Commands\\ScheduleListCommand",
   "Naf\\Schedule\\Commands\\ScheduleTickerCommand",
   "Naf\\Schedule\\Core\\JobRepository",
@@ -217,7 +450,16 @@
   "Naf\\Support\\RequestParameter",
   "Naf\\Support\\Stopwatch",
   "Naf\\View\\Core\\Asset",
-  "Naf\\View\\Core\\View"
+  "Naf\\View\\Core\\View",
+  "Naf\\Websocket\\Commands\\ServeCommand",
+  "Naf\\Websocket\\Protocol\\Close",
+  "Naf\\Websocket\\Protocol\\Frame",
+  "Naf\\Websocket\\Protocol\\Handshake",
+  "Naf\\Websocket\\Publisher",
+  "Naf\\Websocket\\Server\\Connection",
+  "Naf\\Websocket\\Server\\Hub",
+  "Naf\\Websocket\\Server\\Server",
+  "Naf\\Websocket\\Token"
  ],
  "commands": [
   "command:list",
@@ -226,6 +468,14 @@
   "mcp:token:create",
   "mcp:token:list",
   "mcp:token:revoke",
+  "nafinity:admin",
+  "nafinity:assets:check",
+  "nafinity:assets:publish",
+  "nafinity:assets:remove",
+  "nafinity:grant-default",
+  "nafinity:migrations:rename",
+  "nafinity:seed",
+  "nafinity:user",
   "oauth:client:create",
   "oauth:client:list",
   "oauth:client:rotate-secret",
@@ -237,262 +487,330 @@
   "oauth:server:setup",
   "queue:consume",
   "queue:retry-failed",
+  "rbac:sync",
   "route:debug",
   "schedule:list",
-  "schedule:ticker"
+  "schedule:ticker",
+  "websocket:serve"
  ],
  "function_details": {
-  "abort": {
-   "namespace": "Naf",
-   "signature": "abort(int $statusCode = 404, string $message = ''): never"
-  },
-  "app": {
-   "namespace": "Naf",
-   "signature": "app(): Naf\\Core\\App"
-  },
-  "asset": {
-   "namespace": "Naf\\View",
-   "signature": "asset(): Naf\\View\\Core\\Asset"
-  },
-  "auth": {
+  "Naf\\Auth\\auth": {
    "namespace": "Naf\\Auth",
    "signature": "auth(): Naf\\Auth\\Auth"
   },
-  "client": {
-   "namespace": "Naf\\Client",
-   "signature": "client(): Naf\\Client\\Core\\Client"
+  "Naf\\Board\\choice": {
+   "namespace": "Naf\\Board",
+   "signature": "choice(array $arguments): string"
   },
-  "command": {
+  "Naf\\Board\\extensions": {
+   "namespace": "Naf\\Board",
+   "signature": "extensions(): Naf\\Board\\ExtensionRegistry"
+  },
+  "Naf\\Board\\field": {
+   "namespace": "Naf\\Board",
+   "signature": "field(array $arguments): string"
+  },
+  "Naf\\Board\\partial": {
+   "namespace": "Naf\\Board",
+   "signature": "partial(string $template, array $data = []): string"
+  },
+  "Naf\\Board\\settings": {
+   "namespace": "Naf\\Board",
+   "signature": "settings(): Naf\\Board\\Settings"
+  },
+  "Naf\\Board\\slot": {
+   "namespace": "Naf\\Board",
+   "signature": "slot(string $slot, Naf\\Board\\Support\\SlotContextInterface|Naf\\Board\\Support\\UiContext $context, array $extra = []): string"
+  },
+  "Naf\\Board\\template": {
+   "namespace": "Naf\\Board",
+   "signature": "template(string $template): string"
+  },
+  "Naf\\CLI\\command": {
    "namespace": "Naf\\CLI",
    "signature": "command(): Naf\\CLI\\Support\\CommandRegistry"
   },
-  "config": {
-   "namespace": "Naf",
-   "signature": "config(?string $key = null, mixed $default = null): mixed"
+  "Naf\\Client\\client": {
+   "namespace": "Naf\\Client",
+   "signature": "client(): Naf\\Client\\Core\\Client"
   },
-  "csrf": {
-   "namespace": "Naf\\Form",
-   "signature": "csrf(): Naf\\Form\\Support\\Csrf"
-  },
-  "database": {
+  "Naf\\Database\\database": {
    "namespace": "Naf\\Database",
    "signature": "database(): ?PDO"
   },
-  "em": {
-   "namespace": "Naf\\ORM",
-   "signature": "em(): Naf\\ORM\\Core\\EntityManager"
+  "Naf\\Form\\csrf": {
+   "namespace": "Naf\\Form",
+   "signature": "csrf(): Naf\\Form\\Support\\Csrf"
   },
-  "env": {
-   "namespace": "Naf",
-   "signature": "env(): string"
-  },
-  "error": {
+  "Naf\\Form\\error": {
    "namespace": "Naf\\Form",
    "signature": "error($field, Naf\\Form\\Core\\Validator $validator): ?string"
   },
-  "error_class": {
+  "Naf\\Form\\error_class": {
    "namespace": "Naf\\Form",
    "signature": "error_class($field, Naf\\Form\\Core\\Validator $validator): string"
   },
-  "event": {
-   "namespace": "Naf",
-   "signature": "event(): Naf\\Core\\EventManager"
-  },
-  "guard": {
-   "namespace": "Naf",
-   "signature": "guard(): Naf\\Support\\Guard"
-  },
-  "has_error": {
+  "Naf\\Form\\has_error": {
    "namespace": "Naf\\Form",
    "signature": "has_error($field, Naf\\Form\\Core\\Validator $validator): bool"
   },
-  "is_post": {
+  "Naf\\Form\\is_post": {
    "namespace": "Naf\\Form",
    "signature": "is_post(): bool"
   },
-  "json": {
-   "namespace": "Naf",
-   "signature": "json(mixed $data, int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface"
-  },
-  "lang": {
-   "namespace": "Naf\\I18n",
-   "signature": "lang(): ?string"
-  },
-  "log": {
-   "namespace": "Naf",
-   "signature": "log(): Psr\\Log\\LoggerInterface"
-  },
-  "mail": {
-   "namespace": "Naf\\Mail",
-   "signature": "mail(): Naf\\Mail\\Models\\Mail"
-  },
-  "mailer": {
-   "namespace": "Naf\\Mail",
-   "signature": "mailer(?Naf\\Mail\\Core\\TransportInterface $transport = null): Naf\\Mail\\Core\\Mailer"
-  },
-  "memory": {
+  "Naf\\Form\\memory": {
    "namespace": "Naf\\Form",
    "signature": "memory(string $key, mixed $default = null): ?string"
   },
-  "memory_checked": {
+  "Naf\\Form\\memory_checked": {
    "namespace": "Naf\\Form",
    "signature": "memory_checked(string $key, mixed $value = 'on'): string"
   },
-  "memory_selected": {
+  "Naf\\Form\\memory_selected": {
    "namespace": "Naf\\Form",
    "signature": "memory_selected(string $key, mixed $expectedValue): string"
   },
-  "oauth": {
-   "namespace": "Naf\\OAuth\\Client",
-   "signature": "oauth(string $provider): Naf\\OAuth\\Client\\Core\\Flow"
-  },
-  "oauth_button": {
-   "namespace": "Naf\\OAuth\\Client",
-   "signature": "oauth_button(string $provider, ?string $label = null, ?string $next = null): string"
-  },
-  "oauth_token": {
-   "namespace": "Naf\\OAuth\\Client",
-   "signature": "oauth_token(string $provider): ?Naf\\OAuth\\Client\\Token\\ProviderToken"
-  },
-  "param": {
-   "namespace": "Naf",
-   "signature": "param(): Naf\\Support\\RequestParameter"
-  },
-  "plugin": {
-   "namespace": "Naf",
-   "signature": "plugin(?string $name = null): Naf\\Support\\Plugin|array"
-  },
-  "queue": {
-   "namespace": "Naf\\Queue",
-   "signature": "queue(?string $channel = null): Naf\\Queue\\Core\\Queue"
-  },
-  "redirect": {
-   "namespace": "Naf",
-   "signature": "redirect(string $url, int $status = 302): Psr\\Http\\Message\\ResponseInterface"
-  },
-  "refresh": {
-   "namespace": "Naf",
-   "signature": "refresh(): Psr\\Http\\Message\\ResponseInterface"
-  },
-  "render": {
-   "namespace": "Naf\\View",
-   "signature": "render(string $template, array $vars = []): Psr\\Http\\Message\\ResponseInterface"
-  },
-  "repo": {
-   "namespace": "Naf\\ORM",
-   "signature": "repo(string $repository): Naf\\ORM\\Repository\\AbstractRepository"
-  },
-  "request": {
-   "namespace": "Naf",
-   "signature": "request(): Psr\\Http\\Message\\ServerRequestInterface|Psr\\Http\\Message\\RequestInterface"
-  },
-  "response": {
-   "namespace": "Naf",
-   "signature": "response(mixed $content = '', int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface"
-  },
-  "route": {
-   "namespace": "Naf",
-   "signature": "route(?string $name = null, array $params = []): Naf\\Core\\Route|string"
-  },
-  "s": {
-   "namespace": "Naf\\View",
-   "signature": "s(array|string|null $value): array|string|null"
-  },
-  "scheduler": {
-   "namespace": "Naf\\Schedule",
-   "signature": "scheduler(): Naf\\Schedule\\Core\\Scheduler"
-  },
-  "session": {
-   "namespace": "Naf\\Session",
-   "signature": "session(): Naf\\Session\\Core\\Session"
-  },
-  "storage": {
-   "namespace": "Naf\\Storage",
-   "signature": "storage(?string $name = null): Naf\\Storage\\Storage"
-  },
-  "t": {
-   "namespace": "Naf\\I18n",
-   "signature": "t(string $key, array $params = []): string"
-  },
-  "token": {
-   "namespace": "Naf\\OAuth\\Server",
-   "signature": "token(): Naf\\OAuth\\Server\\Core\\TokenContext"
-  },
-  "tokens": {
-   "namespace": "Naf\\MCP",
-   "signature": "tokens(): Naf\\MCP\\Store\\TokenStoreInterface"
-  },
-  "tool": {
-   "namespace": "Naf\\MCP",
-   "signature": "tool(): Naf\\MCP\\Support\\ToolRegistry"
-  },
-  "translation_paths": {
-   "namespace": "Naf\\I18n",
-   "signature": "translation_paths(): Naf\\I18n\\Support\\TranslationPathRegistry"
-  },
-  "translator": {
-   "namespace": "Naf\\I18n",
-   "signature": "translator(): Naf\\I18n\\Core\\Translator"
-  },
-  "validator": {
+  "Naf\\Form\\validator": {
    "namespace": "Naf\\Form",
    "signature": "validator(): Naf\\Form\\Core\\Validator"
   },
-  "view": {
+  "Naf\\I18n\\lang": {
+   "namespace": "Naf\\I18n",
+   "signature": "lang(): ?string"
+  },
+  "Naf\\I18n\\t": {
+   "namespace": "Naf\\I18n",
+   "signature": "t(string $key, array $params = []): string"
+  },
+  "Naf\\I18n\\translation_paths": {
+   "namespace": "Naf\\I18n",
+   "signature": "translation_paths(): Naf\\I18n\\Support\\TranslationPathRegistry"
+  },
+  "Naf\\I18n\\translator": {
+   "namespace": "Naf\\I18n",
+   "signature": "translator(): Naf\\I18n\\Core\\Translator"
+  },
+  "Naf\\MCP\\tokens": {
+   "namespace": "Naf\\MCP",
+   "signature": "tokens(): Naf\\MCP\\Store\\TokenStoreInterface"
+  },
+  "Naf\\MCP\\tool": {
+   "namespace": "Naf\\MCP",
+   "signature": "tool(): Naf\\MCP\\Support\\ToolRegistry"
+  },
+  "Naf\\Mail\\mail": {
+   "namespace": "Naf\\Mail",
+   "signature": "mail(): Naf\\Mail\\Models\\Mail"
+  },
+  "Naf\\Mail\\mailer": {
+   "namespace": "Naf\\Mail",
+   "signature": "mailer(?Naf\\Mail\\Core\\TransportInterface $transport = null): Naf\\Mail\\Core\\Mailer"
+  },
+  "Naf\\OAuth\\Client\\oauth": {
+   "namespace": "Naf\\OAuth\\Client",
+   "signature": "oauth(string $provider): Naf\\OAuth\\Client\\Core\\Flow"
+  },
+  "Naf\\OAuth\\Client\\oauth_button": {
+   "namespace": "Naf\\OAuth\\Client",
+   "signature": "oauth_button(string $provider, ?string $label = null, ?string $next = null): string"
+  },
+  "Naf\\OAuth\\Client\\oauth_token": {
+   "namespace": "Naf\\OAuth\\Client",
+   "signature": "oauth_token(string $provider): ?Naf\\OAuth\\Client\\Token\\ProviderToken"
+  },
+  "Naf\\OAuth\\Server\\token": {
+   "namespace": "Naf\\OAuth\\Server",
+   "signature": "token(): Naf\\OAuth\\Server\\Core\\TokenContext"
+  },
+  "Naf\\ORM\\em": {
+   "namespace": "Naf\\ORM",
+   "signature": "em(): Naf\\ORM\\Core\\EntityManager"
+  },
+  "Naf\\ORM\\repo": {
+   "namespace": "Naf\\ORM",
+   "signature": "repo(string $repository): Naf\\ORM\\Repository\\AbstractRepository"
+  },
+  "Naf\\Queue\\queue": {
+   "namespace": "Naf\\Queue",
+   "signature": "queue(?string $channel = null): Naf\\Queue\\Core\\Queue"
+  },
+  "Naf\\Rbac\\permissions": {
+   "namespace": "Naf\\Rbac",
+   "signature": "permissions(): Naf\\Rbac\\Registry\\PermissionRegistry"
+  },
+  "Naf\\Rbac\\rbac": {
+   "namespace": "Naf\\Rbac",
+   "signature": "rbac(): Naf\\Rbac\\Rbac"
+  },
+  "Naf\\Rbac\\roles": {
+   "namespace": "Naf\\Rbac",
+   "signature": "roles(): Naf\\Rbac\\Registry\\RoleRegistry"
+  },
+  "Naf\\Schedule\\scheduler": {
+   "namespace": "Naf\\Schedule",
+   "signature": "scheduler(): Naf\\Schedule\\Core\\Scheduler"
+  },
+  "Naf\\Session\\session": {
+   "namespace": "Naf\\Session",
+   "signature": "session(): Naf\\Session\\Core\\Session"
+  },
+  "Naf\\Storage\\storage": {
+   "namespace": "Naf\\Storage",
+   "signature": "storage(?string $name = null): Naf\\Storage\\Storage"
+  },
+  "Naf\\View\\asset": {
+   "namespace": "Naf\\View",
+   "signature": "asset(): Naf\\View\\Core\\Asset"
+  },
+  "Naf\\View\\render": {
+   "namespace": "Naf\\View",
+   "signature": "render(string $template, array $vars = []): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "Naf\\View\\s": {
+   "namespace": "Naf\\View",
+   "signature": "s(array|string|null $value): array|string|null"
+  },
+  "Naf\\View\\view": {
    "namespace": "Naf\\View",
    "signature": "view(string $tpl, array $vars = []): string"
+  },
+  "Naf\\Websocket\\live": {
+   "namespace": "Naf\\Websocket",
+   "signature": "live(): bool"
+  },
+  "Naf\\Websocket\\publisher": {
+   "namespace": "Naf\\Websocket",
+   "signature": "publisher(): Naf\\Websocket\\Publisher"
+  },
+  "Naf\\Websocket\\token": {
+   "namespace": "Naf\\Websocket",
+   "signature": "token(string $subject, array $channels): string"
+  },
+  "Naf\\abort": {
+   "namespace": "Naf",
+   "signature": "abort(int $statusCode = 404, string $message = ''): never"
+  },
+  "Naf\\app": {
+   "namespace": "Naf",
+   "signature": "app(): Naf\\Core\\App"
+  },
+  "Naf\\config": {
+   "namespace": "Naf",
+   "signature": "config(?string $key = null, mixed $default = null): mixed"
+  },
+  "Naf\\env": {
+   "namespace": "Naf",
+   "signature": "env(): string"
+  },
+  "Naf\\event": {
+   "namespace": "Naf",
+   "signature": "event(): Naf\\Core\\EventManager"
+  },
+  "Naf\\guard": {
+   "namespace": "Naf",
+   "signature": "guard(): Naf\\Support\\Guard"
+  },
+  "Naf\\json": {
+   "namespace": "Naf",
+   "signature": "json(mixed $data, int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "Naf\\log": {
+   "namespace": "Naf",
+   "signature": "log(): Psr\\Log\\LoggerInterface"
+  },
+  "Naf\\param": {
+   "namespace": "Naf",
+   "signature": "param(): Naf\\Support\\RequestParameter"
+  },
+  "Naf\\plugin": {
+   "namespace": "Naf",
+   "signature": "plugin(?string $name = null): Naf\\Support\\Plugin|array"
+  },
+  "Naf\\redirect": {
+   "namespace": "Naf",
+   "signature": "redirect(string $url, int $status = 302): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "Naf\\refresh": {
+   "namespace": "Naf",
+   "signature": "refresh(): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "Naf\\request": {
+   "namespace": "Naf",
+   "signature": "request(): Psr\\Http\\Message\\ServerRequestInterface|Psr\\Http\\Message\\RequestInterface"
+  },
+  "Naf\\response": {
+   "namespace": "Naf",
+   "signature": "response(mixed $content = '', int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface"
+  },
+  "Naf\\route": {
+   "namespace": "Naf",
+   "signature": "route(?string $name = null, array $params = []): Naf\\Core\\Route|string"
   }
  },
  "functions": {
-  "abort": "framework",
-  "app": "framework",
-  "asset": "view",
-  "auth": "auth",
-  "client": "client",
-  "command": "cli",
-  "config": "framework",
-  "csrf": "form",
-  "database": "database",
-  "em": "orm",
-  "env": "framework",
-  "error": "form",
-  "error_class": "form",
-  "event": "framework",
-  "guard": "framework",
-  "has_error": "form",
-  "is_post": "form",
-  "json": "framework",
-  "lang": "i18n",
-  "log": "framework",
-  "mail": "mail",
-  "mailer": "mail",
-  "memory": "form",
-  "memory_checked": "form",
-  "memory_selected": "form",
-  "oauth": "oauth-client",
-  "oauth_button": "oauth-client",
-  "oauth_token": "oauth-client",
-  "param": "framework",
-  "plugin": "framework",
-  "queue": "queue",
-  "redirect": "framework",
-  "refresh": "framework",
-  "render": "view",
-  "repo": "orm",
-  "request": "framework",
-  "response": "framework",
-  "route": "framework",
-  "s": "view",
-  "scheduler": "schedule",
-  "session": "session",
-  "storage": "storage",
-  "t": "i18n",
-  "token": "oauth-server",
-  "tokens": "mcp",
-  "tool": "mcp",
-  "translator": "i18n",
-  "validator": "form",
-  "view": "view"
+  "Naf\\Auth\\auth": "auth",
+  "Naf\\Board\\choice": "board",
+  "Naf\\Board\\extensions": "board",
+  "Naf\\Board\\field": "board",
+  "Naf\\Board\\partial": "board",
+  "Naf\\Board\\settings": "board",
+  "Naf\\Board\\slot": "board",
+  "Naf\\Board\\template": "board",
+  "Naf\\CLI\\command": "cli",
+  "Naf\\Client\\client": "client",
+  "Naf\\Database\\database": "database",
+  "Naf\\Form\\csrf": "form",
+  "Naf\\Form\\error": "form",
+  "Naf\\Form\\error_class": "form",
+  "Naf\\Form\\has_error": "form",
+  "Naf\\Form\\is_post": "form",
+  "Naf\\Form\\memory": "form",
+  "Naf\\Form\\memory_checked": "form",
+  "Naf\\Form\\memory_selected": "form",
+  "Naf\\Form\\validator": "form",
+  "Naf\\I18n\\lang": "i18n",
+  "Naf\\I18n\\t": "i18n",
+  "Naf\\I18n\\translation_paths": "i18n",
+  "Naf\\I18n\\translator": "i18n",
+  "Naf\\MCP\\tokens": "mcp",
+  "Naf\\MCP\\tool": "mcp",
+  "Naf\\Mail\\mail": "mail",
+  "Naf\\Mail\\mailer": "mail",
+  "Naf\\OAuth\\Client\\oauth": "oauth-client",
+  "Naf\\OAuth\\Client\\oauth_button": "oauth-client",
+  "Naf\\OAuth\\Client\\oauth_token": "oauth-client",
+  "Naf\\OAuth\\Server\\token": "oauth-server",
+  "Naf\\ORM\\em": "orm",
+  "Naf\\ORM\\repo": "orm",
+  "Naf\\Queue\\queue": "queue",
+  "Naf\\Rbac\\permissions": "rbac",
+  "Naf\\Rbac\\rbac": "rbac",
+  "Naf\\Rbac\\roles": "rbac",
+  "Naf\\Schedule\\scheduler": "schedule",
+  "Naf\\Session\\session": "session",
+  "Naf\\Storage\\storage": "storage",
+  "Naf\\View\\asset": "view",
+  "Naf\\View\\render": "view",
+  "Naf\\View\\s": "view",
+  "Naf\\View\\view": "view",
+  "Naf\\Websocket\\live": "websocket",
+  "Naf\\Websocket\\publisher": "websocket",
+  "Naf\\Websocket\\token": "websocket",
+  "Naf\\abort": "framework",
+  "Naf\\app": "framework",
+  "Naf\\config": "framework",
+  "Naf\\env": "framework",
+  "Naf\\event": "framework",
+  "Naf\\guard": "framework",
+  "Naf\\json": "framework",
+  "Naf\\log": "framework",
+  "Naf\\param": "framework",
+  "Naf\\plugin": "framework",
+  "Naf\\redirect": "framework",
+  "Naf\\refresh": "framework",
+  "Naf\\request": "framework",
+  "Naf\\response": "framework",
+  "Naf\\route": "framework"
  },
  "packages": {
   "auth": {
@@ -514,6 +832,34 @@
    "php": ">=8.3",
    "requires": [
     "naf/auth"
+   ],
+   "suggests": [],
+   "version": "v0.1.0"
+  },
+  "board": {
+   "description": "Project-isolated Kanban boards for NAF, with an extension platform.",
+   "namespace": "Naf\\Board",
+   "php": ">=8.3",
+   "requires": [
+    "naf/auth",
+    "naf/auth-ldap",
+    "naf/cli",
+    "naf/client",
+    "naf/database",
+    "naf/form",
+    "naf/framework",
+    "naf/i18n",
+    "naf/mail",
+    "naf/mcp",
+    "naf/oauth-client",
+    "naf/orm",
+    "naf/queue",
+    "naf/rate-limit",
+    "naf/rbac",
+    "naf/schedule",
+    "naf/session",
+    "naf/storage",
+    "naf/view"
    ],
    "suggests": [],
    "version": "v0.1.0"
@@ -565,7 +911,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.5"
+   "version": "v0.2.6"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
@@ -663,6 +1009,18 @@
    "suggests": [],
    "version": "v0.1.0"
   },
+  "rbac": {
+   "description": "Roles, permissions and the rules for handing them out, for NAF hosts.",
+   "namespace": "Naf\\Rbac",
+   "php": ">=8.3",
+   "requires": [
+    "naf/auth",
+    "naf/database",
+    "naf/framework"
+   ],
+   "suggests": [],
+   "version": "v0.1.1"
+  },
   "schedule": {
    "description": "NAF Schedule Plugin for recurring Tasks.",
    "namespace": "Naf\\Schedule",
@@ -707,6 +1065,16 @@
    ],
    "suggests": [],
    "version": "v0.2.2"
+  },
+  "websocket": {
+   "description": "A WebSocket server for NAF hosts, in plain PHP: it carries that something changed, never what.",
+   "namespace": "Naf\\Websocket",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": [],
+   "version": "v0.1.0"
   }
  }
 }

@@ -92,8 +92,10 @@ nav:
       - Sending mail: mail.md
       - HTTP client: http-client.md
       - Rate limits: rate-limits.md
+      - Live updates: websocket.md
   - Identity:
       - Authentication and permissions: auth.md
+      - Roles and permissions: rbac.md
       - Why auth has this shape: auth-architecture.md
       - Signing in against a directory: auth-ldap.md
       - Signing in with a provider: oauth-client.md

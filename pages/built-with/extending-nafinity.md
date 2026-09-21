@@ -1,5 +1,4 @@
 ---
-external_classes: true
 title: How Nafinity is extended
 ---
 
@@ -67,20 +66,25 @@ migrations, translations, and replacing a core service through the container.
 
 ## The events
 
-Three, for the whole application.
+Six, for the whole application, and each of them is a class: `dispatch(new Change(…))`,
+`listen(Change::class, …)`. A misspelled class is an error where it is written, while a
+misspelled event name used to be a listener that never ran and never said so.
 
-| Event | Payload | When |
+| Event | Carries | When |
 |---|---|---|
-| `nafinity.changed` | `Change` | Anything was written: 24 kinds, from `ticket.moved` to `account.created` |
-| `rbac.granted` | `GrantsChanged` | Roles or permissions were granted or withdrawn |
-| `export.line` | `ExportLine` | One record is about to be written into an export |
+| `Change` | project, ticket, actor, type, payload | Anything was written — 24 kinds, from `ticket.moved` to `account.created` |
+| `GrantsChanged` | actor, subject, scope, before, after | Roles or permissions moved (from [`naf/rbac`](../rbac.md)) |
+| `SignIn` | email, provider, outcome, account | Somebody tried to sign in, successfully or not |
+| `ExportStarted` | format, project, columns | An export is about to write its first record |
+| `ExportLine` | format, project, ticket, row | One record, before it is written |
+| `ExportFinished` | format, project, columns, count | An export wrote its last record |
 
 One write event rather than twenty-four is deliberate. The listeners that exist mostly
 want *everything* — the audit log and the live updates do — and a plugin that wants one
 kind writes one line:
 
 ```php
-event()->listen('nafinity.changed', function (Change $change): void {
+event()->listen(Change::class, function (Change $change): void {
     if ($change->type !== 'ticket.moved') {
         return;
     }
@@ -88,16 +92,20 @@ event()->listen('nafinity.changed', function (Change $change): void {
 });
 ```
 
+`SignIn` exists because signing in writes no row, so `Change` structurally cannot carry it.
+Both outcomes travel on it, because the interesting one is usually the failure, and it carries
+the address as typed even when no account answers to it.
+
 Splitting it would make the two listeners that want everything register twenty-four times
 to get it.
 
 ### A listener can refuse
 
-`nafinity.changed` is dispatched inside the transaction that did the work. Throwing from a
+`Change` is dispatched inside the transaction that did the work. Throwing from a
 listener rolls the whole thing back:
 
 ```php
-event()->listen('nafinity.changed', function (Change $change): void {
+event()->listen(Change::class, function (Change $change): void {
     if ($change->type === 'ticket.moved' && $this->isFriday()) {
         throw new Failure(t('Freitags wird nichts nach Fertig geschoben.'), 422);
     }
@@ -111,6 +119,10 @@ another system — gets to stop something.
 It costs doing the work and undoing it, which for a rule engine is the right trade: the
 listener sees the finished state rather than a proposal, and that is usually what a rule
 needs to judge.
+
+`SignIn` is the exception that cannot refuse, and is announced *after* its transaction on
+purpose. By then the session is published and the person is in; rolling that back would leave
+them signed in with no record of it. Refusing a sign-in is the authentication provider's job.
 
 ## A worked example: changing an export
 
@@ -133,7 +145,7 @@ $context->exporters()->add(new ExporterDefinition(
 Then say what it reports:
 
 ```php
-event()->listen(ExportService::LINE, static function (ExportLine $line): void {
+event()->listen(ExportLine::class, static function (ExportLine $line): void {
     if (!$line->isFor('acme.external')) {
         return;
     }

@@ -14,7 +14,7 @@ for services exposed through these helpers.
 
 ## naf/framework
 
-Version **v0.2.5** · [Core](first-app.md)
+Version **v0.2.6** · [Core](first-app.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -41,6 +41,20 @@ Version **v0.2.2** · [Authentication and permissions](auth.md)
 | Signature | Namespace to import from |
 | --- | --- |
 | <code>auth(): Naf\Auth\Auth</code> | `Naf\Auth` |
+
+## naf/board
+
+Version **v0.1.0** · [Nafinity](built-with/nafinity.md)
+
+| Signature | Namespace to import from |
+| --- | --- |
+| <code>choice(array $arguments): string</code> | `Naf\Board` |
+| <code>extensions(): Naf\Board\ExtensionRegistry</code> | `Naf\Board` |
+| <code>field(array $arguments): string</code> | `Naf\Board` |
+| <code>partial(string $template, array $data = []): string</code> | `Naf\Board` |
+| <code>settings(): Naf\Board\Settings</code> | `Naf\Board` |
+| <code>slot(string $slot, Naf\Board\Support\SlotContextInterface&#124;Naf\Board\Support\UiContext $context, array $extra = []): string</code> | `Naf\Board` |
+| <code>template(string $template): string</code> | `Naf\Board` |
 
 ## naf/cli
 
@@ -90,6 +104,7 @@ Version **v0.2.2** · [Translations](translations.md)
 | --- | --- |
 | <code>lang(): ?string</code> | `Naf\I18n` |
 | <code>t(string $key, array $params = []): string</code> | `Naf\I18n` |
+| <code>translation_paths(): Naf\I18n\Support\TranslationPathRegistry</code> | `Naf\I18n` |
 | <code>translator(): Naf\I18n\Core\Translator</code> | `Naf\I18n` |
 
 ## naf/mail
@@ -145,6 +160,16 @@ Version **v0.2.3** · [Queues and workers](queues.md)
 | --- | --- |
 | <code>queue(?string $channel = null): Naf\Queue\Core\Queue</code> | `Naf\Queue` |
 
+## naf/rbac
+
+Version **v0.1.1** · [Roles and permissions](rbac.md)
+
+| Signature | Namespace to import from |
+| --- | --- |
+| <code>permissions(): Naf\Rbac\Registry\PermissionRegistry</code> | `Naf\Rbac` |
+| <code>rbac(): Naf\Rbac\Rbac</code> | `Naf\Rbac` |
+| <code>roles(): Naf\Rbac\Registry\RoleRegistry</code> | `Naf\Rbac` |
+
 ## naf/schedule
 
 Version **v0.2.3** · [Scheduled jobs](scheduling.md)
@@ -180,6 +205,16 @@ Version **v0.2.2** · [Views and templates](views.md)
 | <code>s(array&#124;string&#124;null $value): array&#124;string&#124;null</code> | `Naf\View` |
 | <code>view(string $tpl, array $vars = []): string</code> | `Naf\View` |
 
+## naf/websocket
+
+Version **v0.1.0** · [Live updates](websocket.md)
+
+| Signature | Namespace to import from |
+| --- | --- |
+| <code>live(): bool</code> | `Naf\Websocket` |
+| <code>publisher(): Naf\Websocket\Publisher</code> | `Naf\Websocket` |
+| <code>token(string $subject, array $channels): string</code> | `Naf\Websocket` |
+
 </div>
 
-*49 public functions across 17 packages.*
+*63 public functions across 20 packages.*
