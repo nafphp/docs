@@ -2,29 +2,26 @@
 
 This draft is outside the published MkDocs pages. It describes source candidates, not a
 released installation recipe. Package code still needs maintainer review and publication;
-release `naf/framework` 0.2.7 and `naf/database` 0.2.4 before `naf/board` 0.1.3. The database
+release `naf/database` 0.2.4 before `naf/board` 0.1.3. Framework 0.2.6 already suffices. The database
 0.2.3 candidate was already merged when this work started; 0.2.4 follows that commit.
 
 ## Completing plugin registration
 
-Framework dispatches `Naf\Core\Event::PLUGINS_BOOTED` once after every installed plugin's
-bootstrap returns, before loading the host routes. It has no payload. Register a listener
-from a plugin bootstrap, not after the host's first `app()` call:
+The host orders infrastructure plugins first, all installed extensions next, and `naf/board`
+last. The skeleton reads Composer's installed `naf-plugin` package names in `src/plugins.php`,
+so a newly installed extension automatically boots before Board. Custom hosts must preserve
+that order. No new framework event or framework DI access is needed.
 
-```php
-use Naf\Core\Event;
-use function Naf\event;
+Extension bootstraps only note providers. During its own bootstrap Board registers lazy
+services and built-in definitions, then initializes the collected providers by index/id,
+declares RBAC definitions and loads the host's optional `app/extensions.php` or
+`src/extensions.php`. Host routes load afterwards. Board service resolution and replacements
+belong in providers; early extension bootstraps and conventional route files precede Board.
 
-event()->listen(Event::PLUGINS_BOOTED, static function (): void {
-    // Resolve contributions after every plugin could register them.
-});
-```
-
-Board registers lazy services and built-in definitions during its bootstrap. Its listener
-then initializes extension providers by index/id, declares RBAC definitions and loads the
-host's optional `app/extensions.php` or `src/extensions.php`. Host routes load afterwards.
-The skeleton integration runner installs the board as a Composer plugin; it no longer copies
-its source and bootstrap into the root project. Its local package aliases use `-dev`.
+The skeleton integration runner installs Board as a Composer plugin and resolves the published
+framework without a local override. It also boots with reversed extension order (Board still
+last), and checks that host overrides and routes win in both CLI and real HTTP requests.
+Local aliases for Board and unpublished dependencies use `-dev`.
 
 To replace a board route, reuse its existing route name as well as method/path, for example
 `route()->add('GET', '/projects', $handler, 'projects')`. A different name does not displace
@@ -87,9 +84,9 @@ text stays separate document content, with its own edit button, preserving links
 Regression coverage includes authentic Composer plugin boot, both database engines, explicit
 user rights, revoke-after-stage recovery, independent tickets, real conflicts, a second PDO
 connection and a real publication socket, pending migration detection, failing attachment
-storage, named route replacement and HTTP accessibility markup. The framework also tests boot
-ordering in a subprocess; database unit tests cover read-only pending inspection and legacy names.
+storage, named route replacement and HTTP accessibility markup. Board integration checks boot
+ordering on the published framework; database unit tests cover read-only pending inspection
+and legacy names.
 
-After package publication, move the applicable framework/database material into their public
-guides and regenerate references from published packages. Board-specific documentation is
+After package publication, move the database material into its public guides and regenerate references from published packages. Board-specific documentation is
 updated alongside its source in `docs/Extensibility.md` and `docs/Tickets.md`.
