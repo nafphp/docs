@@ -36,7 +36,12 @@ final class AcmeProvider implements ExtensionProviderInterface
 ```
 
 The context carries the container and the registries, never a current user: definitions
-are code, and user data is read in the request that needs it.
+are code, and user data is read in the request that needs it. An extension's `composer.json`
+requires `naf/board` for its API and declares
+`"extra": {"naf": {"boot": {"before": ["naf/board"]}}}`. Its bootstrap only notes the
+provider; Board boots after it, adds its defaults, runs providers by index and id, then loads
+the host's optional `extensions.php`. Resolve Board services and replace definitions inside
+`register()`, when those defaults exist.
 
 ## The registries
 

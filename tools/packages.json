@@ -44,8 +44,10 @@
   "Naf\\Board\\Contracts\\NotificationServiceInterface",
   "Naf\\Board\\Contracts\\PageRendererInterface",
   "Naf\\Board\\Contracts\\PreferenceServiceInterface",
+  "Naf\\Board\\Contracts\\ProjectAccessInterface",
   "Naf\\Board\\Contracts\\ProjectServiceInterface",
   "Naf\\Board\\Contracts\\ProjectToolInterface",
+  "Naf\\Board\\Contracts\\RememberStoreInterface",
   "Naf\\Board\\Contracts\\RoleServiceInterface",
   "Naf\\Board\\Contracts\\SettingSectionProviderInterface",
   "Naf\\Board\\Contracts\\SettingsServiceInterface",
@@ -82,8 +84,12 @@
   "Naf\\Board\\Domain\\ProjectScope",
   "Naf\\Board\\Domain\\Status",
   "Naf\\Board\\Events\\ActivityListener",
+  "Naf\\Board\\Events\\SignIn",
   "Naf\\Board\\Export\\CsvExporter",
+  "Naf\\Board\\Export\\ExportFinished",
   "Naf\\Board\\Export\\ExportLine",
+  "Naf\\Board\\Export\\ExportOptions",
+  "Naf\\Board\\Export\\ExportStarted",
   "Naf\\Board\\Export\\JsonExporter",
   "Naf\\Board\\ExtensionContext",
   "Naf\\Board\\ExtensionRegistry",
@@ -91,6 +97,7 @@
   "Naf\\Board\\Jobs\\DeliverNotificationJob",
   "Naf\\Board\\Jobs\\FinalizeAttachmentJob",
   "Naf\\Board\\Jobs\\MaintenanceJob",
+  "Naf\\Board\\Jobs\\PublishBoardChangeJob",
   "Naf\\Board\\Migrations\\M202609140001Nafinity",
   "Naf\\Board\\Migrations\\M202609140002Queue",
   "Naf\\Board\\Migrations\\M202609140003RateLimits",
@@ -112,6 +119,8 @@
   "Naf\\Board\\Migrations\\M202609210005NewTicketPlacement",
   "Naf\\Board\\Migrations\\M202609210006AuditLog",
   "Naf\\Board\\Migrations\\M202609210007Presence",
+  "Naf\\Board\\Migrations\\M202609210008RememberedSignIns",
+  "Naf\\Board\\Migrations\\M202609210009AuditRetention",
   "Naf\\Board\\Models\\Ticket",
   "Naf\\Board\\Models\\User",
   "Naf\\Board\\Modules\\Attachments\\AttachmentsModule",
@@ -128,9 +137,11 @@
   "Naf\\Board\\Modules\\CorePermissions",
   "Naf\\Board\\Modules\\CorePriorities",
   "Naf\\Board\\Modules\\CoreSettings",
+  "Naf\\Board\\Modules\\CoreSignInAudit",
   "Naf\\Board\\Modules\\CoreTicket",
   "Naf\\Board\\Modules\\NafinityDefaults",
   "Naf\\Board\\Modules\\Providers\\AiSectionProvider",
+  "Naf\\Board\\Modules\\Providers\\ExportSectionProvider",
   "Naf\\Board\\Modules\\Providers\\LanguagePickerProvider",
   "Naf\\Board\\Modules\\Providers\\MembersSectionProvider",
   "Naf\\Board\\Modules\\Providers\\Names",
@@ -175,7 +186,10 @@
   "Naf\\Board\\Services\\NotificationService",
   "Naf\\Board\\Services\\PageRenderer",
   "Naf\\Board\\Services\\PreferenceService",
+  "Naf\\Board\\Services\\ProjectAccess",
   "Naf\\Board\\Services\\ProjectService",
+  "Naf\\Board\\Services\\RememberService",
+  "Naf\\Board\\Services\\RememberStore",
   "Naf\\Board\\Services\\RoleService",
   "Naf\\Board\\Services\\SettingsService",
   "Naf\\Board\\Services\\SlotRenderer",
@@ -215,6 +229,7 @@
   "Naf\\Board\\Support\\PasswordRule",
   "Naf\\Board\\Support\\Presence",
   "Naf\\Board\\Support\\ProjectSlotContext",
+  "Naf\\Board\\Support\\RememberToken",
   "Naf\\Board\\Support\\Resolver",
   "Naf\\Board\\Support\\RichText",
   "Naf\\Board\\Support\\ServiceDefaults",
@@ -228,6 +243,7 @@
   "Naf\\Board\\Support\\UiContext",
   "Naf\\Board\\Support\\Version",
   "Naf\\CLI\\Commands\\ListCommand",
+  "Naf\\CLI\\Commands\\PluginDebugCommand",
   "Naf\\CLI\\Commands\\RouteDebugCommand",
   "Naf\\CLI\\Core\\AbstractCommand",
   "Naf\\CLI\\Core\\Console",
@@ -235,6 +251,7 @@
   "Naf\\CLI\\Core\\Output",
   "Naf\\CLI\\Exception\\ConsoleException",
   "Naf\\CLI\\Support\\CommandRegistry",
+  "Naf\\CLI\\Support\\LauncherInstaller",
   "Naf\\Client\\Core\\Client",
   "Naf\\Client\\Exception\\ClientException",
   "Naf\\Client\\Transports\\CurlTransport",
@@ -447,6 +464,7 @@
   "Naf\\Support\\CoreFileLoader",
   "Naf\\Support\\Guard",
   "Naf\\Support\\Plugin",
+  "Naf\\Support\\PluginBootOrder",
   "Naf\\Support\\RequestParameter",
   "Naf\\Support\\Stopwatch",
   "Naf\\View\\Core\\Asset",
@@ -485,6 +503,7 @@
   "oauth:keys:prune",
   "oauth:server:doctor",
   "oauth:server:setup",
+  "plugins:debug",
   "queue:consume",
   "queue:retry-failed",
   "rbac:sync",
@@ -862,7 +881,7 @@
     "naf/view"
    ],
    "suggests": [],
-   "version": "v0.1.0"
+   "version": "v0.1.3"
   },
   "cli": {
    "description": "NAF CLI Plugin for console applications.",
@@ -872,7 +891,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "client": {
    "description": "NAF Client Plugin to make simple http requests.",
@@ -892,7 +911,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.4"
   },
   "form": {
    "description": "NAF Form Plugin to make form handling easier.",
@@ -911,7 +930,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.6"
+   "version": "v0.2.7"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
@@ -941,7 +960,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.3"
+   "version": "v0.2.4"
   },
   "oauth-client": {
    "description": "Sign in with external OAuth2 and OpenID Connect providers, keeping your own user model.",
@@ -958,7 +977,7 @@
     "naf/database",
     "naf/view"
    ],
-   "version": "v0.2.3"
+   "version": "v0.2.4"
   },
   "oauth-server": {
    "description": "Run your application as an OAuth2 authorization server and protect its APIs.",
@@ -975,7 +994,7 @@
     "naf/database",
     "naf/view"
    ],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "orm": {
    "description": "NAF ORM Plugin.",
@@ -997,7 +1016,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.3"
+   "version": "v0.2.4"
   },
   "rate-limit": {
    "description": "Atomic PDO fixed-window rate limits for NAF hosts.",
@@ -1019,7 +1038,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.1.1"
+   "version": "v0.1.2"
   },
   "schedule": {
    "description": "NAF Schedule Plugin for recurring Tasks.",
@@ -1030,7 +1049,7 @@
     "naf/queue"
    ],
    "suggests": [],
-   "version": "v0.2.3"
+   "version": "v0.2.4"
   },
   "session": {
    "description": "NAF Session Plugin for storing data across requests.",
@@ -1042,7 +1061,7 @@
    "suggests": [
     "naf/database"
    ],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "storage": {
    "description": "Provider-independent file storage with named disks and streams for NAF.",
@@ -1074,7 +1093,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.1.0"
+   "version": "v0.1.1"
   }
  }
 }

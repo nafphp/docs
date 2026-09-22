@@ -32,7 +32,6 @@ app/
   src/
     config.php       everything the application runs on, in one file
     routes.php       routes you add; a path here wins over the board's
-    plugins.php      the order plugins boot in
     extensions.php   your last word on what the application offers
     Controllers/     your code, namespace Nafinity\
     views/           a template here wins over the board's
@@ -66,7 +65,11 @@ silently. `make health` compares the two and turns that silence into a sentence.
 ## The commands it brings
 
 `make` wraps the ones a development installation needs daily; these are what it wraps, and
-what a deployment runs directly.
+what a deployment runs directly. From the repository root, `bin/naf command:list` selects
+local PHP inside the container or the Compose `app` service on the host. From `app/`, use
+`bin/naf command:list` as well. Docker failures remain errors rather than falling back
+to another runtime. Set `NAF_CLI_RUNTIME=local` or `NAF_CLI_RUNTIME=compose` to
+choose explicitly; `NAF_CLI_SERVICE` selects another Compose service.
 
 | Command | What it does |
 |---|---|
@@ -81,7 +84,16 @@ what a deployment runs directly.
 
 The first four are what `make assets`, `make seed` and `make health` call. The rest are for
 the moments an installation is being set up or repaired, which is why they are commands rather
-than screens.
+than screens. `make health` checks pending migrations and the configured attachment
+storage as well as database readiness.
+
+## Exporting boards
+
+Board settings export that board's tickets. Installation settings can export one board or
+all active boards the current account may export. CSV, JSON and installed exporter formats
+use the same selection; status, archive state and inclusive UTC update dates can narrow the
+result. Each board's export and field permissions are checked separately, including in a
+combined download. Managing installation settings does not grant access to another board.
 
 ## Making it yours
 
@@ -92,9 +104,9 @@ rather call it something else.
 **Overriding a template.** Copy the one you want from `vendor/naf/board/src/views/` into
 `app/src/views/`, keeping the path. Host views win over the package's.
 
-**Changing what the application offers.** `app/src/extensions.php` runs after the board
-and every plugin has registered, so anything reachable there can be replaced or removed —
-including a definition a plugin just added:
+**Changing what the application offers.** `app/src/extensions.php` runs after Board's
+providers, so anything reachable there can be replaced or removed — including a definition
+an extension just added:
 
 ```php
 use function Naf\Board\extensions;
@@ -103,8 +115,11 @@ extensions()->boardFilters()->remove('example.only-mine');
 ```
 
 **Adding a plugin.** `composer require` it. A package of type `naf-plugin` is found
-through Composer's installed-packages metadata, so there is nothing to register; list it
-in `app/src/plugins.php` only when its position in the boot order matters.
+through Composer's installed-packages metadata. Plugins declare boot prerequisites in their
+own manifests, so a normal Nafinity installation has no `plugins.php`. An extension that
+registers a Board provider requires `naf/board` and declares
+`extra.naf.boot.before: ["naf/board"]`; Board runs the provider after its own defaults.
+Use `bin/naf plugins:debug` to inspect the order.
 
 For the mechanisms a plugin has once it is installed, see
 [how Nafinity is extended](extending-nafinity.md).

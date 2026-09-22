@@ -90,7 +90,8 @@ caller believing the transfer happened.
 
 ## Migrations
 
-A migration is a class with `up()` and `down()`, and it lives in `app/Migrations`.
+A migration is a class with `up()` and `down()`. Application migrations may live in
+`app/Migrations` or `src/Migrations`; both directories are discovered when present.
 The commands require the optional CLI package first:
 
 ```bash
@@ -124,6 +125,22 @@ all contribute migrations that `db:migrate up` runs alongside yours.
 
 That is why a fresh install of one of those packages usually ends with a migration step, and
 why you do not have to copy anybody's schema into your own migrations folder.
+
+To inspect what would run without applying it, use database 0.2.4+ with an existing migration
+tracker:
+
+```php
+use Naf\Database\Core\MigrationRunner;
+use Naf\Database\Support\MigrationRegistry;
+use function Naf\Database\database;
+
+$pdo = database() ?? throw new RuntimeException('Database is not configured.');
+$pending = (new MigrationRunner($pdo))->pending(MigrationRegistry::getPaths());
+```
+
+`$pending` is a list of fully qualified migration class names in the runner's global order.
+Inspection uses the same `shouldRun()` rules as execution. It does not create the tracker,
+run migrations or rewrite legacy names; a missing tracker or database error is reported.
 
 ### Migrations and transactions
 
