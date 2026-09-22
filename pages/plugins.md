@@ -211,11 +211,40 @@ Later values override earlier values recursively. See [Configuration](configurat
 
 ## Boot order
 
-All discovered plugins are registered before any bootstrap runs. `hasPlugin()` says that a
-plugin is registered; it does not say that its bootstrap has already run. Prefer lazy service
-factories so a dependency is resolved after registration has finished.
+Framework 0.2.7+ reads boot order from each installed plugin's `composer.json`. All plugins
+are registered before any bootstrap runs. `hasPlugin()` says a plugin is registered;
+`isBooted()` says its bootstrap has finished. Prefer lazy service factories when another
+plugin's service is only needed later.
 
-When boot order matters, create `app/plugins.php` returning the package names to load first:
+A plugin that needs another bootstrap to finish first declares that relationship itself:
+
+```json
+{
+  "extra": {
+    "naf": {
+      "boot": {
+        "after": ["naf/cli"],
+        "before": ["naf/board"]
+      }
+    }
+  }
+}
+```
+
+`before` and `after` are optional lists of exact Composer package names. They order only
+installed plugins: a missing optional target is skipped, never installed. Declare required
+packages separately in Composer `require`. A requirement alone creates no boot edge; a Board
+extension can require Board's API while booting before Board to register its provider.
+
+The framework validates the complete graph before running plugin code. Invalid declarations
+and cycles fail with the packages and source declarations involved. Unconstrained plugins
+are ordered by package name, so Composer discovery order does not change the result.
+The same order governs plugin configuration and view resource precedence. Host configuration
+and host routes retain their final override position; a plugin's routes and helper files
+load before its own root bootstrap.
+
+An installation may still return a partial preference list from `app/plugins.php` or
+`src/plugins.php`:
 
 ```php
 <?php
@@ -223,9 +252,15 @@ When boot order matters, create `app/plugins.php` returning the package names to
 return ['naf/session', 'naf/form'];
 ```
 
-Other installed plugins follow. This orders installed plugins; it does not install packages or
-act as an allow-list. Application routes load after plugin bootstraps. Application service
-bindings belong in the root `bootstrap.php`, after the autoloader and before `app()->run()`.
+Listed installed packages keep their relative order and receive priority among ready
+plugins. Other installed plugins still load. A preference conflicting with a plugin's
+`before` or `after` declaration fails with a cycle rather than silently changing that
+plugin's prerequisite. Application routes load after all plugin bootstraps; application
+service bindings belong in the root `bootstrap.php` before `app()->run()`.
+
+With `naf/cli` 0.2.3+, run `vendor/bin/naf plugins:debug` to see the resolved order,
+prerequisites and skipped optional targets. `App::getPluginBootPlan()` exposes the same
+information to application code.
 
 The loader also accepts `src/config.php`, `src/routes.php` and `src/functions.php` when their
 `app/` counterparts are absent. Keep one layout per package to avoid competing files.
@@ -236,9 +271,8 @@ For plugin contributions, follow the shared
 [NAF code style](https://github.com/nafphp/docs/blob/main/CODE_STYLE.md): PER Coding Style 3.0
 with descriptive local names, separate logical steps and locally aligned assignments.
 The guide includes a formatter configuration and Composer commands for individual packages.
-The September 2026 rollout adds `composer style:check`, `composer style:fix` and a CI check
-to all 22 workspace plugins. These changes are on RC branches; released packages may not
-yet contain the commands. Check the package's own scripts and instructions.
+Packages adopt `composer style:check`, `composer style:fix` and CI checks individually.
+Check the package's own scripts and instructions for the commands it supports.
 
 Keep ordinary PHP operations simple. Add a helper or service when it has a useful
 responsibility, and preserve the package's public API, evaluation order and cleanup behavior

@@ -24,6 +24,25 @@ contributes its commands, so what you see depends on what you have installed.
 The binary works from any directory: it finds its autoloader through Composer rather than
 through the directory you happen to be standing in.
 
+With `naf/cli` 0.2.3+, an application can install a root-level shortcut. From the directory
+containing its `composer.json`, run:
+
+```sh
+vendor/bin/naf-install
+bin/naf command:list
+```
+
+The installer creates `bin/naf` and adds a `post-autoload-dump` hook to restore it after
+later Composer installs. Commit the shortcut and manifest change with your application.
+It leaves a conflicting existing file or symlink untouched. If the application provides
+an executable `bin/naf-runtime`, the shortcut delegates runtime selection to that file;
+otherwise it runs the Composer binary with local PHP. A missing or non-executable adapter
+is an error. The usual `vendor/bin/naf` remains available.
+
+To inspect plugin startup, run `vendor/bin/naf plugins:debug` (or `bin/naf plugins:debug`
+when the shortcut is installed). It shows the order, declared prerequisites and optional
+targets that are not installed. This command requires framework 0.2.7+.
+
 ## Writing one
 
 A command is a class extending `AbstractCommand`, with a name, a `configure()` that
