@@ -63,26 +63,25 @@ application decided they are.
 
 Installing the package intercepts nothing. Booting it creates no tables, opens no connection
 and consumes no limit — the limiter is resolved on the first guard call, which is when your
-connection has to be there:
+connection has to be there. Install and configure `naf/database` 0.2.4+ as described in
+[Database](database.md); it registers the configured connection under `PDO::class`.
+For a connection managed outside NAF, bind your own `PDO::class` service before that first
+guard call.
+
+Create the table once, in an explicit migration using the configured connection:
 
 ```php
-use function Naf\app;
+use Naf\RateLimit\PdoLimiter;
 use function Naf\Database\database;
 
-app()->container()->set(PDO::class, static fn() =>
-    database() ?? throw new LogicException('Rate limiting requires a configured database.'));
+$pdo = database() ?? throw new LogicException('Rate limiting requires a configured database.');
+(new PdoLimiter($pdo))->install();
 ```
 
-Create the table once, in an explicit migration using that connection:
-
-```php
-(new Naf\RateLimit\PdoLimiter($pdo))->install();
-```
-
-An existing `PDO::class` binding from another plugin is left alone, and binding your own
-`PdoLimiter` works even after the default one has already answered a call. MariaDB, PostgreSQL
-and SQLite are supported. Call `cleanup()` periodically — from a scheduled job, for instance —
-to drop buckets whose window has passed.
+An existing `PDO::class` binding is left alone. Binding your own `PdoLimiter` works even
+after the default one has already answered a call. MySQL, MariaDB, PostgreSQL and SQLite are
+supported. Call `cleanup()` periodically — from a scheduled job, for instance — to delete
+buckets that expired more than 24 hours ago.
 
 ## What a fixed window cannot promise
 

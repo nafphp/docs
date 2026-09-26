@@ -62,9 +62,11 @@ t('checkout.confirm');  // → "checkout.confirm" when the key is not in the fil
 Untranslated text shows up in the interface rather than as an empty space, which is what
 you want while a translation is still being written.
 
-A missing **file** is a different matter: asking for a language whose JSON does not exist
-throws a `LogicException`, and so does a file that is not valid JSON. That is deliberate —
-a typo in a language code should fail at once, not silently serve English to everybody.
+An individual missing file is skipped when another directory provides that language. If no
+directory has a file for the chosen language, or a file contains invalid JSON, the translator
+logs the problem and has no translations for that language. `t()` then returns each requested
+key. Check the application log if a page shows keys unexpectedly; it does not silently switch
+to English.
 
 ## Choosing the language
 
@@ -105,3 +107,19 @@ nothing validates the code against that list.
 
 `translationPath` is relative to your application's base path. One JSON file per language,
 named by its code.
+
+## Translations from plugins
+
+A plugin can register a directory of `<language>.json` files in its `bootstrap.php`:
+
+```php
+use function Naf\I18n\translation_paths;
+
+translation_paths()->add('acme/blog', __DIR__ . '/app/Resources/lang');
+```
+
+Registered directories are read by their `index` (default `100`), then id. Later files
+replace matching keys from earlier files; the application's configured translation directory
+is always read last. Use `remove('acme/blog')` to unregister a path or pass `replace: true`
+to replace an existing id. Changes to the registry reload an already-created translator on
+its next translation.

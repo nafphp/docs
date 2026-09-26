@@ -1,5 +1,7 @@
 ---
 title: Roles and permissions
+requires:
+  - naf/rbac
 ---
 
 # Roles and permissions
@@ -13,13 +15,14 @@ that decides who may change either. If you need roles an installation can edit, 
 fixed list in code, this is that, and the screens to do it with.
 
 ```sh
-composer require naf/rbac
+composer require naf/cli
 vendor/bin/naf db:migrate up
 vendor/bin/naf rbac:sync
 ```
 
-`rbac:sync` writes the roles installed packages declare. Run it after migrating and after
-adding a package.
+`naf/cli` is optional for `naf/rbac`, but required for these migration and sync commands.
+Configure a database connection first; see [Database](database.md). `rbac:sync` writes the
+roles installed packages declare. Run it after migrating and after adding a package.
 
 ## Declaring what can be granted
 
@@ -29,19 +32,19 @@ In your plugin's `bootstrap.php`:
 use Naf\Rbac\Definition\PermissionDefinition;
 use Naf\Rbac\Definition\RoleDefinition;
 
-use function Naf\Rbac\rbac;
+use function Naf\Rbac\permissions;
+use function Naf\Rbac\roles;
 
-rbac()->registry
-    ->permission(
-        new PermissionDefinition('users.view', 'See users', '', 'Users', 10),
-        new PermissionDefinition('users.invite', 'Invite users', '', 'Users', 20),
-    )
-    ->role(new RoleDefinition(
-        'admin',
-        'Administrator',
-        'Runs this installation.',
-        ['rbac.manage', 'users.view', 'users.invite'],
-    ));
+permissions()->add(
+    new PermissionDefinition('users.view', 'See users', '', 'Users', 10),
+    new PermissionDefinition('users.invite', 'Invite users', '', 'Users', 20),
+);
+roles()->add(new RoleDefinition(
+    'admin',
+    'Administrator',
+    'Runs this installation.',
+    ['rbac.manage', 'users.view', 'users.invite'],
+));
 ```
 
 A declared permission is only *offerable*. It never grants itself to an existing role, so
@@ -151,7 +154,7 @@ final class Boards implements ScopeSourceInterface
     }
 }
 
-rbac()->registry->scope(new Boards($repository));
+roles()->scope(new Boards($repository));
 ```
 
 Teams, tenants, single tickets: another registration, no change in here. The type is a string

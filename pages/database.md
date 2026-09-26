@@ -26,6 +26,10 @@ PDO can do, you can do, and everything you already know about PDO applies.
 It is typed `?PDO`: you get `null` if no database is configured, rather than an exception
 from somewhere deeper.
 
+Since `naf/database` 0.2.4, the plugin also registers the configured connection as
+`PDO::class` in the container for constructor injection. Resolving that binding without
+database configuration throws `DatabaseException`; the `database()` helper remains nullable.
+
 ## Two defaults that change how you write queries
 
 The connection is created with:

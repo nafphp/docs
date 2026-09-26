@@ -79,7 +79,8 @@ machine that cannot see request one's file.
 ```
 
 This needs `naf/database`, and the table needs creating — the plugin registers a migration
-for it, so `naf db:migrate up` has one waiting.
+for it. Install `naf/cli` as well to run the migration with `vendor/bin/naf db:migrate up`;
+see [Migrations](database.md#migrations).
 
 **If `naf/database` is not installed, this fails quietly.** The plugin writes a warning to
 the log and carries on with file storage. Your application works, your sessions are in
