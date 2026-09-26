@@ -68,7 +68,8 @@ click — permissions can never go stale.
 ## Quickstart
 
 This example starts from [Your first application](first-app.md) and uses SQLite, so no
-separate database server is needed. Install the ORM and session integration explicitly:
+separate database server is needed. Install the ORM and session integration explicitly.
+The example uses `naf/database` 0.2.4+, which `naf/orm` installs:
 
 ```bash
 composer require naf/auth naf/orm naf/session
@@ -104,15 +105,13 @@ define('BASE_PATH', __DIR__);
 require __DIR__ . '/vendor/autoload.php';
 
 use function Naf\app;
-use function Naf\Database\database;
-
-// The auth model factory resolves PDO by its class name. Bind the same connection
-// that naf/database and naf/orm use; neither plugin supplies this PDO alias itself.
-app()->container()->set(PDO::class, static fn() => database()
-    ?? throw new RuntimeException('Configure a database connection.'));
 
 app()->run();
 ```
+
+`naf/database` 0.2.4+ registers the configured connection under `PDO::class`, which the
+auth model factory uses. If an existing application locks an older version, update that
+dependency before using this bootstrap file.
 
 ### 2. Define your user model
 

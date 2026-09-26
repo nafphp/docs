@@ -10,7 +10,7 @@ requires:
 # A login form
 
 First complete [the authentication quickstart](../auth.md#quickstart), including its SQLite
-config, PDO binding, user model and seed command. It builds on [Your first
+config, user model and seed command. It builds on [Your first
 application](../first-app.md). These steps provide the account **demo** with password
 **local-demo-password** for local use. The packages above supply the form and session.
 

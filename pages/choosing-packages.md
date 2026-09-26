@@ -211,6 +211,23 @@ Read [Sending mail](mail.md). If it should not block the response, put it behind
 
 ---
 
+## More optional capabilities
+
+| You need | Package | Guide |
+|---|---|---|
+| translations | `naf/i18n` | [Translations](translations.md) |
+| an HTTP client | `naf/client` | [HTTP client](http-client.md) |
+| file storage | `naf/storage` | [File storage](file-storage.md) |
+| database-backed rate limits | `naf/rate-limit` with `naf/database` | [Rate limits](rate-limits.md) |
+| roles people can edit | `naf/rbac` | [Roles and permissions](rbac.md) |
+| directory sign-in | `naf/auth-ldap` | [LDAP authentication](auth-ldap.md) |
+| live updates | `naf/websocket` | [Live updates](websocket.md) |
+
+Command-line setup for some of these packages also needs `naf/cli`; each guide names its
+prerequisites.
+
+---
+
 ## The short version
 
 | You are building | Install |

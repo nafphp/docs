@@ -1,20 +1,44 @@
 ---
 title: Live updates
+requires:
+  - naf/websocket
 ---
 
 # Live updates
 
-A WebSocket server for NAF hosts, written in plain PHP: no extension beyond the core, no
-dependency, and no event loop library. `stream_socket_server` and `stream_select` are the
-whole of it.
+A WebSocket server for NAF hosts, written with PHP's stream functions and no event loop
+library. `stream_socket_server` and `stream_select` do the socket work.
 
 ```sh
-composer require naf/websocket
-php vendor/bin/naf websocket:serve
+composer require naf/cli
 ```
 
 Meant to be a supervised program beside a queue worker. It keeps no state, so a restart costs
 its clients a reconnect and nothing else.
+
+`naf/cli` is optional for the publisher, but required for `websocket:serve`. The server is
+disabled by default and has no signing key. For a local HTTP application, generate a key
+with `php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'`, put it in `.env` as
+`WEBSOCKET_KEY=...`, and add this to `app/config.php`:
+
+```php
+return ['websocket' => [
+    'enabled'     => true,
+    'key'         => 'ENV:WEBSOCKET_KEY',
+    'address'     => '127.0.0.1:8091',
+    'url'         => 'ws://127.0.0.1:8091',
+    'origins'     => ['http://127.0.0.1:8000'],
+    'certificate' => '',
+]];
+```
+
+Merge the `websocket` key with any existing configuration, then run
+`vendor/bin/naf websocket:serve`. `Naf\Websocket\live()` returns true only when the feature
+is enabled and a signing key is present. Without both, the command reports that it is off
+and exits. The web process and server must use the same key and `websocket:control` socket
+path. For HTTPS, configure `websocket:certificate` and `websocket:key_file` and expose a
+`wss://` URL; list the allowed page origins explicitly. The shipped certificate path is
+environment-specific and the empty origins list accepts any origin.
 
 ## It carries that something changed, never what
 
@@ -32,8 +56,8 @@ publisher()->publish('project:4', ['revision' => '187']);
 ```
 
 One line of JSON into a Unix socket. Not a port, so it needs no secret; not a queue, so there
-is nothing to drain. It never throws and never waits: a request must not fail because a socket
-server is restarting.
+is nothing to drain. `publish()` returns `false` if the socket is unavailable and bounds the
+connection attempt to 50 milliseconds, so a restarting server does not fail a request.
 
 ## Why it has its own port
 

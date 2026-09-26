@@ -101,16 +101,6 @@ autorestart=true
 
 Replace `/var/www/my-app` with your application path.
 
-```ini
-[program:naf-schedule]
-directory=/var/www/my-app
-command=php /var/www/my-app/vendor/bin/naf schedule:ticker --max-runtime=3600
-autostart=true
-autorestart=true
-```
-
-Replace `/var/www/my-app` with your application path.
-
 ## What happens to a window that was missed
 
 Nothing. `isDue()` is asked about the minute the ticker is in, so a job due at 03:00 on a

@@ -101,20 +101,6 @@ autorestart=true
 
 Replace `/var/www/my-app` with the absolute path of your deployed application.
 
-`--max-jobs` and `--max-runtime` exist because a long-running PHP process accumulates
-memory. Let it exit on its own terms and have the supervisor start a fresh one, rather than
-waiting for the OOM killer to decide.
-
-```ini
-[program:naf-queue]
-directory=/var/www/my-app
-command=php /var/www/my-app/vendor/bin/naf queue:consume --channels=default,emails --max-jobs=500
-autostart=true
-autorestart=true
-```
-
-Replace `/var/www/my-app` with the absolute path of your deployed application.
-
 ## Jobs that failed
 
 A job whose `execute()` throws goes to the deadletter instead of being retried forever.
