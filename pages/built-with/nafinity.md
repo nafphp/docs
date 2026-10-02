@@ -37,7 +37,7 @@ app/
     views/           a template here wins over the board's
   public/index.php   the entry point; assets are published in beside it
   storage/           uploads, sessions, queue and scheduler state
-docker/, Makefile    how it runs locally
+docker/, Makefile    how it runs locally, and the image it ships as
 ```
 
 There is deliberately almost nothing there. A fresh installation is a complete
@@ -61,6 +61,25 @@ The stylesheets and scripts live inside `naf/board` and every plugin, so they ar
 into `app/public/` rather than checked in. A package added later is registered and absent
 at the same moment, which a browser reports as a 404 on a module tag — which is to say
 silently. `make health` compares the two and turns that silence into a sentence.
+
+Nafinity runs on MariaDB or MySQL; Compose brings MariaDB along.
+
+`composer install` takes `naf/board` and the plugins from Packagist, at the versions current
+when it runs. When to update them is your decision: `make composer-update`, then
+`make migrate`, `make roles` and `make assets`.
+
+## Shipping it
+
+```sh
+docker build --target production -t nafinity .
+```
+
+That image is the installation as it ships: dependencies installed from Packagist — from
+`app/composer.lock` when you commit one —, every package's stylesheets and scripts published
+into `public/`, and no Composer, source mount or development tool inside. It needs what the
+development stack gives it: the database settings, `APP_URL`, `APP_ENV=prod`, a certificate
+and key in `/etc/nginx/ssl/` and a volume for `storage/`. After each deployment, run `naf db:migrate up` and `naf rbac:sync` in
+it. Building it needs naf/board 0.1.4 or newer, whose boot does not connect to a database.
 
 ## The commands it brings
 

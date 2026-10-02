@@ -19,7 +19,10 @@ DB_PASS=change-me
 ```
 
 If `.env.local` exists, it is loaded **instead of** `.env`; the two are not merged.
-The loader runs when the application first boots. Existing `$_ENV` entries are preserved.
+The loader runs when the application first boots and only fills gaps: a variable the process
+already has — in `$_ENV`, or in its environment as `getenv()` sees it — keeps its value, so
+what Docker or the shell sets wins over the file. naf/framework before 0.2.8 checked `$_ENV`
+only; with PHP's default `variables_order`, the file then overrode the environment.
 Values are simple strings: do not rely on shell interpolation, automatic boolean conversion
 or stripping quotes. Keep secret files out of version control.
 
@@ -39,9 +42,14 @@ return [
 ];
 ```
 
-`ENV:API_KEY` resolves from `$_ENV`, recursively, when the configuration is built. An absent
-value becomes `null`. For operating-system variables not populated into `$_ENV`, use
-`getenv('NAME')` explicitly and handle its `false` result.
+`ENV:API_KEY` resolves recursively when the configuration is built: from `$_ENV` first, then
+from the process environment. An absent value becomes `null`. The fallback needs
+naf/framework 0.2.8 or newer; earlier versions read `$_ENV` alone, which PHP only fills when
+`variables_order` contains `E` — the `php.ini` files PHP ships with set `GPCS`.
+
+Reading `$_ENV` directly, as for the database values above, sees only what `$_ENV` holds.
+Where the value may come from the process environment, use an `ENV:` reference or
+`getenv('NAME')` and handle its `false` result.
 
 ## Application environment
 
