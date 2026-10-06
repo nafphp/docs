@@ -1,6 +1,9 @@
 # RC integration review — 15 September 2026
 
-These are unreleased source candidates. This document is excluded from the published
+Status on 6 October 2026: historical evidence. The reviewed dependencies are published;
+this record does not impose a new RC/release gate. See `reconciliation-2026-10-06.md`.
+
+At the date of this review these were unreleased source candidates. This document is excluded from the published
 MkDocs navigation. Merge package code through the maintainer, publish dependencies in
 order, verify Packagist, and only then update the public guides and generated references.
 No stable package release is made by this review.

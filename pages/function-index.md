@@ -14,7 +14,7 @@ for services exposed through these helpers.
 
 ## naf/framework
 
-Version **v0.2.7** · [Core](first-app.md)
+Version **v0.2.8** · [Core](first-app.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
@@ -44,7 +44,7 @@ Version **v0.2.2** · [Authentication and permissions](auth.md)
 
 ## naf/board
 
-Version **v0.1.3** · [Nafinity](built-with/nafinity.md)
+Version **v0.1.4** · [Nafinity](built-with/nafinity.md)
 
 | Signature | Namespace to import from |
 | --- | --- |
