@@ -3,9 +3,8 @@
 NAF packages use [PER Coding Style 3.0](https://github.com/php-fig/per-coding-style/blob/3.0.0/spec.md),
 the [successor to PSR-12](https://www.php-fig.org/per/coding-style/meta/), with the same
 readability rules as Nafinity. Keep syntax compatible with the package's minimum PHP version.
-The September 2026 rollout applies these rules to all 22 workspace plugins on their RC
-branches. Released versions can still have the previous formatting; see the
-[rollout record](reviews/plugin-readability-2026-09-15.md#completed-rollout).
+Use each package's current formatter configuration, `AGENTS.md` and declared checks
+when applying these rules.
 
 ## Keep code easy to follow
 
@@ -71,6 +70,3 @@ package's declared tests/analysis and `composer validate --strict`. Add the styl
 the package's CI when adopting it. Keep mechanical formatting separate from behavior fixes
 so each change can be reviewed. New control-flow simplifications need relevant regression
 coverage. Follow the [normal contribution workflow](AGENT_WORKFLOW.md) for commits and PRs.
-
-The [September 2026 plugin review](reviews/plugin-readability-2026-09-15.md) records the
-initial inventory and specific places where manual readability work is useful.
