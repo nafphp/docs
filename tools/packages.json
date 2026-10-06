@@ -892,7 +892,7 @@
     "naf/view"
    ],
    "suggests": [],
-   "version": "v0.1.4"
+   "version": "v0.1.5"
   },
   "cli": {
    "description": "NAF CLI Plugin for console applications.",
@@ -1049,7 +1049,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.1.2"
+   "version": "v0.1.3"
   },
   "schedule": {
    "description": "NAF Schedule Plugin for recurring Tasks.",
