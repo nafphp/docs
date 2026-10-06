@@ -1,5 +1,8 @@
 # Plugin readability review — 2026-09-15
 
+Status on 6 October 2026: historical inventory, not an outstanding request to reformat
+every package. Current package checks and code take precedence over these counts.
+
 ## Scope and method
 
 The inventory covers all 22 immediate workspace packages whose Composer type is

@@ -71,7 +71,7 @@ when it runs. When to update them is your decision: `make composer-update`, then
 ## Shipping it
 
 ```sh
-docker build --target production -t nafinity .
+docker build --target production -f docker/Dockerfile -t nafinity .
 ```
 
 That image is the installation as it ships: dependencies installed from Packagist — from
@@ -105,6 +105,18 @@ The first four are what `make assets`, `make seed` and `make health` call. The r
 the moments an installation is being set up or repaired, which is why they are commands rather
 than screens. `make health` checks pending migrations and the configured attachment
 storage as well as database readiness.
+
+## Account appearance and language
+
+Personal settings choose Classic or Anthracite separately from light, dark or system
+brightness. They persist for the account across projects and sign-in; existing accounts
+start with Classic. The brightness button changes brightness while retaining the palette.
+
+German is the base language. English covers core navigation, ticket fragments, validation,
+activity vocabulary, AI tool titles and browser messages. Project names, ticket text and
+extension-provided wording remain their authors' content. Local AI selection uses only the
+authorized catalog, keeps required read tools with actions, and falls back to bounded
+German/English keyword selection when embeddings are unavailable. Writes still require confirmation.
 
 ## Exporting boards
 

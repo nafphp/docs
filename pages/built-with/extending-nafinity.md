@@ -205,6 +205,14 @@ vanish from the board's own arithmetic.
 That is the test any proposed extension point has to pass. Not "can a plugin write this",
 but "what happens to the data when the plugin is gone".
 
+## Browser lifecycle
+
+A contributed module exports `mount(root, context, api)` and may return a disposer,
+synchronously or through a promise. The board mounts each contributed root once and calls
+its disposer once when closing the drawer or replacing a fragment. A disposer returned
+after the root was removed is still called. Own listeners, timers and retained nodes
+must be released there; a module failure leaves the fixed ticket areas available.
+
 ## The full reference
 
 Every definition's parameters, the contracts, storage, the browser lifecycle for

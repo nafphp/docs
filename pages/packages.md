@@ -9,10 +9,10 @@ What there is, what it requires and what it suggests. Generated from the
 
 | Package | Version | Requires | Suggests | PHP |
 |---|---|---|---|---|
-| **`naf/framework`**<br><span style="font-weight:400">NAF - the ultra-light, functional PHP framework for fast microservices and APIs.</span> | `v0.2.7` | — | — | `>=8.3` |
+| **`naf/framework`**<br><span style="font-weight:400">NAF - the ultra-light, functional PHP framework for fast microservices and APIs.</span> | `v0.2.8` | — | — | `>=8.3` |
 | **`naf/auth`**<br><span style="font-weight:400">Authentication and permission checks for NAF, with your own user model.</span> | `v0.2.2` | `naf/framework` | `naf/orm`, `naf/session` | `>=8.3` |
 | **`naf/auth-ldap`**<br><span style="font-weight:400">Optional TLS LDAP provider using the existing NAF Auth contract.</span> | `v0.1.0` | `naf/auth` | — | `>=8.3` |
-| **`naf/board`**<br><span style="font-weight:400">Project-isolated Kanban boards for NAF, with an extension platform.</span> | `v0.1.3` | `naf/auth`, `naf/auth-ldap`, `naf/cli`, `naf/client`, `naf/database`, `naf/form`, `naf/framework`, `naf/i18n`, `naf/mail`, `naf/mcp`, `naf/oauth-client`, `naf/orm`, `naf/queue`, `naf/rate-limit`, `naf/rbac`, `naf/schedule`, `naf/session`, `naf/storage`, `naf/view` | — | `>=8.3` |
+| **`naf/board`**<br><span style="font-weight:400">Project-isolated Kanban boards for NAF, with an extension platform.</span> | `v0.1.4` | `naf/auth`, `naf/auth-ldap`, `naf/cli`, `naf/client`, `naf/database`, `naf/form`, `naf/framework`, `naf/i18n`, `naf/mail`, `naf/mcp`, `naf/oauth-client`, `naf/orm`, `naf/queue`, `naf/rate-limit`, `naf/rbac`, `naf/schedule`, `naf/session`, `naf/storage`, `naf/view` | — | `>=8.3` |
 | **`naf/cli`**<br><span style="font-weight:400">NAF CLI Plugin for console applications.</span> | `v0.2.3` | `naf/framework` | — | `>=8.3` |
 | **`naf/client`**<br><span style="font-weight:400">NAF Client Plugin to make simple http requests.</span> | `v0.2.2` | `naf/framework` | — | `>=8.3` |
 | **`naf/database`**<br><span style="font-weight:400">NAF Database Plugin to work with various storage solutions.</span> | `v0.2.4` | `naf/framework` | — | `>=8.3` |
