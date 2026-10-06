@@ -24,6 +24,11 @@ vendor/bin/naf rbac:sync
 Configure a database connection first; see [Database](database.md). `rbac:sync` writes the
 roles installed packages declare. Run it after migrating and after adding a package.
 
+For MySQL 8.x, use `naf/rbac` 0.1.3 or newer. The package quotes its stored
+`system` flag for that driver; older versions fail during migration or role writes.
+Existing role data and grant rules are unchanged, and no additional schema migration
+is required. MariaDB, SQLite and PostgreSQL retain their existing configuration.
+
 ## Declaring what can be granted
 
 In your plugin's `bootstrap.php`:

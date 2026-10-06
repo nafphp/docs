@@ -62,7 +62,9 @@ into `app/public/` rather than checked in. A package added later is registered a
 at the same moment, which a browser reports as a 404 on a module tag — which is to say
 silently. `make health` compares the two and turns that silence into a sentence.
 
-Nafinity runs on MariaDB or MySQL; Compose brings MariaDB along.
+Nafinity runs on MariaDB or MySQL; Compose brings MariaDB along. MySQL 8.x
+installations need `naf/board` 0.1.5 or newer, including its `naf/rbac` 0.1.3
+minimum, so role migrations and writes quote the reserved `system` column.
 
 `composer install` takes `naf/board` and the plugins from Packagist, at the versions current
 when it runs. When to update them is your decision: `make composer-update`, then
