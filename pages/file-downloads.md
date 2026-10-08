@@ -13,7 +13,7 @@ NAF gives you full control to stream files using a custom response.
 
 You can manually create a response that forces a file download:
 
-```php
+```php-inline
 use function Naf\response;
 
 $filePath = BASE_PATH . '/storage/files/example.pdf';
@@ -34,7 +34,7 @@ return $response;
 
 ## Example: Download Controller
 
-```php
+```php-inline
 namespace App\Controllers;
 
 use function Naf\{abort, response};
@@ -69,7 +69,7 @@ class FileController
 
 Example for PDF:
 
-```php
+```php-inline
 return response(file_get_contents($pdfPath))
     ->withHeader('Content-Type', 'application/pdf')
     ->withHeader('Content-Disposition', 'attachment; filename="document.pdf"');

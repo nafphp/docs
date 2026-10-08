@@ -10,7 +10,7 @@ reusing a name replaces the earlier registration.
 
 ## Defining routes
 
-```php
+```php-inline
 use App\Controllers\HomeController;
 use function Naf\{response, route};
 
@@ -24,7 +24,7 @@ A GET route does not automatically provide HEAD or OPTIONS.
 
 ## Route parameters
 
-```php
+```php-inline
 use function Naf\{json, route};
 
 route()->add('GET', '/users/{id}', function (string $id) {
@@ -41,7 +41,7 @@ Routes are matched in registration order. Put a literal route such as `/users/ne
 
 ## Generate a URL
 
-```php
+```php-inline
 use function Naf\route;
 
 $url = route('users.show', ['id' => 42]); // /users/42
@@ -51,7 +51,7 @@ Pass every placeholder. Values are substituted as given; encode user-controlled 
 with `rawurlencode()` when generating a URL. Route names also identify CSRF exemptions and
 active navigation:
 
-```php
+```php-inline
 route()->current();                  // current route name, or null
 route()->active('users.show');       // 'active' when it matches, otherwise ''
 ```

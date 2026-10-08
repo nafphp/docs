@@ -8,7 +8,7 @@ requires:
 
 > **Log people in, and check what they may do — with your own user model.**
 
-```php
+```php-inline
 auth()->authenticate(new PasswordCredentials($username, $password));   // sign in
 auth()->user();                                                   // your own User object
 auth()->can('posts.edit');                                        // bool, guests included
@@ -33,7 +33,7 @@ that knows which is called a **provider**, and this plugin ships one for `naf/or
 
 ### The whole picture
 
-```
+```text
   login form
       │  PasswordCredentials(username, password)
       ▼
@@ -214,7 +214,7 @@ together. A matching password setter lets `OrmProvider` upgrade an outdated hash
 Naming sources yourself still works and still takes precedence — it is the only way to have
 several:
 
-```php
+```php-inline
 return ['auth' => [
     'providers' => ['database' => \Naf\Auth\Provider\OrmProvider::class],
     'orm' => ['repository' => \App\Repositories\UserRepository::class],
@@ -229,7 +229,7 @@ It retains the chosen source name in session records.
 Register your existing PDO connection in your application's bootstrap. No `naf/database`
 or `naf/orm` is needed:
 
-```php
+```php-inline
 // Application bootstrap: $pdo is your configured connection.
 use function Naf\app;
 
@@ -238,7 +238,7 @@ app()->container()->set(PDO::class, $pdo);
 
 Select the provider and, optionally, change its table and columns:
 
-```php
+```php-inline
 // app/config.php
 use Naf\Auth\Provider\DatabaseProvider;
 
@@ -263,7 +263,7 @@ The provider leaves your connection configuration and transaction management unc
 The default factory in the bootstrap returns an `Identity` with the row's identifier and empty grants. To use your own
 model or exclude disabled accounts, supply a mapper used for authentication **and** restoration:
 
-```php
+```php-inline
 use Naf\Auth\Identity\IdentityInterface;
 
 // Add this entry to auth.database in app/config.php.
@@ -286,7 +286,7 @@ password resets. No schema or migration is installed. Integration tests use SQLi
 
 ### 4. Log in
 
-```php
+```php-inline
 use Naf\Auth\Credentials\PasswordCredentials;
 use function Naf\Auth\auth;
 
@@ -299,7 +299,7 @@ username still costs a full password hash, so response times give nothing away e
 
 ### 5. Use it anywhere
 
-```php
+```php-inline
 auth()->check();                // bool
 auth()->user();                 // your User, or null
 auth()->user()?->getUsername(); // your own methods, right there
@@ -317,7 +317,7 @@ That is the entire flow.
 Every check returns a plain `bool` and denies guests, so you never need a null check first.
 Several names in one call mean **all of them**:
 
-```php
+```php-inline
 auth()->can('posts.edit');
 auth()->can('posts.edit', 'posts.publish');      // both
 auth()->canAny('posts.edit', 'posts.publish');   // at least one
@@ -341,7 +341,7 @@ Your grants are read **once** per check, so a model that queries a database or a
 
 In a controller, say what the route needs and let it throw:
 
-```php
+```php-inline
 auth()->requireLogin();
 auth()->requirePermission('posts.edit', 'posts.publish');   // all of them
 auth()->requireRole('admin');
@@ -351,7 +351,7 @@ A guest raises `UnauthenticatedException` (401), a signed-in person without the 
 `ForbiddenException` (403). Left alone, NAF renders its own 401 and 403 pages. Catch them when
 you want something else:
 
-```php
+```php-inline
 use Naf\Auth\Exceptions\{ForbiddenException, UnauthenticatedException};
 
 try {
@@ -366,7 +366,7 @@ try {
 Every requirement implies a signed-in user, so `requirePermission(...$configured)` with an empty
 list asks for a login and nothing more. For "any of these", check and throw yourself:
 
-```php
+```php-inline
 if (!auth()->canAny('posts.edit', 'posts.publish')) {
     throw new ForbiddenException();
 }
@@ -378,7 +378,7 @@ if (!auth()->canAny('posts.edit', 'posts.publish')) {
 
 When "may edit" depends on *which* object, register a rule for that class:
 
-```php
+```php-inline
 // Add this to the auth configuration in app/config.php.
 'policies' => [
     Post::class => static fn(IdentityInterface $user, string $action, Post $post): bool
@@ -388,7 +388,7 @@ When "may edit" depends on *which* object, register a rule for that class:
 
 The bootstrap registers these callbacks. Application logic only asks:
 
-```php
+```php-inline
 auth()->allows('edit', $post);
 ```
 
@@ -402,7 +402,7 @@ The exact class wins, then its nearest registered parent.
 With `naf/session` installed, a successful login is remembered and the session ID is rotated —
 a login that cannot rotate its ID is aborted rather than published. Only two values are stored:
 
-```php
+```php-inline
 $_SESSION['auth'] = ['provider' => 'database', 'identifier' => '42'];
 ```
 
@@ -411,7 +411,7 @@ $_SESSION['auth'] = ['provider' => 'database', 'identifier' => '42'];
 
 Turn persistence off for a stateless API:
 
-```php
+```php-inline
 // app/config.php
 return ['auth' => ['session' => false]];
 ```
@@ -426,7 +426,7 @@ click; the default (`null`) persists as soon as `naf/session` is installed. Bind
 
 Register as many as you like and name the one you mean:
 
-```php
+```php-inline
 // auth.providers in app/config.php
 'providers' => [
     'database' => OrmProvider::class,
@@ -434,7 +434,7 @@ Register as many as you like and name the one you mean:
 ],
 ```
 
-```php
+```php-inline
 // Application logic
 
 auth()->authenticate($credentials, 'ldap');   // only LDAP is asked
@@ -448,7 +448,7 @@ comes from the source it was created with — even when two sources use the same
 A configured class name must have a container binding. Custom provider factories belong in the
 application bootstrap, alongside their dependencies:
 
-```php
+```php-inline
 $container = app()->container();
 $container->set(LdapProvider::class, static fn() => new LdapProvider(
     $container->get(LdapClient::class),
@@ -469,7 +469,7 @@ The former `register()` and `resolveStore()` helpers have been removed; bootstra
 `PasswordHasher` is a shared container service. To change the hashing algorithm or cost, bind
 it in the application bootstrap before resolving providers:
 
-```php
+```php-inline
 $container->set(PasswordHasher::class, static fn() => new PasswordHasher(
     PASSWORD_BCRYPT, ['cost' => 12],
 ));
@@ -483,7 +483,7 @@ A provider answers the same two questions for any backend. For usernames and has
 yourself, extend `PasswordProvider` and the verification, the timing-safe rejection of unknown
 accounts and the rehashing are already handled:
 
-```php
+```php-inline
 use Naf\Auth\Identity\IdentityInterface;
 use Naf\Auth\Provider\PasswordProvider;
 use Naf\Auth\Support\PasswordHasher;
@@ -523,7 +523,7 @@ For tokens, OIDC or an LDAP bind there is no stored hash to compare, so implemen
 
 Already verified the person some other way (registration, an invite link, a CLI command)? Set the already verified identity explicitly:
 
-```php
+```php-inline
 auth()->setIdentity($user, 'database');   // named: persisted like a normal login
 auth()->setIdentity($user);               // unnamed: this request only
 ```

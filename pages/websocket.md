@@ -9,7 +9,7 @@ requires:
 A WebSocket server for NAF hosts, written with PHP's stream functions and no event loop
 library. `stream_socket_server` and `stream_select` do the socket work.
 
-```sh
+```bash
 composer require naf/cli
 ```
 
@@ -21,7 +21,7 @@ disabled by default and has no signing key. For a local HTTP application, genera
 with `php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'`, put it in `.env` as
 `WEBSOCKET_KEY=...`, and add this to `app/config.php`:
 
-```php
+```php-inline
 return ['websocket' => [
     'enabled'     => true,
     'key'         => 'ENV:WEBSOCKET_KEY',
@@ -49,7 +49,7 @@ permissions it has always had.
 So the server holds no authority. There is nothing in it to leak, a bug in it cannot become a
 disclosure, and an installation that switches it off loses live updates and nothing else.
 
-```php
+```php-inline
 use function Naf\Websocket\publisher;
 
 publisher()->publish('project:4', ['revision' => '187']);
@@ -71,7 +71,7 @@ The server has no session and no database. It cannot ask whether somebody may li
 channel, so it does not: the application answers that while it still has a request, and writes
 the answer into a short-lived signed token.
 
-```php
+```php-inline
 use function Naf\Websocket\token;
 
 $token = token((string) $userId, ['project:4']);

@@ -30,7 +30,7 @@ That URL is what you hand a client. Everything below is what travels over it.
 
 Four methods: what it is called, what it is for, what it takes, and what it does.
 
-```php
+```php-inline
 namespace App\Mcp;
 
 use Naf\MCP\Support\Schema;
@@ -92,7 +92,7 @@ correction, and the call arrives looking valid.
 
 A tool the registry has never seen does not exist. Register it in your `bootstrap.php`:
 
-```php
+```php-inline
 use function Naf\MCP\tool;
 
 tool()->register(new App\Mcp\GetFolderSize());
@@ -153,7 +153,7 @@ means issuing a new token, which is the point.
 
 From application code:
 
-```php
+```php-inline
 use function Naf\MCP\tokens;
 
 $created = tokens()->create('Local AI client', ['*']);
@@ -164,7 +164,7 @@ echo $created->record->id;      // tok_… — what you revoke by
 
 On a local-only project you can turn the whole check off, deliberately:
 
-```php
+```php-inline
 return ['mcp' => ['auth' => ['enabled' => false]]];
 ```
 
@@ -176,7 +176,7 @@ host with a public address.
 A token carries scopes; a tool can demand them by implementing `ScopedToolInterface` alongside
 `ToolInterface`:
 
-```php
+```php-inline
 use Naf\MCP\Tools\ScopedToolInterface;
 
 final class ArticleSearchTool implements ToolInterface, ScopedToolInterface
@@ -252,7 +252,7 @@ And calls one:
 
 A tool may take an `action` argument and branch on it:
 
-```php
+```php-inline
 ->prop('action', Schema::string()->enum(['analyze', 'summary', 'details']))
 ```
 
@@ -266,7 +266,7 @@ in the schema, and the model picks from them rather than guessing a verb.
 scratch file. It resolves every path inside one root, refuses anything that escapes it through
 `..`, and caps what a single write may be (5 MB unless you say otherwise):
 
-```php
+```php-inline
 use Naf\MCP\Support\FilesystemStore;
 
 $store = new FilesystemStore(BASE_PATH . '/storage/mcp/tools', maxBytes: 1_000_000);

@@ -14,7 +14,7 @@ A Nafinity installation loads twenty plugins. The application itself is one of t
 
 The repository you clone is a skeleton. The product is a dependency.
 
-```
+```text
 naf/nafinity     the installation you own
   └── naf/board  everything the application does
         └── naf/framework and eighteen other plugins
@@ -24,7 +24,7 @@ That is the point rather than a packaging detail: extending Nafinity must never 
 editing it. Everything the product does lives in `naf/board`; everything you decide lives
 in the skeleton, which is small enough to read in a minute.
 
-```
+```text
 app/
   composer.json      what your installation requires
   bootstrap.php      nine lines: autoload, BASE_PATH, run
@@ -49,7 +49,7 @@ Nafinity ships with Docker Compose and a Makefile. One command builds the image,
 dependencies, migrates, writes the declared roles, publishes assets, seeds a demo project
 and starts everything:
 
-```sh
+```bash
 make first-install
 ```
 
@@ -72,7 +72,7 @@ when it runs. When to update them is your decision: `make composer-update`, then
 
 ## Shipping it
 
-```sh
+```bash
 docker build --target production -f docker/Dockerfile -t nafinity .
 ```
 
@@ -141,7 +141,7 @@ rather call it something else.
 providers, so anything reachable there can be replaced or removed — including a definition
 an extension just added:
 
-```php
+```php-inline
 use function Naf\Board\extensions;
 
 extensions()->boardFilters()->remove('example.only-mine');

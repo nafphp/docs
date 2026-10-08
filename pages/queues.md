@@ -18,7 +18,7 @@ queue nobody drains is just a directory filling up.
 A job is a class with one method. The payload it was queued with arrives in the
 constructor.
 
-```php
+```php-inline
 namespace App\Jobs;
 
 use Naf\CLI\Core\Output;
@@ -40,7 +40,7 @@ the job to the deadletter.
 
 ## Queueing it
 
-```php
+```php-inline
 use function Naf\Queue\queue;
 
 queue()->push(SendWelcomeEmail::class, ['email' => 'user@example.com']);
@@ -53,7 +53,7 @@ The payload is serialised, so it holds data and not objects. Pass an id, not the
 A channel is a separate line of work. Without one everything shares a queue, and a thousand
 thumbnails delay the password-reset mail behind them.
 
-```php
+```php-inline
 queue('emails')->push(SendWelcomeEmail::class, ['email' => $email]);
 ```
 
@@ -128,7 +128,7 @@ the second server cannot see the first server's directory. The package ships an
 `SQLiteDriver` as well, and the driver is a single interface, so a Redis or database one is
 a class and a rebinding away:
 
-```php
+```php-inline
 use Naf\Queue\Core\Queue;
 use function Naf\app;
 
@@ -146,7 +146,7 @@ only the basic contract still works — it just has no channels and no deadlette
 so every server sees the same work. It implements `LeaseQueueDriverInterface`, which adds
 reserve, acknowledge, release and renew on top of the basic contract.
 
-```php
+```php-inline
 use Naf\Queue\Core\Queue;
 use Naf\Queue\Drivers\PDODriver;
 use function Naf\app;

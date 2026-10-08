@@ -60,7 +60,7 @@ declare(strict_types=1);
 require dirname(__DIR__) . '/bootstrap.php';
 ```
 
-```dotenv title=".env"
+```ini title=".env"
 APP_ENV=dev
 ```
 
@@ -122,7 +122,7 @@ final class HomeController
 
 ## Render the page
 
-```php title="app/views/home.phtml"
+```html+php title="app/views/home.phtml"
 <?php
 
 declare(strict_types=1);

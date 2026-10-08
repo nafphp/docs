@@ -15,7 +15,7 @@ tells you whether this one is still within the line.
 The package registers a `rateLimit` guard on the `Naf\guard()` registry the framework already
 provides, so there is nothing new to learn and nothing extra to install:
 
-```php
+```php-inline
 use function Naf\guard;
 use function Naf\json;
 
@@ -47,7 +47,7 @@ Ten attempts per sixty seconds, counted against that key. The answer is three fi
 The key decides what is being limited, and it is yours to choose. Namespace it, so a limit on
 exports cannot be spent by a limit on logins:
 
-```php
+```php-inline
 guard()->rateLimit('login:account:' . $accountId, 5, 300);
 guard()->rateLimit('login:address:' . $peerAddress, 20, 300);
 ```
@@ -70,7 +70,7 @@ guard call.
 
 Create the table once, in an explicit migration using the configured connection:
 
-```php
+```php-inline
 use Naf\RateLimit\PdoLimiter;
 use function Naf\Database\database;
 

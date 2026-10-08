@@ -14,7 +14,7 @@ on top of this package; if you want somebody else's ORM, nothing here is in the 
 
 ## Getting the connection
 
-```php
+```php-inline
 use function Naf\Database\database;
 
 $rows = database()->query('SELECT * FROM users')->fetchAll();
@@ -34,7 +34,7 @@ database configuration throws `DatabaseException`; the `database()` helper remai
 
 The connection is created with:
 
-```php
+```php-inline
 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
 ```
@@ -46,7 +46,7 @@ reach the error handler.
 **Rows arrive as associative arrays.** No `PDO::FETCH_ASSOC` on every call, and no numeric
 duplicates of every column.
 
-```php
+```php-inline
 $stmt = database()->prepare('SELECT * FROM users WHERE id = :id');
 $stmt->execute(['id' => 1]);      // throws on failure; its bool return is not the row
 $user = $stmt->fetch();
@@ -54,7 +54,7 @@ $user = $stmt->fetch();
 
 ## Queries with values in them
 
-```php
+```php-inline
 $stmt = database()->prepare('SELECT * FROM users WHERE email = :email');
 $stmt->execute(['email' => $email]);
 $user = $stmt->fetch();
@@ -66,13 +66,13 @@ separately, so no value can end up read as SQL.
 
 Do not build the other kind:
 
-```php
+```php-inline
 database()->query("SELECT * FROM users WHERE email = '$email'");   // no
 ```
 
 ## Transactions
 
-```php
+```php-inline
 $pdo = database();
 $pdo->beginTransaction();
 
@@ -133,7 +133,7 @@ why you do not have to copy anybody's schema into your own migrations folder.
 To inspect what would run without applying it, use database 0.2.4+ with an existing migration
 tracker:
 
-```php
+```php-inline
 use Naf\Database\Core\MigrationRunner;
 use Naf\Database\Support\MigrationRegistry;
 use function Naf\Database\database;
@@ -168,7 +168,7 @@ transaction to undo the statements that already committed.
 
 ## Configuration
 
-```php
+```php-inline
 'database' => [
     'driver'   => 'mysql',
     'host'     => '127.0.0.1',
@@ -185,7 +185,7 @@ PostgreSQL.
 SQLite takes a path instead of a host, and defaults to an in-memory database when you give
 it none:
 
-```php
+```php-inline
 'database' => [
     'driver'   => 'sqlite',
     'database' => '/var/data/app.sqlite',   // or ':memory:'

@@ -15,7 +15,7 @@ a cache directory, or a syntax to learn.
 
 ## Rendering one
 
-```php
+```php-inline
 use function Naf\View\render;
 
 return render('product.detail', ['product' => $product]);
@@ -32,7 +32,7 @@ view paths are still searched afterwards.
 
 ## render() or view()
 
-```php
+```php-inline
 render('mail.welcome', ['name' => $name]);  // → a PSR-7 ResponseInterface
 view('mail.welcome', ['name' => $name]);    // → a string
 ```
@@ -46,7 +46,7 @@ email, is the mistake the two names exist to prevent.
 
 ## Escaping
 
-```php
+```html+php
 <?php use function Naf\View\s; ?>
 
 <h1><?= s($title) ?></h1>
@@ -62,7 +62,7 @@ puts exactly what is in `$title` on the page. Wrap anything that came from outsi
 
 A view names its layout and fills the blocks the layout leaves open.
 
-```php
+```html+php
 <?php $this->setLayout('layouts.main') ?>
 
 <?php $this->block('title') ?>Products<?php $this->endblock('title') ?>
@@ -72,7 +72,7 @@ A view names its layout and fills the blocks the layout leaves open.
 <?php $this->endblock('content') ?>
 ```
 
-```php
+```html+php
 <?php use function Naf\View\asset; ?>
 <!-- app/views/layouts/main.phtml -->
 <!DOCTYPE html>
@@ -93,7 +93,7 @@ anything optional. Variables passed to the view reach the layout too.
 
 ## Assets
 
-```php
+```html+php
 <?php use function Naf\View\asset; ?>
 
 <?php asset()->add('/css/app.css') ?>
@@ -103,7 +103,7 @@ anything optional. Variables passed to the view reach the layout too.
 
 Collect them anywhere — a view, a partial, a controller — and print them once in the layout:
 
-```php
+```html+php
 <?= asset()->render('css') ?>
 <?= asset()->render('js') ?>
 ```

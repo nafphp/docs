@@ -8,7 +8,7 @@ requires:
 
 > **Sign people in with Google, Microsoft or any OpenID Connect provider — and keep your own user model.**
 
-```php
+```html+php
 <?= oauth_button('google') ?>
 ```
 
@@ -61,7 +61,7 @@ repositories — can keep those tokens instead; that is opt-in and lives in
 
 The whole thing:
 
-```php
+```php-inline
 // app/config.php
 return [
     'public_url' => 'https://example.com',
@@ -102,7 +102,7 @@ is built from this one value, so it is stated once rather than guessed.
 The key names the login; `driver` says which provider is behind it. Keeping them apart is what
 lets you offer the same provider twice under names of your choosing:
 
-```php
+```php-inline
 'logins' => [
     'staff'    => ['driver' => 'microsoft', 'tenant' => 'acme.example', 'client_id' => …, 'client_secret' => …],
     'partners' => ['driver' => 'microsoft', 'tenant' => 'partner.example', 'client_id' => …, 'client_secret' => …],
@@ -117,7 +117,7 @@ needs nothing else.
 
 Microsoft needs one more thing: **which accounts may sign in.**
 
-```php
+```php-inline
 'microsoft' => [
     'client_id'     => $_ENV['MS_CLIENT_ID'],
     'client_secret' => $_ENV['MS_CLIENT_SECRET'],
@@ -129,7 +129,7 @@ A single named tenant pins the issuer by itself. The multi-tenant values — `co
 `organizations`, `consumers` — mean *any* organisation in the world may sign in, so they will
 not start without you saying who:
 
-```php
+```php-inline
 'tenant'          => 'common',
 'allowed_tenants' => ['8f3a1c94-…', 'b21d…'],   // or ['*'] to accept everyone
 ```
@@ -143,7 +143,7 @@ the tenant is then checked against your list.
 
 One extra line — the issuer. Endpoints and keys come from its discovery document.
 
-```php
+```php-inline
 'keycloak' => [
     'issuer'        => 'https://id.example.com/realms/main',
     'client_id'     => …,
@@ -153,7 +153,7 @@ One extra line — the issuer. Endpoints and keys come from its discovery docume
 
 ### GitHub, and other providers without OpenID Connect
 
-```php
+```php-inline
 'github' => [
     'client_id'     => $_ENV['GITHUB_CLIENT_ID'],
     'client_secret' => $_ENV['GITHUB_CLIENT_SECRET'],
@@ -173,7 +173,7 @@ describes the same subject. It adds to a verified identity; it never establishes
 A provider is plain OAuth2 when it has no issuer. Such a provider takes three URLs and, if it
 does not call its identifier `sub`, the field that holds it:
 
-```php
+```php-inline
 'acme' => [
     'client_id'     => …,
     'client_secret' => …,
@@ -250,11 +250,11 @@ location are derived or defaulted. Set them when you actually need something els
 
 ## The button
 
-```php
+```php-inline
 use function Naf\OAuth\Client\oauth_button;
 ```
 
-```php
+```html+php
 <?= oauth_button('google') ?>                          <!-- "Mit Google anmelden" -->
 <?= oauth_button('google', 'Continue with Google') ?>  <!-- explicit text wins -->
 <?= oauth_button('google', next: '/projects/7') ?>     <!-- land there afterwards -->
@@ -293,7 +293,7 @@ A refused login redirects to `oauth:error_route` with the reason flashed into th
 `oauth_error`, rather than raising an error page. A cancelled login is something a person did,
 not a server fault:
 
-```php
+```html+php
 <?php if ($reason = session()->getFlash('oauth_error')): ?>
     <p><?= $reason === 'not_linked'
         ? 'No account is linked to that login yet.'
@@ -314,7 +314,7 @@ The one decision left to you. Three answers are possible and only one is safe by
 
 Turning on the middle one is one setting and one function:
 
-```php
+```php-inline
 'oauth' => ['accounts' => [
     'auto_register' => true,
     'create' => static fn(ExternalIdentity $external) => $users->create([
@@ -344,7 +344,7 @@ provider to assert an address could then walk into the account that uses it. Att
 provider is a separate act, performed by somebody already signed in — and the person who
 finishes it must be the person who started it:
 
-```php
+```html+php
 <a href="<?= route('oauth.connect', ['provider' => 'github']) ?>">Connect GitHub</a>
 ```
 
@@ -354,7 +354,7 @@ finishes it must be the person who started it:
 
 Nothing above is mandatory. `oauth()` gives you the same flow with none of the routing:
 
-```php
+```php-inline
 use function Naf\Auth\auth;
 use function Naf\OAuth\Client\oauth;
 
@@ -404,7 +404,7 @@ It is a different question when the application has to *act* at the provider —
 calendar, list their repositories, post on their behalf. That needs what the provider issued, kept
 between visits, and still working an hour later.
 
-```php
+```php-inline
 // app/config.php
 'oauth' => [
     'tokens' => [
@@ -421,7 +421,7 @@ a new consent screen.
 
 Then, wherever the API call happens:
 
-```php
+```php-inline
 use function Naf\OAuth\Client\oauth;
 use function Naf\OAuth\Client\oauth_token;
 use function Naf\Auth\auth;

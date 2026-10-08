@@ -35,7 +35,7 @@ These are integration fragments, not a complete application. Create the views, w
 directory and library-specific configuration first. Put this registration in `bootstrap.php`
 after the autoloader and before `app()->run()`:
 
-```php
+```php-inline
 use Jenssegers\Blade\Blade;
 use function Naf\app;
 
@@ -46,7 +46,7 @@ app()->container()->set('blade', function () {
 
 Now you can use Blade inside your controllers:
 
-```php
+```php-inline
 use function Naf\{app, response};
 
 $blade = app()->container()->get('blade');
@@ -67,7 +67,7 @@ composer require illuminate/database
 Configure the `database` values shown below in `app/config.php` for your database, then register
 Eloquent in `bootstrap.php` before `app()->run()`:
 
-```php
+```php-inline
 use Illuminate\Database\Capsule\Manager as Capsule;
 use function Naf\{app, config};
 
@@ -95,7 +95,7 @@ app()->container()->set('db', function () {
 
 Use models as usual:
 
-```php
+```php-inline
 use App\Models\User; // Your Eloquent model, extending Illuminate\Database\Eloquent\Model.
 use function Naf\app;
 

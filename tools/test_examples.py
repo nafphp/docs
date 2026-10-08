@@ -23,7 +23,7 @@ import urllib.parse
 import urllib.request
 
 PAGES = Path(__file__).resolve().parent.parent / 'pages'
-BLOCKS = re.compile(r'^```\w+ title="([^"]+)"\n(.*?)^```\s*$', re.M | re.S)
+BLOCKS = re.compile(r'^```[\w+-]+ title="([^"]+)"\n(.*?)^```\s*$', re.M | re.S)
 PHP = shlex.split(os.environ.get('PHP_COMMAND', 'php'))
 COMPOSER = shlex.split(os.environ.get('COMPOSER_COMMAND', 'composer'))
 checks = 0

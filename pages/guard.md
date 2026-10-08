@@ -7,7 +7,7 @@ title: Guard
 The guard is a registry of small validation functions. Core rules cover paths and HTML output;
 plugins can add rules of their own.
 
-```php
+```php-inline
 use function Naf\guard;
 
 $path = guard()->safePath('user.profile');
@@ -36,7 +36,7 @@ HTML in a command, use an appropriate explicit escaping function or register the
 `guard()->csrf()` is registered by `naf/form`, which also installs `naf/session`. It is not
 available in a core-only application. Prefer the form helper in templates:
 
-```php
+```html+php
 <?php use function Naf\Form\csrf; ?>
 <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
 ```
@@ -50,7 +50,7 @@ header support and named-route exemptions.
 
 ## Register a rule
 
-```php
+```php-inline
 use function Naf\guard;
 
 guard()->register('positiveId', function (int $id): int {

@@ -7,7 +7,7 @@ title: How Nafinity is extended
 Nafinity has two extension mechanisms and no others. Not a hook manager beside an event
 system beside a filter chain — two, used for everything.
 
-```
+```text
 Registry   what exists          a plugin adds to a list the application renders
 Event      what is happening    a listener takes part in something already running
 ```
@@ -22,7 +22,7 @@ A plugin contributes by implementing one interface and being registered once. Ev
 below happens inside `register()`, which runs after the board's own defaults and before
 the installation's `extensions.php` gets the last word.
 
-```php
+```php-inline
 use Naf\Board\Contracts\ExtensionProviderInterface;
 use Naf\Board\ExtensionContext;
 
@@ -88,7 +88,7 @@ One write event rather than twenty-four is deliberate. The listeners that exist 
 want *everything* — the audit log and the live updates do — and a plugin that wants one
 kind writes one line:
 
-```php
+```php-inline
 event()->listen(Change::class, function (Change $change): void {
     if ($change->type !== 'ticket.moved') {
         return;
@@ -109,7 +109,7 @@ to get it.
 `Change` is dispatched inside the transaction that did the work. Throwing from a
 listener rolls the whole thing back:
 
-```php
+```php-inline
 event()->listen(Change::class, function (Change $change): void {
     if ($change->type === 'ticket.moved' && $this->isFriday()) {
         throw new Failure(t('Freitags wird nichts nach Fertig geschoben.'), 422);
@@ -137,7 +137,7 @@ saying anything different.
 
 Register the format:
 
-```php
+```php-inline
 $context->exporters()->add(new ExporterDefinition(
     id: 'acme.external',
     label: 'External system',
@@ -149,7 +149,7 @@ $context->exporters()->add(new ExporterDefinition(
 
 Then say what it reports:
 
-```php
+```php-inline
 event()->listen(ExportLine::class, static function (ExportLine $line): void {
     if (!$line->isFor('acme.external')) {
         return;
@@ -187,7 +187,7 @@ interface, without a plugin.
 
 A plugin that needs a state of its own puts it on the ticket as a field:
 
-```php
+```php-inline
 $context->ticketFields()->add(new TicketFieldDefinition(
     key:     'acme.approval',
     label:   'Approval',

@@ -18,7 +18,7 @@ you find out about in the wrong week.
 
 A scheduled job is a queue job that also says when it wants to run.
 
-```php
+```php-inline
 namespace App\Jobs;
 
 use Naf\CLI\Core\Output;
@@ -43,7 +43,7 @@ final class RebuildSitemap implements QueueJobInterface, ScheduledJobInterface
 
 ## Registering it
 
-```php
+```php-inline
 use function Naf\Schedule\scheduler;
 
 scheduler()->addScheduledJob(RebuildSitemap::class);
@@ -120,7 +120,7 @@ The scheduler gives each run a deterministic id — `sha1('schedule:' . $class .
 — and the file driver uses that id as the job's filename. Queueing the same job again
 overwrites the same file, so what waits for the worker is one run, not six hundred.
 
-```php
+```php-inline
 'schedule' => [
     'queue' => [
         'coalesce' => true,     // the default

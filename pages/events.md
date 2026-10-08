@@ -6,7 +6,7 @@ title: Events
 
 Listeners are callables registered during bootstrap. Custom events can carry any payload:
 
-```php
+```php-inline
 use function Naf\{event, log};
 
 event()->listen('product.created', function (object $product) {
@@ -26,7 +26,7 @@ NAF constructs class-based listeners through the default container.
 Since **v0.2.6** the event may be an object, in which case its class is the name and the
 object itself is the payload:
 
-```php
+```php-inline
 final class OrderShipped
 {
     public function __construct(public string $order) {}
@@ -80,7 +80,7 @@ request path. There is no `response.sending` event.
 PSR-7 responses are immutable: `withHeader()` returns a new response. Return it from a
 `response.header` listener:
 
-```php
+```php-inline
 use Naf\Core\Event;
 use Psr\Http\Message\ResponseInterface;
 use function Naf\event;

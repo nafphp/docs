@@ -45,7 +45,14 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - toc: { permalink: true }
-  - pymdownx.highlight: { use_pygments: true, pygments_lang_class: true }
+  - pymdownx.highlight:
+      use_pygments: true
+      pygments_lang_class: true
+      extend_pygments_lang:
+        - name: php-inline
+          lang: php
+          options:
+            startinline: true
   - pymdownx.superfences
   - pymdownx.inlinehilite
   - pymdownx.snippets

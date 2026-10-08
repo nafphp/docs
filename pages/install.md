@@ -97,7 +97,7 @@ use function Naf\{json, route};
 route()->add('GET', '/', fn() => json(['ok' => true]), 'home');
 ```
 
-```dotenv title=".env"
+```ini title=".env"
 APP_ENV=dev
 ```
 

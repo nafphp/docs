@@ -29,7 +29,7 @@ final class HelloController
 
 Register it in `app/routes.php`:
 
-```php
+```php-inline
 use App\Controllers\HelloController;
 use function Naf\route;
 
@@ -41,7 +41,7 @@ changing the method argument to `$person` without changing the route will fail.
 
 ## Closures
 
-```php
+```php-inline
 use function Naf\{response, route};
 
 route()->add('GET', '/ping', fn() => response('Pong!'), 'ping');
@@ -57,7 +57,7 @@ With NAF's default `AutoResolvingContainer`, controllers are built through `make
 Declare services in the constructor; concrete classes with resolvable dependencies need no
 container registration:
 
-```php
+```php-inline
 namespace App\Controllers;
 
 use App\Services\ProductService;

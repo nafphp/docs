@@ -16,7 +16,7 @@ until something is written.
 
 ## Reading and writing
 
-```php
+```php-inline
 use function Naf\Session\session;
 
 session()->set('user_id', 42);
@@ -34,11 +34,11 @@ argument for keeping it small.
 
 ## Messages that should appear once
 
-```php
+```php-inline
 session()->flash('success', 'Your profile has been updated.');
 ```
 
-```php
+```php-inline
 $message = session()->getFlash('success');       // returns it and deletes it
 ```
 
@@ -48,7 +48,7 @@ second time.
 
 ## Regenerating the session id
 
-```php
+```php-inline
 session()->regenerate();
 ```
 
@@ -61,7 +61,7 @@ It is rate-limited. The default refuses to regenerate more than once every 300 s
 calling it on every request is harmless rather than a way to lose sessions. Pass a different
 interval if you want another rhythm:
 
-```php
+```php-inline
 session()->regenerate(60);
 ```
 
@@ -71,7 +71,7 @@ The default handler is PHP's own: files in whatever `session.save_path` points a
 breaks the moment a second web server enters the picture, because request two lands on a
 machine that cannot see request one's file.
 
-```php
+```php-inline
 'session' => [
     'storage'        => 'database',
     'database_table' => 'sessions',
@@ -91,7 +91,7 @@ files, and the only sign is a line in a log nobody reads. Check the log after sw
 A load balancer terminating TLS speaks plain HTTP to your application, which then believes
 the connection was insecure and sets a cookie without the `Secure` flag.
 
-```php
+```php-inline
 'session' => [
     'trust_proxy_headers' => true,
     'trusted_proxies'     => ['10.0.0.1'],

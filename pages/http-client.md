@@ -16,7 +16,7 @@ question rather than a given.
 
 ## Sending a request
 
-```php
+```php-inline
 use Nyholm\Psr7\Request;
 use function Naf\Client\client;
 
@@ -31,7 +31,7 @@ standard PSR-18 client accepts this one — including libraries that have never 
 
 ## Retries are on by default
 
-```php
+```php-inline
 'client' => [
     'retries'        => 1,      // one additional attempt
     'retry_delay_ms' => 150,
@@ -44,7 +44,7 @@ retry creates the order twice.
 
 For a request that must not be repeated, take a copy of the client with retries off:
 
-```php
+```php-inline
 $once = client()->withOptions(['retries' => 0]);
 $once->sendRequest($request);
 ```
@@ -60,7 +60,7 @@ host without the cURL extension the request still goes out.
 
 A transport is one class:
 
-```php
+```php-inline
 interface TransportInterface
 {
     public function send(string $url, string $method, array $headerLines, string $body, array $config): array;
@@ -74,7 +74,7 @@ error.
 
 You can hand the client its transports directly, in the order you want them tried:
 
-```php
+```php-inline
 new Client([new MyTransport(), new CurlTransport()]);
 ```
 
@@ -86,7 +86,7 @@ what makes an upload or a download bigger than your memory limit possible at all
 
 Two things follow from it, and both bite quietly if you do not know them:
 
-```php
+```php-inline
 $response = client()->sendRequest($request);
 $body     = $response->getBody();
 
@@ -110,7 +110,7 @@ Existing `TransportInterface` implementations and string-based `send()` calls ke
 unchanged. A custom transport can additionally implement `StreamingTransportInterface`, and
 if your code must not silently fall back to buffering, say so:
 
-```php
+```php-inline
 $streaming = client()->withOptions(['streaming' => true]);
 ```
 
@@ -129,7 +129,7 @@ A few sharp edges worth knowing:
 
 ## TLS and HTTP versions
 
-```php
+```php-inline
 'client' => [
     'cacert'       => '/etc/ssl/certs/ca-certificates.crt',
     'http_version' => 'auto',   // auto | 1.1 | 2
@@ -147,7 +147,7 @@ the shell.
 
 The constructor takes the transports, so a test hands it one that answers from memory:
 
-```php
+```php-inline
 $client = new Client([new FakeTransport([
     'status' => 200,
     'body'   => '{"ok":true}',

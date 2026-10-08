@@ -15,7 +15,7 @@ instead of you concatenating fragments in the order English happens to use.
 
 ## Translating a string
 
-```php
+```php-inline
 use function Naf\I18n\t;
 
 echo t('welcome');
@@ -34,7 +34,7 @@ a key literally called `nav.home`, which is a perfectly good way to organise a f
 
 ## Putting values into a sentence
 
-```php
+```php-inline
 echo t('greeting', ['name' => 'John']);
 ```
 
@@ -55,7 +55,7 @@ array passed by accident leaves the placeholder standing instead of printing `Ar
 
 `t()` returns the key itself:
 
-```php
+```php-inline
 t('checkout.confirm');  // → "checkout.confirm" when the key is not in the file
 ```
 
@@ -81,7 +81,7 @@ without the query parameter.
 
 To set it yourself:
 
-```php
+```php-inline
 use Naf\I18n\Support\Language;
 use function Naf\I18n\translator;
 
@@ -97,7 +97,7 @@ nothing validates the code against that list.
 
 ## Configuration
 
-```php
+```php-inline
 'language'          => null,        // forced language; null means detect
 'fallback_language' => 'en',        // used when nothing was detected
 'app' => [
@@ -112,7 +112,7 @@ named by its code.
 
 A plugin can register a directory of `<language>.json` files in its `bootstrap.php`:
 
-```php
+```php-inline
 use function Naf\I18n\translation_paths;
 
 translation_paths()->add('acme/blog', __DIR__ . '/app/Resources/lang');

@@ -11,7 +11,7 @@ and finally `app/config.php`, so your application has the last word.
 
 Place local values in `.env` at the project root:
 
-```dotenv
+```ini
 APP_ENV=dev
 DB_HOST=127.0.0.1
 DB_USER=my_app
@@ -30,7 +30,7 @@ or stripping quotes. Keep secret files out of version control.
 
 Inside application configuration, which is loaded after the environment file:
 
-```php
+```php-inline
 // app/config.php
 return [
     'database' => [
@@ -56,7 +56,7 @@ Where the value may come from the process environment, use an `ENV:` reference o
 `env()` returns the **environment name as a string**. It does not read arbitrary keys and
 it does not return an object with `isProduction()` methods.
 
-```php
+```php-inline
 use Naf\Core\Environment;
 use function Naf\env;
 
@@ -78,7 +78,7 @@ should still configure the environment explicitly before using `env()`.
 
 ## Read configuration
 
-```php
+```php-inline
 use function Naf\config;
 
 $all = config();
@@ -97,7 +97,7 @@ The merge is `array_replace_recursive(core, plugins, app)`. Application values w
 Numeric arrays are replaced by position, not appended. This is why settings such as
 `csrf_exempt_routes` use named keys:
 
-```php
+```php-inline
 return ['csrf_exempt_routes' => ['oauth.token' => false]];
 ```
 

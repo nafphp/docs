@@ -9,7 +9,7 @@ The default response uses the exception's `getStatusCode()` when available, othe
 
 ## Abort a request
 
-```php
+```php-inline
 use function Naf\abort;
 
 abort(404, 'The requested item was not found.');
@@ -32,7 +32,7 @@ the core error handler. To customize an error, return a response from the `excep
 
 Register this in `bootstrap.php`, after the autoloader and before `app()->run()`:
 
-```php
+```php-inline
 use Naf\Core\{ErrorHandler, Event};
 use function Naf\{event, response};
 
@@ -55,7 +55,7 @@ Pass any template data explicitly; no `$path` variable is injected automatically
 For expected validation failures, return `json($payload, 422)` from your handler. To cover
 uncaught exceptions as well, register this before `app()->run()`:
 
-```php
+```php-inline
 use Naf\Core\{ErrorHandler, Event};
 use function Naf\{event, json, log, request};
 

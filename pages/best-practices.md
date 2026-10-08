@@ -43,7 +43,7 @@ values across a redirect.
 
 With `naf/view`, a template imports and calls `s()` explicitly:
 
-```php
+```html+php
 <?php use function Naf\View\s; ?>
 <h1>Hello, <?= s($name) ?>!</h1>
 ```

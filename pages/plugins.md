@@ -16,7 +16,7 @@ to a `nixphp-plugin` under NAF 0.2.
 
 A NAF plugin mimics the structure of a full app:
 
-```
+```text
 your-plugin/
 ├── app/
 │   ├── config.php         // Plugin-specific configuration
@@ -90,7 +90,7 @@ No manual registration is needed.
 
 ## Accessing Plugin Metadata
 
-```php
+```php-inline
 use function Naf\plugin;
 
 $plugins = plugin(); // array<string, Naf\Support\Plugin>
@@ -104,7 +104,7 @@ For internal use or debugging only – no need to register anything yourself.
 
 ---
 ## Example Plugin: Event Listener
-``` plaintext
+```text
 my-event-plugin/
 ├── app/
 │   └── Listeners/
@@ -112,7 +112,7 @@ my-event-plugin/
 └── bootstrap.php
 ```
 **UserListener.php:**
-``` php
+```php-inline
 namespace MyEventPlugin\Listeners;
 
 use function Naf\log;
@@ -127,7 +127,7 @@ class UserListener
 }
 ```
 **bootstrap.php:**
-``` php
+```php-inline
 use MyEventPlugin\Listeners\UserListener;
 use function Naf\{event, log};
 
@@ -141,7 +141,7 @@ event()->listen('user.login', function($user) {
 });
 ```
 Usage in the main application:
-``` php
+```php-inline
 use function Naf\{event, log};
 
 // After successful user registration:
@@ -155,7 +155,7 @@ event()->dispatch('user.registered', $user);
 
 **Structure:**
 
-```
+```text
 my-hello-plugin/
 ├── app/
 │   └── Controllers/
@@ -166,7 +166,7 @@ my-hello-plugin/
 
 **HelloController.php:**
 
-```php
+```php-inline
 namespace MyHelloPlugin\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
@@ -183,7 +183,7 @@ class HelloController
 
 **bootstrap.php:**
 
-```php
+```php-inline
 use MyHelloPlugin\Controllers\HelloController;
 use function Naf\route;
 

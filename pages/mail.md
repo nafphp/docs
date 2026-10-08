@@ -18,7 +18,7 @@ If the person who triggered real delivery should not wait for it, use [a queue](
 `mail()` hands you an empty message, `mailer()` sends it. Both are imported from
 `Naf\Mail`.
 
-```php
+```php-inline
 use function Naf\Mail\{mail, mailer};
 
 $message = mail()
@@ -34,7 +34,7 @@ Every setter returns the message, so the calls chain in any order you like.
 
 ## Recipients
 
-```php
+```php-inline
 mail()
     ->addTo('john@example.com')
     ->addTo('jane@example.com')     // call it again for a second recipient
@@ -51,7 +51,7 @@ method to remove a recipient — build the message with the ones you want.
 
 `setContent()` treats its argument as HTML unless you say otherwise:
 
-```php
+```php-inline
 ->setContent('<b>Welcome!</b>')          // HTML
 ->setContent('Welcome!', false)          // plain text
 ```
@@ -61,7 +61,7 @@ both, that is a transport concern, not this object's.
 
 ## Attachments
 
-```php
+```php-inline
 ->addAttachment('report.pdf', '/path/to/report.pdf');
 ```
 
@@ -69,7 +69,7 @@ The first argument is the filename the recipient sees, the second the file on di
 argument marks the attachment as inline, which is how you reference an image from the HTML
 body:
 
-```php
+```php-inline
 mail()
     ->addAttachment('logo.png', '/path/to/logo.png', true)
     ->setContent('<img src="cid:logo.png">');
@@ -82,7 +82,7 @@ The `cid:` reference uses the name you gave, not the path.
 `send()` is typed to return `bool`, but the shipped transport never returns `false` — it
 throws `Naf\Mail\Exceptions\MailException` when PHP's `mail()` refuses the message.
 
-```php
+```php-inline
 use Naf\Mail\Exceptions\MailException;
 use function Naf\Mail\mailer;
 
@@ -155,7 +155,7 @@ $container->set(Mailer::class, static fn() => new Mailer(
 In the root **`bootstrap.php`**, after requiring `vendor/autoload.php` and before
 `app()->run()`, add:
 
-```php
+```php-inline
 require_once BASE_PATH . '/app/mail-dummy.php';
 ```
 

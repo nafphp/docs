@@ -8,7 +8,7 @@ requires:
 
 > **Be the place people sign in with — an OAuth2 authorization server and OpenID Connect provider, on the accounts you already have.**
 
-```php
+```php-inline
 token()->requireScope('posts.write');
 ```
 
@@ -41,7 +41,7 @@ Deliberately not offered: the Implicit and Password grants, wildcard redirect UR
 
 ## Configuration
 
-```php
+```php-inline
 // app/config.php
 return [
     'public_url'   => 'https://id.example.com',
@@ -61,7 +61,7 @@ That is everything that has no sensible default.
 target. Set it only when this installation serves an API that clients name explicitly with the
 `resource` parameter:
 
-```php
+```php-inline
 'oauth_server' => ['audience' => 'https://reports.example.com', …],
 ```
 
@@ -107,7 +107,7 @@ consent screen shows. One answer to "what may be said about this person", not on
 
 Configure `oauth_server:claims` only for something the profile does not cover:
 
-```php
+```php-inline
 'oauth_server' => ['claims' => static fn(User $user): array => ['locale' => $user->locale]],
 ```
 
@@ -145,7 +145,7 @@ vendor/bin/naf oauth:client:create "Acme Intranet" \
     --scope=posts.read,posts.write
 ```
 
-```
+```text
   Acme Intranet
   Client ID       9f2c…
   Client secret   7b41…
@@ -193,7 +193,7 @@ working on a day nobody chose.
 
 ## Protecting an API
 
-```php
+```php-inline
 use function Naf\OAuth\Server\token;
 
 public function store(): ResponseInterface
