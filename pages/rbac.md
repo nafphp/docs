@@ -14,7 +14,7 @@ puts that in writing.
 that decides who may change either. If you need roles an installation can edit, rather than a
 fixed list in code, this is that, and the screens to do it with.
 
-```sh
+```bash
 composer require naf/cli
 vendor/bin/naf db:migrate up
 vendor/bin/naf rbac:sync
@@ -33,7 +33,7 @@ is required. MariaDB, SQLite and PostgreSQL retain their existing configuration.
 
 In your plugin's `bootstrap.php`:
 
-```php
+```php-inline
 use Naf\Rbac\Definition\PermissionDefinition;
 use Naf\Rbac\Definition\RoleDefinition;
 
@@ -61,7 +61,7 @@ Your user model already implements `Naf\Auth\Identity\UserInterface`. Point its 
 methods here and everything downstream — `auth()->can()`, `requirePermission()` — works
 unchanged:
 
-```php
+```php-inline
 public function getRoles(): iterable
 {
     return rbac()->rolesOf((int) $this->getId());
@@ -105,7 +105,7 @@ message for the person who tried.
 
 A grant is a person, a role, and where it applies:
 
-```php
+```php-inline
 use Naf\Rbac\Scope;
 
 $rbac->assignments->assign(7, [$adminId]);                                 // everywhere
@@ -115,7 +115,7 @@ $rbac->assignments->assign(7, [$memberId], Scope::of('project', 5));       // on
 
 Asking is the same shape:
 
-```php
+```php-inline
 $rbac->allows(7, 'board.settings', Scope::of('project', 5));
 ```
 
@@ -130,7 +130,7 @@ relying on reach.
 A role says where it may be handed out at all, so an installation-wide role cannot be granted
 on one board and a board role cannot be granted installation-wide:
 
-```php
+```php-inline
 new RoleDefinition('admin', 'Administrator', permissions: [...]);
 new RoleDefinition('maintainer', 'Maintainer', permissions: [...], scopeType: 'project');
 ```
@@ -144,7 +144,7 @@ over a board, and the policy asks for it accordingly.
 The package knows a grant can attach to something, and nothing about what. A host registers
 one source per kind, and every screen offers it from then on:
 
-```php
+```php-inline
 use Naf\Rbac\Contracts\ScopeSourceInterface;
 
 final class Boards implements ScopeSourceInterface
@@ -178,7 +178,7 @@ The price is quiet: a permission declared *after* the roles were written reaches
 the feature behind it is dead on arrival and the only symptom is a button that does nothing.
 `rbac:sync` therefore compares the two lists and names the difference:
 
-```
+```text
  6 declared role(s); nothing to add
  24 permission(s) declared across 6 group(s).
    owner is missing delete, export
@@ -200,7 +200,7 @@ installation builds itself.
 Both are fragments, not pages — a host that installs this already has somewhere settings live,
 and a package cannot bring a shell without it looking bolted on.
 
-```php
+```html+php
 <?= partial('rbac/roles', ['return' => '/admin/settings']) ?>
 <?= partial('rbac/grants', ['user' => 12, 'name' => 'Alice', 'return' => '/admin/users/12']) ?>
 ```
@@ -226,7 +226,7 @@ own.
 
 A grant change is dispatched as an event, so a host that keeps a history can record it:
 
-```php
+```php-inline
 use Naf\Rbac\Events\GrantsChanged;
 
 event()->listen(GrantsChanged::class, function (GrantsChanged $moved): void {

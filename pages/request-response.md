@@ -9,7 +9,7 @@ Import helpers in each PHP file that uses them.
 
 ## Read the request
 
-```php
+```php-inline
 use function Naf\request;
 
 $method = request()->getMethod();
@@ -23,7 +23,7 @@ $rawBody = (string) request()->getBody();
 `getParsedBody()` exposes parsed form data. It does **not** automatically decode JSON.
 For a JSON-only endpoint, decode the body explicitly and reject invalid input:
 
-```php
+```php-inline
 use function Naf\{json, request};
 
 try {
@@ -38,7 +38,7 @@ if (!is_array($data)) {
 
 ## Combined request parameters
 
-```php
+```php-inline
 use function Naf\param;
 
 $email = param()->get('email');
@@ -57,7 +57,7 @@ Use the body directly when a value from the query string should not be accepted.
 
 ## Uploaded files
 
-```php
+```php-inline
 use function Naf\{json, request};
 
 $file = request()->getUploadedFiles()['document'] ?? null;
@@ -75,7 +75,7 @@ an unchecked filesystem path. Validate type and size according to your applicati
 
 ## Responses
 
-```php
+```php-inline
 use function Naf\{json, response};
 
 return response('Hello', 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
@@ -84,7 +84,7 @@ return response('Hello', 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
 `response($content = '', $status = 200, $headers = [])` accepts a PSR-7-compatible body.
 The helper sets no default content type; state it explicitly when it matters.
 
-```php
+```php-inline
 use function Naf\json;
 
 return json(['message' => 'Created'], 201);
@@ -95,7 +95,7 @@ For a response with no body use `response('', 204)`, not `json(null, 204)`.
 
 ## HTML views
 
-```php
+```php-inline
 use function Naf\View\render;
 
 return render('home', ['name' => 'World']);
@@ -107,7 +107,7 @@ See [Views and templates](views.md).
 
 ## Redirect and refresh
 
-```php
+```php-inline
 use function Naf\{redirect, refresh};
 
 return redirect('/login');       // 302
@@ -117,7 +117,7 @@ return refresh();               // 302 to the current URL path, without its quer
 
 ## Custom responses
 
-```php
+```php-inline
 use Nyholm\Psr7\Response;
 
 return new Response(202, ['Content-Type' => 'text/plain'], 'Accepted');
@@ -128,7 +128,7 @@ that new response. See [Events](events.md#change-a-response) for response-header
 
 ## Logging
 
-```php
+```php-inline
 use function Naf\log;
 
 log()->info('Import finished', ['count' => 12]);
@@ -147,7 +147,7 @@ protocol-normalization listener if you copied it from an earlier tutorial.
 
 No manual protocol override is needed with the supported versions:
 
-```php
+```php-inline
 use function Naf\redirect;
 
 return redirect('/login');

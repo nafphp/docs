@@ -40,7 +40,7 @@ an undefined-function error, and that is the single most common surprise with th
 
 Hand the request body and a set of rules to the validator:
 
-```php
+```php-inline
 use function Naf\Form\validator;
 use function Naf\param;
 
@@ -72,7 +72,7 @@ errors later without you passing it around.
 
 ### Your own messages
 
-```php
+```php-inline
 use function Naf\Form\validator;
 use function Naf\param;
 
@@ -88,7 +88,7 @@ validator()->validate(param()->all(), [
 
 ### Your own rules
 
-```php
+```php-inline
 use Naf\Form\Core\Validator;
 
 Validator::register('starts_with', function ($value, $param) {
@@ -100,7 +100,7 @@ Register it once, during boot, and use it like any built-in rule: `'ref' => 'sta
 
 ## Showing what went wrong
 
-```php
+```html+php
 <input name="email" class="<?= error_class('email', validator()) ?>">
 <?php if (has_error('email', validator())): ?>
     <span class="error"><?= error('email', validator()) ?></span>
@@ -118,7 +118,7 @@ A failed validation should not empty the form. `memory()` reads the **current re
 through `param()`. It neither escapes the value nor persists it across a redirect.
 For HTML, escape it with `s()` from `naf/view`, or `htmlspecialchars()` yourself:
 
-```php
+```html+php
 <?php
 use function Naf\Form\{memory, memory_checked, memory_selected};
 use function Naf\View\s;
@@ -135,7 +135,7 @@ so they can be dropped into the tag without a conditional.
 
 Put a token in every form that changes something:
 
-```php
+```html+php
 <form method="post">
     <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
     <!-- your fields -->
@@ -173,7 +173,7 @@ A protocol endpoint called by a program carries no session to ride on and no for
 token in. A CSRF check there refuses legitimate requests while protecting nothing. Name
 such routes one at a time:
 
-```php
+```php-inline
 'csrf_exempt_routes' => [
     'oauth.token' => true,
 ],
@@ -188,7 +188,7 @@ deliberate: a prefix rule exempts endpoints nobody remembered adding.
 
 ### Turning it off
 
-```php
+```php-inline
 'csrf_validation' => false,
 ```
 

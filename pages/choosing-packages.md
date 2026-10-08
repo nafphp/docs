@@ -24,7 +24,7 @@ composer require naf/framework
 and the request and response objects are all in the core. There is no template engine to
 switch off and no session being started behind your back.
 
-```php
+```php-inline
 use function Naf\{json, param, route};
 
 route()->add('POST', '/webhook', function () {
@@ -49,7 +49,7 @@ composer require naf/view naf/form
 `naf/form` brings `naf/session` with it, because CSRF tokens and remembered input both
 need somewhere to live. You do not install it separately.
 
-```php
+```php-inline
 use function Naf\route;
 use function Naf\View\render;
 
@@ -109,7 +109,7 @@ composer require naf/auth naf/orm naf/session
 But the ordinary case is a user model in a database and a session to stay signed in, which
 is why the two are suggested alongside it rather than required.
 
-```php
+```php-inline
 use Naf\Auth\Credentials\PasswordCredentials;
 use function Naf\Auth\auth;
 

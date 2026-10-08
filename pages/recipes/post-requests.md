@@ -15,7 +15,7 @@ form dependency update and bootstrap correction for the released redirect helper
 
 A form that renders and submits at the same URL needs both methods registered:
 
-```php
+```php-inline
 use App\Controllers\ContactController;
 use function Naf\route;
 
@@ -36,7 +36,7 @@ usually easier to read; one method is easier when the form and its handling are 
 request says `Content-Type: application/json` and the parsed body is empty — the decoded JSON body, so the
 same controller reads a browser form and an API client without caring which it got:
 
-```php
+```php-inline
 use function Naf\param;
 
 $email = param()->get('email');
@@ -53,7 +53,7 @@ see [Requests and responses](../request-response.md#read-the-request).
 
 ## Checking it
 
-```php
+```php-inline
 use function Naf\Form\validator;
 use function Naf\param;
 
@@ -80,7 +80,7 @@ request rather than quietly pass everything.
 With `naf/form` installed, a listener checks POST, PUT and DELETE before
 your controller runs. You put the token in the form, and that is the whole of your part:
 
-```php
+```html+php
 <?php use function Naf\Form\csrf; ?>
 <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
 ```
@@ -93,7 +93,7 @@ validation](../forms.md#requests-that-carry-their-own-credentials) covers how.
 
 After a successful browser form submission, redirect:
 
-```php
+```php-inline
 use function Naf\redirect;
 use function Naf\route;
 

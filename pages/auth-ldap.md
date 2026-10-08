@@ -18,7 +18,7 @@ directory checks the credentials; your application decides which local account t
 
 That decision is two closures, and they are the only link between the two worlds:
 
-```php
+```php-inline
 accountForSubject(string $subject): ?string     // who is this, locally?
 subjectForAccount(string $identifier): ?string  // and which subject is that account?
 ```

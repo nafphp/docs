@@ -154,7 +154,7 @@ one request — the redirect's — and is gone on the next reload.
 
 ## The template
 
-```php title="app/views/contact.phtml"
+```html+php title="app/views/contact.phtml"
 <?php
 use function Naf\Form\csrf;
 use function Naf\Form\error;

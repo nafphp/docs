@@ -14,7 +14,7 @@ in an S3-compatible bucket or on a WebDAV server.
 
 A disk is a configured place with a name, and naming them is the point:
 
-```php
+```php-inline
 use function Naf\Storage\storage;
 
 storage()->put('foo.txt', 'Hello World');
@@ -29,7 +29,7 @@ remembers which directory is which.
 
 The everyday operations are what you would expect:
 
-```php
+```php-inline
 $disk = storage('documents');
 
 $disk->put($path, $contents);
@@ -43,7 +43,7 @@ $disk->url($path);        // public disks
 
 Configure disks in the application's `app/config.php` or `src/config.php`:
 
-```php
+```php-inline
 use Naf\Storage\Adapters\LocalAdapter;
 
 return [
@@ -79,7 +79,7 @@ on failure, and use last-completed-write semantics. Files and SQL are separate t
 Reading a 2 GB export into a string to write it somewhere else is how an application runs out
 of memory. Streams avoid that in both directions:
 
-```php
+```php-inline
 $stream = $disk->readStream($path);
 $disk->writeStream($path, $handle);
 ```
@@ -119,7 +119,7 @@ flight — that is disk, not memory.
 
 Configure either adapter through the same disk map:
 
-```php
+```php-inline
 use Naf\Storage\Adapters\S3Adapter;
 use Naf\Storage\Adapters\WebDavAdapter;
 

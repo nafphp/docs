@@ -45,6 +45,12 @@ That source directory is only read; tests run on copies. File-titled blocks are 
 untitled reference fragments are not automatically executable applications. Keep prerequisites,
 file locations and expected results explicit when adding examples.
 
+Give every fenced block a language: `php` for PHP files beginning with `<?php`, `php-inline`
+for PHP fragments without an opening tag, and `html+php` for templates mixing HTML and PHP.
+The configured `php-inline` lexer enables highlighting without adding a tag to the copied code.
+Use `bash` for shell commands, `ini` for environment files and `text` for directory trees or
+command output. Reserve file titles for complete files so the example runner can test them.
+
 ## Refresh generated references
 
 ```sh

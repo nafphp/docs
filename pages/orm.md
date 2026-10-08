@@ -97,7 +97,7 @@ For deployed applications, manage schema changes through [migrations](database.m
 
 With the `$products` repository above:
 
-```php
+```php-inline
 $all = $products->findAll();
 $one = $products->findOneBy('sku', 'ABC-1');
 $active = $products->findBy('status', 'active');
@@ -130,7 +130,7 @@ to load a relationship. For queries beyond the finders, use PDO through `databas
 
 A single `em()->save()` opens a transaction when none is active. To span several saves:
 
-```php
+```php-inline
 use function Naf\ORM\em;
 
 // $order and $invoice are your already-created entities.

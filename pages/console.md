@@ -27,7 +27,7 @@ through the directory you happen to be standing in.
 With `naf/cli` 0.2.3+, an application can install a root-level shortcut. From the directory
 containing its `composer.json`, run:
 
-```sh
+```bash
 vendor/bin/naf-install
 bin/naf command:list
 ```
@@ -48,7 +48,7 @@ targets that are not installed. This command requires framework 0.2.7+.
 A command is a class extending `AbstractCommand`, with a name, a `configure()` that
 declares its arguments, and a `run()` that does the work.
 
-```php
+```php-inline
 namespace App\Commands;
 
 use Naf\CLI\Core\AbstractCommand;
@@ -77,7 +77,7 @@ final class HelloCommand extends AbstractCommand
 
 ## Registering it
 
-```php
+```php-inline
 use function Naf\CLI\command;
 
 command()->add(\App\Commands\HelloCommand::class);
@@ -93,7 +93,7 @@ vendor/bin/naf hello:say World
 
 ## Arguments and options
 
-```php
+```php-inline
 protected function configure(): void
 {
     $this->addArgument('name')                      // required
@@ -103,7 +103,7 @@ protected function configure(): void
 }
 ```
 
-```php
+```php-inline
 $input->getArgument('name');      // ?string
 $input->getOption('shout');       // true when present, null when not
 $input->getOption('repeat');      // the value, or an array when given more than once
@@ -114,7 +114,7 @@ so rather than assuming a string.
 
 ## Asking a question
 
-```php
+```php-inline
 $name = $input->ask('What is your name? ');
 ```
 
@@ -123,7 +123,7 @@ it cannot run from cron. Give anything scheduled its input as arguments.
 
 ## Writing output
 
-```php
+```php-inline
 $output->writeLine('Done.', 'ok');        // green
 $output->writeLine('Careful.', 'warning'); // yellow
 $output->writeLine('Failed.', 'error');    // red

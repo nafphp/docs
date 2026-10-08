@@ -10,7 +10,7 @@ and recursively resolve their constructor dependencies without registering each 
 
 ## Autowiring without registration
 
-```php
+```php-inline
 use function Naf\app;
 
 final class Clock
@@ -38,7 +38,7 @@ come from route parameters; event handler arguments come from the event payload.
 
 ## Register and retrieve services
 
-```php
+```php-inline
 use function Naf\app;
 
 $container = app()->container();
@@ -52,7 +52,7 @@ need an interface binding, custom construction or a shared instance.
 
 Use class or interface names as keys for constructor injection:
 
-```php
+```php-inline
 use App\Mail\SmtpMailer;
 use App\Mail\MailerInterface;
 use function Naf\app;
@@ -85,7 +85,7 @@ Calling `make(ReportService::class)` does not register the resulting object. A s
 
 ## Constructor parameters
 
-```php
+```php-inline
 use function Naf\app;
 
 final class GreetingService

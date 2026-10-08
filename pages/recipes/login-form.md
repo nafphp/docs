@@ -132,7 +132,7 @@ to do.
 
 ## The template
 
-```php title="app/views/login.phtml"
+```html+php title="app/views/login.phtml"
 <?php
 use function Naf\Form\csrf;
 use function Naf\Form\error;
@@ -167,7 +167,7 @@ back-forward cache and any proxy that logs bodies, to save one field of typing.
 
 ## The protected page and logout form
 
-```php title="app/views/account.phtml"
+```html+php title="app/views/account.phtml"
 <?php
 use function Naf\Form\csrf;
 use function Naf\View\s;
@@ -194,7 +194,7 @@ return 400. Only call `csrf()->generate()` once per page; reuse that token if yo
 
 In a controller that only signed-in people may reach:
 
-```php
+```php-inline
 use function Naf\Auth\auth;
 
 auth()->requireLogin();                     // 401 if nobody is signed in
