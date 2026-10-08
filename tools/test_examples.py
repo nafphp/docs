@@ -296,6 +296,11 @@ def main():
                 copy_examples('orm.md', fixture)
                 for _ in range(2):
                     expect(run([*PHP, 'bin/products-demo.php'], fixture).strip() == 'NAF for Beginners', 'ORM save/find is repeatable')
+            elif feature == 'first-app':
+                # The tutorial replaces bootstrap/routes before removing the starter examples.
+                for name in ('app/Controllers/WebsiteController.php', 'app/Service/QuoteService.php',
+                             'app/views/welcome.phtml', 'app/views/contact.phtml', 'app/Jobs/SendMailJob.php'):
+                    (fixture / name).unlink()
             run([*COMPOSER, 'dump-autoload', '--no-interaction'], fixture)
             with server(fixture) as client:
                 test_first(client)

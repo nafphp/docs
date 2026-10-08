@@ -40,10 +40,13 @@ The starter's `composer.json` maps `App\` to `app/`. Composer can therefore load
 ```php title="bootstrap.php"
 <?php
 
-define('BASE_PATH', __DIR__);
-require __DIR__ . '/vendor/autoload.php';
+declare(strict_types=1);
 
 use function Naf\app;
+
+define('BASE_PATH', __DIR__);
+
+require __DIR__ . '/vendor/autoload.php';
 
 // Register application services here, before run() handles the request.
 app()->run();
@@ -51,6 +54,8 @@ app()->run();
 
 ```php title="public/index.php"
 <?php
+
+declare(strict_types=1);
 
 require dirname(__DIR__) . '/bootstrap.php';
 ```
@@ -61,6 +66,8 @@ APP_ENV=dev
 
 ```php title="app/config.php"
 <?php
+
+declare(strict_types=1);
 
 return [];
 ```
@@ -73,7 +80,10 @@ exercise, or put `APP_ENV=dev` there too.
 ```php title="app/routes.php"
 <?php
 
+declare(strict_types=1);
+
 use App\Controllers\HomeController;
+
 use function Naf\route;
 
 route()->add('GET', '/', [HomeController::class, 'index'], 'home');
@@ -87,9 +97,12 @@ Every route has a unique name. The `{name}` placeholder matches the controller a
 ```php title="app/Controllers/HomeController.php"
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
+
 use function Naf\json;
 use function Naf\View\render;
 
@@ -111,8 +124,12 @@ final class HomeController
 
 ```php title="app/views/home.phtml"
 <?php
+
+declare(strict_types=1);
+
 use function Naf\route;
 use function Naf\View\s;
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -151,6 +168,51 @@ Expect HTTP **200**, `Content-Type: application/json; charset=UTF-8` and a body 
 
 These commands run the application through HTTP. Executing `php bootstrap.php` alone does
 not serve a page: `app()->run()` returns immediately under CLI.
+
+## Remove the starter demo
+
+Once the home page and `/hello/Ada` work, you can remove the original demonstration.
+**Replace its routes and bootstrap first**, as this tutorial does, so they no longer reference
+`WebsiteController` or a `QuoteService` binding. Save any changes you want to keep, then run
+this from your project root:
+
+```bash
+rm app/Controllers/WebsiteController.php app/Service/QuoteService.php \
+  app/views/welcome.phtml app/views/contact.phtml app/Jobs/SendMailJob.php
+composer dump-autoload
+```
+
+The quotes belong to `QuoteService`; remove that file only when your own pages no longer use
+it. `SendMailJob` is an unused example, not a mail integration. The empty `app/config.php`
+above removes the demo's quote configuration.
+
+This tutorial's `home.phtml` is a complete HTML document. If your application also no longer
+uses the shared demo layout, you can remove `app/views/layout.phtml` and `public/css/naf.css`,
+then delete the unused starter artwork from `public/images/`. Keep any layouts, styles or
+images that your own views still reference.
+
+The starter's `tests/smoke.py` checks its demo routes. Replace it with tests for your own
+application, or remove it and the `test` entry in Composer's `scripts` object. Keep
+`composer.json`, `composer.lock`, `vendor/`, `bootstrap.php`, `public/index.php` and the
+`App\` autoload mapping. The framework and its installed plugins continue to work after
+the demonstration is gone.
+
+### Start with a fresh directory
+
+To get a new copy of the starter, stop the development server with Ctrl+C and run this from
+the parent directory, choosing a name that does not already exist:
+
+```bash
+composer create-project naf/app my-next-app
+cd my-next-app
+APP_ENV=dev php -S 127.0.0.1:8000 -t public
+```
+
+Your old project stays available while you copy over anything you need. After backing it up
+and checking the new application, you can delete the old project directory. A fresh starter
+includes its demo again; use the steps above to replace it with your own pages. For an HTTP
+service that needs no templates or forms, start with the
+[core-only project](install.md#core-only-project) instead.
 
 ## Continue building
 
