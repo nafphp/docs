@@ -31,8 +31,9 @@ The test creates a fresh `composer create-project naf/app` installation and a se
 project in temporary directories. It extracts the **actual file-titled Markdown blocks**,
 lints their PHP and tests them through local HTTP servers. It checks HTML and JSON, validation,
 escaping, CSRF, a local mail outbox, login persistence/logout/suspension, ORM save/find and
-SQLite API persistence and errors. It never sends mail externally. Temporary projects and
-servers are cleaned up, including on test failure.
+SQLite API persistence and errors, and database migrations (apply, repeat and roll back).
+It never sends mail externally. Temporary projects and servers are cleaned up, including on
+test failure.
 
 To reuse a starter that already has `naf/auth`, `naf/orm` and `naf/mail` installed:
 
