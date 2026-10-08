@@ -301,6 +301,8 @@ def main():
                 for name in ('app/Controllers/WebsiteController.php', 'app/Service/QuoteService.php',
                              'app/views/welcome.phtml', 'app/views/contact.phtml', 'app/Jobs/SendMailJob.php'):
                     (fixture / name).unlink()
+                for name in ('app/views/partials/contact-form.phtml', 'public/js/demo.js'):
+                    (fixture / name).unlink(missing_ok=True)
             run([*COMPOSER, 'dump-autoload', '--no-interaction'], fixture)
             with server(fixture) as client:
                 test_first(client)

@@ -186,6 +186,17 @@ The quotes belong to `QuoteService`; remove that file only when your own pages n
 it. `SendMailJob` is an unused example, not a mail integration. The empty `app/config.php`
 above removes the demo's quote configuration.
 
+If your starter includes a shared contact-form template or interactive demo script, remove
+those unused files too:
+
+```bash
+rm -f app/views/partials/contact-form.phtml public/js/demo.js
+```
+
+Remove the script's `asset()->add()` registration from the shared layout if you keep that
+layout for your own pages. The `-f` allows this step to work with older starters that do not
+include these files.
+
 This tutorial's `home.phtml` is a complete HTML document. If your application also no longer
 uses the shared demo layout, you can remove `app/views/layout.phtml` and `public/css/naf.css`,
 then delete the unused starter artwork from `public/images/`. Keep any layouts, styles or
