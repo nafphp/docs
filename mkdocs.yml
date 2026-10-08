@@ -80,9 +80,11 @@ nav:
       - Errors and aborting: errors.md
       - Guard: guard.md
       - Serving files: file-downloads.md
-      - How plugins work: plugins.md
       - External libraries: external-libraries.md
       - Best practices: best-practices.md
+  - Plugins:
+      - How plugins work: plugins.md
+      - Flow (development guide): https://github.com/nafphp/docs/blob/main/drafts/flow-0.1.0.md
   - Presenting:
       - Views and templates: views.md
       - Forms and validation: forms.md

@@ -21,6 +21,10 @@ Navigation comes in three levels: installation and first app, complete worked ex
 then topic references. Each chapter declares optional packages in front matter; the hook
 renders the install command and transitive dependencies. Previous/next links follow navigation.
 
+The Plugins section links to the [Flow development guide](drafts/flow-0.1.0.md).
+Its installation and complete example are checked against the RC branch, while the API
+remains outside `pages/` until its first stable release is available on Packagist.
+
 ## Test what readers copy
 
 ```sh
