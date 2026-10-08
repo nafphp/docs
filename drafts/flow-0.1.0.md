@@ -308,10 +308,12 @@ server synchronization or lifecycle hooks.
 
 ## Assets and CSP
 
-The readable source is `src/Resources/public/flow.js`; the package also ships its
-prebuilt `flow.min.js`. The plugin boots after View and registers `/_flow/flow.js` as a
-module. This fixed URL serves the minified file, so asset tags and imports continue
-to share one module instance. Applications need no Node installation or build step. Its named route
+The readable entry point is `src/Resources/public/flow.js`; its implementation is split
+into focused modules in `src/Resources/public/runtime/`. esbuild bundles these into the
+prebuilt `flow.min.js` shipped by the package. The plugin boots after View and registers
+`/_flow/flow.js` as a module. This fixed URL serves the complete minified bundle, so asset
+tags and imports share one module instance without additional runtime module requests.
+Applications need no Node installation or build step. Its named route
 `flow.runtime` serves only that known file through PSR-7, with a JavaScript MIME type,
 `nosniff`, an ETag and `public, max-age=0, must-revalidate`. Matching `If-None-Match`
 requests return 304. There is no generic vendor-file endpoint or publishing command to run.
