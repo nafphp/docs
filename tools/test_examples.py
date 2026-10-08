@@ -197,17 +197,40 @@ def test_login(root, client):
 
 def test_api(root):
     with server(root) as client:
-        expect(json.loads(client.request('/api/articles')[2]) == {'data': []}, 'API starts empty')
+        initial = client.request('/api/articles')
+        expect(initial[0] == 200 and json.loads(initial[2]) == {'data': []}, 'API starts empty')
+        expect('application/json' in initial[1]['Content-Type'], 'API JSON content type')
         request = lambda body, path='/api/articles': client.request(path, 'POST', body.encode(), {'Content-Type': 'application/json'})
         for body, status in [('{', 400), ('[]', 422), ('null', 422), ('{}', 422), ('{"title":[],"body":"ok"}', 422)]:
             result = request(body)
             expect(result[0] == status and 'error' in json.loads(result[2]), f'API rejects {body}')
         expect(client.form('/api/articles', {'title': 'a', 'body': 'b'})[0] == 415, 'API rejects form media type')
         expect(request('{}', '/api/articles?title=a&body=b')[0] == 422, 'Query does not fill missing body fields')
+        for article in [{'title': ' ', 'body': 'ok'}, {'title': 'a' * 201, 'body': 'ok'},
+                        {'title': 'ok', 'body': 'b' * 10001}]:
+            invalid = request(json.dumps(article))
+            expect(invalid[0] == 422 and 'fields' in json.loads(invalid[2]), 'API validates article field limits')
         saved = request('{"title":"First article","body":"Hello from NAF."}')
-        expect(saved[0] == 201 and json.loads(saved[2])['data']['title'] == 'First article', 'API saves article')
+        article = {'id': 1, 'title': 'First article', 'body': 'Hello from NAF.'}
+        expect(saved[0] == 201 and json.loads(saved[2]) == {'data': article}, 'API saves article with associative PDO rows')
         location = saved[1]['Location']
+        expect(location == '/api/articles/1', 'API Location points to the named article route')
         expect(json.loads(client.request(location)[2])['data']['body'] == 'Hello from NAF.', 'API reads article')
+        expect('0 migration(s) successfully executed.' in run([*PHP, 'vendor/bin/naf', 'db:migrate', 'up'], root),
+               'Repeating migration skips the applied schema')
+        expect(json.loads(client.request('/api/articles')[2]) == {'data': [article]}, 'Repeating migration preserves articles')
+        with sqlite3.connect(root / 'storage/articles.sqlite') as database:
+            migrations = database.execute('SELECT name FROM migrations').fetchall()
+        expect(migrations == [('App\\Migrations\\CreateArticlesTable',)], 'Database plugin tracks one application migration')
+        quoted_title = "An article'); DROP TABLE articles; --"
+        quoted = client.request('/api/articles', 'POST',
+                                json.dumps({'id': 999, 'title': quoted_title, 'body': 'Stored as text.'}).encode(),
+                                {'Content-Type': 'Application/JSON; charset=utf-8'})
+        quoted_article = json.loads(quoted[2])['data']
+        expect(quoted[0] == 201 and quoted_article == {'id': 2, 'title': quoted_title, 'body': 'Stored as text.'},
+               'Prepared values stay literal, media type parameters work and extra fields are ignored')
+        expect(client.request('/api/articles/1%20OR%201=1', 'DELETE')[0] == 404, 'Bound article ID cannot alter the delete query')
+        expect(client.request(quoted[1]['Location'], 'DELETE')[0] == 204, 'Quoted article can be deleted normally')
         unknown = client.request('/unknown')
         expect(unknown[0] == 404 and 'error' in json.loads(unknown[2]), 'Unknown API route returns JSON')
     with server(root) as client:
@@ -216,6 +239,20 @@ def test_api(root):
         expect(deleted[0] == 204 and deleted[2] == '', 'DELETE has an empty 204 body')
         expect(client.request(location)[0] == 404, 'Deleted article is missing')
         expect(client.request(location, 'DELETE')[0] == 404, 'Deleting missing article returns 404')
+        request = client.request('/api/articles', 'POST', b'{"title":"Before rollback","body":"Temporary."}',
+                                 {'Content-Type': 'application/json'})
+        expect(request[0] == 201, 'Article exists before migration rollback')
+        expect('1 migration(s) successfully executed.' in run(
+            [*PHP, 'vendor/bin/naf', 'db:migrate', 'down', '--name=CreateArticlesTable'], root),
+            'Named migration rolls back through the CLI')
+        with sqlite3.connect(root / 'storage/articles.sqlite') as database:
+            expect(database.execute("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'articles'").fetchone() is None,
+                   'Rollback removes the article table')
+            expect(database.execute('SELECT COUNT(*) FROM migrations').fetchone()[0] == 0, 'Rollback removes migration history')
+        expect('1 migration(s) successfully executed.' in run([*PHP, 'vendor/bin/naf', 'db:migrate', 'up'], root),
+               'Migration can be applied after rollback')
+        recreated = client.request('/api/articles')
+        expect(recreated[0] == 200 and json.loads(recreated[2]) == {'data': []}, 'Reapplied migration creates an empty usable schema')
         # A real storage failure must still produce a sanitized JSON error.
         with sqlite3.connect(root / 'storage/articles.sqlite') as database:
             database.execute('DROP TABLE articles')
@@ -273,8 +310,12 @@ def main():
             result = client.request('/')
             expect(result[0] == 200 and json.loads(result[2]) == {'ok': True}, 'Core-only install')
         print('PASS core-only install', flush=True)
+        run([*COMPOSER, 'require', 'naf/database:^0.2.4', 'naf/cli:^0.2',
+             '--no-interaction', '--prefer-dist'], core)
         copy_examples('recipes/json-api.md', core)
-        expect('Articles table ready.' in run([*PHP, 'bin/create-articles.php'], core), 'API schema setup')
+        run([*COMPOSER, 'dump-autoload', '--no-interaction'], core)
+        expect('1 migration(s) successfully executed.' in run([*PHP, 'vendor/bin/naf', 'db:migrate', 'up'], core),
+               'API schema setup uses the database migration command')
         test_api(core)
         print('PASS JSON API', flush=True)
     print(f'PASS {checks} checks against copied documentation examples')
