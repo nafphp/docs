@@ -8,7 +8,21 @@ A plugin is an ordinary Composer package that declares `"type": "naf-plugin"`. T
 is the whole discovery mechanism: the framework asks Composer which installed packages have
 it and boots them. There is nothing to register and no list to maintain.
 
-It also means the type has to be right. A package that installs correctly but declares a
+## Flow development guide
+
+Flow is being prepared for its first stable release. Its
+[development guide](https://github.com/nafphp/docs/blob/main/drafts/flow-0.1.0.md)
+contains the current installation steps, component and lifecycle API, shared stores,
+backend requests and a complete example with separate JavaScript modules and PHP templates.
+It also explains the asset and CSP integration and the current limitations.
+
+The guide is a release draft, reviewed against the RC branch. It will become a chapter
+on this site after the stable package is available on Packagist. Its development installation
+uses the explicit Git repository and RC constraint; the API may still change during review.
+
+## Plugin discovery
+
+The package type has to be right. A package that installs correctly but declares a
 different type is not loaded — silently, without an error — which is exactly what happens
 to a `nixphp-plugin` under NAF 0.2.
 
