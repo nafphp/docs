@@ -38,8 +38,9 @@ state; a standalone counter does not require one.
 
 ## Installation
 
-**Development version:** the first implementation lives on `v0.1.0-rc`. No stable release
-has been published. The API can change during review. In an existing NAF application:
+**Development version:** the first implementation is merged into `main`. The installation
+below uses the retained `v0.1.0-rc` branch. No stable release has been published, and the
+API can change before 0.1.0. In an existing NAF application:
 
 ```bash
 composer config repositories.naf-flow vcs https://github.com/nafphp/flow
@@ -120,20 +121,69 @@ use function Naf\View\s;
 </section>
 ```
 
-## Objects and direct mounting
+## Component factories: classes and exported functions
 
-The registry always accepts a synchronous factory, returning one new object per container.
-Classes need no base class. An anonymous factory exported from an ES module works too:
+`Flow.register(name, factory)` always receives a synchronous factory function. Flow calls
+it with `(props, context)` when mounting a matching HTML container. The factory returns
+a new object for that container; it can construct an ordinary class or return an object
+literal. Classes need no base class.
+
+For a class, wrap its constructor in a factory:
 
 ```javascript
+Flow.register('counter', props => new Counter(props));
+```
+
+The arrow function is registered first. `new Counter(props)` runs when Flow calls that
+function during mounting, once for each matching container. If Flow has already started,
+registration can immediately mount containers already on the page. Otherwise they mount
+when Flow starts after the document is ready. Containers added later receive new instances.
+
+An ES module can instead export the factory itself:
+
+```javascript title="public/js/components/createCounter.js"
 export default props => ({
     count: props.initial ?? 0,
     increment() { this.count++; },
 });
 ```
 
+```javascript
+import createCounter from './components/createCounter.js';
+
+Flow.register('factory-counter', createCounter);
+```
+
+Here `createCounter` is already a function returning a new component object, so pass its
+reference. Do not call `createCounter({ initial: 0 })` while registering: that passes the
+resulting object instead of a factory. Similarly, passing the class itself as
+`Flow.register('counter', Counter)` is unsupported: Flow calls factories as functions,
+without adding `new`.
+
+The playground demo uses both techniques deliberately. `Counter`, `PackageSearch` and `GreetingPreview`
+are classes wrapped in factories. Its `StoreInspector` and `CounterStage` exports are
+factory functions, despite their capitalized import names. In application code, names
+such as `createStoreInspector` make that distinction clearer. Both forms have the same
+reactivity, bindings, context and lifecycle. The complete example below follows the same
+pattern with its `CatalogSearch` class and exported `FilterMirror` factory.
+
+| Call | What you pass | When the object is created | Ownership |
+| --- | --- | --- | --- |
+| `Flow.register(name, props => new Counter(props))` | Factory constructing a class | On each new mount | One new instance per container |
+| `Flow.register(name, createCounter)` | Exported factory function | On each new mount | One new object per container |
+| `Flow.mount(root, new Counter(props))` | An already constructed instance | Immediately when `new` is evaluated | That instance belongs to one container |
+| `Flow.store(name, new Filters())` | An already constructed shared object | Immediately when `new` is evaluated | One store shared by its consumers |
+
+Repeated scans keep existing component instances. A factory must return a fresh object
+for each new container; returning the same preconstructed component for multiple containers
+is rejected. Use a store for intentionally shared state.
+
 Use normal methods when referring to the instance through `this`. Arrow functions keep
-JavaScript's native lexical `this` behavior. For explicit ownership of an existing object:
+JavaScript's native lexical `this` behavior.
+
+## Direct mounting
+
+For explicit ownership of an existing object:
 
 ```javascript
 const counter = new Counter({ initial: 0 });
@@ -320,6 +370,11 @@ Use `flow-on:submit="save"` on the form. For JSON writes, send `X-CSRF-Token` wh
 Cancelling a browser request does not roll back an operation already running on the server.
 
 ## Stores
+
+A store takes an object, rather than a component factory. In the following registration,
+JavaScript evaluates `new Filters()` immediately and Flow observes that same instance.
+`Flow.store('filters')` retrieves it without constructing another object. Create the store
+before registering components that read it during `init()`.
 
 ```javascript
 class Filters {
