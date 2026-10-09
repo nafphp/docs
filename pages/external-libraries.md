@@ -2,7 +2,7 @@
 title: External libraries
 ---
 
-# Using External Libraries
+# External libraries { #using-external-libraries }
 
 NAF can use ordinary Composer libraries through configuration and container bindings.
 Check whether an existing [NAF package](choosing-packages.md) meets the requirement first.
@@ -11,7 +11,7 @@ Register external services in root `bootstrap.php`, before their consumers are c
 The examples below are integration fragments. They assume a bootstrapped application and
 the library-specific setup described in each section.
 
-## Installing Packages
+## Install a library { #installing-packages }
 
 You can install any Composer package as usual:
 
@@ -24,7 +24,7 @@ does not configure its services or register a NAF plugin unless it declares `naf
 
 ---
 
-## Example: Using Blade Templating
+## Example: Blade templates { #example-using-blade-templating }
 
 Install Blade via Composer:
 
@@ -57,7 +57,7 @@ return response($blade->render('home', ['name' => 'World']));
 
 ---
 
-## Example: Using Eloquent ORM
+## Example: Eloquent ORM { #example-using-eloquent-orm }
 
 Install Eloquent via Composer:
 
@@ -106,7 +106,7 @@ $user = User::find(1);
 
 ---
 
-## Tips for Integration
+## Integration checklist { #tips-for-integration }
 
 - Register services inside your container via `app()->container()->set()`.
 - Load config values using `config('key')`.
