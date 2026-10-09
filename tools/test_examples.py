@@ -111,7 +111,7 @@ def csrf(result):
 
 
 @contextmanager
-def server(root, router=None):
+def server(root, router=None, environment=None):
     with socket.socket() as sock:
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]
@@ -120,7 +120,8 @@ def server(root, router=None):
         if router:
             command.append(str(root / router))
         process = subprocess.Popen(command,
-                                   cwd=root, stdout=log, stderr=log)
+                                   cwd=root, stdout=log, stderr=log,
+                                   env={**os.environ, **(environment or {})})
         try:
             client = Client(port)
             for attempt in range(100):
@@ -157,6 +158,99 @@ def test_first(client):
     expect(result[0] == 200 and json.loads(result[2]) == {'hello': 'Ada'}, 'First app JSON route')
     expect('application/json' in result[1]['Content-Type'], 'JSON content type')
     expect(client.request('/does-not-exist')[0] == 404, 'Unknown HTML route')
+
+
+def test_small_website(root):
+    with server(root) as client:
+        home = client.request('/')
+        expect(home[0] == 200 and 'Hello, visitor!' in home[2], 'Small website default greeting')
+        expect('text/html' in home[1]['Content-Type'], 'Small website HTML response type')
+        expect(home[1]['X-Content-Type-Options'] == 'nosniff', 'Small website prevents MIME sniffing')
+        policy = home[1]['Content-Security-Policy']
+        expect("default-src 'none'" in policy and "style-src 'self'" in policy
+               and "frame-ancestors 'none'" in policy, 'Small website CSP allows local CSS and blocks framing')
+        expect(home[1]['Referrer-Policy'] == 'strict-origin-when-cross-origin', 'Small website referrer policy')
+        about = client.request('/about')
+        for result in (home, about):
+            expect(result[0] == 200 and 'aria-label="Main navigation"' in result[2]
+                   and 'href="/about"' in result[2] and 'href="/css/site.css"' in result[2]
+                   and 'Built with NAF and ordinary PHP.' in result[2], 'Both website pages use the shared layout')
+        expect('About this site' in about[2] and '<title>About · Small NAF site</title>' in about[2],
+               'Small website About content and title')
+        css = client.request('/css/site.css')
+        expect(css[0] == 200 and 'text/css' in css[1]['Content-Type'], 'Local stylesheet is served')
+        expect('Set-Cookie' not in home[1], 'Small website needs no session cookie')
+        for name in ('Ada', 'Zoë', 'a' * 80):
+            greeting = client.request('/?name=' + urllib.parse.quote(name))
+            expect(greeting[0] == 200 and f'Hello, {name}!' in greeting[2], 'Website accepts valid names at the byte limit')
+        blank = client.request('/?name=%20%20')
+        expect(blank[0] == 200 and 'Hello, visitor!' in blank[2], 'Blank name uses the default greeting')
+        injection = client.request('/?name=' + urllib.parse.quote('\"><script>alert(1)</script>'))
+        expect(injection[0] == 200 and '<script>' not in injection[2]
+               and '&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;' in injection[2],
+               'Website escapes HTML text and quoted attribute injection')
+        for query in ('name%5B%5D=Ada', 'name=' + 'a' * 81, 'name=' + urllib.parse.quote('ë' * 41), 'name=%FF'):
+            expect(client.request('/?' + query)[0] == 400, 'Website rejects arrays, oversized names and invalid UTF-8')
+        unknown = client.request('/missing')
+        expect(unknown[0] == 404 and unknown[1]['X-Content-Type-Options'] == 'nosniff',
+               'Website unknown route retains response headers')
+    # A missing trusted template is an actual application failure; production must hide its details.
+    template = root / 'app/views/about.phtml'
+    original = template.read_text()
+    template.unlink()
+    try:
+        with server(root, environment={'APP_ENV': 'prod'}) as client:
+            failure = client.request('/about')
+            expect(failure[0] == 500 and 'View about not found' not in failure[2]
+                   and str(root) not in failure[2], 'Production website hides template exception details')
+    finally:
+        template.write_text(original)
+
+
+def test_simple_api(root):
+    with server(root) as client:
+        listing = client.request('/api/products')
+        data = json.loads(listing[2])
+        expect(listing[0] == 200 and data['currency'] == 'EUR'
+               and [product['id'] for product in data['data']] == ['notebook', 'pencil'], 'Storage-free API returns the public catalog')
+        expect('application/json' in listing[1]['Content-Type']
+               and listing[1]['X-Content-Type-Options'] == 'nosniff', 'Storage-free API JSON response headers')
+        expect('Set-Cookie' not in listing[1], 'Storage-free API needs no session cookie')
+        first = json.loads(client.request('/api/products?limit=1')[2])
+        expect(first['data'] == [data['data'][0]], 'API limit bounds the returned list')
+        maximum = client.request('/api/products?limit=100')
+        expect(maximum[0] == 200 and json.loads(maximum[2]) == data, 'API accepts its maximum limit')
+        for identifier, product in zip(('notebook', 'pencil'), data['data']):
+            detail = client.request('/api/products/' + identifier)
+            expect(detail[0] == 200 and json.loads(detail[2]) == {'data': product, 'currency': 'EUR'},
+                   'API resolves a named route parameter and injected catalog service')
+        for query in ('limit=0', 'limit=-1', 'limit=101', 'limit=text', 'limit=1.5',
+                      'limit%5B%5D=1', 'limit=', 'limit=' + '9' * 100):
+            invalid = client.request('/api/products?' + query)
+            expect(invalid[0] == 400 and json.loads(invalid[2]) == {'error': 'limit must be an integer from 1 to 100.'},
+                   'API rejects invalid limit types and values')
+        missing = client.request('/api/products/missing')
+        expect(missing[0] == 404 and json.loads(missing[2]) == {'error': 'Product not found.'}, 'API product lookup is exact')
+        unknown = client.request('/unknown')
+        expect(unknown[0] == 404 and json.loads(unknown[2]) == {'error': 'Request refused'}
+               and unknown[1]['X-Content-Type-Options'] == 'nosniff', 'API unknown-route errors are JSON with response headers')
+        refused = client.request('/api/products', 'POST', b'{}', {'Content-Type': 'application/json'})
+        expect(400 <= refused[0] < 500 and 'error' in json.loads(refused[2]), 'Read-only API offers no write endpoint')
+        expect(json.loads(client.request('/api/products')[2]) == data, 'Refused write leaves the catalog unchanged')
+    catalog = root / 'app/Services/ProductCatalog.php'
+    original = catalog.read_text()
+    catalog.write_text(original.replace('return [', "throw new \\RuntimeException('Catalog source unavailable: private-service-token');\n        return [", 1))
+    try:
+        with server(root) as client:
+            failure = client.request('/api/products')
+            expect(failure[0] == 500 and json.loads(failure[2]) == {'error': 'Internal server error'},
+                   'Unexpected catalog failure returns sanitized JSON even in development')
+            expect('application/json' in failure[1]['Content-Type']
+                   and failure[1]['X-Content-Type-Options'] == 'nosniff', 'API failure retains JSON response headers')
+        logs = '\n'.join(path.read_text() for path in (root / 'logs').rglob('*.log'))
+        expect('private-service-token' in logs, 'API exception details are logged for the operator')
+    finally:
+        catalog.write_text(original)
 
 
 def test_flow(root, client):
@@ -315,6 +409,7 @@ def test_api(root):
             database.execute('DROP TABLE articles')
         failure = client.request('/api/articles')
         expect(failure[0] == 500 and json.loads(failure[2]) == {'error': 'Internal server error'}, 'Unexpected API exception sanitized')
+        expect('no such table: articles' in (root / 'logs/app.log').read_text(), 'Persistent API logs the actual database failure')
 
 
 def test_integrations(root):
@@ -507,6 +602,18 @@ def main():
             result = client.request('/')
             expect(result[0] == 200 and json.loads(result[2]) == {'ok': True}, 'Core-only install')
         print('PASS core-only install', flush=True)
+        for scenario, test in (('small-website', test_small_website), ('simple-json-api', test_simple_api)):
+            fixture = root / scenario
+            fixture.mkdir()
+            copy_examples(f'recipes/{scenario}.md', fixture)
+            run([*COMPOSER, 'install', '--no-interaction', '--prefer-dist'], fixture)
+            run([*COMPOSER, 'validate', '--strict'], fixture)
+            packages = json.loads(run([*COMPOSER, 'show', '--format=json'], fixture))['installed']
+            installed = {package['name'] for package in packages if package['name'].startswith('naf/')}
+            expected = {'naf/framework', 'naf/view'} if scenario == 'small-website' else {'naf/framework'}
+            expect(installed == expected, 'Scenario installs only its documented NAF packages')
+            test(fixture)
+            print(f'PASS {scenario}', flush=True)
         run([*COMPOSER, 'require', 'naf/database:^0.2.4', 'naf/cli:^0.2',
              '--no-interaction', '--prefer-dist'], core)
         copy_examples('recipes/json-api.md', core)

@@ -9,6 +9,13 @@ requires:
 
 # A login form
 
+| Result | Packages | Starting point |
+|---|---|---|
+| Login, protected account page and CSRF-protected logout | Starter + `naf/auth`; `pdo_sqlite` for demo accounts | [Authentication quickstart](../auth.md#quickstart) |
+
+Choose this scenario for browser sessions and private pages. Public websites and read-only
+public APIs can start without accounts; [compare the scenarios](index.md).
+
 First complete [the authentication quickstart](../auth.md#quickstart), including its SQLite
 config, user model and seed command. It builds on [Your first
 application](../first-app.md). These steps provide the account **demo** with password

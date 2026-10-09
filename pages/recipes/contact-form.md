@@ -9,6 +9,13 @@ requires:
 
 # A contact form
 
+| Result | Packages | Starting point |
+|---|---|---|
+| A validated message, local mail outbox and success redirect | Starter + `naf/mail` | [Your first application](../first-app.md) |
+
+Choose this scenario when a website needs to accept a message. If you only need to display
+pages, start with [the small website](small-website.md). [Compare all scenarios](index.md).
+
 Start from [Your first application](../first-app.md), then run `composer require naf/mail`.
 The starter already supplies the other packages listed above. Each titled block is a complete
 file; create missing directories and replace the tutorial's corresponding files. If you combine

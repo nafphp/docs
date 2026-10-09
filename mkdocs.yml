@@ -66,10 +66,13 @@ nav:
       - Your first application: first-app.md
       - Choosing packages: choosing-packages.md
   - Tutorials and task guides:
+      - Choose a scenario: recipes/index.md
+      - Small website: recipes/small-website.md
+      - JSON API without a database: recipes/simple-json-api.md
       - Handling POST requests: recipes/post-requests.md
       - Contact form: recipes/contact-form.md
       - Login form: recipes/login-form.md
-      - JSON API: recipes/json-api.md
+      - JSON API with a database: recipes/json-api.md
   - Core concepts:
       - Application lifecycle: lifecycle.md
       - Routing: routing.md

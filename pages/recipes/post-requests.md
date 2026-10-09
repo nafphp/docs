@@ -11,6 +11,18 @@ This guide explains that sequence; linked recipes provide complete applications.
 [Your first application](../first-app.md). The starter includes the form and session packages
 used below. APIs can follow the same input flow with their own authentication and CSRF policy.
 
+## Choose a worked scenario
+
+| Task | Example | What to check |
+|---|---|---|
+| Accept a message from a browser | [Contact form](contact-form.md) | Invalid input stays on the page; valid input redirects; missing CSRF fails |
+| Sign in or out | [Login form](login-form.md) | Credentials are checked; account access is protected; logout requires POST and CSRF |
+| Create a record from JSON | [JSON API with a database](json-api.md) | Malformed JSON, media type, field validation and the saved record |
+
+If you only need to display pages or return public JSON, start with the
+[small website](small-website.md) or [storage-free API](simple-json-api.md). Neither needs a
+state-changing POST. The [scenario list](index.md) shows the required packages for each path.
+
 ## One route or two
 
 A form that renders and submits at the same URL needs both methods registered:

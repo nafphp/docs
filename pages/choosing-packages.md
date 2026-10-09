@@ -13,6 +13,10 @@ templates or sessions, use the [core-only installation](install.md#core-only-pro
 The commands below extend an existing Composer project; they do not create its bootstrap,
 routes or configuration.
 
+The [application scenarios](recipes/index.md) pair each result with its package set and a
+worked guide. Start with [a small website](recipes/small-website.md)
+or [a JSON API without a database](recipes/simple-json-api.md) in an empty directory.
+
 ## Package selection { #the-short-version }
 
 | Capability | Install | Additional setup |
@@ -52,14 +56,19 @@ The starter already includes these packages. View renders PHP templates; Form va
 and checks CSRF tokens on POST, PUT and DELETE. Form installs Session for token storage.
 The `memory()` helper reads the current request; it does not preserve input across redirects.
 
-Follow [Views](views.md), [Forms](forms.md) and the [contact form](recipes/contact-form.md).
+For two HTML pages without submissions, install only `naf/view` on top of the core and follow
+[the small website](recipes/small-website.md). Add Form when you need validated submissions
+and CSRF protection. Follow [Views](views.md), [Forms](forms.md) and the
+[contact form](recipes/contact-form.md).
 Add [`naf/i18n`](translations.md) for translated text.
 
 ## JSON APIs { #a-json-api }
 
 The core implements JSON APIs without View, Form or Session. Use `json()` for responses and
-configure [JSON error responses](errors.md#json-errors-for-an-api). The
-[JSON API example](recipes/json-api.md) adds SQLite persistence and migrations.
+configure [JSON error responses](errors.md#json-errors-for-an-api). Start with the
+[storage-free product API](recipes/simple-json-api.md), which returns data from an injected
+PHP service. The [JSON API with a database](recipes/json-api.md) adds SQLite persistence,
+write operations and migrations when your application needs them.
 
 Choose authentication separately. A bearer-authenticated endpoint must verify its token.
 If Form is also installed, its CSRF listener exempts an Authorization header beginning with
