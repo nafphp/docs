@@ -67,6 +67,9 @@ installation; no plugin registration file is needed.
 
 ## 2. Bootstrap and register routes
 
+The dependencies are installed. Next, add the web entry point and bootstrap so a request can
+reach NAF, then register the two page routes. Their controller and templates follow below.
+
 ```php title="public/index.php"
 <?php
 
@@ -126,6 +129,9 @@ file registers actions; NAF constructs the controller when a matching request ar
 
 ## 3. Read input and return a page
 
+The routes refer to `PageController`. Add that class now: it reads the optional greeting
+name, checks the input and chooses the template for each page.
+
 ```php title="app/Controllers/PageController.php"
 <?php
 
@@ -170,6 +176,9 @@ escapes it for HTML output. `render()` returns the response, so the action does 
 headers or call `exit`.
 
 ## 4. Share the HTML layout
+
+Both actions now refer to templates. Create the shared document first, then fill its `content`
+block from each page. This keeps navigation and page structure in one place.
 
 ```php title="app/views/layouts/main.phtml"
 <?php
@@ -267,7 +276,7 @@ footer { font-size: .9rem; }
 
 ## 5. Run and check the result
 
-From the project root:
+All application files are now in place. From the project root:
 
 ```bash
 composer dump-autoload
@@ -295,6 +304,21 @@ curl -i http://127.0.0.1:8000/missing
 | `GET /?name[]=Ada`, invalid UTF-8 or a name over 80 bytes | 400 |
 | `GET /about` | 200, About page with the shared layout |
 | `GET /missing` | 404 |
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| A welcome page from another project | Stop the earlier server and start this one from `naf-site/` with `-t public` |
+| A class-not-found or missing-view error | Check the file paths and case shown above; run `composer dump-autoload` after correcting a class path |
+| The page has no styling | Check that `/css/site.css` returns 200 and that the file is under `public/css/`; the policy permits this local stylesheet |
+| The greeting returns 400 | Try `/?name=Ada`; arrays, invalid UTF-8 and names over 80 bytes are intentionally rejected |
+
+For a 500 response, inspect the PHP server terminal and `logs/app.log` if it exists. Keep
+`APP_ENV=dev` for local diagnosis; [Troubleshooting](../troubleshooting.md#routing-and-bootstrap)
+explains how to separate routing, autoload and template problems.
+
+## Continue building
 
 NAF handles routing and response emission. Your controller owns input rules, and your
 templates own escaping. Keep additional page content in templates; move reusable business

@@ -15,6 +15,13 @@ No base controller or application-wide ORM is required.
 
 ## Choose a starting point
 
+If this is your first time using NAF, [install the starter](install.md#start-with-the-application-skeleton)
+and follow [Your first application](first-app.md). You will build an HTML page and a JSON
+endpoint before moving on to forms, services or persistence. You can learn the core concepts
+as you use them; no need to read every reference chapter first.
+
+If you already have a particular application in mind, choose one of these paths:
+
 | Goal | Guide |
 |---|---|
 | Pick a small, complete application to build | [Application scenarios](recipes/index.md) |
@@ -32,7 +39,8 @@ the installation guide and package chapters name them.
 
 The documentation assumes familiarity with PHP classes, namespaces, Composer and basic HTTP.
 It explains NAF conventions as they are introduced. Start with the first application before
-using reference fragments, which assume an application is already bootstrapped.
+using reference fragments, which assume an application is already bootstrapped. The small
+website and JSON API tutorials also provide complete setup in their own directories.
 
 ## Core features
 

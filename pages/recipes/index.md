@@ -8,6 +8,10 @@ Start with the result you need. These examples show the packages, complete files
 needed to reach a working application. The two smallest projects start in empty directories;
 the form examples build on the application starter.
 
+For a guided introduction to NAF itself, start with [Your first application](../first-app.md).
+If you know which result you want, you can follow the small website or storage-free API
+directly. You do not need to complete every scenario or install every listed package.
+
 ## What do you want to build?
 
 | Scenario | What you get | Packages you add | Start here |
@@ -27,6 +31,7 @@ for dependency details and additional integrations.
 
 The contact and login tutorials replace files in the starter. Follow each in a separate
 project first; when combining them, merge routes, configuration and service registrations.
+Each guide names the files to keep and the ones to replace, so you can start from a known state.
 
 ## Follow the output through the application
 

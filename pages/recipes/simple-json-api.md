@@ -59,6 +59,9 @@ private and use `composer install` to reproduce the tested dependencies on deplo
 
 ## 2. Bootstrap with JSON error handling
 
+With the core installed, add the entry point and bootstrap. Set up JSON error responses here
+so clients get the same response format when a later route lookup or controller fails.
+
 ```php title="public/index.php"
 <?php
 
@@ -114,6 +117,9 @@ Keep logs outside `public/` and restrict access to the application operator.
 
 ## 3. Put application data in a service
 
+Next, give the API a source of product data. This service returns fixed records, which lets
+you follow the HTTP flow before introducing a database or external integration.
+
 ```php title="app/Services/ProductCatalog.php"
 <?php
 
@@ -151,6 +157,9 @@ is EUR. No write endpoint is offered, and restarting PHP does not change the cat
 The service has no HTTP dependency, so you can test or reuse it outside a controller.
 
 ## 4. Check input and return JSON
+
+The catalog is ready to use. Add a controller to check HTTP input and turn the service's
+results into responses, then register its two routes.
 
 ```php title="app/Controllers/ProductController.php"
 <?php
@@ -224,6 +233,8 @@ No container binding is needed for these classes. The placeholder `{id}` matches
 
 ## 5. Run and check the result
 
+Once the service, controller and routes are in place, start the application from its root:
+
 ```bash
 composer dump-autoload
 php -S 127.0.0.1:8000 -t public
@@ -261,6 +272,22 @@ The list request returns status 200, `Content-Type: application/json`,
 | `GET /api/products/missing` | 404 | `{"error":"Product not found."}` |
 | `GET /unknown` | 404 | `{"error":"Request refused"}` |
 | Unexpected exception after bootstrap | 500 | `{"error":"Internal server error"}`; details stay in the log |
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| `/` returns a JSON 404 | This example registers `/api/products`, not a home route; request that URL instead |
+| A product returns 404 | Use the exact identifier `notebook` or `pencil`; other identifiers are expected to fail |
+| The list returns 400 | Remove the query string or use `?limit=1`; the parameter accepts integers from 1 to 100 |
+| A response contains HTML | Confirm you replaced `bootstrap.php` with this example and are reaching the server for `naf-catalog-api/` |
+| `Internal server error` | Read `logs/app.log` for the exception; check the service/controller paths and run `composer dump-autoload` after fixing them |
+
+The error response deliberately keeps internal details out of the client output. Use the
+local log for diagnosis rather than adding exception messages to the JSON response.
+See [Troubleshooting](../troubleshooting.md) for more checks.
+
+## Continue building
 
 This API exposes public data and accepts no writes, so it needs no authentication or CSRF
 token for these operations. Add access checks when introducing private data. When adding
