@@ -46,6 +46,10 @@ dependencies and NAF discovers the plugin. `--with-all-dependencies` also update
 framework version held by an older starter lock file. No Node installation or frontend
 build is needed in the consuming application. Only the host's `public/` directory is a web root.
 
+With PHP's built-in development server, use the [router file below](#development-server)
+so requests for the runtime URL reach NAF too. Configure other web servers to send
+requests for nonexistent files to `public/index.php`, as for the application's other routes.
+
 ## A counter
 
 Create `public/js/components/Counter.js`:
@@ -593,6 +597,31 @@ const props = JSON.parse(root.getAttribute('flow-props'));
 Flow.store('catalog-filters', new Filters(props.query));
 Flow.register('catalog-search', () => new CatalogSearch());
 Flow.register('filter-mirror', FilterMirror);
+```
+
+### Development server
+
+PHP's built-in server can treat URLs containing a file extension as missing static files.
+The Flow runtime is an application route, so create this router in the application root.
+Existing public files are served directly; other requests reach the normal entry point:
+
+```php title="router.php"
+<?php
+
+declare(strict_types=1);
+
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if (is_string($path) && is_file(__DIR__ . '/public' . $path)) {
+    return false;
+}
+
+require __DIR__ . '/public/index.php';
+```
+
+Start the development server from the application root:
+
+```bash
+php -S 127.0.0.1:8000 -t public router.php
 ```
 
 Open `/flow-example`. Typing in either field updates the other and reloads only the

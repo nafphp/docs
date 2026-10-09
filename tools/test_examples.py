@@ -91,12 +91,15 @@ def csrf(result):
 
 
 @contextmanager
-def server(root):
+def server(root, router=None):
     with socket.socket() as sock:
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]
     with tempfile.TemporaryFile(mode='w+') as log:
-        process = subprocess.Popen([*PHP, '-S', f'127.0.0.1:{port}', '-t', str(root / 'public')],
+        command = [*PHP, '-S', f'127.0.0.1:{port}', '-t', str(root / 'public')]
+        if router:
+            command.append(str(root / router))
+        process = subprocess.Popen(command,
                                    cwd=root, stdout=log, stderr=log)
         try:
             client = Client(port)
@@ -350,7 +353,7 @@ def main():
         if not route:
             raise RuntimeError('Flow route example is missing')
         (flow / 'app/routes.php').write_text('<?php\n\n' + route.group(1))
-        with server(flow) as client:
+        with server(flow, 'router.php') as client:
             test_flow(flow, client)
         print('PASS Flow components and fragments', flush=True)
         core = root / 'core'
