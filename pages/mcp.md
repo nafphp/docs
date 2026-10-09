@@ -23,9 +23,17 @@ Installing the plugin adds one route, under two methods:
 | `GET /mcp` | returns 405 with `Allow: POST` after authentication; server-initiated streaming is not implemented |
 
 Configure clients with the `/mcp` URL and a token created below.
-Missing or invalid credentials produce 401 at the MCP authenticator. If Form is installed,
-a POST without a Bearer header can fail its CSRF check first with 400. A Bearer header skips
-that check, but still has to authenticate at MCP.
+Missing or invalid credentials produce 401 at the MCP authenticator. With `naf/form` 0.2.3+
+installed, exempt this protocol route from browser CSRF validation in the existing
+`app/config.php` return array:
+
+```php-inline
+'csrf_exempt_routes' => ['mcp_server_rpc' => true],
+```
+
+Keep MCP authentication enabled. Form 0.2.3+ does not exempt requests merely because they
+carry a Bearer header; without the route exemption, a legitimate client can receive 400
+before MCP authenticates it. This setting exempts only the named MCP POST route.
 
 ## A tool
 
