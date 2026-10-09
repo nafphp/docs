@@ -80,6 +80,14 @@ Version **v0.2.4** · [Database](database.md)
 | --- | --- |
 | <code>database(): ?PDO</code> | `Naf\Database` |
 
+## naf/flow
+
+Version **v0.1.0** · [Flow](flow.md)
+
+| Signature | Namespace to import from |
+| --- | --- |
+| <code>page(string $template, array $vars = [], ?string $fragment = null): Psr\Http\Message\ResponseInterface</code> | `Naf\Flow` |
+
 ## naf/form
 
 Version **v0.2.3** · [Forms and validation](forms.md)
@@ -217,4 +225,4 @@ Version **v0.1.1** · [Live updates](websocket.md)
 
 </div>
 
-*63 public functions across 20 packages.*
+*64 public functions across 21 packages.*

@@ -10,6 +10,7 @@ from pathlib import Path
 PAGES = os.path.join(os.path.dirname(__file__), "..", "pages")
 KAPITEL = {
     "framework": ("Core", None), "view": ("Views and templates", "views.md"),
+    "flow": ("Flow", "flow.md"),
     "form": ("Forms and validation", "forms.md"), "session": ("Sessions", "sessions.md"),
     "database": ("Database", "database.md"), "orm": ("ORM and repositories", "orm.md"),
     "queue": ("Queues and workers", "queues.md"), "schedule": ("Scheduled jobs", "scheduling.md"),

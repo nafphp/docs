@@ -123,3 +123,9 @@ file, and a PHP error in a template is a PHP error with the right line number.
 The price is that nothing is escaped for you and nothing stops a template from doing more
 than it should. A `.phtml` file can open a database connection. It should not, and the only
 thing preventing it is you.
+
+## Interactive containers
+
+[Flow](flow.md) connects JavaScript classes or object factories to individual HTML containers.
+Use it when a view needs reactive fields, shared state or backend fragments without a page
+reload. The Flow chapter covers the existing View asset collector and a complete example.

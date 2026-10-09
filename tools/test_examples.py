@@ -91,12 +91,15 @@ def csrf(result):
 
 
 @contextmanager
-def server(root):
+def server(root, router=None):
     with socket.socket() as sock:
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]
     with tempfile.TemporaryFile(mode='w+') as log:
-        process = subprocess.Popen([*PHP, '-S', f'127.0.0.1:{port}', '-t', str(root / 'public')],
+        command = [*PHP, '-S', f'127.0.0.1:{port}', '-t', str(root / 'public')]
+        if router:
+            command.append(str(root / router))
+        process = subprocess.Popen(command,
                                    cwd=root, stdout=log, stderr=log)
         try:
             client = Client(port)
@@ -131,6 +134,37 @@ def test_first(client):
     expect(result[0] == 200 and json.loads(result[2]) == {'hello': 'Ada'}, 'First app JSON route')
     expect('application/json' in result[1]['Content-Type'], 'JSON content type')
     expect(client.request('/does-not-exist')[0] == 404, 'Unknown HTML route')
+
+
+def test_flow(root, client):
+    full = client.request('/flow-example')
+    expect(full[0] == 200 and '3 results' in full[2], 'Flow full page renders the catalog')
+    expect(full[2].count('src="/_flow/flow.js"') == 1, 'Flow runtime asset is rendered once')
+    expect(full[2].count('src="/js/flow-example.js"') == 1, 'Flow application module is rendered once')
+    expect("script-src 'self'" in full[1]['Content-Security-Policy'], 'Flow example uses strict CSP')
+    filtered = client.request('/flow-example?q=view')
+    expect(filtered[0] == 200 and '1 results' in filtered[2]
+           and '<!doctype html>' in filtered[2], 'Flow GET fallback renders a full page')
+    expect(filtered[2].count('value="view"') == 2, 'Flow server query initializes both store consumers')
+    fragment = client.request('/flow-example?q=queue', headers={'X-Flow': 'fragment'})
+    expect(fragment[0] == 200 and 'Queues and workers' in fragment[2]
+           and '1 results' in fragment[2], 'Flow fragment renders filtered results')
+    expect(fragment[1]['X-Flow'] == 'fragment' and 'X-Flow' in fragment[1]['Vary'],
+           'Flow fragment has its response and cache variation headers')
+    expect('<html' not in fragment[2] and '<script' not in fragment[2], 'Flow returns only the selected fragment')
+    expect(client.request('/flow-example?q%5B%5D=view')[0] == 400, 'Flow rejects array queries')
+    expect(client.request('/flow-example?q=' + 'a' * 81)[0] == 400, 'Flow rejects long queries')
+    escaped = client.request('/flow-example?q=' + urllib.parse.quote('<svg onload="alert(1)">'))
+    expect(escaped[0] == 200 and '<svg' not in escaped[2]
+           and '&lt;svg' in escaped[2] and '&quot;' in escaped[2], 'Flow escapes query attributes')
+    runtime = client.request('/_flow/flow.js')
+    bundle = root / 'vendor/naf/flow/src/Resources/public/flow.min.js'
+    expect(runtime[0] == 200 and runtime[2] == bundle.read_text(), 'Flow serves the published prebuilt bundle')
+    expect(client.request('/_flow/flow.js', headers={'If-None-Match': runtime[1]['ETag']})[0] == 304,
+           'Flow validates its runtime ETag')
+    for module in (root / 'public/js').rglob('*.js'):
+        path = '/' + module.relative_to(root / 'public').as_posix()
+        expect(client.request(path)[0] == 200, f'Flow documented module is served: {path}')
 
 
 def test_starter(client):
@@ -309,6 +343,19 @@ def main():
                 if feature == 'contact': test_contact(fixture, client)
                 if feature == 'login': test_login(fixture, client)
             print(f'PASS {feature}', flush=True)
+        flow = root / 'flow'
+        shutil.copytree(starter, flow)
+        run([*COMPOSER, 'require', 'naf/flow:^0.1', '--with-all-dependencies',
+             '--no-interaction', '--prefer-dist'], flow)
+        copy_examples('flow.md', flow)
+        route = re.search(r'Add this route to the existing `app/routes.php`:\n\n```php-inline\n(.*?)^```',
+                          (PAGES / 'flow.md').read_text(), re.M | re.S)
+        if not route:
+            raise RuntimeError('Flow route example is missing')
+        (flow / 'app/routes.php').write_text('<?php\n\n' + route.group(1))
+        with server(flow, 'router.php') as client:
+            test_flow(flow, client)
+        print('PASS Flow components and fragments', flush=True)
         core = root / 'core'
         core.mkdir()
         copy_examples('install.md', core)

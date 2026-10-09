@@ -295,6 +295,7 @@
   "Naf\\Exceptions\\HttpException",
   "Naf\\Exceptions\\RouteNotFoundException",
   "Naf\\Exceptions\\ServiceNotFoundException",
+  "Naf\\Flow\\Http\\RuntimeController",
   "Naf\\Form\\Core\\Validator",
   "Naf\\Form\\Events\\CsrfListener",
   "Naf\\Form\\Support\\Csrf",
@@ -568,6 +569,10 @@
    "namespace": "Naf\\Database",
    "signature": "database(): ?PDO"
   },
+  "Naf\\Flow\\page": {
+   "namespace": "Naf\\Flow",
+   "signature": "page(string $template, array $vars = [], ?string $fragment = null): Psr\\Http\\Message\\ResponseInterface"
+  },
   "Naf\\Form\\csrf": {
    "namespace": "Naf\\Form",
    "signature": "csrf(): Naf\\Form\\Support\\Csrf"
@@ -789,6 +794,7 @@
   "Naf\\CLI\\command": "cli",
   "Naf\\Client\\client": "client",
   "Naf\\Database\\database": "database",
+  "Naf\\Flow\\page": "flow",
   "Naf\\Form\\csrf": "form",
   "Naf\\Form\\error": "form",
   "Naf\\Form\\error_class": "form",
@@ -923,6 +929,17 @@
    ],
    "suggests": [],
    "version": "v0.2.4"
+  },
+  "flow": {
+   "description": "Reactive JavaScript components and HTML updates for NAF, automatically integrated with naf/view.",
+   "namespace": "Naf\\Flow",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework",
+    "naf/view"
+   ],
+   "suggests": [],
+   "version": "v0.1.0"
   },
   "form": {
    "description": "NAF Form Plugin to make form handling easier.",
