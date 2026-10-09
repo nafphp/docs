@@ -147,3 +147,5 @@ try {
 
 `em()->clear()` releases the manager's tracked state; call it periodically in long-running
 workers. Define and migrate your schema yourself: the ORM does not generate it.
+
+Create and evolve schemas through [Database migrations](database.md#migrations). Verify mapping and persistence with [disposable test data](testing.md#forms-sessions-and-persistence).

@@ -4,17 +4,9 @@ title: How Nafinity is extended
 
 # How Nafinity is extended
 
-Nafinity has two extension mechanisms and no others. Not a hook manager beside an event
-system beside a filter chain — two, used for everything.
-
-```text
-Registry   what exists          a plugin adds to a list the application renders
-Event      what is happening    a listener takes part in something already running
-```
-
-Whether a third is ever needed is a question worth keeping closed. Before proposing one,
-the answer has to be: what can this do that a registry and an event cannot express? A
-second API for the same problem is not a reason.
+Nafinity exposes typed registries for definitions and object events for application changes.
+A plugin registers a provider before Board boots; Board invokes it after its own defaults.
+The host's optional `extensions.php` applies final overrides.
 
 ## Providers
 
@@ -43,11 +35,11 @@ provider; Board boots after it, adds its defaults, runs providers by index and i
 the host's optional `extensions.php`. Resolve Board services and replace definitions inside
 `register()`, when those defaults exist.
 
-## The registries
+## Definition registries { #the-registries }
 
 Every one of them takes definitions of one type, keys them by id, orders them by an index
 with the id as tie-breaker, and refuses a duplicate unless you pass `replace: true`.
-Learning one is learning all sixteen.
+Use the same registration conventions across the registries below.
 
 | Registry | What a plugin puts in it |
 |---|---|
@@ -69,11 +61,11 @@ Learning one is learning all sixteen.
 A plugin can also do everything any NAF plugin can: routes, controllers, commands, jobs,
 migrations, translations, and replacing a core service through the container.
 
-## The events
+## Application events { #the-events }
 
-Six, for the whole application, and each of them is a class: `dispatch(new Change(…))`,
-`listen(Change::class, …)`. A misspelled class is an error where it is written, while a
-misspelled event name used to be a listener that never ran and never said so.
+Application events use objects: `dispatch(new Change(…))` and `listen(Change::class, …)`.
+Their classes define payloads. PHP does not check existence for a `::class` string; use static
+analysis and tests to catch misspelled listener keys.
 
 | Event | Carries | When |
 |---|---|---|
@@ -106,8 +98,9 @@ to get it.
 
 ### A listener can refuse
 
-`Change` is dispatched inside the transaction that did the work. Throwing from a
-listener rolls the whole thing back:
+`Change` is dispatched inside the application transaction. Throwing from its listener rolls
+back that database work. This fragment assumes registration inside a service whose
+`isFriday()` method implements the application's rule:
 
 ```php-inline
 event()->listen(Change::class, function (Change $change): void {
@@ -121,19 +114,16 @@ The ticket does not move, its version does not advance, and the person is told w
 is how a rule that no permission can express — one that depends on the data, the time or
 another system — gets to stop something.
 
-It costs doing the work and undoing it, which for a rule engine is the right trade: the
-listener sees the finished state rather than a proposal, and that is usually what a rule
-needs to judge.
+The listener observes the resulting state before commit. External effects such as HTTP calls
+or mail are not undone by a database rollback; defer them or use a reliable job/outbox design.
 
-`SignIn` is the exception that cannot refuse, and is announced *after* its transaction on
-purpose. By then the session is published and the person is in; rolling that back would leave
-them signed in with no record of it. Refusing a sign-in is the authentication provider's job.
+`SignIn` is dispatched after its transaction and cannot veto completed authentication.
+Reject credentials or inactive accounts through the authentication provider.
 
 ## A worked example: changing an export
 
-The case both mechanisms were sharpened on. A plugin keeps a state of its own on tickets,
-and one external system needs that state reported as `done` — without the board ever
-saying anything different.
+This example maps a custom ticket state to `done` in one export format without changing
+the stored ticket. Register a format, then modify its exported row through an event.
 
 Register the format:
 
@@ -161,7 +151,7 @@ event()->listen(ExportLine::class, static function (ExportLine $line): void {
 });
 ```
 
-Three things that are not accidents.
+The example preserves these boundaries:
 
 `$line->ticket` is `readonly`, and PHP enforces it: reassigning it, editing a key,
 taking a reference and `unset` all raise an error. An export that edited the tickets it
@@ -176,7 +166,7 @@ And the columns needed no registration. Every field a plugin registered through
 `ticketFields()` is a column in every format, with the field's own read permission still
 deciding whether this reader sees it.
 
-## What is deliberately not extensible
+## Ticket status and custom states { #what-is-deliberately-not-extensible }
 
 A ticket's `status` is `open` or `closed`, and no registry offers a third value.
 
@@ -202,8 +192,7 @@ can name them. A value in `status` could not be inert: every count of open ticke
 `WHERE status = 'open'`, so tickets carrying a status nothing explains would silently
 vanish from the board's own arithmetic.
 
-That is the test any proposed extension point has to pass. Not "can a plugin write this",
-but "what happens to the data when the plugin is gone".
+When adding extension data, define how the application handles it after the plugin is removed.
 
 ## Browser lifecycle
 
@@ -213,7 +202,7 @@ its disposer once when closing the drawer or replacing a fragment. A disposer re
 after the root was removed is still called. Own listeners, timers and retained nodes
 must be released there; a module failure leaves the fixed ticket areas available.
 
-## The full reference
+## Extension reference { #the-full-reference }
 
 Every definition's parameters, the contracts, storage, the browser lifecycle for
 contributed widgets, and the negative cases — an unknown key, a reserved id, a value the

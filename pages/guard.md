@@ -62,3 +62,5 @@ guard()->register('positiveId', function (int $id): int {
 
 $id = guard()->positiveId(42);
 ```
+
+Apply checks at the application boundary and verify rejected inputs in [application tests](testing.md).

@@ -16,6 +16,7 @@ import shutil
 import socket
 import sqlite3
 import subprocess
+import sys
 import tempfile
 import time
 import urllib.error
@@ -48,6 +49,8 @@ def copy_examples(page, root):
         target.write_text(content)
         if target.suffix in ('.php', '.phtml'):
             run([*PHP, '-l', str(target)], root)
+        elif target.suffix == '.py':
+            compile(content, str(target), 'exec')
     (root / 'storage/mail').mkdir(parents=True, exist_ok=True)
 
 
@@ -56,6 +59,23 @@ def expect(condition, message):
     if not condition:
         raise AssertionError(message)
     checks += 1
+
+
+def fragment(page, marker, language='php-inline'):
+    """Extract a documented fragment following its exact introduction."""
+    source = (PAGES / page).read_text().split(marker, 1)
+    if len(source) != 2:
+        raise RuntimeError(f'Missing example introduction in {page}: {marker}')
+    block = re.search(r'^```' + re.escape(language) + r'\n(.*?)^```', source[1], re.M | re.S)
+    if not block:
+        raise RuntimeError(f'Missing example fragment in {page}')
+    return block.group(1)
+
+
+def bootstrap_include(root, name):
+    bootstrap = root / 'bootstrap.php'
+    source = bootstrap.read_text()
+    bootstrap.write_text(source.replace('app()->run();', f"require_once BASE_PATH . '/{name}';\n\napp()->run();"))
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -117,6 +137,9 @@ def server(root, router=None):
         except Exception:
             log.seek(0)
             print(log.read()[-6000:])
+            application_log = root / 'logs/app.log'
+            if application_log.exists():
+                print(application_log.read_text()[-4000:])
             raise
         finally:
             process.terminate()
@@ -294,6 +317,118 @@ def test_api(root):
         expect(failure[0] == 500 and json.loads(failure[2]) == {'error': 'Internal server error'}, 'Unexpected API exception sanitized')
 
 
+def test_integrations(root):
+    for page in ('first-app.md', 'testing.md', 'http-client.md', 'file-downloads.md',
+                 'queues.md', 'scheduling.md', 'mcp.md', 'console.md'):
+        copy_examples(page, root)
+    plugin = root.parent / 'hello-plugin'
+    plugin.mkdir()
+    copy_examples('plugins.md', plugin)
+    run([*COMPOSER, 'config', 'repositories.docs-plugin', 'path', str(plugin)], root)
+    run([*COMPOSER, 'require', 'example/naf-hello:@dev', '--no-interaction', '--prefer-dist'], root)
+    bootstrap_include(root, 'app/schedule.php')
+    command = fragment('console.md', '## Register a command')
+    (root / 'app/commands.php').write_text('<?php\n\n' + command)
+    bootstrap_include(root, 'app/commands.php')
+    registration = fragment('mcp.md', 'Register the tool in root `bootstrap.php`')
+    (root / 'app/mcp.php').write_text('<?php\n\n' + registration)
+    bootstrap_include(root, 'app/mcp.php')
+    routes = fragment('file-downloads.md', 'Add this fragment to the existing `app/routes.php`:')
+    (root / 'app/download-routes.php').write_text('<?php\n\n' + routes)
+    with (root / 'app/routes.php').open('a') as file:
+        file.write("\nrequire __DIR__ . '/download-routes.php';\n")
+    (root / 'storage/files').mkdir(parents=True)
+    (root / 'storage/files/example.txt').write_text('Example download\n')
+    reports = root / 'storage/reports'
+    reports.mkdir(parents=True)
+    (reports / 'report.txt').write_text('Report\n')
+    (reports / 'nested').mkdir()
+    (reports / 'nested/second.txt').write_text('Second\n')
+    (reports / 'outside.txt').symlink_to(root / 'composer.json')
+    run([*COMPOSER, 'dump-autoload', '--no-interaction'], root)
+
+    expect('OK (2 tests, 2 assertions)' in run(
+        [*PHP, 'vendor/bin/phpunit', '--bootstrap', 'vendor/autoload.php', 'tests/GreetingTest.php'], root),
+        'Documented PHPUnit service tests')
+    expect('HTTP transport test passed.' in run([*PHP, 'bin/http-client-demo.php'], root),
+           'Fake transport retries without network delivery')
+    expect('Hello, World!' in run([*PHP, 'vendor/bin/naf', 'hello:say', 'World'], root),
+           'Application command is registered and runs through the CLI')
+    missing_name = subprocess.run([*PHP, 'vendor/bin/naf', 'hello:say'], cwd=root, capture_output=True)
+    expect(missing_name.returncode != 0, 'Application command rejects a missing required argument')
+    expect('Job queued.' in run([*PHP, 'bin/enqueue-demo.php'], root), 'Queue producer runs through application bootstrap')
+    expect('Recorded signup for user 42' in run([*PHP, 'vendor/bin/naf', 'queue:consume', '--once'], root),
+           'Queue worker constructs and executes the documented job')
+    producer = root / 'bin/enqueue-demo.php'
+    producer.write_text(producer.read_text().replace("'user_id' => 42", "'user_id' => 0"))
+    run([*PHP, 'bin/enqueue-demo.php'], root)
+    for attempt in range(3):
+        failed = subprocess.run([*PHP, 'vendor/bin/naf', 'queue:consume', '--once', '--verbose'],
+                                cwd=root, capture_output=True, text=True)
+        expect(failed.returncode != 0 and 'positive user_id' in failed.stdout + failed.stderr,
+               f'Invalid job payload fails worker attempt {attempt + 1}')
+    deadletters = list((root / 'storage/queue/deadletter').rglob('*.job'))
+    expect(len(deadletters) == 1, 'Failed job is retained in the documented deadletter directory')
+    run([*PHP, 'vendor/bin/naf', 'queue:retry-failed', '--keep'], root)
+    expect(deadletters[0].is_file(), 'Retry with --keep retains the original failure')
+    for attempt in range(3):
+        retried = subprocess.run([*PHP, 'vendor/bin/naf', 'queue:consume', '--once', '--verbose'],
+                                 cwd=root, capture_output=True, text=True)
+        expect(retried.returncode != 0 and 'positive user_id' in retried.stdout + retried.stderr,
+               f'Retried job reaches worker attempt {attempt + 1}')
+    run([*PHP, 'vendor/bin/naf', 'schedule:ticker', '--once'], root)
+    expect((root / 'storage/schedule-state.json').is_file(), 'Scheduler writes application-specific state')
+    expect('Scheduled heartbeat executed.' in run([*PHP, 'vendor/bin/naf', 'queue:consume', '--once'], root),
+           'Ticker and worker execute the documented scheduled job')
+
+    def token(scope):
+        output = run([*PHP, 'vendor/bin/naf', 'mcp:token:create', 'Documentation test', '--scope', scope], root)
+        plain = re.sub(r'\x1b\[[0-9;]*m', '', output)
+        match = re.search(r'Token:\s+(mcp_\S+)', plain)
+        expect(bool(match), 'MCP CLI creates a scoped bearer token')
+        return match.group(1)
+
+    allowed = token('folders:read')
+    denied = token('articles:read')
+    with server(root) as client:
+        plugin_response = client.request('/plugin-hello')
+        expect(plugin_response[0] == 200 and json.loads(plugin_response[2]) == {'message': 'Hello from the plugin'},
+               'Composer discovers the documented plugin and loads its route and controller')
+        expect('HTTP smoke tests passed.' in run([sys.executable, 'tests/http_smoke.py', client.base], root),
+               'Documented HTTP smoke test runs against a live application')
+        download = client.request('/downloads/example')
+        expect(download[0] == 200 and download[2] == 'Example download\n', 'Download stream emits file contents')
+        expect(download[1]['Content-Disposition'] == 'attachment; filename="example.txt"', 'Controlled download filename')
+        expect(client.request('/downloads/unknown')[0] == 404, 'Unknown download identifier is rejected')
+        expect(client.request('/mcp', 'POST', b'{}', {'Content-Type': 'application/json'})[0] == 400,
+               'With Form installed, the CSRF listener rejects an unauthenticated MCP POST first')
+        expect(client.request('/mcp', 'POST', b'{}',
+                              {'Content-Type': 'application/json', 'Authorization': 'Bearer invalid'})[0] == 401,
+               'MCP rejects an invalid bearer token after the Bearer CSRF exemption')
+
+        def rpc(method, args=None, bearer=allowed):
+            message = {'jsonrpc': '2.0', 'id': 1, 'method': method}
+            if args is not None:
+                message['params'] = {'name': 'get_folder_size', 'arguments': args}
+            result = client.request('/mcp', 'POST', json.dumps(message).encode(),
+                                    {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + bearer})
+            expect(result[0] == 200, f'MCP {method} responds to an authenticated request')
+            return json.loads(result[2])['result']
+
+        definitions = rpc('tools/list')['tools']
+        expect([tool['name'] for tool in definitions] == ['get_folder_size'], 'Scoped MCP tool is advertised')
+        expect(definitions[0]['inputSchema']['additionalProperties'] is False, 'MCP advertises the bounded input schema')
+        result = rpc('tools/call', {'folder': 'reports'})
+        expect(result['isError'] is False and json.loads(result['content'][0]['text']) == {'folder': 'reports', 'bytes': 14},
+               'MCP tool counts nested application files and excludes symlinks')
+        expect(rpc('tools/call', {'folder': '../'})['isError'] is True, 'MCP handler rejects unknown folders')
+        expect(rpc('tools/call', {'folder': 'reports', 'path': '/tmp'})['isError'] is True,
+               'MCP handler rejects extra arguments independently of its advertised schema')
+        expect(rpc('tools/list', bearer=denied)['tools'] == [], 'MCP hides tools outside token scopes')
+        expect(rpc('tools/call', {'folder': 'reports'}, bearer=denied)['isError'] is True,
+               'MCP refuses direct calls outside token scopes')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--starter', type=Path, help='Reuse installed starter dependencies; source is read-only')
@@ -356,6 +491,14 @@ def main():
         with server(flow, 'router.php') as client:
             test_flow(flow, client)
         print('PASS Flow components and fragments', flush=True)
+        integrations = root / 'integrations'
+        shutil.copytree(starter, integrations)
+        run([*COMPOSER, 'require', 'naf/client', 'naf/queue', 'naf/schedule', 'naf/mcp',
+             '--with-all-dependencies', '--no-interaction', '--prefer-dist'], integrations)
+        run([*COMPOSER, 'require', '--dev', 'phpunit/phpunit:^12.1',
+             '--no-interaction', '--prefer-dist'], integrations)
+        test_integrations(integrations)
+        print('PASS service/HTTP tests, downloads, queue retry, schedule, HTTP fake and MCP scopes', flush=True)
         core = root / 'core'
         core.mkdir()
         copy_examples('install.md', core)

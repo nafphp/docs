@@ -231,3 +231,5 @@ service that needs no templates or forms, start with the
 - [A contact form](recipes/contact-form.md) adds an HTML form.
 - [A login form](recipes/login-form.md) signs in a user.
 - [A JSON API](recipes/json-api.md) adds persistent data and JSON error responses.
+
+See [Testing applications](testing.md) to automate verification and [Deployment](deployment.md) for production setup.

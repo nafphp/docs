@@ -1,55 +1,38 @@
 ---
-title: Why auth has this shape
+title: Authentication architecture
 requires:
   - naf/auth
 ---
 
-# Why auth has this shape
+# Authentication architecture { #why-auth-has-this-shape }
 
-Why the plugin has this shape. [Authentication and permissions](auth.md) describes how
-to use it; this page explains the design.
+Auth separates credential verification, identity loading, authorization and persistence.
+[Authentication](auth.md) explains usage; this chapter describes how its services cooperate
+and which guarantees depend on the application provider.
 
 ## One implementation per question
 
-The permission question is answered in exactly one place, `Auth::holds()`. There is no authorizer
-service, no actor wrapper and no interface that mirrors the manager. An earlier draft had all three,
-which meant `can`, `canAny`, `canAll`, `hasRole`, `hasAnyRole` and `hasAllRoles` existed three times
-over — plus fallback copies inside the wrapper, because the authorizer interface declared fewer
-methods than the authorizer had. Every extra layer was a second place for the same rule to drift.
+`Auth` owns permission checks and the current identity. `auth()->user()` returns the
+provider's identity object. `IdentityInterface` exposes the identifier, roles and permissions;
+`UserInterface` adds activity and profile information.
 
-Consequences that are deliberate, not oversights:
+`can('a', 'b')` requires both permissions; `canAny('a', 'b')` accepts either. Per-object
+`allows($action, $resource)` checks a registered policy independently of global grants.
+No policy means denial. Applications register providers and policies in their bootstrap.
 
-- **`Auth` is final and holds its own state.** No shared state object, no cloning. `authenticate()` takes
-  the source name as an argument instead of `auth('name')` returning a copy, so there is nothing to
-  keep in sync between instances.
-- **No `Actor`.** `auth()->user()` returns the provider's own object and `auth()` answers the
-  authorization questions about it. One way to reach the person, one way to ask about them.
-- **Grants live on `IdentityInterface`.** Identifier, roles and permissions form the base
-  contract. `UserInterface` extends it with `isActive()` and `getProfile()`; Auth checks
-  that extended contract when present. Returning `[]` for grants suits login-only applications.
-- **Variadics replace the ANY/ALL pairs.** `can('a', 'b')` is "both"; `canAny('a', 'b')` is "either".
-  Listing nothing is vacuously true for the ALL forms, so `requirePermission(...$configured)` with an
-  empty configuration asks for a login and nothing more.
-- **`allows($action, $resource)` is separate from `can()`.** A global grant and a per-object rule are
-  different questions, so they are different methods; the resource never sneaks in as a second
-  argument that silently changes what `can()` means.
-- **Policies live in `Auth`.** They are an array lookup and a callback. A registry service for that
-  would be a class whose whole job is `isset()`.
-
-## The provider is the seam
+## Provider responsibilities { #the-provider-is-the-seam }
 
 `ProviderInterface` declares `authenticate()` and `find()`. Everything a backend needs — a PDO
 connection, an LDAP handle, an HTTP client — is a constructor dependency of the provider, resolved
 through the container when it is registered by class name.
 
-- `PasswordProvider` exists because the unknown-account path is what hand-written login code gets
-  wrong. It verifies against a decoy hash when there is no account, so a wrong username and a wrong
-  password cost the same.
+- `PasswordProvider` verifies passwords and uses a decoy hash for unknown accounts to reduce
+  timing differences between unknown-account and incorrect-password paths.
 - `OrmProvider` is the ORM implementation. It maps a repository and three column names onto
   those two questions, and requires the model to implement `IdentityInterface` — that requirement is
   what keeps `auth()->user()` returning the application's own class instead of a wrapper.
 - Providers registered by name are resolved lazily and cached, so registering five sources in
-  `bootstrap.php` builds none of them until somebody logs in.
+  `bootstrap.php` does not construct them until authentication or identity loading needs them.
 
 ## Persistence
 
@@ -88,19 +71,19 @@ occur. Service construction and registration belong in the bootstrap, including 
 provider factories and any imperative policy/provider registrations.
 
 Boot the auth plugin before using `auth()`, and resolve it after dependency plugins have booted.
-Lazy factories allow registration before the session, PDO or ORM services exist. Unlike the previous
-helper, this deliberately does not hide a missing or incorrectly ordered bootstrap.
+Lazy factories allow registration before the session, PDO or ORM services exist. Missing or
+incorrectly ordered dependencies fail when the manager is resolved.
 
-No framework API, no event system and no guard registry is introduced. The two exceptions expose
+Authorization exceptions expose
 `getStatusCode()` so the framework error handler renders 401 and 403 instead of a generic 500; they
 carry the same value as their exception code and stay usable outside HTTP.
 
 ## What the plugin guarantees
 
-- A login rotates the session ID, or it does not happen.
+- With `SessionStateStore`, a login rotates the session ID or fails.
 - Restoration distinguishes sources even when identifiers collide, and re-reads grants every request.
 - A resource policy that denies — or the absence of one — is never bypassed by a global permission.
-- An unknown username costs a full hash. Credentials are marked `#[\SensitiveParameter]` and
+- Password providers verify a decoy hash for unknown usernames to reduce timing differences. Credentials are marked `#[\SensitiveParameter]` and
   `PasswordCredentials` redacts its debug output. Nothing but a source name and an identifier is
   persisted.
 - A failed attempt leaves an existing login intact. Call `logout()` first if reauthentication should

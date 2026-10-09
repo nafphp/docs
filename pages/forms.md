@@ -6,25 +6,26 @@ requires:
 
 # Forms and validation
 
-`naf/form` covers the three things a form needs beyond HTML: validating what came in,
-showing what went wrong, and putting back what the person already typed. It also protects
-POST, PUT and DELETE requests with a CSRF token, without you registering anything.
-PATCH is not checked by the current listener.
+`naf/form` provides validation, error display helpers and request-value helpers. It also
+checks CSRF tokens before controllers handle POST, PUT and DELETE requests. The current
+listener does not check PATCH.
 
-## Use the corrected helper release
+Use the examples in a bootstrapped application. Template examples assume the starter's
+`naf/view` package for HTML escaping; validation itself does not require View.
 
-Use `naf/form` **0.2.1 or newer**. Version 0.2.0's `is_post()` asked the container for a
-removed string service key, which also broke `error()` and `error_class()`. Upgrade an older
+## Requirements and compatibility { #use-the-corrected-helper-release }
+
+The template helpers in this guide require `naf/form` **0.2.1+**. Update an older
 installation with:
 
 ```bash
 composer require 'naf/form:^0.2.1'
 ```
 
-No compatibility alias is needed with 0.2.1. Starter 0.2.2 already includes a newer compatible
-version; see [Installation](install.md) when updating an older starter.
+Starter 0.2.2 includes compatible dependencies. See [Installation](install.md) for updating
+an older application.
 
-## The helpers are namespaced
+## Import helpers { #the-helpers-are-namespaced }
 
 Every helper lives in `Naf\Form`. Templates import the ones they use:
 
@@ -33,12 +34,13 @@ Every helper lives in `Naf\Form`. Templates import the ones they use:
 use function Naf\Form\{csrf, error, has_error, memory, validator};
 ```
 
-They are not global. A template that calls `memory()` without importing it will fail with
-an undefined-function error, and that is the single most common surprise with this plugin.
+Imports are local to each PHP file. Calling a helper without its namespace or import
+produces an undefined-function error.
 
 ## Validation
 
-Hand the request body and a set of rules to the validator:
+Pass input and field rules to the shared validator. `param()->all()` combines body and
+query data; use the request body accessor when the input source matters:
 
 ```php-inline
 use function Naf\Form\validator;
@@ -67,8 +69,8 @@ errors later without you passing it around.
 | `max:n` | the value is empty, or at most `n` characters | Maximum of %d characters. |
 | `boolean` | it reads as a boolean | Is not a boolean value. |
 
-`min` and `max` pass on an empty value on purpose: whether a field may be empty at all is
-`required`'s question, and answering it twice produces two messages for one mistake.
+`min` and `max` permit empty values. Combine them with `required` when the field must be
+present and nonempty. Validate input types before rules that expect text.
 
 ### Your own messages
 
@@ -98,7 +100,7 @@ Validator::register('starts_with', function ($value, $param) {
 
 Register it once, during boot, and use it like any built-in rule: `'ref' => 'starts_with:INV-'`.
 
-## Showing what went wrong
+## Display validation errors { #showing-what-went-wrong }
 
 ```html+php
 <input name="email" class="<?= error_class('email', validator()) ?>">
@@ -109,10 +111,10 @@ Register it once, during boot, and use it like any built-in rule: `'ref' => 'sta
 
 - `error($field, $validator)` — an HTML `div.error-msg` containing the field messages on POST, or `null`
 - `has_error($field, $validator)` — whether the field has one
-- `error_class($field, $validator)` — a class name to hang styling on
+- `error_class($field, $validator)` — the configured error class for a field
 - `is_post()` — whether this request was a POST, for the usual `if (is_post())` branch
 
-## Putting back what was typed
+## Redisplay submitted values { #putting-back-what-was-typed }
 
 A failed validation should not empty the form. `memory()` reads the **current request**
 through `param()`. It neither escapes the value nor persists it across a redirect.
@@ -133,12 +135,18 @@ so they can be dropped into the tag without a conditional.
 
 ## CSRF protection
 
-Put a token in every form that changes something:
+Generate one token per rendered page and reuse it across forms. In a template:
 
 ```html+php
+<?php
+use function Naf\Form\csrf;
+use function Naf\View\s;
+
+$token = csrf()->generate();
+?>
 <form method="post">
-    <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
-    <!-- your fields -->
+    <input type="hidden" name="_csrf" value="<?= s($token) ?>">
+    <!-- Application fields -->
 </form>
 ```
 
@@ -161,17 +169,13 @@ A request whose `Authorization` header begins with `Bearer ` is let through by t
 listener. This does **not** validate the token or authenticate the caller: the endpoint
 must perform its own bearer authentication and must not fall back to a cookie login.
 
-Only `Bearer`. A browser attaches cookies and Basic credentials by itself, so a request
-carrying those is exactly the kind CSRF exists to stop — the header was never proof of
-anything, and treating *any* `Authorization` header as a pass made the header itself the
-bypass. Nothing attaches a Bearer token automatically, so a request that has one was built
-deliberately by whoever holds it.
+Cookies and Basic credentials do not receive this exemption. For bearer-authenticated
+endpoints, reject invalid tokens even when the caller also has a valid browser session.
 
 ### Routes that authenticate some other way
 
-A protocol endpoint called by a program carries no session to ride on and no form to put a
-token in. A CSRF check there refuses legitimate requests while protecting nothing. Name
-such routes one at a time:
+For protocol endpoints that authenticate independently of browser cookies, configure
+explicit exemptions in the array returned by `app/config.php`:
 
 ```php-inline
 'csrf_exempt_routes' => [
@@ -183,8 +187,8 @@ It is a map rather than a list so that several plugins can contribute to it with
 overwriting another by position — and so an application can switch a plugin's exemption
 back off with `false`.
 
-Routes are named, never guessed from a path. There is no pattern matching here, and that is
-deliberate: a prefix rule exempts endpoints nobody remembered adding.
+Exemptions match exact route names, not paths or prefixes. Review the endpoint's own
+authentication before exempting it.
 
 ### Turning it off
 
@@ -192,14 +196,15 @@ deliberate: a prefix rule exempts endpoints nobody remembered adding.
 'csrf_validation' => false,
 ```
 
-For a service with no browser clients at all. If some of your endpoints need it and others
-do not, exempt those routes instead.
+This disables the listener globally. Use it only when the application does not rely on
+browser-attached credentials. Prefer named exemptions for mixed browser/API applications.
 
-## How it works
+## Services and request timing { #how-it-works }
 
 The plugin registers the built-in validator rules through the container, extends the guard
 with a CSRF service, hooks the check into `Event::CONTROLLER_CALLING`, and provides the view
 helpers. CSRF tokens are stored in the session, which is why `naf/session` comes along.
 Remembered input is read from the current request, not from the session.
 
-None of it needs configuration.
+Built-in validation rules and CSRF checking are registered automatically. Application
+validation rules, tokens in forms and any exemptions still require application code.

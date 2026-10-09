@@ -61,59 +61,62 @@ markdown_extensions:
 
 nav:
   - Getting started:
-      - What NAF is: index.md
+      - NAF overview: index.md
       - Installation: install.md
       - Your first application: first-app.md
-      - Which packages do I need?: choosing-packages.md
-  - Worked examples:
-      - Handling a POST request: recipes/post-requests.md
-      - A contact form: recipes/contact-form.md
-      - A login form: recipes/login-form.md
-      - A JSON API: recipes/json-api.md
-  - Core:
+      - Choosing packages: choosing-packages.md
+  - Tutorials and task guides:
+      - Handling POST requests: recipes/post-requests.md
+      - Contact form: recipes/contact-form.md
+      - Login form: recipes/login-form.md
+      - JSON API: recipes/json-api.md
+  - Core concepts:
+      - Application lifecycle: lifecycle.md
       - Routing: routing.md
       - Controllers: controllers.md
       - Requests and responses: request-response.md
       - Configuration: configuration.md
-      - Dependency Injection: dependency-injection.md
+      - Dependency injection: dependency-injection.md
       - Events: events.md
-      - Errors and aborting: errors.md
-      - Guard: guard.md
+      - Error handling: errors.md
+      - Guard rules: guard.md
       - Serving files: file-downloads.md
       - External libraries: external-libraries.md
-      - Best practices: best-practices.md
+      - Application design: best-practices.md
   - Plugins:
-      - How plugins work: plugins.md
-      - Flow: flow.md
-  - Presenting:
+      - Plugin development: plugins.md
       - Views and templates: views.md
       - Forms and validation: forms.md
+      - Flow browser components: flow.md
       - Translations: translations.md
-  - Storing:
+  - Persistence:
       - Sessions: sessions.md
-      - Database: database.md
+      - Database and migrations: database.md
       - ORM and repositories: orm.md
       - File storage: file-storage.md
-  - Doing work:
+  - Commands and integrations:
       - Console commands: console.md
       - Queues and workers: queues.md
       - Scheduled jobs: scheduling.md
-      - Sending mail: mail.md
+      - Mail delivery: mail.md
       - HTTP client: http-client.md
       - Rate limits: rate-limits.md
-      - Live updates: websocket.md
-  - Identity:
-      - Authentication and permissions: auth.md
-      - Roles and permissions: rbac.md
-      - Why auth has this shape: auth-architecture.md
-      - Signing in against a directory: auth-ldap.md
-      - Signing in with a provider: oauth-client.md
-      - Being the provider: oauth-server.md
-  - Machines:
+      - WebSocket notifications: websocket.md
       - MCP tools: mcp.md
-  - Build with NafPHP:
-      - Nafinity: built-with/nafinity.md
-      - How Nafinity is extended: built-with/extending-nafinity.md
+  - Identity and access:
+      - Authentication and permissions: auth.md
+      - Authentication architecture: auth-architecture.md
+      - Roles and permissions: rbac.md
+      - LDAP authentication: auth-ldap.md
+      - OAuth client: oauth-client.md
+      - OAuth authorization server: oauth-server.md
+  - Testing and deployment:
+      - Testing applications: testing.md
+      - Deploying applications: deployment.md
+      - Troubleshooting and logging: troubleshooting.md
+  - Built with NAF:
+      - Nafinity application: built-with/nafinity.md
+      - Nafinity extensions: built-with/extending-nafinity.md
   - Reference:
       - Function index: function-index.md
       - Package overview: packages.md

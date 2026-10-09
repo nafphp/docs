@@ -4,12 +4,12 @@ title: External libraries
 
 # Using External Libraries
 
-NAF is designed to be minimal and flexible.  
-You are free to integrate any external library you need without fighting against hidden internals.
+NAF can use ordinary Composer libraries through configuration and container bindings.
+Check whether an existing [NAF package](choosing-packages.md) meets the requirement first.
+Register external services in root `bootstrap.php`, before their consumers are constructed.
 
-Thanks to the PSR-4 structure and Composer, adding new tools is simple and clean.
-
----
+The examples below are integration fragments. They assume a bootstrapped application and
+the library-specific setup described in each section.
 
 ## Installing Packages
 
@@ -19,7 +19,8 @@ You can install any Composer package as usual:
 composer require some/vendor-package
 ```
 
-The package will be autoloaded automatically according to PSR-4 standards.
+Composer loads the package according to its declared autoload configuration. Installation
+does not configure its services or register a NAF plugin unless it declares `naf-plugin`.
 
 ---
 
@@ -110,4 +111,5 @@ $user = User::find(1);
 - Register services inside your container via `app()->container()->set()`.
 - Load config values using `config('key')`.
 - Keep external libraries isolated and modular.
-- You are free to build your own architecture around NAF without restrictions.
+- Test the integrated library against the PHP and dependency versions in your application lock.
+- Keep template directories, cache permissions and database configuration explicit.

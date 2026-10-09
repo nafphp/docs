@@ -6,37 +6,52 @@ requires:
 
 # MCP tools
 
-An AI client — Claude, ChatGPT, an editor plugin — can call into your application, but only
-through things you wrote and named. This plugin speaks the Model Context Protocol over one
-route and offers whatever tools you registered. Nothing else is reachable: there is no generic
-query endpoint, no table browser, no "run this SQL". A tool is a PHP class, and the only things
-a model can do are the ones you gave it.
+`naf/mcp` exposes explicitly registered tools over a JSON-RPC HTTP endpoint. Tools are PHP
+classes with input schemas and handlers. Bearer tokens and tool scopes control access;
+handlers must still authorize the application data and operations they expose.
 
-Tokens are files, so a plugin you install to let an agent read two counters does not cost you a
-database table.
+Start from a bootstrapped application. The default token store uses a file, not a database.
+The example below measures files in one application-owned reports directory.
 
 ## The endpoint
 
 Installing the plugin adds one route, under two methods:
 
-| | |
+| Route | Behavior |
 | --- | --- |
-| `POST /mcp` | the JSON-RPC endpoint — everything happens here |
+| `POST /mcp` | Authenticated JSON-RPC requests and responses |
 | `GET /mcp` | returns 405 with `Allow: POST` after authentication; server-initiated streaming is not implemented |
 
-That URL is what you hand a client. Everything below is what travels over it.
+Configure clients with the `/mcp` URL and a token created below.
+Missing or invalid credentials produce 401 at the MCP authenticator. If Form is installed,
+a POST without a Bearer header can fail its CSRF check first with 400. A Bearer header skips
+that check, but still has to authenticate at MCP.
 
 ## A tool
 
-Four methods: what it is called, what it is for, what it takes, and what it does.
+Create the reports directory from the project root:
 
-```php-inline
+```bash
+mkdir -p storage/reports
+```
+
+Create this tool file. Its handler accepts only the reports identifier and rejects unknown
+arguments. Keep the directory application-owned and
+perform account-specific access checks when adapting this example to private data.
+
+```php title="app/Mcp/GetFolderSize.php"
+<?php
+
+declare(strict_types=1);
+
 namespace App\Mcp;
 
 use Naf\MCP\Support\Schema;
 use Naf\MCP\Tools\ToolInterface;
+use Naf\MCP\Tools\ScopedToolInterface;
+use function Naf\log;
 
-final class GetFolderSize implements ToolInterface
+final class GetFolderSize implements ToolInterface, ScopedToolInterface
 {
     public function name(): string
     {
@@ -53,44 +68,63 @@ final class GetFolderSize implements ToolInterface
         return Schema::object()
             ->description($this->description())
             ->additionalProperties(false)
-            ->prop('path', Schema::string()->description('Relative folder path'))
-            ->required('path')
+            ->prop('folder', Schema::string()->enum(['reports'])->description('Application folder identifier'))
+            ->required('folder')
             ->toArray();
+    }
+
+    public function requiredScopes(): array
+    {
+        return ['folders:read'];
     }
 
     public function handle(array $args): mixed
     {
-        $path  = (string) $args['path'];
-        $bytes = 0;
-
-        $it = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS)
-        );
-
-        foreach ($it as $file) {
-            $bytes += $file->getSize();
+        if (($args['folder'] ?? null) !== 'reports' || array_diff(array_keys($args), ['folder']) !== []) {
+            throw new \InvalidArgumentException('Expected only folder=reports.');
         }
 
-        return ['path' => $path, 'bytes' => $bytes, 'human' => round($bytes / 1024 / 1024, 1) . ' MB'];
+        $path = BASE_PATH . '/storage/reports';
+        if (!is_dir($path)) {
+            throw new \RuntimeException('Reports directory is unavailable.');
+        }
+        $bytes = 0;
+
+        try {
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS)
+            );
+
+            foreach ($it as $file) {
+                if (!$file->isLink() && $file->isFile()) {
+                    $bytes += $file->getSize();
+                }
+            }
+        } catch (\RuntimeException $error) {
+            log()->error('Reports tool failed: ' . $error->getMessage());
+            throw new \RuntimeException('Unable to read reports.');
+        }
+
+        return ['folder' => 'reports', 'bytes' => $bytes];
     }
 }
 ```
 
-`description()` is not a comment. It is the sentence the model reads when it decides whether
-this tool is the one for the job, and so is every `->description()` on a property. A tool
-nobody can tell apart from another one gets called wrongly.
+Tool and property descriptions are sent to clients. Describe the operation, accepted input
+and relevant limits so an assistant can select it correctly.
 
 `Schema` builds the JSON Schema without writing it by hand — `object()`, `string()`,
 `integer()`, `boolean()` and `array(Schema $items)` to start one, then `prop()`, `required()`,
 `nullable()`, `enum()`, `min()`, `max()`, `default()`, `description()` and
 `additionalProperties()`. Finish with `toArray()`.
 
-**Say `additionalProperties(false)`.** Without it a model that invents an argument gets no
-correction, and the call arrives looking valid.
+Use `additionalProperties(false)` to describe a closed argument object. The published plugin
+advertises schemas but does not validate tool arguments against them. Validate types, allowed
+values and extra fields in `handle()`, as above; clients can ignore the schema.
 
 ## Registering it
 
-A tool the registry has never seen does not exist. Register it in your `bootstrap.php`:
+Register the tool in root `bootstrap.php`, after autoloading and before `app()->run()`:
 
 ```php-inline
 use function Naf\MCP\tool;
@@ -98,15 +132,13 @@ use function Naf\MCP\tool;
 tool()->register(new App\Mcp\GetFolderSize());
 ```
 
-Nothing scans a directory for tools. What is registered is what `tools/list` answers with, in
-the order it was registered. The registry is keyed by `name()`, so a second tool claiming a name
-that is taken replaces the first without a word — worth knowing when two of them come from
-different packages.
+Tools are not discovered by directory scanning. Registration order determines list order;
+a repeated `name()` replaces the previous registration. Use unique tool names.
 
 ## What comes back
 
 Whatever `handle()` returns is encoded as pretty-printed JSON and delivered as a text block —
-return an array and you are done.
+return an array for structured application results.
 
 ```json
 {
@@ -114,7 +146,7 @@ return an array and you are done.
     "content": [
       {
         "type": "text",
-        "text": "{\n  \"path\": \"var/log\",\n  \"bytes\": 25500000,\n  \"human\": \"25.5 MB\"\n}"
+        "text": "{\n    \"folder\": \"reports\",\n    \"bytes\": 14\n}"
       }
     ],
     "isError": false
@@ -122,10 +154,9 @@ return an array and you are done.
 }
 ```
 
-Throwing is how a tool reports failure. The exception is caught, logged, and returned as a
-result with `isError` set — which means **its message is handed to the client**. Throw sentences
-you would be happy to show a stranger, and let unexpected failures carry a message you wrote
-rather than a stack of internals.
+Tool exceptions are logged and returned with `isError: true`. Their messages are exposed to
+clients. Use safe messages for expected failures; catch internal exceptions in the handler,
+log diagnostic details and rethrow with a message that omits secrets and private paths.
 
 ## Tokens
 
@@ -142,34 +173,34 @@ so a stolen file is not a set of working tokens.
 With `naf/cli` installed the plugin registers three commands:
 
 ```bash
-vendor/bin/naf mcp:token:create "Local AI client" --scope "*"
+vendor/bin/naf mcp:token:create "Local AI client" --scope "folders:read"
 vendor/bin/naf mcp:token:list
 vendor/bin/naf mcp:token:revoke tok_...
 ```
 
 Note the two prefixes. The secret a client sends starts with `mcp_` and is shown **once**, at
 creation; the id you revoke by starts with `tok_` and is what `list` prints. Losing the secret
-means issuing a new token, which is the point.
+requires issuing a replacement token.
 
 From application code:
 
 ```php-inline
 use function Naf\MCP\tokens;
 
-$created = tokens()->create('Local AI client', ['*']);
+$created = tokens()->create('Local AI client', ['folders:read']);
 
 echo $created->plainToken;      // mcp_… — shown once, only the hash is kept
 echo $created->record->id;      // tok_… — what you revoke by
 ```
 
-On a local-only project you can turn the whole check off, deliberately:
+For an isolated local endpoint, authentication can be disabled in `app/config.php`:
 
 ```php-inline
 return ['mcp' => ['auth' => ['enabled' => false]]];
 ```
 
-That opens the endpoint to anything that can reach the URL. It belongs on a laptop, not on a
-host with a public address.
+This allows every caller that can reach the endpoint to invoke every registered tool,
+including scoped tools. Keep authentication enabled for publicly reachable endpoints.
 
 ### Scopes
 
@@ -191,15 +222,16 @@ final class ArticleSearchTool implements ToolInterface, ScopedToolInterface
 ```
 
 Three patterns are understood: `*` for everything, an exact scope like `articles:read`, and a
-prefix wildcard like `articles:*`. A tool whose scopes a token does not hold is not merely
-refused — it is left out of `tools/list` entirely, so a model never learns it exists.
+prefix wildcard like `articles:*`. A scoped tool requires at least one of its declared scopes.
+If a token matches none, the tool is omitted from `tools/list` and direct calls are rejected.
+Enforce stricter combinations inside the handler when an operation requires several grants.
 
 ## What a client sees
 
 A client connects and asks what this server is:
 
 ```json
-{ "jsonrpc": "2.0", "method": "initialize", "params": {} }
+{ "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {} }
 ```
 
 The answer announces capabilities, not tools:
@@ -227,7 +259,12 @@ Then it asks for the tools themselves, and gets back exactly what its token may 
       {
         "name": "get_folder_size",
         "description": "Returns the size of a folder.",
-        "inputSchema": { "… JSON Schema …" }
+        "inputSchema": {
+          "type": "object",
+          "properties": { "folder": { "type": "string", "enum": ["reports"] } },
+          "required": ["folder"],
+          "additionalProperties": false
+        }
       }
     ]
   }
@@ -243,7 +280,7 @@ And calls one:
   "method": "tools/call",
   "params": {
     "name": "get_folder_size",
-    "arguments": { "path": "var/log" }
+    "arguments": { "folder": "reports" }
   }
 }
 ```
@@ -262,9 +299,9 @@ in the schema, and the model picks from them rather than guessing a verb.
 
 ## Files a tool needs
 
-`FilesystemStore` is a sandbox for tools that have to keep something on disk — a cache, a
-scratch file. It resolves every path inside one root, refuses anything that escapes it through
-`..`, and caps what a single write may be (5 MB unless you say otherwise):
+`FilesystemStore` provides local file operations relative to an application-owned root. It
+rejects textual `..` traversal and unsupported path characters, and caps each write at
+5,000,000 bytes by default:
 
 ```php-inline
 use Naf\MCP\Support\FilesystemStore;
@@ -275,16 +312,23 @@ $store->write('folder-size/cache.json', $json);
 $entry = $store->read('folder-size/cache.json');
 ```
 
-It is yours to construct — nothing registers one for you, and there is no default root. Its
-`read()`, `write()`, `list()` and `delete()` all answer arrays describing what happened, and
-they throw on a missing file, an oversized write or a path that points outside the root.
+Construct it explicitly; there is no default root or container binding. Methods return arrays:
 
-It is not reachable over MCP. A model cannot read or write a file through it; only your tool
-can, at the paths your tool chose.
+| Method | Result and failures |
+|---|---|
+| `read()` | Path, encoding, content and bytes; throws if the file is missing or unreadable |
+| `write()` | Success, path and bytes; throws on an oversized write or write failure |
+| `list()` | Entries with path/type and file sizes; throws for a non-directory |
+| `delete()` | Success, path and whether a file was deleted; a missing file is not an error |
+
+Invalid paths and unsupported encodings throw. The default cap limits each write's bytes,
+not total directory size or the resulting size of an appended file.
+
+The store is not itself an MCP tool. Keep its root and parent directories under application
+control, without caller-created symlinks. Its path checks are not a filesystem isolation
+boundary for hostile local writers. Your tool must authorize operations and validate paths.
 
 ## Resources
 
-This plugin implements tools, and not the resource half of MCP — no `resources/list`,
-`resources/read` or `resources/write`. Tools cover what most clients actually use, and a
-resource surface is a second way to expose data that would need its own permission story.
-It may come later; nothing here changes when it does.
+This plugin implements tools, not MCP resources. It does not register `resources/list`,
+`resources/read` or `resources/write`. Add explicit tools for supported application operations.

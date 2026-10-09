@@ -1,54 +1,56 @@
 ---
-title: What NAF is
+title: NAF overview
 ---
 
-# What NAF is
+# NAF overview { #what-naf-is }
 
-NAF is a PHP microframework: routing, a container, configuration, events and error
-handling, and nothing else. Everything past that — templates, forms, sessions, a database,
-a queue — is a separate package you install when you need it and never think about when
-you do not.
+NAF is a PHP microframework for HTTP applications and services. The core provides routing,
+controller dispatch, a dependency injection container, configuration, events, logging and
+error handling. Optional Composer packages add templates, forms, authentication, persistence
+and background jobs.
 
-That is the whole idea, and it has a cost worth naming: a fresh NAF application cannot
-render an HTML page until you decide how you want to. In exchange, an application that
-only answers JSON never carries a template engine, and one that has no forms never starts
-a session.
+Application code uses ordinary PHP classes and explicitly imported helper functions. Route
+handlers return PSR-7 responses; controllers receive services through their constructors.
+No base controller or application-wide ORM is required.
 
-If you are not sure which pieces your project needs,
-[start with the scenarios](choosing-packages.md).
+## Choose a starting point
 
-## Target Audience
+| Goal | Guide |
+|---|---|
+| Build a website with templates and forms | [Install the starter](install.md#start-with-the-application-skeleton) |
+| Build an HTTP service without templates or sessions | [Core-only installation](install.md#core-only-project) |
+| Learn the layout and request handling | [Your first application](first-app.md) |
+| Select packages for an existing application | [Choosing packages](choosing-packages.md) |
 
-NAF is designed for developers who need:
+You need PHP 8.3 or newer and Composer. Individual packages require additional extensions;
+the installation guide and package chapters name them.
 
-- Full control over their application's structure
-- Minimal dependencies and maximum flexibility
-- Native PHP capabilities with PSR compliance (PSR-3, PSR-4, PSR-7, PSR-11, PSR-18)
-- A framework that stays out of the way while providing necessary functionality
+## Target audience
 
-## Core Features
+The documentation assumes familiarity with PHP classes, namespaces, Composer and basic HTTP.
+It explains NAF conventions as they are introduced. Start with the first application before
+using reference fragments, which assume an application is already bootstrapped.
 
-NAF includes:
+## Core features
 
-- **Routing** for URL handling and HTTP method mapping
-- **Controllers** for organizing request handling logic
-- **Response helpers** for explicit HTML, JSON and redirects
-- **Dependency injection**, configuration, events and error handling
-- **Plugin System** for extending functionality
-- **PSR Compatibility** for integration with the PHP ecosystem
+| Capability | Responsibility | Guide |
+|---|---|---|
+| Routing and controllers | Match method/path pairs and invoke handlers | [Routing](routing.md), [Controllers](controllers.md) |
+| HTTP messages | Read requests and create responses | [Requests and responses](request-response.md) |
+| Services | Construct dependencies and share registered instances | [Dependency injection](dependency-injection.md) |
+| Configuration | Load environment values and merge arrays | [Configuration](configuration.md) |
+| Events and errors | Observe execution and customize failure responses | [Events](events.md), [Errors](errors.md) |
+| Plugins | Discover installed packages and load their resources | [Plugins](plugins.md) |
 
-Templates (`naf/view`), database access (`naf/database`) and sessions (`naf/session`)
-are optional plugins, described in [Choosing packages](choosing-packages.md).
-PSR-18 support comes from the optional `naf/client` package.
+The core uses PSR-7 messages, a PSR-11 container and PSR-3 logging. The optional `naf/client`
+implements PSR-18. [Application lifecycle](lifecycle.md) explains boot and request handling.
 
-## Design Principles
+## Design principles
 
-NAF focuses on providing just enough structure without imposing architectural decisions. The framework:
+NAF keeps application structure and optional capabilities separate from the HTTP core.
+Install the packages needed for the application, configure their services and keep business
+rules in application classes. Extend behavior through the container, events and plugin
+interfaces rather than copying framework internals.
 
-- Uses plain PHP wherever possible
-- Avoids complex abstractions and magic methods
-- Keeps dependencies to a minimum
-- Follows PSR standards for interoperability
-
-Use NAF as a foundation for APIs, web applications, or any PHP project that values **clarity**, **speed**, and **simplicity**.
-
+Your application defines validation rules, access policies, schemas, tests and deployment
+settings. The [worked examples](recipes/post-requests.md) show these responsibilities together.

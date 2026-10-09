@@ -92,7 +92,8 @@ published site describes published releases. Park it in `drafts/`, which is outs
 `docs_dir` and outside the page checks, and say in the file which release it waits for.
 Move it into `pages/` after that release, and rerun the documented checks.
 
-Follow [README.md](README.md) for documentation checks: check pages, build MkDocs strictly,
+Follow [DOCUMENTATION_STYLE.md](DOCUMENTATION_STYLE.md) for audience, page purpose, examples
+and editorial review. Follow [README.md](README.md) for documentation checks: check pages, build MkDocs strictly,
 and execute the documented examples. Refresh generated package/function references when
 releases or signatures change. New examples outside the automated runner need their own
 behavior check. Use fresh test applications and a dummy/file mail transport for local tests.

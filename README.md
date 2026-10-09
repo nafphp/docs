@@ -17,9 +17,11 @@ mkdocs build --strict
 mkdocs serve
 ```
 
-Navigation comes in three levels: installation and first app, complete worked examples,
-then topic references. Each chapter declares optional packages in front matter; the hook
-renders the install command and transitive dependencies. Previous/next links follow navigation.
+Read [DOCUMENTATION_STYLE.md](DOCUMENTATION_STYLE.md) before changing prose or examples.
+The website groups getting started, tutorials, core concepts, plugins, persistence, integrations,
+identity, testing/deployment and reference. Each chapter declares package requirements in front
+matter; the hook renders install commands and transitive dependencies after its introduction.
+Keep existing page URLs and useful heading anchors when reorganizing content.
 
 The Plugins section includes the [Flow chapter](pages/flow.md). Its complete PHP and
 HTML-fragment example is copied into a fresh application and checked against the published
@@ -35,7 +37,9 @@ The test creates a fresh `composer create-project naf/app` installation and a se
 project in temporary directories. It extracts the **actual file-titled Markdown blocks**,
 lints their PHP and tests them through local HTTP servers. It checks HTML and JSON, validation,
 escaping, CSRF, a local mail outbox, login persistence/logout/suspension, ORM save/find and
-SQLite API persistence and errors, and database migrations (apply, repeat and roll back).
+SQLite API persistence and errors, and database migrations (apply, repeat and roll back). It also exercises the documented
+service/HTTP tests, plugin discovery, application commands, streamed downloads, queue failure/retry,
+scheduling, MCP scopes and a fake HTTP transport.
 It never sends mail externally. Temporary projects and servers are cleaned up, including on
 test failure.
 

@@ -411,3 +411,5 @@ CSRF protection. Keep that protection for requests authenticated by cookies. A h
 with `Bearer` bypasses the form plugin's CSRF check, but **does not authenticate the request**.
 Validate credentials independently and never fall back to cookie authentication after an
 invalid bearer token. See [requests that carry their own credentials](../forms.md#requests-that-carry-their-own-credentials).
+
+See [Testing applications](../testing.md) to automate verification and [Deployment](../deployment.md) for production setup.

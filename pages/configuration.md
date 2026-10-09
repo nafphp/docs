@@ -103,3 +103,5 @@ return ['csrf_exempt_routes' => ['oauth.token' => false]];
 
 Use [plugin ordering](plugins.md#boot-order) when bootstraps depend on each other, and
 [Errors and aborting](errors.md) for custom error responses.
+
+See [Deployment](deployment.md#production-configuration) for production setup and [Troubleshooting](troubleshooting.md#plugins-and-configuration) for ignored values.

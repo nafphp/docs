@@ -46,3 +46,5 @@ On Linux, `sed -i` takes no argument — drop the `''`.
 The `nixphp/*` packages stay on Packagist, marked abandoned and pointing at their successors.
 They receive no further releases. The repositories under `github.com/nixphp` stay where they
 are, so every existing link keeps working.
+
+After updating, run [application tests](testing.md) against the new lock and verify [deployment configuration](deployment.md).

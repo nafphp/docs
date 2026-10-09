@@ -6,13 +6,13 @@ requires:
 
 # Roles and permissions
 
-[`naf/auth`](auth.md) answers *is this person allowed to*. It deliberately says nothing about
-where that answer comes from — it has no database and no migrations, and its `UserInterface`
-puts that in writing.
+`naf/rbac` stores roles and grants in a database and provides administration fragments.
+Applications and plugins declare available permissions in code. The privilege policy controls
+which accounts can manage roles or grant access.
 
-`naf/rbac` is one answer: grants kept in tables, a vocabulary declared in code, and a policy
-that decides who may change either. If you need roles an installation can edit, rather than a
-fixed list in code, this is that, and the screens to do it with.
+Install the package, configure a database, run its migrations and synchronize declared roles.
+The migration and synchronization commands also require `naf/cli`.
+
 
 ```bash
 composer require naf/cli
@@ -20,14 +20,7 @@ vendor/bin/naf db:migrate up
 vendor/bin/naf rbac:sync
 ```
 
-`naf/cli` is optional for `naf/rbac`, but required for these migration and sync commands.
-Configure a database connection first; see [Database](database.md). `rbac:sync` writes the
-roles installed packages declare. Run it after migrating and after adding a package.
-
-For MySQL 8.x, use `naf/rbac` 0.1.3 or newer. The package quotes its stored
-`system` flag for that driver; older versions fail during migration or role writes.
-Existing role data and grant rules are unchanged, and no additional schema migration
-is required. MariaDB, SQLite and PostgreSQL retain their existing configuration.
+For MySQL 8.x, use `naf/rbac` 0.1.3+; older releases do not quote the `system` column.
 
 ## Declaring what can be granted
 
@@ -55,7 +48,7 @@ roles()->add(new RoleDefinition(
 A declared permission is only *offerable*. It never grants itself to an existing role, so
 installing a package cannot widen anybody's access.
 
-## Answering with it
+## Integrate identity grants { #answering-with-it }
 
 Your user model already implements `Naf\Auth\Identity\UserInterface`. Point its two grant
 methods here and everything downstream — `auth()->can()`, `requirePermission()` — works
@@ -76,24 +69,18 @@ public function getPermissions(): iterable
 Both are read once per request and cached. Call `rbac()->forget()` after a change that a
 later part of the same request will read back.
 
-## The rules
+## Privilege policy { #the-rules }
 
-`PrivilegePolicy` is the whole of the authorization, and it is meant to be read:
+`PrivilegePolicy` enforces the following administration rules:
 
-1. You need `rbac.manage` at all.
-2. **You cannot hand out what you do not hold.** This subsumes the rule other systems write
-   separately as *only an administrator may make administrators*: if only they hold the
-   managing permission, only they can grant a role that carries it. It also means your top
-   role must hold every permission it is expected to be able to grant.
-3. **You cannot manage an account that holds something you do not.** Otherwise the way around
-   rule 2 is to strip somebody and rebuild them.
-4. **Somebody has to be left who can still do this.** The last role carrying `rbac.manage`
-   cannot be emptied or deleted.
-5. Changing your own roles needs `rbac.manage.own`. It cannot be used to gain anything — rule
-   2 applies to yourself like to anybody else, so the most it does is rearrange or give up what
-   is already held. What it is good for is an administrator who hands out roles that must not
-   hand *themselves* out, such as HR or project management: that difference is a grant rather
-   than a line of code. Rule 4 still applies, so it is no way to step off the last set of keys.
+1. Administration requires `rbac.manage`.
+2. You can grant only permissions you hold. A role used to administer all permissions must
+   therefore hold all permissions it may grant.
+3. You cannot manage an account holding permissions you lack. Removing its roles first does
+   not bypass the grant restriction.
+4. The last role carrying `rbac.manage` cannot be emptied or deleted.
+5. Changing your own roles also requires `rbac.manage.own`. Grant and lockout restrictions
+   still apply; this permission does not allow self-escalation.
 
 Which permission counts for rules 2 and 4 is `rbac:lockout_permission`, so a host may call its
 top role whatever it likes and may have several that qualify.
@@ -101,7 +88,7 @@ top role whatever it likes and may have several that qualify.
 Every denial throws `PrivilegedActionDenied` with a stable `reason` for logs and tests, and a
 message for the person who tried.
 
-## Places
+## Scoped grants { #places }
 
 A grant is a person, a role, and where it applies:
 
@@ -122,10 +109,8 @@ $rbac->allows(7, 'board.settings', Scope::of('project', 5));
 Three spellings reach a place — everywhere, every instance of its kind, and that instance —
 and `Scope::covers()` is the only thing that decides which.
 
-**An installation-wide grant reaches inside every board.** That is a decision: the
-alternative, an administrator locked out of a board, is a support request rather than a
-safeguard. A host wanting real separation names the two abilities differently instead of
-relying on reach.
+An installation-wide grant covers every board. Use distinct permission names when global
+administration and board-specific access must be separate capabilities.
 
 A role says where it may be handed out at all, so an installation-wide role cannot be granted
 on one board and a board role cannot be granted installation-wide:
@@ -139,7 +124,7 @@ Editing a role is deliberately **not** scoped. A role is one object held in many
 changing what it carries reaches all of them — that is authority over the installation, not
 over a board, and the policy asks for it accordingly.
 
-## Adding a kind of place
+## Register a scope source { #adding-a-kind-of-place }
 
 The package knows a grant can attach to something, and nothing about what. A host registers
 one source per kind, and every screen offers it from then on:
@@ -169,14 +154,13 @@ the host chooses, and `Scope::of('team', 'design')` works the moment something a
 `instances()` is called while a screen renders, so it may return only what the person granting
 is allowed to see. An empty list hides the kind.
 
-## Keeping declarations and stored roles honest
+## Synchronize declared roles { #keeping-declarations-and-stored-roles-honest }
 
-A stored role keeps what an installation made of it. An editor role somebody trimmed on
-purpose must not have its permissions handed back because a package was updated.
+Synchronization preserves changes made to stored roles. New declarations do not overwrite
+an administrator's customized grants automatically.
 
-The price is quiet: a permission declared *after* the roles were written reaches nobody, so
-the feature behind it is dead on arrival and the only symptom is a button that does nothing.
-`rbac:sync` therefore compares the two lists and names the difference:
+`rbac:sync` reports differences between stored roles and their current declarations,
+including newly declared permissions:
 
 ```text
  6 declared role(s); nothing to add
@@ -186,19 +170,17 @@ the feature behind it is dead on arrival and the only symptom is a button that d
  The roles above no longer carry everything their packages declare. …
 ```
 
-It repairs nothing, which is the point: which side is right is a decision, and the
-installation is entitled to make it. Grant it in the role editor, or run `rbac:sync --reapply`
-to take the packages' word for every declared role — which discards whatever this installation
-had changed about them.
+Review reported differences and grant permissions through the role editor. To restore all
+declared roles to their package definitions, run `rbac:sync --reapply`; this discards local
+changes to those roles.
 
 Only declared roles are compared, and each only against its own declaration. A permission no
 role carries at all is ordinary, because packages ship permissions meant for roles an
 installation builds itself.
 
-## The screens
+## Administration fragments { #the-screens }
 
-Both are fragments, not pages — a host that installs this already has somewhere settings live,
-and a package cannot bring a shell without it looking bolted on.
+The administration views are fragments intended for the host's settings layout:
 
 ```html+php
 <?= partial('rbac/roles', ['return' => '/admin/settings']) ?>
@@ -209,8 +191,7 @@ and a package cannot bring a shell without it looking bolted on.
 every place in one form, submitted at once, because a person's access is one decision and not
 a series of them.
 
-The host owns people. This package never lists them, never creates them and never deactivates
-them; it is handed one and says what they may do.
+The host supplies the account being managed. RBAC does not list, create or deactivate accounts.
 
 `src/Resources/public/assets/rbac.css` styles both through custom properties with neutral
 defaults, so mapping them to a host's design is one block:
@@ -222,7 +203,7 @@ defaults, so mapping them to a host's design is one block:
 Set `rbac:path` to `null` to register no endpoints and drive the services from screens of your
 own.
 
-## Telling a host what moved
+## Grant change events { #telling-a-host-what-moved }
 
 A grant change is dispatched as an event, so a host that keeps a history can record it:
 
@@ -234,10 +215,10 @@ event()->listen(GrantsChanged::class, function (GrantsChanged $moved): void {
 });
 ```
 
-One per change. This package keeps no history of its own, because a history is a product
-decision and access control is not.
+One event is dispatched for each grant change. Record audit history in an application listener
+when the product requires it.
 
-## What this does not do
+## Application responsibilities { #what-this-does-not-do }
 
 **Users.** Who exists, inviting them, deactivating them: that is the host's, and this package
 only says what they may do.

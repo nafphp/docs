@@ -6,32 +6,26 @@ requires:
 
 # Authentication and permissions
 
-> **Log people in, and check what they may do — with your own user model.**
+`naf/auth` verifies credentials and checks roles, permissions and per-object policies. Your
+application supplies the identity model and account source. Built-in providers support ORM
+and PDO accounts; custom providers implement the same contract.
 
-```php-inline
-auth()->authenticate(new PasswordCredentials($username, $password));   // sign in
-auth()->user();                                                   // your own User object
-auth()->can('posts.edit');                                        // bool, guests included
-auth()->requireRole('admin');                                     // or a 403 leaves the controller
-```
+For a working browser login, follow the quickstart and [login form](recipes/login-form.md).
+Session persistence requires `naf/session`; the core Auth package does not install a user
+schema or account registration flow.
 
-> Install it when you need logins, and nothing else.
+## Responsibilities { #what-this-plugin-is }
 
----
-
-## What this plugin is
-
-It answers two questions and owns nothing else:
+Auth separates authentication and authorization:
 
 1. **Who is this?** — verify credentials, remember the person across requests.
 2. **What may they do?** — permissions, roles, and rules that depend on the object at hand.
 
-It brings **no user table, no ORM and no opinion about where your accounts live**. That is deliberate:
-your accounts may be rows in a database, entries in a directory, or records behind an API. The piece
-that knows which is called a **provider**, and this plugin ships one for `naf/orm` — see
-[Quickstart](#quickstart). For anything else you write about twenty lines yourself.
+A provider verifies credentials and reloads accounts from their source. Built-in providers
+support `naf/orm` and PDO; other backends implement `ProviderInterface`. Account schemas and
+account lifecycle remain application responsibilities.
 
-### The whole picture
+### Main services { #the-whole-picture }
 
 ```text
   login form
@@ -50,7 +44,7 @@ that knows which is called a **provider**, and this plugin ships one for `naf/or
   next request: provider->find('42') ──▶ your user model, freshly loaded
 ```
 
-Four moving parts, and you own two of them:
+The integration has these responsibilities:
 
 | Part | Who writes it | What it is |
 | --- | --- | --- |
@@ -59,9 +53,9 @@ Four moving parts, and you own two of them:
 | **`auth()`** | this plugin | The one object you call. Signs people in and out and answers every permission question. |
 | **Store** | this plugin | Writes those two values into the `naf/session` session. Nothing else is persisted. |
 
-Because only the provider name and the identifier are stored, **every request reloads the account
-through your provider**. A deleted, locked or demoted user is a guest again on their very next
-click — permissions can never go stale.
+With session persistence, restoration reloads the identity through its provider on a new
+request. A missing or inactive account loses its login. Changed grants are obtained from the
+reloaded identity; demotion does not itself turn an otherwise active account into a guest.
 
 ---
 
@@ -209,7 +203,7 @@ set `username_field` and `password_field` under `auth:users` and update the mode
 together. A matching password setter lets `OrmProvider` upgrade an outdated hash after login.
 `auth:users:store` currently accepts only `'orm'`; other account stores use explicit providers.
 
-### The older, explicit form
+### Explicit provider registration { #the-older-explicit-form }
 
 Naming sources yourself still works and still takes precedence — it is the only way to have
 several:
@@ -294,8 +288,9 @@ use function Naf\Auth\auth;
 $authenticated = auth()->authenticate(new PasswordCredentials($username, $password));
 ```
 
-`authenticate()` returns `false` for wrong credentials and never says which half was wrong. An unknown
-username still costs a full password hash, so response times give nothing away either.
+`authenticate()` returns `false` for invalid credentials without distinguishing unknown
+accounts from wrong passwords. Password providers verify a decoy hash for unknown accounts
+to reduce timing differences; this is not a guarantee of identical end-to-end response times.
 
 ### 5. Use it anywhere
 
@@ -308,7 +303,7 @@ auth()->can('posts.edit');      // bool — false for guests, no null check
 auth()->logout();
 ```
 
-That is the entire flow.
+Use [the login recipe](recipes/login-form.md) for request validation, CSRF and redirects.
 
 ---
 
@@ -337,7 +332,7 @@ Your grants are read **once** per check, so a model that queries a database or a
 
 ---
 
-## Requiring things (401 and 403)
+## Require authentication and grants { #requiring-things-401-and-403 }
 
 In a controller, say what the route needs and let it throw:
 
@@ -392,7 +387,7 @@ The bootstrap registers these callbacks. Application logic only asks:
 auth()->allows('edit', $post);
 ```
 
-The policy owns the whole decision: no policy means no, and a global permission never overrules it.
+A resource check requires a matching policy. Global permissions do not override its denial.
 The exact class wins, then its nearest registered parent.
 
 ---
@@ -416,13 +411,13 @@ Turn persistence off for a stateless API:
 return ['auth' => ['session' => false]];
 ```
 
-`true` demands the session plugin instead of quietly degrading to a login that is gone on the next
-click; the default (`null`) persists as soon as `naf/session` is installed. Bind your own
-`StateStoreInterface` to store the record somewhere else entirely.
+`auth:session` set to `true` requires Session. The default `null` enables persistence when
+Session is installed; `false` disables it. A custom `StateStoreInterface` binding takes
+precedence and can store the authentication record elsewhere.
 
 ---
 
-## Several sources
+## Multiple account sources { #several-sources }
 
 Register as many as you like and name the one you mean:
 
@@ -521,31 +516,27 @@ final class ApiUserProvider extends PasswordProvider
 For tokens, OIDC or an LDAP bind there is no stored hash to compare, so implement
 `ProviderInterface` directly — `authenticate()` and `find()`, nothing else.
 
-Already verified the person some other way (registration, an invite link, a CLI command)? Set the already verified identity explicitly:
+After another mechanism has verified an identity, adopt it explicitly:
 
 ```php-inline
 auth()->setIdentity($user, 'database');   // named: persisted like a normal login
 auth()->setIdentity($user);               // unnamed: this request only
 ```
 
-`setIdentity()` trusts the supplied identity and does not verify credentials — but it still
-refuses a suspended one, with an `InvalidArgumentException`. Verifying somebody some other way is
-not a reason to sign in an account that may not sign in, and whoever trusted the identity has to
-check that the account is open. With a provider name it also updates the session when persistence
-is enabled. Without a name it clears any previous persisted authentication and sets the identity
-for this request only.
+`setIdentity()` does not verify credentials. It throws `InvalidArgumentException` for an
+inactive identity. With a provider name it also updates the state store when persistence is
+enabled. Without a name it clears persisted authentication and sets the identity for this
+request only.
 
-Need the model first — to look up who an external login belongs to, to impersonate somebody, or
-in a CLI tool? `auth()->load('database', '42')` reads it through the registered source and hands
-it back. It changes nothing: no login, no session, no store. It answers `null` for an unknown
-source, an empty identifier, a vanished account, a suspended one, or a provider that hands back
-somebody else — the same guarantee restoration relies on, because restoration now calls it.
+`auth()->load('database', '42')` reloads an identity without signing in or changing session
+state. It returns `null` for an unknown provider, empty identifier, missing or inactive account,
+or a provider result whose identifier does not match. Session restoration uses the same checks.
 
 ---
 
 ## Reference
 
-Everything the plugin exposes.
+The following tables summarize the manager methods and public contracts.
 
 **`auth()`** — the shared manager, registered by `bootstrap.php` and resolved on first use.
 
@@ -570,7 +561,7 @@ Everything the plugin exposes.
 | --- | --- | --- |
 | `Identity` | `UserInterface` | Your user model: identity, plus whether the account is open and what may be shown. |
 | `Identity` | `UserProfile` | Display name, e-mail, and whether that address was actually confirmed. |
-| `Identity` | `IdentityInterface` | The older contract: identifier, roles, permissions. Still accepted. |
+| `Identity` | `IdentityInterface` | Base identity contract: identifier, roles and permissions. |
 | `Identity` | `Identity` | A ready-made identity for CLI tools and tests. |
 | `Credentials` | `CredentialsInterface` | Marker for whatever a provider needs. |
 | `Credentials` | `PasswordCredentials` | Username and password, redacted in debug output. |
@@ -585,7 +576,7 @@ Everything the plugin exposes.
 | `Exceptions` | `UnauthenticatedException` | 401. |
 | `Exceptions` | `ForbiddenException` | 403. |
 
-See [Why auth has this shape](auth-architecture.md) for the decisions behind this shape and the exact
-restore and rotation semantics.
+See [Authentication architecture](auth-architecture.md) for provider resolution, restoration
+and session rotation.
 
 ---

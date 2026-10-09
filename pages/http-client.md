@@ -6,13 +6,12 @@ requires:
 
 # HTTP client
 
-Calling somebody else's HTTP service from inside your application — an internal API,
-a payment provider, a webhook you have to deliver.
+`naf/client` implements PSR-18 for outbound HTTP calls. It selects the first available
+transport: cURL, then PHP streams. cURL supports bounded-memory request and response bodies;
+the stream-wrapper transport buffers bodies as strings.
 
-It implements PSR-18, so anything expecting a standard client accepts it, and it carries
-no dependencies of its own. Two transports sit behind it, cURL and streams, and it falls
-back when the first is unavailable — which matters on the shared hosting where cURL is a
-question rather than a given.
+Use this chapter in an existing [NAF application](first-app.md). The cURL transport requires
+`ext-curl`; the fallback needs PHP URL streams enabled.
 
 ## Sending a request
 
@@ -21,138 +20,157 @@ use Nyholm\Psr7\Request;
 use function Naf\Client\client;
 
 $response = client()->sendRequest(new Request('GET', 'https://api.example.com/status'));
-
-$response->getStatusCode();
-(string) $response->getBody();
+$status = $response->getStatusCode();
+$body = (string) $response->getBody();
 ```
 
-`client()` implements `Psr\Http\Client\ClientInterface`, so anything that accepts a
-standard PSR-18 client accepts this one — including libraries that have never heard of NAF.
+Inspect the status before using the body. HTTP 4xx and 5xx responses are returned to the
+caller; they do not by themselves trigger an exception or retry. Transport failures raise
+`Naf\Client\Exception\ClientException`. Casting the body to a string loads it into memory.
+
+## Configuration
+
+Add a `client` array to `app/config.php`. Per-call `withOptions()` values override that
+configuration on a cloned client, leaving the shared instance unchanged.
+
+| Key under `client` | Type | Default | Effect |
+|---|---|---|---|
+| `retries` | integer | `1` | Additional attempts for recognized transient transport failures |
+| `retry_delay_ms` | integer | `150` | Delay between attempts in milliseconds |
+| `timeout` | number | `20` | Transfer timeout in seconds |
+| `connect_timeout` | number | `8` | cURL connection timeout in seconds |
+| `ssl_verify` | boolean | `true` | TLS certificate verification |
+| `cacert` | string or null | automatic | Explicit CA bundle file |
+| `http_version` | string | `auto` | cURL negotiation: `auto`, `1.1` or `2` |
+| `max_redirects` | integer | `5` | Redirect limit; `0` disables following |
+| `decode_content` | boolean | `true` | cURL response content decoding |
+| `streaming` | boolean | `false` | Require a streaming-capable transport |
+
+Transport-specific options may not apply to the stream-wrapper fallback. Keep TLS verification
+enabled and check the host's CA configuration when certificate verification fails.
 
 ## Retries are on by default
 
-```php-inline
-'client' => [
-    'retries'        => 1,      // one additional attempt
-    'retry_delay_ms' => 150,
-],
-```
+The client recognizes selected TLS/network error messages, including timeouts and connection
+resets, for retry. It does not retry every failure. A timed-out POST may already have reached
+the remote service; repeating it can duplicate an operation.
 
-**A failed request is sent again.** That is right for a GET and wrong for anything that
-changes something on the other side: a POST that times out may well have arrived, and the
-retry creates the order twice.
-
-For a request that must not be repeated, take a copy of the client with retries off:
+Disable retries for operations that must not be replayed unless the remote API provides an
+appropriate idempotency mechanism:
 
 ```php-inline
 $once = client()->withOptions(['retries' => 0]);
-$once->sendRequest($request);
+$response = $once->sendRequest($request);
 ```
 
-`withOptions()` returns a clone. The container holds one shared client, so switching
-retries off for an OAuth code exchange does not switch it off for everybody else — which
-is the whole reason it is a clone and not a setter.
+## Transport selection { #two-transports-and-a-fallback }
 
-## Two transports, and a fallback
+Transports implement `Naf\Client\Transports\TransportInterface`. Its `send()` returns a pair:
+a response body string and a list of raw response header lines, including the HTTP status
+line. `isAvailable()` determines whether the client can select the transport.
 
-The client tries cURL first and streams second, asking each whether it is available. On a
-host without the cURL extension the request still goes out.
+Pass an ordered array of transport instances to `new Client($transports)` for custom
+selection. Fallback is based on availability; a failed cURL request does not automatically
+switch to the stream transport.
 
-A transport is one class:
+## Streaming large bodies { #large-bodies-do-not-go-through-memory }
 
-```php-inline
-interface TransportInterface
-{
-    public function send(string $url, string $method, array $headerLines, string $body, array $config): array;
-    public function isAvailable(): bool;
-}
-```
-
-`isAvailable()` is the part that matters: a transport that cannot run says so instead of
-failing at the call, which is what makes the fallback work rather than just shifting the
-error.
-
-You can hand the client its transports directly, in the order you want them tried:
-
-```php-inline
-new Client([new MyTransport(), new CurlTransport()]);
-```
-
-## Large bodies do not go through memory
-
-The cURL transport streams. It transfers a PSR-7 request body in chunks from its current
-position, and spools the response into a temporary file that is deleted for you. That is
-what makes an upload or a download bigger than your memory limit possible at all.
-
-Two things follow from it, and both bite quietly if you do not know them:
+The cURL transport reads the request body from its current position and spools the response
+to a temporary file before `sendRequest()` returns. The operation is synchronous and requires
+enough temporary disk space for the response. Close the body when finished:
 
 ```php-inline
 $response = client()->sendRequest($request);
-$body     = $response->getBody();
+$body = $response->getBody();
 
-while (!$body->eof()) {
-    fwrite($target, $body->read(8192));
+try {
+    while (!$body->eof()) {
+        fwrite($target, $body->read(8192));
+    }
+} finally {
+    $body->close();
 }
-
-$body->close();          // the temporary file goes away here
 ```
 
-Close the body when you are done. And `(string) $response->getBody()` still loads the whole
-thing into memory — casting undoes the streaming, which is fine for a JSON answer and not
-for a 2 GB file. A request stream you opened yourself stays open; the client does not close
-what it did not create.
+This fragment assumes `$target` is an open writable resource owned by the caller. The client
+does not close request streams opened by application code. `(string) $body` still reads the
+entire response into memory.
 
-!!! note "The temporary filesystem has to be big enough"
-    The response is spooled before `sendRequest()` returns, so the network transfer is
-    finished by then. What you need free is disk, not memory.
-
-Existing `TransportInterface` implementations and string-based `send()` calls keep working
-unchanged. A custom transport can additionally implement `StreamingTransportInterface`, and
-if your code must not silently fall back to buffering, say so:
-
-```php-inline
-$streaming = client()->withOptions(['streaming' => true]);
-```
-
-That requires a transport with the capability rather than accepting the buffering fallback.
-The stream-wrapper transport remains string-based.
-
-A few sharp edges worth knowing:
-
-| Situation | Behaviour |
+| Situation | Behavior |
 |---|---|
-| A retry after a failure | seeks the request body back to where it started |
-| A non-seekable streaming request | never retried automatically — it cannot be rewound |
-| `'decode_content' => false` | keeps the encoded bytes, for passing straight to object or file storage |
-| Redirects | only the final response's headers and body are kept |
-| `'max_redirects' => 0` | do not follow redirects at all |
+| Retried streaming request | Seek back to the original request-body position |
+| Non-seekable streaming request | No automatic retry |
+| `decode_content => false` | Preserve encoded response bytes |
+| Redirect | Retain only the final response's headers and body |
+| `streaming => true` | Reject a transport without streaming support |
+
+A custom transport can implement `StreamingTransportInterface` in addition to the basic
+interface. Set `streaming` when buffering is unacceptable.
 
 ## TLS and HTTP versions
 
-```php-inline
-'client' => [
-    'cacert'       => '/etc/ssl/certs/ca-certificates.crt',
-    'http_version' => 'auto',   // auto | 1.1 | 2
-],
-```
-
-The CA bundle is resolved once per request rather than per attempt. Leave `cacert` out and
-the system bundle is used; set it when PHP on that host cannot find one, which is the usual
-cause of a certificate error that makes no sense on a machine where `curl` works fine from
-the shell.
-
-`http_version` stays on `auto` unless a server negotiates badly.
+Leave `cacert` unset to use automatic CA-bundle resolution. When the host needs an explicit
+bundle, configure its readable file path. The bundle is resolved once per call. Keep
+`http_version` on `auto` unless the remote service requires a specific version.
 
 ## Testing without the network
 
-The constructor takes the transports, so a test hands it one that answers from memory:
+The following complete example supplies a fake transport, simulates one timeout and verifies
+the retry and JSON response without making a network connection. Create the two files:
 
-```php-inline
-$client = new Client([new FakeTransport([
-    'status' => 200,
-    'body'   => '{"ok":true}',
-])]);
+```php title="tests/FakeTransport.php"
+<?php
+
+declare(strict_types=1);
+
+namespace Tests;
+
+use Naf\Client\Transports\TransportInterface;
+
+final class FakeTransport implements TransportInterface
+{
+    public int $attempts = 0;
+
+    public function isAvailable(): bool
+    {
+        return true;
+    }
+
+    public function send(string $url, string $method, array $headerLines, string $body, array $config): array
+    {
+        $this->attempts++;
+        if ($this->attempts === 1) {
+            throw new \RuntimeException('Connection timed out (simulated).');
+        }
+
+        return ['{"ok":true}', ['HTTP/1.1 200 OK', 'Content-Type: application/json']];
+    }
+}
 ```
 
-No HTTP goes out, no test depends on somebody else's uptime, and the retry behaviour is
-exercised the same way it will be in production.
+```php title="bin/http-client-demo.php"
+<?php
+
+declare(strict_types=1);
+
+require dirname(__DIR__) . '/bootstrap.php';
+require dirname(__DIR__) . '/tests/FakeTransport.php';
+
+use Naf\Client\Core\Client;
+use Nyholm\Psr7\Request;
+use Tests\FakeTransport;
+
+$transport = new FakeTransport();
+$client = (new Client([$transport]))->withOptions(['retries' => 1, 'retry_delay_ms' => 0]);
+$response = $client->sendRequest(new Request('GET', 'https://example.invalid/status'));
+
+if ($transport->attempts !== 2 || $response->getStatusCode() !== 200
+    || json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR) !== ['ok' => true]) {
+    throw new RuntimeException('Unexpected transport result.');
+}
+
+echo "HTTP transport test passed.\n";
+```
+
+Run `php bin/http-client-demo.php` from the application root. Expect `HTTP transport test passed.`
+See [Testing applications](testing.md) for service and HTTP tests.

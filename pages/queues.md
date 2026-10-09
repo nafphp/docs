@@ -6,63 +6,95 @@ requires:
 
 # Queues and workers
 
-Work that should not happen while somebody is waiting. A confirmation mail, a
-thumbnail, a call to a slow third party — the request hands it over and finishes.
-
-The default driver writes to files, so there is nothing to install before you can try it.
-Running the jobs is a command, which is why `naf/cli` comes along with this package: a
-queue nobody drains is just a directory filling up.
+`naf/queue` separates job submission from execution. An HTTP handler enqueues data and returns;
+a CLI worker constructs the job and calls `execute()`. Installing Queue also installs CLI.
+The default file driver needs writable local storage and a running worker.
 
 ## A job
 
-A job is a class with one method. The payload it was queued with arrives in the
-constructor.
+Start from [Your first application](first-app.md), install Queue, and create this file. The
+example writes a confirmation to worker output without sending mail or modifying accounts.
 
-```php-inline
+```php title="app/Jobs/RecordSignup.php"
+<?php
+
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use Naf\CLI\Core\Output;
 use Naf\Queue\Core\QueueJobInterface;
 
-final class SendWelcomeEmail implements QueueJobInterface
+final class RecordSignup implements QueueJobInterface
 {
     public function __construct(private array $payload) {}
 
     public function execute(Output $output): void
     {
-        // send it
+        $id = $this->payload['user_id'] ?? null;
+        if (!is_int($id) || $id < 1) {
+            throw new \InvalidArgumentException('A positive user_id is required.');
+        }
+
+        $output->writeLine('Recorded signup for user ' . $id);
     }
 }
 ```
 
-Throwing from `execute()` is how a job reports failure — the worker catches it and moves
-the job to the deadletter.
+Jobs implement `QueueJobInterface`. Their queued payload reaches the constructor. Keep it
+serializable and pass identifiers or values rather than entity objects. Throw an exception
+to report failure. Drivers with deadletter support retain failed work for inspection/retry.
 
 ## Queueing it
 
-```php-inline
+Create this CLI script to submit the example job:
+
+```php title="bin/enqueue-demo.php"
+<?php
+
+declare(strict_types=1);
+
+require dirname(__DIR__) . '/bootstrap.php';
+
+use App\Jobs\RecordSignup;
 use function Naf\Queue\queue;
 
-queue()->push(SendWelcomeEmail::class, ['email' => 'user@example.com']);
+queue()->push(RecordSignup::class, ['user_id' => 42]);
+echo "Job queued.\n";
 ```
 
-The payload is serialised, so it holds data and not objects. Pass an id, not the entity.
+Run from the project root:
+
+```bash
+composer dump-autoload
+php bin/enqueue-demo.php
+vendor/bin/naf queue:consume --once
+```
+
+Expect `Job queued.` and then `Recorded signup for user 42`. The second command exits after
+one job. Enqueueing alone does not execute work.
 
 ## Channels
 
-A channel is a separate line of work. Without one everything shares a queue, and a thousand
-thumbnails delay the password-reset mail behind them.
+Channels separate workloads. Add this fragment to a handler or application service after
+loading the application:
 
 ```php-inline
-queue('emails')->push(SendWelcomeEmail::class, ['email' => $email]);
+use App\Jobs\RecordSignup;
+use function Naf\Queue\queue;
+
+queue('accounts')->push(RecordSignup::class, ['user_id' => 42]);
 ```
 
-Then run a worker per channel, or one worker across several:
+Run workers for the channels they should consume:
 
 ```bash
-vendor/bin/naf queue:consume --channel=emails
-vendor/bin/naf queue:consume --channels=default,emails,thumbnails
+vendor/bin/naf queue:consume --channel=accounts
+vendor/bin/naf queue:consume --channels=default,accounts,thumbnails
 ```
+
+The unqualified `queue()` uses the default channel. A job in another channel waits until a
+worker consumes that channel. Channel support depends on the selected driver.
 
 ## Running the worker
 
@@ -70,110 +102,102 @@ vendor/bin/naf queue:consume --channels=default,emails,thumbnails
 vendor/bin/naf queue:consume
 ```
 
-It keeps going until you stop it. The options that matter for running it under a process
-supervisor:
-
-| Option | What it does |
+| Option | Effect |
 |---|---|
-| `--once` | take one job and exit |
-| `--max-jobs=N` | exit after N jobs |
-| `--max-runtime=N` | exit after N seconds |
-| `--channel=name` | one channel |
-| `--channels=a,b,c` | several |
-| `--verbose`, `-v` | print each job |
+| `--once` | Consume at most one available job and exit |
+| `--max-jobs=N` | Exit after N processed jobs |
+| `--max-runtime=N` | Exit after N seconds |
+| `--channel=name` | Consume one channel |
+| `--channels=a,b,c` | Consume several channels |
+| `--verbose`, `-v` | Print additional worker output |
 
-With `--once`, the exit code tells you what happened: nonzero when the job failed, including
-when its class is missing. A supervisor or a CI step can act on that instead of parsing
-output. The failure is still kept for retry or the deadletter — a nonzero exit does not mean
-the work was thrown away.
-
-`--max-jobs` and `--max-runtime` exist because a long-running PHP process accumulates
-memory. Let it exit on its own terms and have the supervisor start a fresh one, rather than
-waiting for the OOM killer to decide.
+With `--once`, a failed job or missing job class produces a nonzero exit status. Use this in
+CI and operational checks. Supervise persistent workers and bound their lifetime to limit
+accumulated memory and stale state. Restart workers after deployments.
 
 ```ini
 [program:naf-queue]
 directory=/var/www/my-app
-command=php /var/www/my-app/vendor/bin/naf queue:consume --channels=default,emails --max-jobs=500
+command=php /var/www/my-app/vendor/bin/naf queue:consume --channels=default,accounts --max-jobs=500
 autostart=true
 autorestart=true
 ```
 
-Replace `/var/www/my-app` with the absolute path of your deployed application.
+Replace the application path and run the supervisor with access to the same configuration
+and storage as the HTTP application. See [Deployment](deployment.md).
 
 ## Jobs that failed
 
-A job whose `execute()` throws goes to the deadletter instead of being retried forever.
+The worker defaults to three attempts with a five-second retry delay. Configure
+`queue:max_attempts` and `queue:retry_delay` in `app/config.php` to change these values.
+With the file driver, a failed attempt is requeued until the limit, then moved to deadletter
+storage. `--once` exits nonzero after one failed attempt even if another attempt remains.
+Use `--verbose` to see failure messages in worker output; exhausted failures are also logged.
+
+Inspect the error and correct its cause before retrying exhausted jobs:
 
 ```bash
-vendor/bin/naf queue:retry-failed          # put them back in the queue
-vendor/bin/naf queue:retry-failed --keep   # ...and keep the deadletter copy
+vendor/bin/naf queue:retry-failed
+vendor/bin/naf queue:retry-failed --keep
 ```
 
-`--keep` is worth it while you are still finding out why they failed: without it, a second
-failure is the only record you have left.
+`--keep` retains the original deadletter entry. The command has no channel option and calls
+`retryFailed()` on the unqualified queue driver. With the default FileDriver, that retries
+the default channel only. Channel-specific retries require the driver's `retryFailedFrom()`
+API; do not assume an unsupported `--channel` option selects them.
 
-!!! warning "There is no per-channel retry"
-    `queue:retry-failed` takes no `--channel`. The driver can do it — the interface has
-    `retryFailedFrom()` — but the command does not pass one through, so anything you give it
-    is ignored and every failed job is retried regardless of channel.
+A driver without deadletter support returns an error from this command. Deadletter
+inspection and retention are operational responsibilities.
 
 ## Where the jobs live
 
-The default driver writes files under your application's base path — one directory for the
-queue, one for the deadletter. Nothing to install, and you can look at what is waiting.
+The default file driver stores jobs in `storage/queue/` and failed jobs in
+`storage/queue/deadletter/`, with channel-specific subdirectories. Preserve these locations
+between releases and grant write access to producers and workers. The default bootstrap
+passes these paths explicitly to FileDriver; bind a different Queue/FileDriver to customize
+them rather than assuming configuration alone changes that binding.
 
-It is also the reason a file-backed queue does not survive being spread over two machines:
-the second server cannot see the first server's directory. The package ships an
-`SQLiteDriver` as well, and the driver is a single interface, so a Redis or database one is
-a class and a rebinding away:
-
-```php-inline
-use Naf\Queue\Core\Queue;
-use function Naf\app;
-
-app()->container()->set(Queue::class, fn() => new Queue(new MyRedisDriver()));
-```
-
-Channels and the deadletter are separate interfaces on top of the basic one
-(`ChannelQueueDriverInterface`, `QueueDeadletterDriverInterface`). A driver that implements
-only the basic contract still works — it just has no channels and no deadletter, and
-`queue:retry-failed` tells you so rather than failing.
+Local files are not automatically shared across machines. Queue also ships SQLite and PDO
+drivers. Custom drivers implement `QueueDriverInterface`; channel, deadletter and lease
+capabilities use additional interfaces.
 
 ### The database driver, for more than one machine
 
-`PDODriver` is the answer to the directory problem above: the queue lives in your database,
-so every server sees the same work. It implements `LeaseQueueDriverInterface`, which adds
-reserve, acknowledge, release and renew on top of the basic contract.
+Use `PDODriver` for a queue shared through a database. This fragment belongs in an explicit
+installation/migration step, with a configured PDO connection:
+
+```php-inline
+use Naf\Queue\Drivers\PDODriver;
+
+(new PDODriver($pdo, 300))->install();
+```
+
+Then add the lazy binding to application `bootstrap.php`, before consumers resolve Queue.
+The second constructor argument is the lease duration in seconds:
 
 ```php-inline
 use Naf\Queue\Core\Queue;
 use Naf\Queue\Drivers\PDODriver;
 use function Naf\app;
 
-$driver = new PDODriver(app()->container()->get(PDO::class), 300);
-$driver->install();                       // once, creates the tables
-
-app()->container()->set(Queue::class, fn() => new Queue($driver));
+$container = app()->container();
+$container->set(Queue::class, static fn() => new Queue(
+    new PDODriver($container->get(PDO::class), 300),
+));
 ```
 
-A claim is a lease, not a deletion. PostgreSQL and MariaDB take a row lock with
-`SKIP LOCKED` so two workers never pick the same job; SQLite gets a serialized
-implementation of the same contract. If a worker crashes mid-job, the lease expires and the
-work becomes available again on its own — nobody has to clean up after it. Fenced tokens
-make the late acknowledgement of a crashed worker bounce instead of marking finished work
-that somebody else has since redone.
+With Database 0.2.4+, the configured connection is bound under `PDO::class`. Alternatively,
+bind your own connection. Do not create queue tables during every request.
 
-Two rules follow from that, and both are easy to get wrong:
+A reserved job remains leased until acknowledgement. A crashed worker's lease expires and
+makes the job available again. Fencing rejects acknowledgements from an obsolete reservation.
+Supported database locking prevents two active claims on the same unexpired reservation;
+lease expiry can still cause concurrent execution if the first worker continues running.
 
-!!! warning "Claim outside a transaction, finish inside the lease"
-    Enqueueing takes part in a caller transaction, so queueing a job and writing the row it
-    refers to commit together. **Claiming** must happen outside one. And a job has to finish
-    within its lease or call renew — otherwise the lease expires while the job is still
-    running and a second worker starts the same work. Delivery is at least once, so make the
-    job itself tolerate being run twice.
+Claim outside an application transaction. Enqueueing can participate in a caller transaction,
+but a job must finish within its lease or renew it. Delivery is at least once: make side
+effects tolerate a repeated job. The worker acknowledges after success; custom consumers
+must acknowledge their own reservations.
 
-`queue:consume` handles all of this and acknowledges only after the job succeeded. If you
-write your own consumer around `dequeue()`, acknowledging the reservation you were given is
-your job. Setting `queue:heartbeat_file` in the configuration has the worker record that it
-is polling, which is what a health check can look at.
+Set `queue:heartbeat_file` to an application-specific writable path for a worker heartbeat.
+Monitor its age together with failures and backlog; it proves polling, not successful jobs.

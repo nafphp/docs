@@ -6,12 +6,13 @@ requires:
 
 # Sending mail
 
-The default transport uses PHP's `mail()` and needs a server configured to deliver mail.
-For local development, first configure [the dummy transport](#testing-without-a-mail-server)
-or use [the contact form's file outbox](recipes/contact-form.md#a-local-mail-outbox).
-Both let you exercise the application without a mail server or external delivery.
+`naf/mail` builds messages and delivers them through a transport. The default transport uses
+PHP's `mail()` and requires a configured delivery system. In local development, first select
+the [capture transport](#testing-without-a-mail-server) or the
+[contact form outbox](recipes/contact-form.md#a-local-mail-outbox).
 
-If the person who triggered real delivery should not wait for it, use [a queue](queues.md).
+Use a [queue](queues.md) when delivery should occur after the HTTP response. A successful
+transport call does not prove that a recipient received the message.
 
 ## Sending a message
 
@@ -77,7 +78,7 @@ mail()
 
 The `cid:` reference uses the name you gave, not the path.
 
-## When it does not go out
+## Delivery failures { #when-it-does-not-go-out }
 
 `send()` is typed to return `bool`, but the shipped transport never returns `false` — it
 throws `Naf\Mail\Exceptions\MailException` when PHP's `mail()` refuses the message.
@@ -231,8 +232,7 @@ Keep test transports confined to development or tests: their successful return v
 the simulation accepted the message. Constructing a separate `new Mailer(...)` in one
 controller does not change the shared `mailer()` helper; replace the container binding.
 
-## Not making somebody wait for it
+## Queued delivery { #not-making-somebody-wait-for-it }
 
-An SMTP handshake takes as long as it takes, and the person who submitted the form is
-watching a spinner for all of it. Hand the message to [a queue](queues.md) and let a worker
+Delivery can delay the HTTP response. Enqueue the message data using [Queue](queues.md) and let a worker
 send it.

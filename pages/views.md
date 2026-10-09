@@ -6,14 +6,14 @@ requires:
 
 # Views and templates
 
-PHP templates with layouts and blocks. There is no template language: a view is a
-`.phtml` file, `<?= ?>` is the syntax, and your editor already understands it.
+`naf/view` renders PHP templates, layouts and named blocks. `render()` creates an HTML
+response; `view()` returns an HTML string. Templates use `.phtml` files and ordinary PHP.
+The package also provides asset collection and explicit HTML escaping.
 
-What you get beyond a plain `include` is inheritance — a layout with named blocks a view
-fills in — plus asset collection and an escaping helper. What you do not get is a compiler,
-a cache directory, or a syntax to learn.
+Start with a bootstrapped [application](first-app.md). Create templates under `app/views/`.
+Application templates can override plugin templates at the same relative path.
 
-## Rendering one
+## Render a template { #rendering-one }
 
 ```php-inline
 use function Naf\View\render;
@@ -52,11 +52,11 @@ email, is the mistake the two names exist to prevent.
 <h1><?= s($title) ?></h1>
 ```
 
-`s()` escapes for HTML. It takes an array as well as a string and escapes every value, which
-saves a loop when you are dumping a row into a table.
+`s()` escapes strings or flat arrays of strings for HTML text and quoted attributes. It is
+not a JavaScript, CSS or URL sanitizer; use encoding appropriate to those contexts.
 
-Nothing escapes automatically — this is PHP, not a template language, and `<?= $title ?>`
-puts exactly what is in `$title` on the page. Wrap anything that came from outside.
+Templates do not escape values automatically. Use `s()` when inserting untrusted text or
+attribute values. `<?= $title ?>` emits the value directly.
 
 ## Layouts and blocks
 
@@ -108,21 +108,17 @@ Collect them anywhere — a view, a partial, a controller — and print them onc
 <?= asset()->render('js') ?>
 ```
 
-The point is that a partial can require its own stylesheet without knowing whether the
-layout has already been sent. Duplicates are removed, so two partials asking for the same
-file produce one tag.
+Register assets before the layout renders the corresponding collection. Duplicate
+registrations of the same asset produce one tag.
 
 JavaScript comes in two modes: `classic` renders a plain `<script src>`, `module` renders
 `type="module"`. An unrecognised mode falls back to `classic` rather than failing.
 
-## What this is not
+## Template responsibilities { #what-this-is-not }
 
-There is no compiler, no cache directory to clear and no syntax to learn — a view is a PHP
-file, and a PHP error in a template is a PHP error with the right line number.
-
-The price is that nothing is escaped for you and nothing stops a template from doing more
-than it should. A `.phtml` file can open a database connection. It should not, and the only
-thing preventing it is you.
+Templates execute as PHP and are not compiled or automatically escaped. Keep queries and
+business rules in services, and pass the resulting data to the view. Treat application and
+plugin templates as trusted code.
 
 ## Interactive containers
 

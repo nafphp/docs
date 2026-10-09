@@ -6,90 +6,119 @@ requires:
 
 # Scheduled jobs
 
-Things that should happen at a time rather than on a request: a nightly cleanup, a
-report at eight, a sync every fifteen minutes.
-
-Jobs are described with cron expressions and handed to the queue, so the scheduler decides
-*when* and the worker decides *how*. The part worth reading before you rely on it is what
-happens when the machine was off at eight — a scheduler that silently skips is a scheduler
-you find out about in the wrong week.
+`naf/schedule` checks cron expressions and enqueues due jobs. A queue worker executes them.
+The package installs Queue and CLI. Run a ticker and worker with the same application
+configuration and queue storage.
 
 ## A scheduled job
 
-A scheduled job is a queue job that also says when it wants to run.
+Start from [Your first application](first-app.md), install Schedule, and create the following
+job. It writes to worker output every minute so setup can be verified without external effects.
 
-```php-inline
+```php title="app/Jobs/RecordHeartbeat.php"
+<?php
+
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use Naf\CLI\Core\Output;
 use Naf\Queue\Core\QueueJobInterface;
 use Naf\Schedule\Core\ScheduledJobInterface;
 
-final class RebuildSitemap implements QueueJobInterface, ScheduledJobInterface
+final class RecordHeartbeat implements QueueJobInterface, ScheduledJobInterface
 {
     public function __construct(private array $payload = []) {}
 
     public function getCronExpression(): string
     {
-        return '0 3 * * *';     // every day at 03:00
+        return '* * * * *';
     }
 
     public function execute(Output $output): void
     {
-        // rebuild it
+        $output->writeLine('Scheduled heartbeat executed.');
     }
 }
 ```
 
+The cron expression uses the PHP process's timezone. For example, `0 3 * * *` runs at 03:00
+in that timezone. Configure it consistently across ticker processes.
+
 ## Registering it
 
-```php-inline
+Create this application registration file. It gives this application its own persistent state
+file rather than using the default shared temporary filename:
+
+```php title="app/schedule.php"
+<?php
+
+declare(strict_types=1);
+
+use App\Jobs\RecordHeartbeat;
+use Naf\Queue\Core\Queue;
+use Naf\Schedule\Core\JobRepository;
+use Naf\Schedule\Core\Scheduler;
+use Naf\Schedule\Support\CronParser;
+use function Naf\app;
 use function Naf\Schedule\scheduler;
 
-scheduler()->addScheduledJob(RebuildSitemap::class);
-scheduler()->addScheduledJob(SyncInventory::class, ['warehouse' => 'north']);
+$container = app()->container();
+$container->set(Scheduler::class, static fn() => new Scheduler(
+    $container->get(Queue::class),
+    $container->get(JobRepository::class),
+    $container->get(CronParser::class),
+    BASE_PATH . '/storage/schedule-state.json',
+));
+scheduler()->addScheduledJob(RecordHeartbeat::class);
 ```
 
-In your application's `bootstrap.php`. The optional payload reaches the job's constructor,
-but each class can be registered only once: a second registration of the same class
-replaces the first payload. Use distinct job classes for distinct registered schedules.
+Create `storage/` and add this include to root `bootstrap.php`, after Composer autoloading
+and before `app()->run()`:
 
-`vendor/bin/naf schedule:list` shows what is registered and when each one runs next.
+```php-inline
+require_once BASE_PATH . '/app/schedule.php';
+```
 
-## Two processes, not one
+Each scheduled class can be registered once; a second registration replaces the first.
+`vendor/bin/naf schedule:list` shows registered jobs and their next occurrence.
 
-**The scheduler does not run your jobs.** It decides that something is due and pushes it
-onto the queue; a queue worker picks it up. Both have to be running:
+## Ticker and worker { #two-processes-not-one }
+
+Verify the example from the project root:
 
 ```bash
-vendor/bin/naf schedule:ticker     # decides what is due
-vendor/bin/naf queue:consume       # actually runs it
+mkdir -p storage
+composer dump-autoload
+vendor/bin/naf schedule:ticker --once
+vendor/bin/naf queue:consume --once
 ```
 
-A ticker without a worker fills the queue and nothing happens. This is the failure people
-hit first, and it looks exactly like a scheduler that is not working.
+Expect the ticker to report a queued `RecordHeartbeat`, then the worker to print
+`Scheduled heartbeat executed.` Repeating the ticker within the same recorded minute does
+not enqueue that schedule again.
 
-## Running the ticker
+For continuous operation, run both commands under a supervisor:
 
 ```bash
 vendor/bin/naf schedule:ticker
+vendor/bin/naf queue:consume
 ```
 
-| Option | What it does |
+A running ticker without a worker leaves jobs waiting in the queue. Stop and remove the demo
+registration when replacing it with application jobs.
+
+## Running the ticker
+
+| Option | Effect |
 |---|---|
-| `--once` | run one scheduling pass and exit |
-| `--max-jobs=N` | exit after queueing N jobs |
-| `--max-runtime=N` | exit after N seconds |
-| `--workers=N` | start this many workers alongside the ticker |
+| `--once` | One scheduling pass, then exit |
+| `--max-jobs=N` | Exit after queueing N jobs |
+| `--max-runtime=N` | Exit after N seconds |
+| `--workers=N` | Start N queue-worker child processes |
 
-`--workers` is not a hint: the ticker starts that many real `queue:consume` processes and
-owns them. They write to the host's `logs/queue/` directory and use whatever PSR-3 logger
-you configured. When the ticker exits — cleanly or by failing — it closes its children
-rather than leaving orphaned workers behind.
-
-That makes `schedule:ticker --workers=1` a way to run the pair under one supervisor entry
-instead of two. Running separate `queue:consume` processes is still the more flexible
-arrangement, because you can scale and restart them independently.
+Child workers write under `logs/queue/`. The ticker owns them and closes them on exit.
+Separate supervised workers allow independent scaling and restarts.
 
 ```ini
 [program:naf-schedule]
@@ -99,59 +128,40 @@ autostart=true
 autorestart=true
 ```
 
-Replace `/var/www/my-app` with your application path.
+Replace the path with the deployed application. Configure a separately supervised worker
+unless using `--workers`. See [Deployment](deployment.md#background-processes).
 
-## What happens to a window that was missed
+## Missed occurrences { #what-happens-to-a-window-that-was-missed }
 
-Nothing. `isDue()` is asked about the minute the ticker is in, so a job due at 03:00 on a
-machine that was off until 03:05 does not run — it runs the next day.
+The ticker evaluates the current minute; it does not catch up missed occurrences. A daily
+03:00 job on a machine unavailable until 03:05 waits until the next scheduled day. For tasks
+that must eventually run, persist completion state and check overdue work in application logic.
 
-That is worth knowing before you rely on it for anything that must happen. If a run cannot
-be skipped, the job itself has to notice that it has not run since yesterday, because the
-scheduler will not tell it.
+## Coalescing queued runs { #why-a-backlog-does-not-build-up }
 
-## Why a backlog does not build up
+By default, the scheduler adds a deterministic `_job_id` for each class/expression pair.
+The file queue uses it as a filename, so later occurrences replace an unconsumed run of that
+same schedule. This suits work such as rebuilding the latest cache state.
 
-The interesting case is the other one: the ticker running while no worker is. Every minute
-a due job is queued again, and by the time a worker comes back there are six hundred copies
-of a sync that only ever needed the latest state.
-
-The scheduler gives each run a deterministic id — `sha1('schedule:' . $class . ':' . $expression)`
-— and the file driver uses that id as the job's filename. Queueing the same job again
-overwrites the same file, so what waits for the worker is one run, not six hundred.
+Add this fragment to `app/config.php` when every occurrence must be queued separately:
 
 ```php-inline
-'schedule' => [
-    'queue' => [
-        'coalesce' => true,     // the default
-    ],
-],
+'schedule' => ['queue' => ['coalesce' => false]],
 ```
 
-Turning it off gives every run its own random id and every run reaches the worker, which is
-what you want for a job where each occurrence means something on its own — a billing tick,
-not a cache rebuild.
+Coalescing depends on the driver honoring `_job_id`; an append-only driver may not implement
+it. It is not a guarantee that side effects execute exactly once.
 
-!!! note "This depends on the driver"
-    Coalescing works because the file driver keys jobs by that id. A driver that ignores
-    `_job_id` and appends every job will not coalesce, no matter what the setting says.
+## Duplicate prevention and state { #not-running-the-same-minute-twice }
 
-## Not running the same minute twice
+The scheduler records the last queued minute under a file lock and replaces its state file
+atomically. Tickers coordinate only when they use the same state file and lock on a filesystem
+that supports those operations. The default is `sys_get_temp_dir() . '/naf-schedule-state.json'`;
+use an application-specific path as in the example and preserve it across restarts.
 
-Within one minute a job is queued once, even if the ticker loops several times. The
-scheduler remembers the last minute each job ran in and persists that, so restarting the
-ticker mid-minute does not queue everything a second time.
+A failed enqueue is not recorded as complete. A crash after enqueue but before recording can
+still duplicate work. Design non-repeatable side effects around durable application identifiers
+and idempotency, as with [queue leases](queues.md#the-database-driver-for-more-than-one-machine).
 
-That state is held under a file lock and replaced atomically, so two tickers cannot both
-decide a minute is theirs, and a crash mid-write does not leave a half-written file. If
-queueing a job fails, the minute is deliberately *not* marked complete — the next pass tries
-again rather than silently skipping it.
-
-!!! note "Crossing the crash boundary needs a durable job id"
-    The guarantee covers the ticker's own state. A crash between enqueueing and recording
-    that minute can still deliver a job twice. If that matters, give the job a durable id so
-    the consumer can recognise the duplicate — the same at-least-once thinking the queue
-    asks for.
-
-Setting `schedule:heartbeat_file` in the configuration has the ticker record that it is
-polling, which gives a health check something to read.
+Set `schedule:heartbeat_file` to an application-specific writable path to record ticker
+polling. A heartbeat does not prove that jobs completed successfully.

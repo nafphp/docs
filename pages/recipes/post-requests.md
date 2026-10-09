@@ -6,10 +6,10 @@ requires:
 
 # Handling a POST request
 
-Every form, every API call that changes something, arrives the same way: a request with a body,
-which you read, check, act on, and answer. This page explains the flow; the linked recipes
-supply complete files. Start with [Your first application](../first-app.md), including its
-form dependency update and bootstrap correction for the released redirect helper.
+A POST handler reads input, validates it, calls application logic and returns a response.
+This guide explains that sequence; linked recipes provide complete applications. Start from
+[Your first application](../first-app.md). The starter includes the form and session packages
+used below. APIs can follow the same input flow with their own authentication and CSRF policy.
 
 ## One route or two
 
@@ -71,14 +71,13 @@ Rules are a `|`-separated string, or an array. Five ship with `naf/form` — `re
 `min`, `max` and `boolean` — and anything else you register yourself; see
 [Forms and validation](../forms.md#your-own-rules).
 
-**An unknown rule throws.** `validate()` does not skip a rule it does not recognise, which is
-what you want: a typo in a rule name is a hole in your validation, and it should stop the
-request rather than quietly pass everything.
+An unknown rule throws instead of being skipped. Correct misspelled or unregistered rule
+names before treating a validation result as complete.
 
 ## CSRF is already handled
 
 With `naf/form` installed, a listener checks POST, PUT and DELETE before
-your controller runs. You put the token in the form, and that is the whole of your part:
+your controller runs. Generate one token per page and reuse it across that page's forms:
 
 ```html+php
 <?php use function Naf\Form\csrf; ?>
@@ -100,12 +99,12 @@ use function Naf\route;
 return redirect(route('contact'));
 ```
 
-A rendered POST response is a page the browser will re-submit when somebody reloads it — the
-double-charge, double-mail, double-comment bug. Redirecting means the reload re-runs a GET.
+Redirecting after success makes a browser reload repeat the GET instead of submitting the
+successful POST again. It does not prevent deliberate duplicate requests; operations such as
+payments still need application-level idempotency.
 
-Failure is the exception: when validation fails you *do* render, because the page has to come
-back with the errors and what was typed still in it. Nothing was changed, so there is nothing to
-re-submit.
+On validation failure, return the form with errors and submitted values, usually with status
+422. Validate before performing side effects so this response does not represent partial success.
 
 ## Where to go next
 

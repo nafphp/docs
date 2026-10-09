@@ -4,7 +4,7 @@ title: Package overview
 
 # Package overview
 
-What there is, what it requires and what it suggests. Generated from the
+Published packages, their required dependencies and optional integrations. Generated from the
 `composer.json` of the published packages.
 
 | Package | Version | Requires | Suggests | PHP |

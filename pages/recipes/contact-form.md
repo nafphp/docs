@@ -216,3 +216,5 @@ The local outbox is application code for development, not a built-in NAF transpo
 real mail, replace its `Mailer` binding with a configured transport from [Sending mail](../mail.md)
 and use sender/recipient addresses you control. Check the boolean result before reporting
 success. Use a [queue](../queues.md) when delivery should happen outside the request.
+
+See [Testing applications](../testing.md) to automate verification and [Deployment](../deployment.md) for production setup.

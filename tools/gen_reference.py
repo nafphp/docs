@@ -9,19 +9,31 @@ from pathlib import Path
 
 PAGES = os.path.join(os.path.dirname(__file__), "..", "pages")
 KAPITEL = {
-    "framework": ("Core", None), "view": ("Views and templates", "views.md"),
+    "framework": ("Core concepts", "lifecycle.md"), "view": ("Views and templates", "views.md"),
     "flow": ("Flow", "flow.md"),
     "form": ("Forms and validation", "forms.md"), "session": ("Sessions", "sessions.md"),
     "database": ("Database", "database.md"), "orm": ("ORM and repositories", "orm.md"),
     "queue": ("Queues and workers", "queues.md"), "schedule": ("Scheduled jobs", "scheduling.md"),
     "mail": ("Sending mail", "mail.md"), "i18n": ("Translations", "translations.md"),
-    "client": ("HTTP client", "http-client.md"), "cli": ("Console commands", "console.md"),
+    "client": ("HTTP client", "http-client.md"),
+    "storage": ("File storage", "file-storage.md"), "cli": ("Console commands", "console.md"),
     "mcp": ("MCP tools", "mcp.md"), "auth": ("Authentication and permissions", "auth.md"),
-    "oauth-client": ("Signing in with a provider", "oauth-client.md"),
-    "oauth-server": ("Being the provider", "oauth-server.md"),
+    "oauth-client": ("OAuth client", "oauth-client.md"),
+    "oauth-server": ("OAuth authorization server", "oauth-server.md"),
     "rbac": ("Roles and permissions", "rbac.md"),
-    "websocket": ("Live updates", "websocket.md"),
+    "websocket": ("WebSocket notifications", "websocket.md"),
     "board": ("Nafinity", "built-with/nafinity.md"),
+}
+
+CORE_GUIDES = {
+    "Naf\\app": "lifecycle.md", "Naf\\abort": "errors.md#abort-a-request",
+    "Naf\\config": "configuration.md#read-configuration", "Naf\\env": "configuration.md#application-environment",
+    "Naf\\event": "events.md", "Naf\\guard": "guard.md", "Naf\\log": "troubleshooting.md#logging",
+    "Naf\\route": "routing.md", "Naf\\request": "request-response.md#read-the-request",
+    "Naf\\param": "request-response.md#combined-request-parameters",
+    "Naf\\response": "request-response.md#responses", "Naf\\json": "request-response.md#responses",
+    "Naf\\redirect": "request-response.md#redirect-and-refresh", "Naf\\refresh": "request-response.md#redirect-and-refresh",
+    "Naf\\plugin": "plugins.md#accessing-plugin-metadata",
 }
 
 def vendor_packages():
@@ -95,10 +107,11 @@ def write_function_index(fns, details, meta):
         chapter, link = KAPITEL.get(pkg, (pkg, None))
         link = link or "first-app.md"
         out += [f"## naf/{pkg}", "", f"Version **{meta[pkg]['version']}** · [{chapter}]({link})", "",
-                "| Signature | Namespace to import from |", "| --- | --- |"]
+                "| Signature | Namespace to import from | Guide |", "| --- | --- | --- |"]
         for fn in names:
             signature = html.escape(details[fn]['signature']).replace('|', '&#124;')
-            out.append(f"| <code>{signature}</code> | `{details[fn]['namespace']}` |")
+            guide = CORE_GUIDES.get(fn, link)
+            out.append(f"| <code>{signature}</code> | `{details[fn]['namespace']}` | [Behavior]({guide}) |")
         out.append("")
     out += ["</div>", ""]
     out.append(f"*{len(fns)} public functions across {len(set(fns.values()))} packages.*")
@@ -107,7 +120,7 @@ def write_function_index(fns, details, meta):
 
 def write_packages(meta):
     out = ["---", "title: Package overview", "---", "", "# Package overview", "",
-           "What there is, what it requires and what it suggests. Generated from the",
+           "Published packages, their required dependencies and optional integrations. Generated from the",
            "`composer.json` of the published packages.", "",
            "| Package | Version | Requires | Suggests | PHP |", "|---|---|---|---|---|"]
     for pkg in sorted(meta, key=lambda p: (p != "framework", p)):

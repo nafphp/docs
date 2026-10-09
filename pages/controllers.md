@@ -86,3 +86,5 @@ interface name. Scalar constructor parameters are not looked up by name in the c
 Injection is into the constructor; action method arguments still come from route parameters.
 See [Dependency Injection](dependency-injection.md) for resolution rules and the difference
 between `get()` and `make()`.
+
+See [Application lifecycle](lifecycle.md) for construction timing and [Testing](testing.md) for handler verification.
