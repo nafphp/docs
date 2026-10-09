@@ -428,6 +428,10 @@ def test_integrations(root):
     registration = fragment('mcp.md', 'Register the tool in root `bootstrap.php`')
     (root / 'app/mcp.php').write_text('<?php\n\n' + registration)
     bootstrap_include(root, 'app/mcp.php')
+    # Copy the protocol route exemption documented for naf/form 0.2.3+.
+    exemption = fragment('mcp.md', 'installed, exempt this protocol route')
+    config_file = root / 'app/config.php'
+    config_file.write_text(config_file.read_text().replace('return [', 'return [\n    ' + exemption, 1))
     routes = fragment('file-downloads.md', 'Add this fragment to the existing `app/routes.php`:')
     (root / 'app/download-routes.php').write_text('<?php\n\n' + routes)
     with (root / 'app/routes.php').open('a') as file:
@@ -495,11 +499,11 @@ def test_integrations(root):
         expect(download[0] == 200 and download[2] == 'Example download\n', 'Download stream emits file contents')
         expect(download[1]['Content-Disposition'] == 'attachment; filename="example.txt"', 'Controlled download filename')
         expect(client.request('/downloads/unknown')[0] == 404, 'Unknown download identifier is rejected')
-        expect(client.request('/mcp', 'POST', b'{}', {'Content-Type': 'application/json'})[0] == 400,
-               'With Form installed, the CSRF listener rejects an unauthenticated MCP POST first')
+        expect(client.request('/mcp', 'POST', b'{}', {'Content-Type': 'application/json'})[0] == 401,
+               'The named route exemption lets MCP reject an unauthenticated POST')
         expect(client.request('/mcp', 'POST', b'{}',
                               {'Content-Type': 'application/json', 'Authorization': 'Bearer invalid'})[0] == 401,
-               'MCP rejects an invalid bearer token after the Bearer CSRF exemption')
+               'MCP rejects an invalid bearer token after the named route CSRF exemption')
 
         def rpc(method, args=None, bearer=allowed):
             message = {'jsonrpc': '2.0', 'id': 1, 'method': method}
