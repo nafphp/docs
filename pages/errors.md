@@ -73,3 +73,5 @@ event()->listen(Event::EXCEPTION, function (\Throwable $exception) {
 Do not expose unexpected exception messages to clients. When a listener returns its own
 response, it should also perform any logging you need. This hook handles failures during the
 request cycle; a parse error in the bootstrap itself may occur before the listener exists.
+
+Use [Logging and troubleshooting](troubleshooting.md) to diagnose failures without exposing details to clients.

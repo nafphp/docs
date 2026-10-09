@@ -6,14 +6,17 @@ requires:
 
 # Rate limits
 
-Some things should not be attempted a thousand times a minute: signing in, sending a
-verification mail, exporting a report. `naf/rate-limit` counts attempts in your database and
-tells you whether this one is still within the line.
+`naf/rate-limit` counts attempts in a database using fixed time windows. Call it explicitly
+before a protected operation such as login, verification mail or export. It returns a decision;
+your handler decides whether to continue or return HTTP 429.
 
-## Asking
+Configure a PDO connection and install the limiter table before using the guard. Installing
+the plugin alone does not intercept requests.
+
+## Check a limit { #asking }
 
 The package registers a `rateLimit` guard on the `Naf\guard()` registry the framework already
-provides, so there is nothing new to learn and nothing extra to install:
+provides. After the database setup below, call it from a handler:
 
 ```php-inline
 use function Naf\guard;
@@ -36,8 +39,8 @@ Ten attempts per sixty seconds, counted against that key. The answer is three fi
 | `retry_after` | seconds until the window resets |
 
 !!! warning "Check the field, not the array"
-    `if ($decision)` is always true — it is a non-empty array either way. The question you
-    meant to ask is `$decision['allowed']`.
+    The result is a non-empty array for both outcomes. Read `$decision['allowed']` to
+    decide whether the operation may continue.
 
 `guard()->run('rateLimit', $key, $limit, $seconds)` does the same thing, and injecting
 `PdoLimiter` directly shares the same buckets.
@@ -54,12 +57,12 @@ guard()->rateLimit('login:address:' . $peerAddress, 20, 300);
 
 Keys are stored hashed rather than as raw account identifiers or addresses. Use the direct
 peer address unless you have deliberately configured a trusted proxy policy — a client-supplied
-header is a suggestion, not an identity.
+header can be forged.
 
-A guard call limits; it does not authenticate. Whoever is asking is still whoever your
-application decided they are.
+Rate limiting does not authenticate callers. Derive account identifiers from verified
+application identities.
 
-## Wiring it to a database
+## Database setup { #wiring-it-to-a-database }
 
 Installing the package intercepts nothing. Booting it creates no tables, opens no connection
 and consumes no limit — the limiter is resolved on the first guard call, which is when your
@@ -83,22 +86,20 @@ after the default one has already answered a call. MySQL, MariaDB, PostgreSQL an
 supported. Call `cleanup()` periodically — from a scheduled job, for instance — to delete
 buckets that expired more than 24 hours ago.
 
-## What a fixed window cannot promise
+## Window boundaries and failures { #what-a-fixed-window-cannot-promise }
 
 This is a fixed window, not a sliding one, and the difference shows at the boundary:
 
-> Ten per minute means ten between 12:00:00 and 12:00:59, and ten more from 12:01:00. Somebody
-> who spends their allowance at 12:00:59 and again at 12:01:00 made twenty attempts in two
-> seconds, and every one of them was within the limit.
+For a limit of ten per minute, ten attempts at 12:00:59 and ten more at 12:01:00 are all
+allowed. Twenty attempts can therefore occur in two seconds around the window boundary.
 
-That is fine for protecting a mailbox or an export. It is not fine if a burst is the thing you
-are defending against, and no amount of tuning the numbers changes the shape.
+A fixed window permits bursts around window boundaries. Choose another algorithm when the
+requirement is a strict rolling-window or burst limit.
 
-Two more things worth knowing:
+Transaction and failure behavior:
 
 - **Counting stays out of your transactions.** The limiter runs its own short transaction and
   refuses to join one you already opened, rather than counting inside work that might still
   roll back. Consume before you start the domain transaction.
-- **A broken database refuses the request.** Storage errors propagate instead of being
-  swallowed, because a limiter that silently allows everything when it cannot reach its table
-  is worse than no limiter at all.
+- **Storage errors propagate.** Handle them as failures; do not continue the protected
+  operation as though the limit had allowed it.

@@ -59,3 +59,5 @@ the packages needed for your feature and keep the Composer lock file for reprodu
 
 Run the example's verification steps after copying it. They check observable HTTP behavior,
 including failure responses, rather than only whether PHP can parse a file.
+
+Continue with [Application lifecycle](lifecycle.md), [Testing](testing.md) and [Deployment](deployment.md) for setup and operational procedures.

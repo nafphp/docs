@@ -1,246 +1,173 @@
 ---
-title: What do I actually need?
+title: Choosing packages
 ---
 
-# What do I actually need?
+# Choosing packages { #what-do-i-actually-need }
 
-NAF is a small core with plugins around it. Nothing is installed that you did not ask for,
-which is the point — and it means the first question is always *which pieces*.
+Choose packages by the capabilities your application needs. Composer installs required
+dependencies automatically; suggested packages are optional and must be installed explicitly.
+The [package overview](packages.md) lists published versions and dependency relationships.
 
-These are the starting points people actually have. Find the one closest to yours, run the
-command, and skip the rest.
+Start a website with `composer create-project naf/app my-app`. For an HTTP service without
+templates or sessions, use the [core-only installation](install.md#core-only-project).
+The commands below extend an existing Composer project; they do not create its bootstrap,
+routes or configuration.
 
----
+## Package selection { #the-short-version }
 
-## One endpoint that answers
+| Capability | Install | Additional setup |
+|---|---|---|
+| HTTP routing and JSON | `naf/framework` | Bootstrap and web entry point |
+| Templates and layouts | `naf/view` | PHP views and optional layout |
+| Form validation and CSRF | `naf/form` | Validation rules and tokens; includes `naf/session` |
+| SQL and migrations | `naf/database` | Database configuration and PDO driver; commands also need `naf/cli` |
+| Entities and repositories | `naf/orm` | Models and schema; includes `naf/database` |
+| Authentication | `naf/auth` | Identity and provider; add sessions for persistent browser login |
+| Editable roles | `naf/rbac` | Migrations, permissions and role synchronization |
+| Background jobs | `naf/queue` | Queue worker; includes `naf/cli` |
+| Scheduled jobs | `naf/schedule` | Ticker and worker; includes Queue and CLI |
+| External sign-in | `naf/oauth-client` | Provider credentials and local account mapping |
+| OAuth authorization server | `naf/oauth-server` | Issuer, keys, clients, scopes and local login |
 
-A webhook receiver. A health check. A tiny service that takes JSON and gives JSON back.
+## Webhooks and HTTP services { #one-endpoint-that-answers }
 
 ```bash
 composer require naf/framework
 ```
 
-**That is the whole list.** Routing, the container, configuration, events, error handling
-and the request and response objects are all in the core. There is no template engine to
-switch off and no session being started behind your back.
+The core provides routing, requests and responses, services, configuration, events and errors.
+Templates and sessions are separate packages. See [Routing](routing.md) and
+[Requests and responses](request-response.md).
 
-```php-inline
-use function Naf\{json, param, route};
+For a webhook, implement the sender's signature or credential checks, validate the payload
+and decide how retries are handled. Installing the core does not authenticate requests.
 
-route()->add('POST', '/webhook', function () {
-    $payload = param()->all();
-    // do the thing
-    return json(['ok' => true]);
-}, 'webhook');
-```
-
-Read [Routing](routing.md) and [Requests and responses](request-response.md). You are done.
-
----
-
-## A small website
-
-Pages people look at, a contact form that posts back, a layout you do not want to repeat.
+## Websites and forms { #a-small-website }
 
 ```bash
 composer require naf/view naf/form
 ```
 
-`naf/form` brings `naf/session` with it, because CSRF tokens and remembered input both
-need somewhere to live. You do not install it separately.
+The starter already includes these packages. View renders PHP templates; Form validates input
+and checks CSRF tokens on POST, PUT and DELETE. Form installs Session for token storage.
+The `memory()` helper reads the current request; it does not preserve input across redirects.
 
-```php-inline
-use function Naf\route;
-use function Naf\View\render;
+Follow [Views](views.md), [Forms](forms.md) and the [contact form](recipes/contact-form.md).
+Add [`naf/i18n`](translations.md) for translated text.
 
-route()->add('GET', '/contact', fn() => render('contact'), 'contact');
-route()->add('POST', '/contact', [ContactController::class, 'submit'], 'contact.submit');
-```
+## JSON APIs { #a-json-api }
 
-Read [Views and templates](views.md) and [Forms and validation](forms.md). If the site has
-more than one language, add [`naf/i18n`](translations.md).
+The core implements JSON APIs without View, Form or Session. Use `json()` for responses and
+configure [JSON error responses](errors.md#json-errors-for-an-api). The
+[JSON API example](recipes/json-api.md) adds SQLite persistence and migrations.
 
----
+Choose authentication separately. A bearer-authenticated endpoint must verify its token.
+If Form is also installed, its CSRF listener exempts an Authorization header beginning with
+`Bearer `; this does not authenticate the caller. Cookie-authenticated APIs may still need
+CSRF protection. See [CSRF](forms.md#csrf-protection).
 
-## A JSON API
-
-No templates, no forms, no browser. Clients send a token and expect JSON.
-
-```bash
-composer require naf/framework
-```
-
-Again just the core. `json()` is a core helper, and so is `abort()` for the error cases.
-You do **not** want `naf/form` here: it adds a CSRF check to every POST, PUT and DELETE,
-which for a token-authenticated API is a check that protects nothing and refuses
-legitimate requests. If you end up installing it for other reasons, a request with a
-`Bearer` token passes anyway — see [CSRF protection](forms.md#csrf-protection).
-
-For storage, add one of the two below.
-
----
-
-## Something to store it in
-
-Two answers, and which one depends on how much structure you want.
+## Database access { #something-to-store-it-in }
 
 ```bash
-composer require naf/database      # PDO, prepared statements, migrations
-composer require naf/orm           # entities and repositories — brings naf/database
+composer require naf/database
 ```
 
-`naf/orm` pulls `naf/database` in, so asking for the ORM is asking for both. Take
-`naf/database` alone when you want to write SQL and have it stay SQL; take `naf/orm` when
-you would otherwise write the same mapping code by hand.
+Use Database for a configured PDO connection, SQL and migrations. Alternatively, install
+ORM, which includes Database:
 
-Read [Database](database.md) or [ORM and repositories](orm.md).
+```bash
+composer require naf/orm
+```
 
----
+ORM adds entity mapping and repositories. Neither package creates the application's schema.
+See [Database](database.md) and [ORM](orm.md).
 
-## People with accounts
-
-Sign-in, permissions, "this belongs to that user".
+## User accounts { #people-with-accounts }
 
 ```bash
 composer require naf/auth naf/orm naf/session
 ```
 
-`naf/auth` requires only the core — it can work against anything you write a provider for.
-But the ordinary case is a user model in a database and a session to stay signed in, which
-is why the two are suggested alongside it rather than required.
+This combination supports the documented database-backed browser login. Auth itself requires
+only the core and can use a PDO, ORM, LDAP or application-defined provider. The provider
+verifies credentials and reloads identities; sessions retain verified logins between requests.
+Registration and account recovery remain application responsibilities.
 
-```php-inline
-use Naf\Auth\Credentials\PasswordCredentials;
-use function Naf\Auth\auth;
+Follow [Authentication](auth.md#quickstart) and the [login form](recipes/login-form.md).
+Add [RBAC](rbac.md) when administrators need to edit stored roles and grants.
 
-if (auth()->authenticate(new PasswordCredentials($email, $password))) {
-    // signed in
-}
-```
-
-Read [Authentication and permissions](auth.md), and
-[Why auth has this shape](auth-architecture.md) if you want the reasoning.
-
----
-
-## Work that should not happen during the request
-
-Sending mail, resizing images, anything that makes somebody wait for no reason.
+## Background and scheduled work { #work-that-should-not-happen-during-the-request }
 
 ```bash
-composer require naf/queue        # brings naf/cli for the worker command
-composer require naf/schedule     # brings naf/queue and naf/cli
+composer require naf/queue
 ```
 
-`naf/queue` runs jobs when a worker picks them up. `naf/schedule` runs them at a time you
-name, and needs the queue underneath — so asking for the scheduler gives you all three.
+Requests enqueue jobs; a running worker executes them. For cron schedules, install:
 
-Read [Queues and workers](queues.md) and [Scheduled jobs](scheduling.md).
+```bash
+composer require naf/schedule
+```
 
----
+Schedule includes Queue and CLI. Run both a ticker and worker. See [Queues](queues.md) for
+failures and delivery guarantees, and [Scheduling](scheduling.md) for missed and repeated runs.
 
-## "Sign in with Google"
-
-Let people in with an account they already have, and keep your own user model.
+## External sign-in { #sign-in-with-google }
 
 ```bash
 composer require naf/oauth-client
 ```
 
-Brings `naf/auth` and `naf/session`. The ready-made button and pages also render without `naf/view`; add it
-when you want application templates to override the shipped markup.
+This includes Auth and Session. Configure a provider and map external identities to local
+accounts. Built-in pages render without View; add it for template overrides. See [OAuth client](oauth-client.md).
 
-Read [Signing in with a provider](oauth-client.md).
-
----
-
-## Being the provider
-
-Other applications sign their users in through *you*, and your API checks their tokens.
+## OAuth authorization server { #being-the-provider }
 
 ```bash
 composer require naf/oauth-server
 ```
 
-Brings `naf/auth`, `naf/session` and `naf/form` — the consent screen is a form, and it needs
-CSRF protection like any other.
+Use this when other applications should obtain tokens for your API or sign in through your
+accounts. It includes Auth, Session and Form. Configure and migrate the database, provide
+local login and register clients. Review [OAuth server](oauth-server.md), including its
+concurrency requirements, before deployment.
 
-Read [Being the provider](oauth-server.md). Before you put it in front of anyone, read the
-concurrency notes in that chapter: the guarantees it makes about simultaneous requests are
-properties of your database, and SQLite cannot demonstrate them.
-
----
-
-## A tool for the terminal
-
-No web server at all. Commands you run yourself or from cron.
+## Console applications { #a-tool-for-the-terminal }
 
 ```bash
 composer require naf/cli
 ```
 
-The core still does the wiring — configuration, the container, events — you just never
-route an HTTP request through it.
+Commands use the application's configuration, container and plugins through `vendor/bin/naf`.
+See [Console commands](console.md) for registration and execution.
 
-Read [Console commands](console.md).
-
----
-
-## Something a language model can call
-
-Exposing part of your application as tools an assistant can use.
+## MCP tools { #something-a-language-model-can-call }
 
 ```bash
 composer require naf/mcp
 ```
 
-Read [MCP tools](mcp.md).
+Register tools and issue scoped access tokens. Tools enforce application access rules for
+their data and actions. See [MCP tools](mcp.md).
 
----
-
-## Sending mail
-
-Not a starting point on its own, but the thing everything eventually needs.
+## Mail delivery { #sending-mail }
 
 ```bash
 composer require naf/mail
 ```
 
-Read [Sending mail](mail.md). If it should not block the response, put it behind
-[a queue](queues.md).
+The default transport uses PHP's `mail()`. Configure local capture in development and tests.
+See [Mail](mail.md), and use a queue when delivery should happen outside the HTTP request.
 
----
+## Other integrations { #more-optional-capabilities }
 
-## More optional capabilities
-
-| You need | Package | Guide |
+| Capability | Package | Guide |
 |---|---|---|
-| translations | `naf/i18n` | [Translations](translations.md) |
-| an HTTP client | `naf/client` | [HTTP client](http-client.md) |
-| file storage | `naf/storage` | [File storage](file-storage.md) |
-| database-backed rate limits | `naf/rate-limit` with `naf/database` | [Rate limits](rate-limits.md) |
-| roles people can edit | `naf/rbac` | [Roles and permissions](rbac.md) |
-| directory sign-in | `naf/auth-ldap` | [LDAP authentication](auth-ldap.md) |
-| live updates | `naf/websocket` | [Live updates](websocket.md) |
+| HTTP requests | `naf/client` | [HTTP client](http-client.md) |
+| Local, S3 and WebDAV files | `naf/storage` | [File storage](file-storage.md) |
+| Database-backed limits | `naf/rate-limit` | [Rate limits](rate-limits.md) |
+| LDAP authentication | `naf/auth-ldap` | [LDAP provider](auth-ldap.md) |
+| WebSocket notifications | `naf/websocket` | [WebSockets](websocket.md) |
+| Browser components | `naf/flow` | [Flow](flow.md) |
 
-Command-line setup for some of these packages also needs `naf/cli`; each guide names its
-prerequisites.
-
----
-
-## The short version
-
-| You are building | Install |
-|---|---|
-| one endpoint, a webhook, an API | `naf/framework` |
-| a website with pages and forms | `naf/view naf/form` |
-| anything that stores data | `naf/database` or `naf/orm` |
-| anything with accounts | `naf/auth naf/orm naf/session` |
-| work that happens later | `naf/queue` or `naf/schedule` |
-| sign-in through Google, GitHub, … | `naf/oauth-client` |
-| your own OAuth provider | `naf/oauth-server` |
-| a command-line tool | `naf/cli` |
-| tools for a language model | `naf/mcp` |
-
-Every package's own dependencies come along automatically. The
-[package overview](packages.md) lists what pulls in what.
+Each guide names optional dependencies and configuration. Continue with
+[Application lifecycle](lifecycle.md) and [Deployment](deployment.md).

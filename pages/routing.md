@@ -66,3 +66,5 @@ vendor/bin/naf route:debug
 This prints method, path and name. A 404 often means the method or path differs from the
 registration. An entirely empty application's GET `/` has a built-in welcome response;
 register your own home route for application behaviour.
+
+See [HTTP tests](testing.md#test-http-behavior) to verify status and content through the running application.

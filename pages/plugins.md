@@ -1,226 +1,143 @@
 ---
-title: How plugins work
+title: Plugins
 ---
 
 # Plugins
 
-A plugin is an ordinary Composer package that declares `"type": "naf-plugin"`. That type
-is the whole discovery mechanism: the framework asks Composer which installed packages have
-it and boots them. There is nothing to register and no list to maintain.
+A NAF plugin is an installed Composer package of type `naf-plugin`. NAF discovers it through
+Composer's installed-package metadata and loads its conventional resources. A cloned sibling
+directory is not an installation; declare dependencies in the consuming application's manifest.
 
-## Flow { #flow-development-guide }
+See [Application lifecycle](lifecycle.md) for when plugin boot occurs. [Choosing packages](choosing-packages.md)
+helps select existing plugins before writing a new one.
 
-[Flow](flow.md) connects native JavaScript components to server-rendered NAF views.
-Its chapter explains installation, lifecycle methods, reactive state, shared stores,
-backend requests, HTML fragments and CSP integration, with a complete example in
-separate component and template files.
+## Plugin discovery <span id="automatic-discovery"></span>
 
-The [component factory section](flow.md#component-factories-classes-and-exported-functions)
-explains class wrappers and directly passed functions, including when component instances
-and shared stores are created.
+Packages of another type, including the old `nixphp-plugin`, are not discovered as NAF plugins.
+Required dependencies belong in Composer `require`; `app/plugins.php` only influences order.
 
-## Plugin discovery
+## Plugin layout { #plugin-structure }
 
-The package type has to be right. A package that installs correctly but declares a
-different type is not loaded — silently, without an error — which is exactly what happens
-to a `nixphp-plugin` under NAF 0.2.
-
-## Plugin Structure
-
-A NAF plugin mimics the structure of a full app:
+Use one conventional layout per package:
 
 ```text
-your-plugin/
-├── app/
-│   ├── config.php         // Plugin-specific configuration
-│   └── views/             // Plugin-specific templates
-│       └── example.phtml
-├── bootstrap.php          // Bootstrap logic (routes, events, services, etc.)
-└── composer.json
-```
-
-- `app/config.php` is merged into the global config.
-- `app/views/` is added to the view resolver.
-- `bootstrap.php` is automatically executed when the plugin is discovered.
-
----
-
-## Example `composer.json`
-
-Below is a minimal but complete `composer.json` for a NAF plugin:
-
-```json
-{
-  "name": "vendor/naf-plugin-example",
-  "description": "Skeleton for your first plugin when using NAF",
-  "type": "naf-plugin",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Your Name",
-      "email": "your@mail.com"
-    }
-  ],
-  "require": {
-    "php": ">=8.3",
-    "naf/framework": "^0.2"
-  },
-  "autoload": {
-    "psr-4": {
-      "MyPlugin\\": "app/"
-    }
-  },
-  "minimum-stability": "stable",
-  "prefer-stable": true
-}
-```
-
-> ✅ Important:
-> - `"type": "naf-plugin"` is required for discovery.
-> - The namespace (e.g. `MyPlugin\\`) must match your plugin classes location.
-
-Run:
-
-```bash
-composer dump-autoload
-```
-
-To ensure your classes are properly registered.
-
----
-
-## Automatic Discovery
-
-Plugins are discovered via Composer using the package `"type": "naf-plugin"`. Once installed, NAF will:
-
-- Load `bootstrap.php`
-- Merge `app/config.php`
-- Register all `app/views/` templates
-
-No manual registration is needed.
-
----
-
-## Accessing Plugin Metadata
-
-```php-inline
-use function Naf\plugin;
-
-$plugins = plugin(); // array<string, Naf\Support\Plugin>
-$view = plugin('naf/view'); // Plugin; ask only for an installed package
-$view->getViewPaths();
-$view->getConfigPaths();
-$view->getBootstrapFile();
-```
-
-For internal use or debugging only – no need to register anything yourself.
-
----
-## Example Plugin: Event Listener
-```text
-my-event-plugin/
-├── app/
-│   └── Listeners/
-│       └── UserListener.php
-└── bootstrap.php
-```
-**UserListener.php:**
-```php-inline
-namespace MyEventPlugin\Listeners;
-
-use function Naf\log;
-
-class UserListener
-{
-    public function onUserRegistered($user)
-    {
-        // Log registration, send welcome email, etc.
-        log()->info('New user registered: ' . $user->email);
-    }
-}
-```
-**bootstrap.php:**
-```php-inline
-use MyEventPlugin\Listeners\UserListener;
-use function Naf\{event, log};
-
-// Register the event listener
-$listener = new UserListener();
-event()->listen('user.registered', [$listener, 'onUserRegistered']);
-
-// You can also use closure-based listeners
-event()->listen('user.login', function($user) {
-    log()->info('User logged in: ' . $user->email);
-});
-```
-Usage in the main application:
-```php-inline
-use function Naf\{event, log};
-
-// After successful user registration:
-$user = new User(); // Your user object
-event()->dispatch('user.registered', $user);
-```
-
----
-
-## Example Plugin: Routing to a Controller
-
-**Structure:**
-
-```text
-my-hello-plugin/
-├── app/
-│   └── Controllers/
-│       └── HelloController.php
+example-plugin/
+├── src/
+│   ├── Controllers/HelloController.php
+│   ├── config.php
+│   ├── functions.php
+│   └── routes.php
 ├── bootstrap.php
 └── composer.json
 ```
 
-**HelloController.php:**
+The loader accepts `app/` variants too, with the first existing candidate winning. Config
+files return arrays; routes register handlers; bootstrap registers services and listeners.
+Views additionally require View. Do not create competing copies of the same resource.
 
-```php-inline
-namespace MyHelloPlugin\Controllers;
+## Package manifest { #example-composerjson }
+
+Create this `composer.json` in the plugin repository. It maps `ExamplePlugin\` to `src/`:
+
+```json title="composer.json"
+{
+    "name": "example/naf-hello",
+    "description": "Example response-producing NAF plugin",
+    "type": "naf-plugin",
+    "license": "MIT",
+    "require": { "php": ">=8.3", "naf/framework": "^0.2" },
+    "autoload": { "psr-4": { "ExamplePlugin\\": "src/" } }
+}
+```
+
+Install the package in the host using its published Composer name. During local development,
+a Composer path repository can point to its checkout; keep that development-only repository
+out of a published package manifest. Regenerate host autoloading after manifest changes.
+
+## Routes and controllers { #example-plugin-routing-to-a-controller }
+
+Create `src/Controllers/HelloController.php` in the plugin:
+
+```php title="src/Controllers/HelloController.php"
+<?php
+
+declare(strict_types=1);
+
+namespace ExamplePlugin\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
-use function Naf\response;
+use function Naf\json;
 
-class HelloController
+final class HelloController
 {
     public function index(): ResponseInterface
     {
-        return response('Hello from the plugin controller!');
+        return json(['message' => 'Hello from the plugin']);
     }
 }
 ```
 
-**bootstrap.php:**
+Create `src/routes.php`:
 
-```php-inline
-use MyHelloPlugin\Controllers\HelloController;
+```php title="src/routes.php"
+<?php
+
+use ExamplePlugin\Controllers\HelloController;
 use function Naf\route;
 
-route()->add('GET', '/plugin-hello', [HelloController::class, 'index'], 'plugin.hello');
+route()->add('GET', '/plugin-hello', [HelloController::class, 'index'], 'example.hello');
 ```
 
-Visit: `http://yourapp.local/plugin-hello`
+In a host with the plugin installed, GET `/plugin-hello` returns 200 and the JSON message.
+Application routes load last and can replace a plugin registration with the same route name.
 
----
+## Services and listeners { #example-plugin-event-listener }
 
-## View Resolution Order
+Register lazy services and listeners in the plugin's root `bootstrap.php`. For example:
 
-1. App `app/views/`
-2. Plugins `app/views/`
+```php title="bootstrap.php"
+<?php
 
----
+use function Naf\{event, log};
 
-## Config Merge Order
+event()->listen('import.completed', static function (int $count): void {
+    log()->info('Imported ' . $count . ' records.');
+});
+```
 
-1. Framework defaults
-2. Plugin configuration, in plugin order
-3. Application configuration (`app/config.php`, or `src/config.php` as a fallback)
+After an application import succeeds, `event()->dispatch('import.completed', $count)` invokes
+that listener. Custom event names have no effect until code dispatches them. Class listeners
+use constructor injection through the default container. See [Events](events.md).
 
-Later values override earlier values recursively. See [Configuration](configuration.md).
+## Resource precedence { #view-resolution-order }
+
+Application view paths take precedence over plugin paths. Within plugins, resolved plugin
+order governs precedence. Use the same relative template path to override a plugin view.
+
+### Configuration merging { #config-merge-order }
+
+Configuration merges core defaults, plugin configuration and application configuration in
+that order. Later values win recursively; numeric arrays replace by position. See
+[Configuration](configuration.md#merge-order).
+
+## Plugin metadata { #accessing-plugin-metadata }
+
+```php-inline
+use function Naf\plugin;
+
+$plugins = plugin();
+$view = plugin('naf/view');
+$paths = $view->getViewPaths();
+```
+
+This fragment assumes View is installed. Asking for an absent plugin throws; inspect
+`app()->hasPlugin('naf/view')` before optional access. Registration does not prove boot has
+finished. Use `isBooted()` on the plugin when that distinction matters.
+
+## Flow { #flow-development-guide }
+
+[Flow](flow.md) adds native browser components to PHP views. It uses the same plugin boot,
+asset collection and HTTP response mechanisms described here.
 
 ## Boot order
 

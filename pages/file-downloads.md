@@ -2,75 +2,95 @@
 title: Serving files
 ---
 
-# File Downloads
+# Serving files { #file-downloads }
 
-Sometimes you want to send files to the browser for download instead of displaying them.  
-NAF gives you full control to stream files using a custom response.
+Return a PSR-7 response with a stream body to serve a file. Set its content type and disposition
+explicitly. The core emitter reads the stream in chunks, so the application does not need to
+load the complete file into a string.
 
----
+The following example starts from [Your first application](first-app.md) and exposes one
+application-owned text file publicly. For private files, perform authorization before opening
+the stream. See [File storage](file-storage.md) for named local or remote disks.
 
-## Downloading a File
+## Create a file and controller { #downloading-a-file }
 
-You can manually create a response that forces a file download:
+From the project root:
 
-```php-inline
-use function Naf\response;
-
-$filePath = BASE_PATH . '/storage/files/example.pdf';
-$fileName = 'example.pdf';
-
-$response = response(file_get_contents($filePath))
-    ->withHeader('Content-Type', 'application/octet-stream')
-    ->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"');
-
-return $response;
+```bash
+mkdir -p storage/files
+php -r 'file_put_contents("storage/files/example.txt", "Example download\n");'
 ```
 
-- `Content-Type` tells the browser this is a generic file download.
-- `Content-Disposition: attachment` forces the download dialog.
-- The file is loaded into the response body.
+Create the controller:
 
----
+```php title="app/Controllers/DownloadController.php"
+<?php
 
-## Example: Download Controller
+declare(strict_types=1);
 
-```php-inline
 namespace App\Controllers;
 
+use Nyholm\Psr7\Stream;
+use Psr\Http\Message\ResponseInterface;
 use function Naf\{abort, response};
 
-class FileController
+final class DownloadController
 {
-    public function download($filename)
+    public function show(string $id): ResponseInterface
     {
-        $path = BASE_PATH . '/storage/files/' . basename($filename);
+        $files = ['example' => ['example.txt', 'text/plain; charset=UTF-8']];
+        if (!isset($files[$id])) {
+            abort(404, 'File not found.');
+        }
 
+        [$name, $type] = $files[$id];
+        $path = BASE_PATH . '/storage/files/' . $name;
         if (!is_file($path) || !is_readable($path)) {
             abort(404, 'File not found.');
         }
 
-        return response(file_get_contents($path))
-            ->withHeader('Content-Type', 'application/octet-stream')
-            ->withHeader('Content-Disposition', 'attachment; filename="' . basename($filename) . '"');
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            abort(500, 'Unable to open file.');
+        }
+
+        return response('', 200, [
+            'Content-Type' => $type,
+            'Content-Disposition' => 'attachment; filename="' . $name . '"',
+        ])->withBody(Stream::create($handle));
     }
 }
 ```
 
-- This example serves flat filenames from an application-owned directory. `basename()` strips
-  directory components; it does not check symlinks or authorize access to private files.
-- Always check if the file actually exists before sending it.
+The route identifier selects a fixed file and download name. It is not concatenated into a
+filesystem path or header. Keep this directory application-owned; do not allow uploads to
+replace its files or create symlinks in it.
 
----
+## Register and verify { #example-download-controller }
 
-## Notes
-
-- For large files, you may want to implement streaming to avoid memory issues.
-- You can adjust `Content-Type` based on the file type if needed (e.g., `application/pdf` for PDFs).
-
-Example for PDF:
+Add this fragment to the existing `app/routes.php`:
 
 ```php-inline
-return response(file_get_contents($pdfPath))
-    ->withHeader('Content-Type', 'application/pdf')
-    ->withHeader('Content-Disposition', 'attachment; filename="document.pdf"');
+use App\Controllers\DownloadController;
+use function Naf\route;
+
+route()->add('GET', '/downloads/{id}', [DownloadController::class, 'show'], 'downloads.show');
 ```
+
+With the development server running:
+
+```bash
+curl -i http://127.0.0.1:8000/downloads/example
+curl -i http://127.0.0.1:8000/downloads/unknown
+```
+
+Expect 200, the attachment header and `Example download` for the first request; 404 for the
+second. A successful handler response does not guarantee a completed client download: the
+connection can fail after headers are sent.
+
+## Download behavior { #notes }
+
+`Content-Disposition: attachment` asks the browser to download the response. Use a MIME type
+matching the selected content. This example serves the full file; it does not implement
+Range requests or resumable downloads. Configure the web server or a suitable file service
+when those features are required.

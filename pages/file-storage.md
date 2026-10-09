@@ -6,13 +6,16 @@ requires:
 
 # File storage
 
-Files that belong to your application: an uploaded avatar, a generated invoice, an export
-somebody downloads once. `naf/storage` gives them one API whether they sit on the local disk,
-in an S3-compatible bucket or on a WebDAV server.
+`naf/storage` exposes named disks for local files, S3-compatible buckets and WebDAV.
+Use it for uploads, generated documents and exports. Each disk has its own adapter,
+root or remote location, and optional public URL configuration.
+
+Configure disks in the application before calling `storage()`. Authorization, upload policy
+and file lifecycle remain application responsibilities.
 
 ## Disks
 
-A disk is a configured place with a name, and naming them is the point:
+Select a disk by its configured name:
 
 ```php-inline
 use function Naf\Storage\storage;
@@ -22,12 +25,10 @@ storage('documents')->put('invoices/2026/1234.pdf', $contents);
 storage('public')->url('avatars/123.jpg');
 ```
 
-`storage()` without a name is the default disk. `storage('documents')` is somewhere else
-entirely — its own root, its own visibility, possibly its own adapter. Public assets and
-private documents stay apart because they are different disks, not because everybody
-remembers which directory is which.
+`storage()` selects the configured default disk. `storage('documents')` selects that named
+disk. Use separate disks for private documents and intentionally public assets.
 
-The everyday operations are what you would expect:
+The disk API supports these operations:
 
 ```php-inline
 $disk = storage('documents');
@@ -76,8 +77,7 @@ on failure, and use last-completed-write semantics. Files and SQL are separate t
 
 ## Large files
 
-Reading a 2 GB export into a string to write it somewhere else is how an application runs out
-of memory. Streams avoid that in both directions:
+Use streams when files may exceed available memory:
 
 ```php-inline
 $stream = $disk->readStream($path);
@@ -89,16 +89,15 @@ $disk->writeStream($path, $handle);
 It does not rewind it. `get()` still loads the entire file into memory. Transfers are
 synchronous; bounded memory does not mean the network operation is asynchronous.
 
-## Paths are checked, not trusted
+## Path validation and errors { #paths-are-checked-not-trusted }
 
-A path that climbs out of its disk's root is **refused**, not normalised into something
-harmless-looking. Failures are typed exceptions rather than `false`, so a mistake is visible
-where it happens instead of three lines later.
+Paths that escape a disk root are rejected. Invalid paths and failed operations raise
+typed exceptions; handle them at the application boundary.
 
 !!! note "This is not an upload lifecycle"
     Quotas, MIME policy, who may read what, and whether a file is allowed to exist at all
-    remain your application's decisions. This package moves bytes and says plainly when it
-    cannot.
+    remain application responsibilities. Validate uploads and authorize reads before
+    invoking storage operations.
 
 ## S3 and WebDAV
 
@@ -110,8 +109,8 @@ composer require aws/aws-sdk-php   # S3 only
 ```
 
 They are declared as suggestions rather than requirements, so a local-only installation pulls
-in nothing extra. The adapter boundary is a single interface, so a service this package does
-not ship is a class and a binding away.
+in nothing extra. Additional adapters implement the package's adapter interface and are selected in the
+disk configuration.
 
 Remote transfers stream too, which means the temporary filesystem needs room for what is in
 flight — that is disk, not memory.

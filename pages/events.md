@@ -21,7 +21,7 @@ event()->dispatch('product.created', $product);
 `dispatch()` returns an array of listener results. Use closures or `[ListenerClass::class, 'handle']`;
 NAF constructs class-based listeners through the default container.
 
-## An event can be an object
+## Object events { #an-event-can-be-an-object }
 
 Since **v0.2.6** the event may be an object, in which case its class is the name and the
 object itself is the payload:
@@ -36,20 +36,16 @@ event()->listen(OrderShipped::class, fn(OrderShipped $shipped) => log()->info($s
 event()->dispatch(new OrderShipped('A-1'));
 ```
 
-`listen()` needs nothing for this — `::class` is a string like any other name — so an
-application converts one event at a time or none. Nothing is required of the class: no
-interface, no base class, no marker.
+`listen()` accepts the class-name string. Event objects need no interface or base class;
+existing string events can continue to be used alongside object events.
 
-What it buys is what a string cannot. A misspelled class is an error where it is written,
-while a misspelled event name is a listener that never runs and never says so. An IDE can find
-every listener of an event and rename one as a refactoring. And the payload has a declared
-shape instead of a docblock describing variadic arguments — which matters most for events a
-listener is meant to change something in, where the shape of what may be edited *is* the
-contract.
+An event class defines the payload shape and supports IDE navigation and refactoring.
+PHP does not verify class existence when evaluating `SomeClass::class`; a misspelled class
+name there still produces a string. Static analysis can detect it, and constructing a
+missing class with `new` fails. Keep listener names and dispatched classes consistent.
 
-One thing to know before converting an event that already exists: names and class names share
-one key space, so converting is a **rename**. A listener registered on the old string stops
-hearing it, silently. Convert the listeners in the same change.
+String names and event class names share one key space. Replacing a custom string name
+with a class name changes the event key; update its listeners in the same change.
 
 Priorities, class listeners, return values and `dispatchForResponse()` behave identically
 either way.
@@ -90,7 +86,8 @@ event()->listen(Event::RESPONSE_HEADER, function (ResponseInterface $response) {
 });
 ```
 
-The last returned response is used. Returning a response from `controller.called` or
+The last returned `ResponseInterface` is used. Every listener receives the original
+response argument; returned replacements are not passed to subsequent listeners. Returning a response from `controller.called` or
 `response.send` does not replace the response being sent. The `exception` hook also supports
 returned responses; see [Errors and aborting](errors.md).
 

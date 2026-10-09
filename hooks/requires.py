@@ -30,8 +30,8 @@ def on_page_markdown(markdown, page, config, files):
     if not req:
         return markdown
 
-    lines = ['!!! info "This chapter needs an extra package"' if len(req) == 1
-             else '!!! info "This chapter needs extra packages"', "",
+    lines = ['!!! info "Required packages"', "",
+             '    In an existing NAF application:', "",
              "    ```bash", "    composer require " + " ".join(req), "    ```", ""]
 
     extra = set()
@@ -43,4 +43,7 @@ def on_page_markdown(markdown, page, config, files):
         lines.append(f"    Also installs these transitive dependencies: {names}.")
         lines.append("")
 
-    return "\n".join(lines) + markdown
+    position = markdown.find("\n## ")
+    if position == -1:
+        position = len(markdown)
+    return markdown[:position] + "\n" + "\n".join(lines) + markdown[position:]

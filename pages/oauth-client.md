@@ -1,34 +1,27 @@
 ---
-title: Signing in with a provider
+title: OAuth client
 requires:
   - naf/oauth-client
 ---
 
-# Signing in with a provider
+# OAuth client { #signing-in-with-a-provider }
 
-> **Sign people in with Google, Microsoft or any OpenID Connect provider — and keep your own user model.**
+`naf/oauth-client` integrates external OAuth 2.0 and OpenID Connect sign-in with NAF Auth.
+It supplies protocol routes and verification; the application configures providers and maps
+external identities to local accounts.
 
-```html+php
-<?= oauth_button('google') ?>
-```
+Before enabling a provider, configure the public URL, credentials, local account source and
+link storage. Run the setup and migration steps below, then verify the complete redirect and
+callback flow. Provider API access after login is a separate opt-in integration.
 
-That is the whole integration. The routes, the protocol and the account lookup are already
-wired; what is left for you is the one decision nobody else can make — see
-[Which account is this?](#which-account-is-this)
+## Protocol verification { #what-this-plugin-is }
 
-> Install it when people should sign in with an account they already have.
+`ExternalIdentity` contains the verified issuer, subject and claims. Map that external
+identity to a local account before completing sign-in.
 
----
+The plugin applies these protocol checks:
 
-## What this plugin is
-
-It answers one question — **who does the provider say this is?** — and hands back an
-`ExternalIdentity`: an issuer, a subject, and the claims that came with them.
-
-Everything the protocol asks for in between is not configurable, because none of it is a
-decision an application should be making:
-
-| | |
+| Check | Behavior |
 | --- | --- |
 | **PKCE** | S256, always, for confidential clients too |
 | **`state`** | random, stored server-side, consumed once |
@@ -43,14 +36,12 @@ decision an application should be making:
 
 A provider whose keys cannot be read makes the login **fail**. It never makes the check optional.
 
-The configured issuer is the trust anchor — the one thing you actually stated about a provider.
-Everything else, endpoints and signing keys included, arrives over the network, so a discovery
-document has to prove it belongs to that issuer before anything in it is used and before a
-client secret is sent to an address it names.
+The configured issuer establishes which provider is trusted. Discovery metadata must name
+that issuer before its endpoints and keys are used. Unavailable keys do not disable token
+verification; they cause the login to fail.
 
-Signing somebody in is the whole of it by default, and stores nothing the provider issued. An
-application that also has to *act* at the provider afterwards — read a calendar, list
-repositories — can keep those tokens instead; that is opt-in and lives in
+Provider tokens are not stored by default. Enable encrypted token storage only when the
+application needs to call provider APIs after login; see
 [Calling the provider afterwards](#calling-the-provider-afterwards).
 
 ---
@@ -59,7 +50,7 @@ repositories — can keep those tokens instead; that is opt-in and lives in
 
 ### Google
 
-The whole thing:
+Add these keys to the array returned by `app/config.php`:
 
 ```php-inline
 // app/config.php
@@ -77,14 +68,14 @@ return [
 ];
 ```
 
-Two things: where your accounts live, and which logins you offer. The connection, the callback
-routes, the session, the link table, the HTTP transport and the landing page are all taken from
-what is already there.
+The configuration selects the local account model, public URL and external login. The
+plugin registers callback routes and uses the configured account and session services.
+Create the link table using the migration steps in this chapter.
 
 The diagnostic commands need `composer require naf/cli`.
 For the API-call example later, also install `naf/client`.
 
-Then ask what to register with the provider:
+Inspect the callback URL to register in the provider console:
 
 ```bash
 vendor/bin/naf oauth:discover google
@@ -141,7 +132,7 @@ the tenant is then checked against your list.
 
 ### Any other OpenID Connect provider
 
-One extra line — the issuer. Endpoints and keys come from its discovery document.
+Configure the issuer. Endpoints and signing keys are obtained from its discovery document.
 
 ```php-inline
 'keycloak' => [
@@ -184,8 +175,8 @@ does not call its identifier `sub`, the field that holds it:
 ],
 ```
 
-**GitLab needs none of this** — it publishes an OpenID Connect discovery document, so
-`'issuer' => 'https://gitlab.com'` is the whole configuration.
+For GitLab, select the OpenID Connect path with `issuer` set to `https://gitlab.com`,
+together with the client credentials and application settings described above.
 
 #### Two trust paths, and the difference between them
 
@@ -194,38 +185,31 @@ signature and the address are verified. Without it there is nothing to sign: the
 from an authenticated call to the provider's API with the access token just exchanged for the
 code.
 
-For the authorization-code flow that is sound — the token was minted for this client id, against
-this redirect URI, with this PKCE verifier, so no token from anywhere else can reach that call.
-It is weaker in kind rather than in strength: there is no audience-bound assertion to re-check
-later, and nothing binds the answer to this particular login beyond the token itself. That is
-also why no `nonce` is sent to such a provider — there would be nothing to bind it to.
+Plain OAuth 2.0 sign-in relies on the authorization-code exchange and an authenticated
+profile request. It has no signed ID token with an audience and nonce to verify. Use
+OpenID Connect where the provider supports it.
 
-One consequence worth knowing: a plain-OAuth2 provider states no issuer, so identities are filed
-under `oauth:<provider key>`. **Renaming the key in your configuration detaches existing links.**
-With OpenID Connect the issuer is the provider's own and renaming is harmless.
+Plain OAuth 2.0 identities use `oauth:<provider key>` as their issuer key. Renaming that
+configuration key detaches existing account links. OpenID Connect links use the verified issuer.
 
 ### When a provider rotates your client secret
 
-Change the one line and deploy. Nothing else moves: the `client_id` stays, the callback URL stays,
-every account link stays, and nobody is signed out. A client secret is only ever used at the token
-endpoint, between your server and theirs — it never reaches a browser and never identifies anyone.
+Update the configured client secret and deploy it before the provider retires the old one.
+Client IDs, callback URLs and account links remain associated with the same provider.
 
-There is nothing to clear either. The secret is read from the configuration on the request that
-needs it; what gets cached is discovery documents and signing keys, and neither contains it.
+The secret is read from configuration when needed. Metadata and key caches do not store it.
 
-The awkward part is that two sides have to change and they cannot do it in the same instant. A
-provider worth using holds both for a while — a `naf/oauth-server` does:
+Coordinate the change with the provider's rotation procedure. When the provider is a NAF
+OAuth server, its overlap window allows the client deployment to switch credentials:
 
 ```bash
 vendor/bin/naf oauth:client:rotate-secret <client-id>
 ```
 
-Deploy the new value here before that window closes; when it lapses, the old secret simply stops
-being accepted and nothing has to run for that to happen. After a leak the server's `--now` ends
-it immediately, and this application stops authenticating until the new secret is deployed — which
-is the point, not a side effect.
+Deploy the new secret within the overlap window. A server-side `--now` rotation invalidates
+the old secret immediately; clients using it fail until their configuration is updated.
 
-### Check it before anybody tries
+### Validate provider setup { #check-it-before-anybody-tries }
 
 ```bash
 vendor/bin/naf oauth:doctor
@@ -235,20 +219,20 @@ It verifies the dependencies, the public URL, the user model and its contract, t
 and every configured login — including whether the provider's metadata is reachable and belongs
 to the issuer you configured. It prints the callback URL to register, and never prints a secret.
 
-### The older configuration
+### Explicit client configuration { #the-older-configuration }
 
 `oauth:providers` is the previous spelling of `auth:logins` and still works; it is used when
 `auth:logins` is absent, and the error messages then name the keys you actually wrote.
 `auth:providers` likewise still names account sources explicitly. Nothing has to be migrated.
 
-### Everything else has a default
+### Configuration defaults { #everything-else-has-a-default }
 
 `callback_url`, `scope`, `label`, `after_login`, `error_route`, the table name and the cache
 location are derived or defaulted. Set them when you actually need something else.
 
 ---
 
-## The button
+## Render a sign-in button { #the-button }
 
 ```php-inline
 use function Naf\OAuth\Client\oauth_button;
@@ -265,16 +249,15 @@ The wording is settled highest-first: what you pass in, then your own
 `oauth:providers:<key>:label`, then the provider's own name. Copy the shipped view to change
 the markup — yours wins, and nothing in the central configuration has to change for it.
 
-A label is only ever a label. It never reaches an issuer, a client id, a redirect URI or a
-subject.
+The button label affects display only; it does not change protocol identifiers or callback URLs.
 
 ---
 
-## The routes
+## Registered routes { #the-routes }
 
 Shipped, named, and off with `'oauth' => ['routes' => false]`:
 
-| | |
+| Route | Purpose |
 | --- | --- |
 | `GET /auth/{provider}` | start a login |
 | `GET /auth/{provider}/callback` | what the provider sends back |
@@ -303,16 +286,16 @@ not a server fault:
 
 ---
 
-## Which account is this?
+## Map an external identity to an account { #which-account-is-this }
 
-The one decision left to you. Three answers are possible and only one is safe by default:
+External login maps an issuer/subject pair to an application account:
 
-- **somebody linked it before** → that account is signed in. Nothing to write.
-- **nobody did, and you allow it** → you create the account, the link is written, they are
-  signed in.
-- **nobody did** → refused with `not_linked`, so they can sign in normally and connect it.
+- An existing link loads and signs in the linked account.
+- With auto-registration enabled, the configured callback creates an account and the plugin
+  links it before signing in.
+- Otherwise, login fails with `not_linked`. The user can sign in locally and connect the provider.
 
-Turning on the middle one is one setting and one function:
+To enable auto-registration, configure the account creation callback:
 
 ```php-inline
 'oauth' => ['accounts' => [
@@ -327,7 +310,7 @@ Turning on the middle one is one setting and one function:
 With several account sources registered in `auth:providers`, name the one that owns external
 logins in `oauth:accounts:provider`. With one, it is used without being named.
 
-### Two rules it enforces for you
+### Identity-link integrity { #two-rules-it-enforces-for-you }
 
 **Identities are keyed on `(issuer, subject)`, never on `subject` alone.** A subject is only
 unique within its issuer; two providers can hand you the same string. The link table's primary
@@ -350,9 +333,9 @@ finishes it must be the person who started it:
 
 ---
 
-## Doing it yourself
+## Custom login integration { #doing-it-yourself }
 
-Nothing above is mandatory. `oauth()` gives you the same flow with none of the routing:
+For application-owned routes, call `oauth()` to use the protocol flow directly:
 
 ```php-inline
 use function Naf\Auth\auth;
@@ -371,13 +354,13 @@ auth()->setIdentity($user, 'database');
 return redirect($callback->redirectTo);
 ```
 
-Writing the callback yourself means storing provider tokens yourself too — the shipped route calls
-`Tokens::remember($callback)` after the sign-in has succeeded, and nothing else does. Keep that
-order: a callback nobody is allowed to finish must not leave a working credential behind.
+A custom callback must call `Tokens::remember($callback)` after successful sign-in when
+provider token storage is enabled. Do not retain credentials from a callback the application
+refuses to complete.
 
 ---
 
-## Several tabs
+## Concurrent login attempts { #several-tabs }
 
 Logins are keyed by their own `state`, so a person with three tabs open finishes all three.
 Each entry is consumed on use and expires after ten minutes, which is also what makes a
@@ -385,7 +368,7 @@ replayed callback fail.
 
 ---
 
-## What comes back
+## External identity data { #what-comes-back }
 
 `Callback`: `identity`, `purpose` (`LOGIN` or `LINK`), `initiator`, `redirectTo`, `token`.
 
@@ -397,12 +380,11 @@ replayed callback fail.
 
 ## Calling the provider afterwards
 
-A login needs none of this. The identity is checked once and your own session is the authority
-from then on, which is why signing in stores no provider tokens at all.
+Local login needs no persistent provider token. Enable the following integration when the
+application must call the provider on the user's behalf after the sign-in request.
 
-It is a different question when the application has to *act* at the provider — read somebody's
-calendar, list their repositories, post on their behalf. That needs what the provider issued, kept
-between visits, and still working an hour later.
+Store the required access and refresh tokens encrypted, request the API's scopes and check
+what the provider actually grants.
 
 ```php-inline
 // app/config.php
@@ -414,10 +396,9 @@ between visits, and still working an hour later.
 ],
 ```
 
-`naf oauth:doctor` says how to generate the key; it deliberately does not print one. Everything in
-`oauth_provider_tokens` is encrypted with it, so a copy of the database is not a copy of anybody's
-permissions — which is also why the key does not belong in that database. Losing it costs everybody
-a new consent screen.
+`vendor/bin/naf oauth:doctor` describes key generation. Keep the encryption key outside
+the database and source repository. Losing it makes stored grants unreadable and requires
+new consent from affected users.
 
 Then, wherever the API call happens:
 
@@ -446,38 +427,32 @@ $response = client()->sendRequest(new Request(
 ));
 ```
 
-`oauth_token()` hands out something usable or nothing: an expired access token is renewed on the
-way out and the renewal written back. A provider that cannot be reached throws rather than
-answering null, because an outage is not a withdrawn permission and must not send people through a
-consent screen that cannot help.
+`oauth_token()` returns a usable token or null when no grant is available. Expired access
+tokens are refreshed and stored. Provider outages raise an exception; they do not imply that
+consent was withdrawn.
 
-### Without consent there is no access, and consent is not what you asked for
+### Granted scopes { #without-consent-there-is-no-access-and-consent-is-not-what-you-asked-for }
 
 What the application may do is decided entirely by the scopes on the consent screen. Ask for
 nothing beyond `openid email profile` — the default — and there is no API access at all.
 
-Asking is not getting. RFC 6749 §5.1 obliges a provider to state the scope it actually issued
-whenever it differs from the request, and Google lets people untick individual permissions. So
-`$token->scope` is the granted scope, never the requested one, and `$token->grants(...)` is worth
-asking before a call rather than after a 403 that will not explain itself.
+A provider may grant fewer scopes than requested. Inspect `$token->scope` and use
+`$token->grants(...)` before an API operation that needs a specific grant.
 
-### Ask when the feature is used, not at the login
+### Incremental consent { #ask-when-the-feature-is-used-not-at-the-login }
 
-`grantUrl()` exists so that extra permissions are requested at the moment they are needed. "Wants
-to see your calendar" makes sense after somebody pressed a calendar button; at a login it reads as
-a reason not to sign in. It returns through the ordinary callback, so there is no second route to
-add.
+`grantUrl()` requests additional scopes when a feature needs them and returns through the
+normal callback. Explain the requested access to users at that point.
 
 A grant replaces the stored token with what the provider issued for it. Google is asked with
 `include_granted_scopes`, so its answer carries the earlier permissions too; a provider that does
 not do this issues a token for the new scope alone, and the previous one is gone.
 
-### Two things that catch people out
+### Access-token lifetime and refresh { #two-things-that-catch-people-out }
 
-**The refresh token arrives once.** Google returns it on the first consent and never again unless
-consent is forced — `grantUrl()` forces it, the login does not. An installation that turns
-`oauth:tokens:store` on *after* people have signed in has no refresh token for any of them until
-they grant something again.
+Google may omit refresh tokens on later sign-ins. Enabling storage after users have already
+signed in can therefore require renewed consent. `grantUrl()` forces consent for its request;
+normal login does not.
 
 **Unlinking is not revoking.** Deleting the link only makes the application forget; the permission
 stays listed in the person's account at the provider, looking current. `Tokens::forget()` tells the
@@ -485,7 +460,7 @@ provider first and then deletes, and belongs wherever an account is unlinked.
 
 ---
 
-## When it does not verify
+## Verification failures { #when-it-does-not-verify }
 
 Every failure is an `OAuthException` carrying a short, stable `reason` alongside its message, so
 an error page can tell a cancelled login from an expired one without matching on prose:
@@ -520,21 +495,15 @@ operator can act on.
 
 ---
 
-## What this is not
+## Application responsibilities { #what-this-is-not }
 
-**There is no LDAP adapter here.** Names like `ldap` appear in tests and in `naf/auth`'s
-examples as stand-ins for "a second account source"; that is not support, and nothing in these
-packages speaks LDAP.
-
-What does exist is the part that matters for adding one: every way of signing in ends at the
-same local contract, `UserInterface`. A directory bind would not be an OAuth provider and must
-not be forced through a redirect flow — it verifies a password against a server and then hands
-over a user, which is what `auth()->setIdentity()` is for. The protocol differs; what a
-signed-in person is does not.
+OAuth sign-in, local passwords and LDAP are separate credential verification mechanisms.
+Use [naf/auth-ldap](auth-ldap.md) for directory credentials. They can all return identities
+through the same NAF Auth contract; do not route LDAP verification through OAuth callbacks.
 
 ### Where credentials belong
 
-| | |
+| Credential | Storage |
 | --- | --- |
 | Local passwords | hashed, never recoverable — `PasswordHasher` |
 | Directory passwords | verified against the directory, never stored locally |
@@ -546,7 +515,7 @@ signed-in person is does not.
 
 ---
 
-## A known limit
+## Current limitations { #a-known-limit }
 
 Taking a pending login out of the session is read-modify-write, and what makes that indivisible
 is the session backend holding a lock for the request. PHP's own file handler does;
@@ -559,7 +528,7 @@ through it. A locking session backend closes it.
 
 ---
 
-## Not here yet
+## Unsupported integrations { #not-here-yet }
 
 - **Rotating `oauth:tokens:key`.** Changing it makes every stored grant unreadable, and everybody
   affected has to grant access again. Re-encrypting in place would need both keys held at once.

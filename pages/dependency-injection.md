@@ -1,8 +1,8 @@
 ---
-title: Dependency Injection
+title: Dependency injection
 ---
 
-# Dependency Injection
+# Dependency injection
 
 NAF supports constructor autowiring out of the box. The default container is
 `AutoResolvingContainer`, wrapping the PSR-11 `Container`. It can build concrete classes
@@ -138,3 +138,5 @@ Do not resolve an application service from a route file before its bootstrap reg
 
 Use constructor injection for required dependencies. String keys remain useful for explicitly
 looked-up services, but do not automatically bind an interface or class of another name.
+
+See [Application lifecycle](lifecycle.md) for boot order and [Testing](testing.md) for replacing dependencies in tests.

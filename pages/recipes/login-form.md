@@ -115,20 +115,15 @@ final class SessionController
 }
 ```
 
-**One message for every failure.** `authenticate()` answers `false` and never says which half was
-wrong, and your page should not undo that: "no such user" and "wrong password" told apart is a
-way to find out which addresses have accounts here. The same sentence covers an unknown
-username, a wrong password and a suspended account.
+Use one failure message for unknown accounts, incorrect passwords and suspended accounts,
+so the response does not reveal which usernames exist. `authenticate()` returns `false` for
+these credential failures; infrastructure and configuration failures can still throw.
 
-**Do not validate the password's shape here.** A `min:8` on the login form tells somebody with a
-seven-character password that they are not merely wrong but wrong in a specific way, and it
-locks out every account created before you raised the rule. Length rules belong on the
-registration form. Here, `required` is the whole of it.
+Require a password at login, but enforce new length or complexity rules during registration
+and password changes. Applying them here could reject an otherwise valid existing password.
 
-**Nothing else has to happen for the session.** `authenticate()` writes the login itself, and
-rotates the session id while doing it, so the id somebody arrived with is not the id they leave
-signed in on. That is session fixation closed off, and it is not something you have to remember
-to do.
+With the Session plugin configured, successful authentication stores the provider and
+identifier and rotates the session ID. The controller does not need to modify `$_SESSION`.
 
 ## The template
 
@@ -210,3 +205,5 @@ Only two values are kept: which source the account came from, and its identifier
 reloads the account through that source, so a suspended or deleted account stops working at
 once rather than whenever a cached copy happens to expire. [Authentication and
 permissions](../auth.md#sessions) has the detail.
+
+See [Testing applications](../testing.md) to automate verification and [Deployment](../deployment.md) for production setup.

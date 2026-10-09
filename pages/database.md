@@ -6,11 +6,12 @@ requires:
 
 # Database
 
-A PDO connection, configured in one place, with migrations to get the schema there.
-You write SQL and get back what PDO gives you.
+`naf/database` provides a configured PDO connection and a migration runner. Query results,
+prepared statements and transactions use PDO directly. The optional [ORM](orm.md) adds
+entity mapping and repositories.
 
-That is the whole of it. If you want rows to arrive as objects, [`naf/orm`](orm.md) sits
-on top of this package; if you want somebody else's ORM, nothing here is in the way.
+Configure a connection in `app/config.php` and enable the PDO driver for your database.
+Migration commands additionally require `naf/cli`.
 
 ## Getting the connection
 
@@ -20,17 +21,16 @@ use function Naf\Database\database;
 $rows = database()->query('SELECT * FROM users')->fetchAll();
 ```
 
-`database()` hands you a `PDO` instance — not a wrapper, not a query builder. Everything
-PDO can do, you can do, and everything you already know about PDO applies.
+`database()` returns the configured `PDO` connection. Its query and transaction APIs are
+standard PDO methods.
 
-It is typed `?PDO`: you get `null` if no database is configured, rather than an exception
-from somewhere deeper.
+It is typed `?PDO` and returns `null` when database configuration is absent.
 
 Since `naf/database` 0.2.4, the plugin also registers the configured connection as
 `PDO::class` in the container for constructor injection. Resolving that binding without
 database configuration throws `DatabaseException`; the `database()` helper remains nullable.
 
-## Two defaults that change how you write queries
+## PDO defaults { #two-defaults-that-change-how-you-write-queries }
 
 The connection is created with:
 
@@ -52,7 +52,7 @@ $stmt->execute(['id' => 1]);      // throws on failure; its bool return is not t
 $user = $stmt->fetch();
 ```
 
-## Queries with values in them
+## Prepared statements { #queries-with-values-in-them }
 
 ```php-inline
 $stmt = database()->prepare('SELECT * FROM users WHERE email = :email');
@@ -60,11 +60,10 @@ $stmt->execute(['email' => $email]);
 $user = $stmt->fetch();
 ```
 
-Named placeholders or `?` — PDO accepts both, but not mixed in one statement. The reason to
-prepare is not speed, it is that a prepared statement sends the query and the values
-separately, so no value can end up read as SQL.
+Named placeholders or `?` — PDO accepts both, but not mixed in one statement. Bind values through prepared statements so user input is not concatenated into SQL.
+Placeholders represent values, not table names or SQL syntax; allow-list dynamic identifiers.
 
-Do not build the other kind:
+Do not interpolate untrusted values into a query:
 
 ```php-inline
 database()->query("SELECT * FROM users WHERE email = '$email'");   // no
@@ -88,9 +87,9 @@ try {
 }
 ```
 
-Because errors throw, the `catch` is the only place a failure can arrive — which is what
-makes this shape safe. Rethrow after rolling back: swallowing the exception leaves the
-caller believing the transfer happened.
+PDO exceptions enter the `catch` block, which rolls back and rethrows. Production transfer
+logic must also validate amounts, authorization and affected rows; a transaction alone does
+not enforce those business rules.
 
 ## Migrations
 
@@ -113,7 +112,7 @@ vendor/bin/naf db:migrate up       # apply what has not run
 vendor/bin/naf db:migrate down     # roll back
 ```
 
-The direction is an argument, given once. `db:migrate up up` is not a thing.
+Pass the direction once, as the positional argument `up` or `down`.
 
 To run a single one:
 
@@ -192,14 +191,16 @@ it none:
 ],
 ```
 
-An in-memory database is emptied when the process ends, which makes it right for tests and
-wrong for everything else.
+An in-memory database lasts only for the connection. Use a persistent file path for data
+that must survive requests or process restarts.
 
-Credentials belong in `.env`. Read `$_ENV['DB_PASSWORD'] ?? ''` or use an
-`ENV:DB_PASSWORD` config value; `env()` returns the application environment name.
+Keep credentials in protected environment values. Use `ENV:DB_PASSWORD` in configuration
+with framework 0.2.8+ when values may come from the process environment. Direct `$_ENV` reads
+only see values in that array. `env()` returns the application environment name.
 
-## When the connection fails
+## Connection errors { #when-the-connection-fails }
 
 A connection that cannot be made throws `Naf\Database\Exceptions\DatabaseException`,
 wrapping the original `PDOException` message. It happens while the container builds the
-connection — so a wrong password surfaces on the first query, not at boot.
+connection. The failure appears when a consumer first resolves it; eager resolution during
+boot can therefore fail before the first query.

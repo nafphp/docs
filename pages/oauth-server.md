@@ -1,31 +1,25 @@
 ---
-title: Being the provider
+title: OAuth authorization server
 requires:
   - naf/oauth-server
 ---
 
-# Being the provider
+# OAuth authorization server { #being-the-provider }
 
-> **Be the place people sign in with — an OAuth2 authorization server and OpenID Connect provider, on the accounts you already have.**
+`naf/oauth-server` provides an OAuth 2.0 authorization server and OpenID Connect provider
+using existing NAF Auth accounts. Other applications can obtain access tokens and, with the
+`openid` scope, verify user identities.
 
-```php-inline
-token()->requireScope('posts.write');
-```
+Deployment requires a configured issuer, database migrations, signing keys, local login,
+registered clients and scopes. The sections below describe those steps and the guarantees
+required from the database.
 
-That is the whole of what an API endpoint has to say. The authorization, the consent, the
-tokens and their revocation are already wired.
+## Supported grants and protocols { #what-this-plugin-is }
 
-> Install it when other applications should be able to act on behalf of your users.
+The server uses NAF Auth identities and access checks. It does not create a separate user
+model or account registration system.
 
----
-
-## What this plugin is
-
-An OAuth2 authorization server, and an OpenID Connect provider on top of it, built on the
-accounts you already have. It does not introduce a second user model, a second login, or a
-second idea of what somebody is allowed to do — it uses `naf/auth` for all three.
-
-| Grant | |
+| Grant | Purpose |
 | --- | --- |
 | **Authorization Code** | with PKCE/S256, mandatory for every client, confidential ones included |
 | **Refresh Token** | with strict rotation and replay detection |
@@ -55,7 +49,8 @@ return [
 ];
 ```
 
-That is everything that has no sensible default.
+Add this configuration to `app/config.php`. The issuer and display name are required;
+application scopes define the API operations clients may request.
 
 **`audience` stays empty for the ordinary case** — one server, one API, tokens that carry no
 target. Set it only when this installation serves an API that clients name explicitly with the
@@ -65,45 +60,38 @@ target. Set it only when this installation serves an API that clients name expli
 'oauth_server' => ['audience' => 'https://reports.example.com', …],
 ```
 
-From then on a token granted for anything else is not a weaker token here, it is not a token
-here at all. Which API a grant is for is decided once, when the person authorizes, and carried
-through every refresh — changing a client's registration later cannot retarget tokens already
-granted.
+When audience validation is configured, a token granted for another resource is rejected.
+The grant's resource persists through refresh; changing client registration does not retarget it.
 
-**`name` has none on purpose.** A sign-in service that ships somebody else's name is worse than
-one that refuses to start. It is display only: it never reaches an issuer, a client id, a
-redirect URI or a subject. OIDC discovery defines no field to publish it in either, so what a
-relying party shows is whatever *its* configuration says — not this.
+`oauth_server:name` is a required display label. It does not change the issuer, client IDs,
+redirect URIs or subject identifiers. Relying parties configure their own display labels.
 
-**Scopes are yours to define.** A scope is what a client asks for; a permission is what a person
-holds. Keeping them separate means an API surface never leaks into the wording of a consent
-screen. Leave `permission` out and the scope name is the permission; give a plain string instead
-of an array and it is the label.
+Scopes describe requested API access; permissions describe the account's authority. A scope
+can map to a permission. If `permission` is omitted, the scope name is used; a string scope
+definition supplies its label.
 
-**`openid`, `profile` and `email` need no configuring.** OpenID Connect defines them, and none
-of them requires a permission: they ask to see who somebody is and what their own profile says,
-not to do anything on their behalf. The person consenting is the person concerned.
+The built-in `openid`, `profile` and `email` scopes expose the consenting account's identity
+and allowed profile data. They do not require an additional application permission.
 
 The sign-in page is found on its own when a route is named `login`; otherwise name it in
 `oauth_server:login_route`. PKCE and the protocol errors are already set.
 
 ### Lifetimes
 
-Set, in seconds, and worth changing only when you know why:
+All lifetimes are integers in seconds:
 
-| Key | Default | |
+| Key | Default | Effect |
 | --- | --- | --- |
-| `oauth_server:access_token_ttl` | `3600` | an hour. Shorter costs refreshes; longer widens the window a leaked token is useful in. |
-| `oauth_server:refresh_token_ttl` | `2592000` | thirty days. This is how long somebody stays signed in without returning to the consent screen. |
-| `oauth_server:id_token_ttl` | `3600` | an hour. Also what `oauth:keys:prune` counts a retired key's retention against. |
-| `oauth_server:code_ttl` | `60` | a minute. An authorization code is redeemed immediately or not at all. |
-| `oauth_server:consent_ttl` | `600` | ten minutes for somebody to read the screen and answer. |
+| `oauth_server:access_token_ttl` | `3600` | Access-token lifetime: one hour. |
+| `oauth_server:refresh_token_ttl` | `2592000` | Refresh-token lifetime: 30 days. Local browser-session lifetime is configured separately. |
+| `oauth_server:id_token_ttl` | `3600` | ID-token lifetime: one hour; minimum retired-key retention. |
+| `oauth_server:code_ttl` | `60` | Authorization-code lifetime: one minute. |
+| `oauth_server:consent_ttl` | `600` | Pending consent-request lifetime: ten minutes. |
 
-### Saying more than "who"
+### Profile claims { #saying-more-than-who }
 
-**Usually nothing to configure.** A model implementing `UserInterface` already says what may be
-shown about it through `getProfile()`, and that is what gets released — the same profile a
-consent screen shows. One answer to "what may be said about this person", not one per consumer.
+`UserInterface::getProfile()` supplies the standard profile data. Configure a claims mapper
+only when the application needs additional mapping.
 
 Configure `oauth_server:claims` only for something the profile does not cover:
 
@@ -111,15 +99,13 @@ Configure `oauth_server:claims` only for something the profile does not cover:
 'oauth_server' => ['claims' => static fn(User $user): array => ['locale' => $user->locale]],
 ```
 
-It adds to the profile rather than replacing it. Either way, what comes out is filtered by the
-scopes that were actually granted: `email` releases `email` and `email_verified`, `profile`
-releases the profile claims, and anything OpenID Connect defines no scope for is dropped rather
-than passed along — including whatever a mapper returns by accident. With neither, an ID token
-still says who somebody is; `sub` is the whole of what the specification requires.
+The mapper adds to the profile. Output is filtered by granted scopes: `email` releases
+email claims and `profile` releases profile claims. Without those scopes, their associated
+claims are omitted. ID tokens still include the required protocol and subject claims.
 
 ---
 
-## Setting it up
+## Database and key setup { #setting-it-up }
 
 Install `naf/cli` for the setup and management commands, and configure a PDO connection
 (usually through `naf/database`). Existing local users and a login route are prerequisites;
@@ -130,14 +116,13 @@ composer require naf/cli naf/database
 vendor/bin/naf oauth:server:setup
 ```
 
-Creates the signing key if there is none and tells you what is still missing. Run it once
-after installing; it is the shortest path from an installed package to a server that can
-issue a token.
+The installation command creates a signing key when absent and reports remaining setup
+requirements. Run it after configuring the database and local login.
 
 `vendor/bin/naf oauth:server:doctor` answers the same question later, when something has
 stopped working and you want to know which part.
 
-## Registering an application
+## Register a client { #registering-an-application }
 
 ```bash
 vendor/bin/naf oauth:client:create "Acme Intranet" \
@@ -171,23 +156,17 @@ vendor/bin/naf oauth:client:rotate-secret 9f2c… --overlap=3600
 vendor/bin/naf oauth:client:rotate-secret 9f2c… --now        # after a leak
 ```
 
-The client id does not change, and nothing already issued is affected. That is the difference
-between rotating a secret and replacing a client: replacing one means a new id in every
-configuration that names it, and every existing authorization gone.
+Secret rotation preserves the client ID and existing authorizations. Deploy the new secret
+to the client application during the configured overlap.
 
-**The secret it replaces keeps working for the overlap.** It has to: the new secret exists on this
-server before it exists in whatever deployment uses it, and a server that holds only one secret at
-a time is a server on which nobody ever changes a secret, because doing so means breaking the
-client until it is redeployed. Two are accepted, never three — rotating again inside a window
-drops the older one.
+During the overlap, the current and previous secrets are accepted. Rotating again replaces
+the previous secret; only two are retained. `--now` invalidates the previous secret immediately.
 
-`--now` ends the previous secret immediately, downtime included. That is what a leaked secret
-calls for, and it is the only case where breaking the client is the right outcome.
+Use immediate rotation when the previous secret must no longer authenticate. Coordinate
+client deployment because its old configuration will fail.
 
-The window is a deadline, not a state to clean up: it lapses on its own and nothing has to run.
-Both `oauth:client:list` and `oauth:server:doctor` mark a rotation that is still open, so the
-second half does not get forgotten — a client whose new secret was never deployed otherwise stops
-working on a day nobody chose.
+The previous secret expires automatically. `oauth:client:list` and `oauth:server:doctor`
+report open rotation windows for operational verification.
 
 ---
 
@@ -209,18 +188,18 @@ public function store(): ResponseInterface
 `requireScope()` raises 401 when no usable token was presented and 403 when the one that was
 does not reach. `can()` is the same check as a plain bool.
 
-### Two things have to hold, every time
+### Token scopes and current permissions { #two-things-have-to-hold-every-time }
 
 - the **token** carries the scope — what the person agreed this application may do for them;
 - the **person** still holds the permission behind it — what they may do at all.
 
-So a read-only token stays read-only in an administrator's hands, and somebody demoted this
-morning loses access this afternoon rather than whenever their token happens to expire.
+User-token authorization checks the token scope and the account's current permission.
+A permission removed from the account is denied on a subsequent check.
 
-A **client-credentials token stands for an application**, with nobody behind it. `user()` is
-null and its registration is the whole answer; no person is invented to carry permissions.
+A client-credentials token represents an application. `user()` returns `null`; authorization
+uses the client's registered grants and token scopes.
 
-### Bearer and session are separate worlds
+### Bearer authentication and sessions { #bearer-and-session-are-separate-worlds }
 
 There is no path from `token()` to a session. An expired, revoked or invented bearer token
 cannot quietly fall back to whoever happens to be signed in with a cookie — a request with no
@@ -230,7 +209,7 @@ usable token has no usable token, whatever else it carries.
 
 ## Endpoints
 
-| | |
+| Route | Purpose |
 | --- | --- |
 | `GET /oauth/authorize` | ask the person |
 | `POST /oauth/authorize` | their answer — CSRF-protected like any other form |
@@ -244,40 +223,36 @@ usable token has no usable token, whatever else it carries.
 Off with `'oauth_server' => ['routes' => false]`. The endpoints stay reachable through the
 container.
 
-The protocol endpoints are exempt from the session-wide CSRF check, because they are called by
-programs: no session to ride on, no form to put a token in, so a check there refuses legitimate
-requests and protects nothing. The exemptions are a map, `csrf_exempt_routes`, rather than a
-list — several plugins can contribute without overwriting one another, and an application can
-switch one back off by name.
+Programmatic token, revocation and introspection endpoints use protocol authentication
+instead of the session-wide CSRF listener. Exemptions use exact route names in
+`csrf_exempt_routes`. The consent route uses a separate request-bound CSRF check.
 
-Introspection is not open to every registered application: a token is somebody's authorization,
-and being registered here is no reason to learn about other people's. Grant it deliberately with
-`--grant=introspection`, to a confidential client.
+Introspection requires a confidential client explicitly registered with
+`--grant=introspection`. Ordinary client registration does not grant token inspection.
 
-### What a request has to say, and what it will not get away with
+### Redirect and reauthentication requirements { #what-a-request-has-to-say-and-what-it-will-not-get-away-with }
 
 **`redirect_uri` is required** — in the authorization request and again at the token endpoint,
 even for a client with exactly one registered URI. PKCE binds the exchange to the browser that
 started it; this binds it to where the code was sent. They answer different questions, and
 RFC 6749 §4.1.3 asks both.
 
-**`prompt` and `max_age` are answered, not ignored.** This server always asks before granting
-access and does not record when somebody last authenticated, so:
+Consent is always interactive and the server does not record the last authentication time.
+Requests using `prompt` or `max_age` therefore have these results:
 
-| | |
+| Request | Result |
 | --- | --- |
 | `prompt=none` | `interaction_required` |
 | `prompt=login` | `invalid_request` — re-authentication cannot be forced |
 | `max_age=…` | `invalid_request` — the last authentication time is not recorded |
 | `prompt=consent` | satisfied, because consent is always asked for |
 
-Silently ignoring these is the worst answer available: a relying party that asked for
-re-authentication and got an ordinary session back has been told something untrue about the
-person in front of it.
+These errors prevent clients from treating an ordinary session as proof of forced or
+recent reauthentication.
 
 ---
 
-## The consent screen
+## Consent screen { #the-consent-screen }
 
 Shipped, and overridden by putting your own `oauth/consent.phtml` in the application's view
 directory. Nothing in the central configuration has to change for that.
@@ -304,11 +279,9 @@ vendor/bin/naf oauth:keys:generate    # the new key signs from now on
 vendor/bin/naf oauth:keys:prune       # remove the old ones, once their tokens have expired
 ```
 
-`prune` counts from when a key **stopped signing**, not from when it was made. That distinction
-is the whole point: a key that signed for a year and was replaced a minute ago has tokens in the
-world for as long as those tokens live, and removing it would make every one of them
-unverifiable. The active key is never removed, and an age shorter than an ID token lives is
-refused.
+`prune` measures retirement age, not creation age. Retain retired public keys until their
+issued ID tokens have expired. The active key cannot be pruned, and retention shorter than
+the configured ID-token lifetime is rejected.
 
 They live in `storage/oauth/keys` unless `oauth_server:key_path` says otherwise — which it has
 to, when several servers share one set: they are files, and nothing replicates them for you.
@@ -319,59 +292,41 @@ went away stops verifying.
 
 ---
 
-## The same user contract
+## Identity and account mapping { #the-same-user-contract }
 
-This server signs people in with `naf/auth`, using the very model your application already
-uses — `UserInterface`, `isActive()`, `getProfile()`. There is no second user table, no second
-login and no second idea of what somebody may do. A suspended account stops working here at the
-same moment it stops working everywhere else.
-
----
-
-## Some decisions, and why
-
-**Access tokens are opaque, not JWTs.** Revocation works without a second mechanism; a database
-leak yields hashes rather than usable tokens; a changed scope or a demoted user takes effect on
-the next call rather than the next token. A resource server running elsewhere uses authenticated
-introspection. ID tokens are signed JWTs in the current OpenID Connect implementation.
-
-**Rotation is strict — there is no grace window.** Implementing one honestly would mean either
-keeping a bearer token in plaintext so it can be handed out twice, or standing down replay
-detection for its duration. Both undo the one thing rotation exists to do. A client that might
-refresh twice at once should serialise its own refreshes.
-
-**Withdrawing something withdraws what came from it.** Revoking a client takes its issued
-tokens with it — otherwise revocation means nothing until they expire. An account that can no
-longer sign in stops everywhere at once: no token is issued for it, no ID token minted, no
-UserInfo answered. That question is asked in one place, so it cannot be answered in some paths
-and skipped in the ones that assert identity.
-
-**A family is a row, not just a column.** Everything descended from one authorization shares a
-family id, and `oauth_families` is where its life ends. Issuing claims that row; revoking takes
-it. Without that they pass each other: a replayed refresh token is detected, the revocation
-sweeps the rows it can see, and a successor committed a millisecond later survives the very
-detection that was supposed to end the chain. That is not theoretical — it is what the
-concurrency checks found.
-
-**A failed exchange keeps or gives back the code deliberately.** A code offered with the wrong
-client, redirect URI or PKCE verifier is **spent**: it has evidently been somewhere it should
-not have been, and going on accepting it is the worse outcome. A failure on *our* side rolls
-back — nothing was issued, so nothing was spent.
-
-**ID tokens are signed; access tokens are not.** The one exists because OpenID Connect defines
-it as a JWT — a statement addressed to one application, which that application checks. The other
-is a credential this server looks up, so a signature would buy nothing and cost revocation.
-
-**Nothing bearable is stored in the clear.** Codes and tokens are SHA-256 hashes; client secrets
-go through the same `PasswordHasher` `naf/auth` uses for people, so raising the hashing cost
-raises it here too.
-
-**A person is two columns, never one.** `user_provider` and `user_id` are the same pair
-`naf/auth` persists in a session, because account ids are only unique within their source.
-What the outside world sees is a subject: random, assigned once, never reused, and revealing
-neither.
+The server uses the application's Auth identity model, including `UserInterface`,
+`isActive()` and `getProfile()`. Account activity and permission checks apply when the server
+reloads the identity; there is no separate OAuth user table.
 
 ---
+
+## Protocol boundaries { #some-decisions-and-why }
+
+Access tokens are opaque credentials stored as hashes. Local validation checks their
+current state; a remote resource server uses authenticated introspection. ID tokens are
+signed JWTs for OpenID Connect clients.
+
+Refresh tokens rotate strictly. Reusing a spent token revokes its family; there is no grace
+window for duplicate refreshes. Clients should serialize refresh requests. The family row
+coordinates issuance with revocation so a concurrent successor cannot bypass replay detection.
+
+An authorization code submitted with the wrong client, redirect URI or PKCE verifier is
+consumed. An internal failure rolls the exchange back. Codes and bearer tokens are stored
+as SHA-256 hashes; client secrets use Auth's password hasher.
+
+Account identity consists of provider and account ID. The public OIDC subject is a separate
+stable opaque identifier. Activity checks use the same Auth identity contract as local login.
+
+### Database concurrency
+
+SQLite serializes writes and is useful for local examples. PostgreSQL and MySQL exercise
+concurrent row-locking behavior that SQLite alone cannot validate. Correct code redemption,
+refresh rotation and family revocation depend on transactions and the database's locking.
+
+For server changes or a deployment-specific database validation, use disposable databases and
+the package's [concurrency checks](https://github.com/nafphp/oauth-server/blob/v0.2.3/tests/Concurrency/README.md).
+They check simultaneous redemption and revocation/refresh races on SQLite, PostgreSQL and MySQL.
+Unit tests alone do not establish these guarantees.
 
 ### Upgrading
 

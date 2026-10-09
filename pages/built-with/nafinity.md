@@ -4,13 +4,11 @@ title: Nafinity
 
 # Nafinity
 
-Project-isolated Kanban boards, and the largest thing built with NAF so far. It is here
-because it answers a question the rest of this documentation can only assert: what a real
-application looks like when the framework stays small and everything else is a plugin.
+Nafinity is a Kanban application built on NAF. Its host skeleton configures the application;
+the published `naf/board` dependency supplies product behavior. Extensions use registries,
+providers and events while the host controls deployment and local overrides.
 
-A Nafinity installation loads twenty plugins. The application itself is one of them.
-
-## The split
+## Host and package layout { #the-split }
 
 The repository you clone is a skeleton. The product is a dependency.
 
@@ -20,9 +18,8 @@ naf/nafinity     the installation you own
         └── naf/framework and eighteen other plugins
 ```
 
-That is the point rather than a packaging detail: extending Nafinity must never mean
-editing it. Everything the product does lives in `naf/board`; everything you decide lives
-in the skeleton, which is small enough to read in a minute.
+Keep host configuration and extensions in the skeleton. Product code belongs to `naf/board`;
+avoid editing installed vendor files so package updates preserve local changes.
 
 ```text
 app/
@@ -40,10 +37,9 @@ app/
 docker/, Makefile    how it runs locally, and the image it ships as
 ```
 
-There is deliberately almost nothing there. A fresh installation is a complete
-application, and none of it is a file you could break by editing.
+The skeleton contains the entry points and configuration needed to run the installed product.
 
-## Running it
+## Local setup { #running-it }
 
 Nafinity ships with Docker Compose and a Makefile. One command builds the image, installs
 dependencies, migrates, writes the declared roles, publishes assets, seeds a demo project
@@ -57,20 +53,18 @@ It is then at `https://localhost`, with a locally trusted certificate the same c
 issued. `make help` lists the rest; the ones you will want early are `make assets` after
 updating a package, `make migrate`, and `make logs`.
 
-The stylesheets and scripts live inside `naf/board` and every plugin, so they are copied
-into `app/public/` rather than checked in. A package added later is registered and absent
-at the same moment, which a browser reports as a 404 on a module tag — which is to say
-silently. `make health` compares the two and turns that silence into a sentence.
+Package stylesheets and scripts are published into `app/public/`. After adding or updating
+a package, run `make assets`. Otherwise registered assets may return 404. `make health`
+compares registered assets with published files and reports missing ones.
 
 Nafinity runs on MariaDB or MySQL; Compose brings MariaDB along. MySQL 8.x
 installations need `naf/board` 0.1.5 or newer, including its `naf/rbac` 0.1.3
 minimum, so role migrations and writes quote the reserved `system` column.
 
-`composer install` takes `naf/board` and the plugins from Packagist, at the versions current
-when it runs. When to update them is your decision: `make composer-update`, then
+`composer install` takes `naf/board` and the plugins from Packagist, from the committed lock when present, otherwise by resolving manifest constraints. When to update them is your decision: `make composer-update`, then
 `make migrate`, `make roles` and `make assets`.
 
-## Shipping it
+## Container deployment { #shipping-it }
 
 ```bash
 docker build --target production -f docker/Dockerfile -t nafinity .
@@ -83,7 +77,7 @@ development stack gives it: the database settings, `APP_URL`, `APP_ENV=prod`, a 
 and key in `/etc/nginx/ssl/` and a volume for `storage/`. After each deployment, run `naf db:migrate up` and `naf rbac:sync` in
 it. Building it needs naf/board 0.1.4 or newer, whose boot does not connect to a database.
 
-## The commands it brings
+## Application commands { #the-commands-it-brings }
 
 `make` wraps the ones a development installation needs daily; these are what it wraps, and
 what a deployment runs directly. From the repository root, `bin/naf command:list` selects
@@ -96,8 +90,8 @@ choose explicitly; `NAF_CLI_SERVICE` selects another Compose service.
 |---|---|
 | `nafinity:seed` | Demo data, and only into a database that has none |
 | `nafinity:assets:publish` | Copy every package's stylesheets and scripts into `app/public/` |
-| `nafinity:assets:check` | Report registered assets that were never published — a 404 on a module tag is otherwise silent |
-| `nafinity:assets:remove` | Take published files back out, from the record written when they went in; works after the package is gone, which is the point |
+| `nafinity:assets:check` | Report registered assets missing from the public directory |
+| `nafinity:assets:remove` | Remove previously published files using the publication record, including after a package was removed |
 | `nafinity:user` | Create an account, reading its password from standard input |
 | `nafinity:admin` | Grant the admin role to an existing account, while nobody holds it yet |
 | `nafinity:grant-default` | Give accounts holding no role at all the one an ordinary account has |
@@ -128,7 +122,7 @@ use the same selection; status, archive state and inclusive UTC update dates can
 result. Each board's export and field permissions are checked separately, including in a
 combined download. Managing installation settings does not grant access to another board.
 
-## Making it yours
+## Host customization { #making-it-yours }
 
 **Your own code** goes in `app/src/` under the `Nafinity\` namespace. The namespace is
 yours: nothing in `naf/board` refers to it, so rename it in `composer.json` if you would
@@ -157,10 +151,9 @@ Use `bin/naf plugins:debug` to inspect the order.
 For the mechanisms a plugin has once it is installed, see
 [how Nafinity is extended](extending-nafinity.md).
 
-## What it is made of
+## Package responsibilities { #what-it-is-made-of }
 
-Nafinity uses most of the NAF ecosystem rather than a corner of it, which is the other
-reason it is worth reading as an example.
+These packages provide the main application capabilities:
 
 | It needs | For |
 |---|---|
@@ -177,11 +170,11 @@ reason it is worth reading as an example.
 | [`naf/rbac`](../rbac.md) | Roles and permissions an installation can edit |
 | [`naf/websocket`](../websocket.md) | Live updates, and who else is on a board |
 
-## Where the rest is written
+## Extension reference { #where-the-rest-is-written }
 
 The extension reference — every registry, every contract, what a plugin may declare and
 what happens when it is removed — ships with the board itself, in `docs/Extensibility.md`
 of `naf/board`. It is exhaustive and versioned with the code it describes, which a page
 here could not be.
 
-This chapter is the map. That file is the territory.
+Use that versioned reference when implementing an extension.

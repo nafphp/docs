@@ -6,12 +6,11 @@ requires:
 
 # Translations
 
-Text in more than one language, kept in JSON files rather than in the code. A key goes
-in, the string for the current language comes out, and a missing key falls back rather
-than breaking the page.
+`naf/i18n` loads translations from JSON files and replaces named placeholders. `t()` returns
+the translation for the current language, or the key when a translation is unavailable.
 
-Variables are substituted into the string, so a translator moves them around the sentence
-instead of you concatenating fragments in the order English happens to use.
+Create one file per language under `app/Resources/lang/`, or configure another application
+translation path. Language selection is described below.
 
 ## Translating a string
 
@@ -30,9 +29,9 @@ with `app/Resources/lang/en.json`:
 ```
 
 Keys are flat strings — there is no nesting and no dot notation. `t('nav.home')` looks for
-a key literally called `nav.home`, which is a perfectly good way to organise a flat file.
+a key literally called `nav.home`; the dot is part of its name.
 
-## Putting values into a sentence
+## Placeholder substitution { #putting-values-into-a-sentence }
 
 ```php-inline
 echo t('greeting', ['name' => 'John']);
@@ -44,14 +43,13 @@ echo t('greeting', ['name' => 'John']);
 }
 ```
 
-The placeholder is `:name`, and it can sit anywhere in the sentence. That is the point:
-a translator moves it to where their language wants it instead of you concatenating
-fragments in the order English happens to use.
+Placeholders such as `:name` can appear anywhere in a translation. Keep complete sentences
+in the translation file so each language can use its own word order.
 
 Values that are neither scalar nor `Stringable` are skipped rather than converted, so an
 array passed by accident leaves the placeholder standing instead of printing `Array`.
 
-## When a key is missing
+## Missing translations { #when-a-key-is-missing }
 
 `t()` returns the key itself:
 
@@ -59,8 +57,8 @@ array passed by accident leaves the placeholder standing instead of printing `Ar
 t('checkout.confirm');  // → "checkout.confirm" when the key is not in the file
 ```
 
-Untranslated text shows up in the interface rather than as an empty space, which is what
-you want while a translation is still being written.
+Missing keys remain visible in the interface. Treat unexpected keys as missing translations
+and check the language file and log.
 
 An individual missing file is skipped when another directory provides that language. If no
 directory has a file for the chosen language, or a file contains invalid JSON, the translator

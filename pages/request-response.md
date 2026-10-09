@@ -152,3 +152,5 @@ use function Naf\redirect;
 
 return redirect('/login');
 ```
+
+See [Serving files](file-downloads.md) for stream responses and [Testing](testing.md) for emitted status and headers.

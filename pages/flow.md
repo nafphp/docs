@@ -636,7 +636,7 @@ curl -H 'X-Flow: fragment' 'http://127.0.0.1:8000/flow-example?q=view'
 The response has `X-Flow: fragment` and `Vary: X-Flow`, and contains the result template
 without a document shell or additional scripts. The input check also rejects `?q[]=view`.
 
-## Practical boundaries and next improvements
+## Runtime boundaries { #practical-boundaries-and-next-improvements }
 
 Keep `update()` selective: use `changes.has()` before requesting data, and avoid a hook
 that continuously writes the field it observes. Async hooks can overlap; the HTML client
@@ -647,10 +647,8 @@ Use unique sibling keys for reorderable lists. Compatible keyed containers retai
 component instance; new props do not silently reset its local fields. Use a new key when
 you intentionally want a fresh instance. Clean up external widgets through `onCleanup()`.
 
-The current engine updates an affected container as a unit. Dependency tracking per
-binding and getter caching are possible later improvements if profiling shows a need.
-The first priorities are browser coverage and measurements on realistic lists; adding
-a router, persistence layer or a template language is not required for this integration.
+The current engine updates an affected container as a unit. Measure realistic list sizes
+and update frequency when evaluating performance for an application.
 
 ## Assets and CSP
 

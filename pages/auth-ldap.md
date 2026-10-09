@@ -1,43 +1,40 @@
 ---
-title: Signing in against a directory
+title: LDAP authentication
 requires:
   - naf/auth-ldap
 ---
 
-# Signing in against a directory
+# LDAP authentication { #signing-in-against-a-directory }
 
-An organisation that already has an LDAP directory does not want a second list of people.
-`naf/auth-ldap` lets the directory verify the password while the local account stays where it
-is, and stays the account.
+`naf/auth-ldap` verifies credentials against an LDAP directory through the existing Auth
+provider contract. The application maps a verified directory entry to its own local identity.
+Use it when an organization manages credentials in a directory but application accounts and
+permissions remain local.
 
 ## How it fits
 
-`LdapProvider` implements the same `ProviderInterface` that NAF Auth already uses, so a
-directory is one more named provider rather than a second login path beside the first. The
-directory checks the credentials; your application decides which local account that person is.
+`LdapProvider` implements Auth's `ProviderInterface`. The directory verifies credentials;
+explicit mapping callbacks associate a stable directory subject with a local account ID.
+The local account provider supplies the identity and permissions.
 
-That decision is two closures, and they are the only link between the two worlds:
+| Callback | Input | Return |
+|---|---|---|
+| `accountForSubject` | Directory subject string | Local account ID, or `null` if unlinked |
+| `subjectForAccount` | Local account ID string | Directory subject, or `null` if unlinked |
 
-```php-inline
-accountForSubject(string $subject): ?string     // who is this, locally?
-subjectForAccount(string $identifier): ?string  // and which subject is that account?
-```
+The plugin does not create accounts or link by email. Store links in application-owned
+persistence and use the immutable directory subject, rather than a changeable username.
+A missing link prevents authentication.
 
-Both return `null` when no link exists, and `null` means no sign-in.
-
-!!! warning "Nothing is created, and nothing is matched by email"
-    An unknown directory subject does not become an account. Two people with the same address
-    do not become the same person. If you want a directory user to have an account here,
-    something in your application has to link them on purpose.
-
-The directory password is never forwarded to the local account provider. Restoring a session
-checks the directory subject again, so revoking somebody in the directory ends their session
-rather than leaving it valid until it expires. NAF Auth still enforces `isActive` and still
-rotates the session on sign-in.
+Session restoration calls the directory again through `find()`. A missing or disallowed
+subject prevents restoration; directory outages throw instead of falling back to local
+credentials. Auth also checks local account activity. With session persistence enabled,
+successful login rotates the session ID.
 
 ## Configuring the connection
 
-`NativeDirectory` refuses an unsafe configuration at construction, before it opens anything:
+Install PHP's `ext-ldap` and provide a readable trusted CA file. `NativeDirectory` validates
+these constructor settings before opening a connection:
 
 - LDAPS, or StartTLS made mandatory, with a CA file that exists.
 - Non-anonymous search credentials and a base DN.
@@ -51,23 +48,59 @@ attribute name that would break out of an LDAP filter. Values are escaped with
 guessed at, and a directory that cannot be reached fails closed instead of falling back to
 local credentials.
 
-!!! warning "Two things this package cannot decide for you"
-    PHP and OpenLDAP keep TLS options **process-global**. Use one trust configuration per
-    process; a second one does not override the first, it fights it.
+!!! warning "TLS trust and disabled accounts"
+    PHP/OpenLDAP TLS options are process-global. Use a consistent trust configuration for
+    directories accessed by the same process.
 
-    And nothing here knows how *your* directory marks an account as disabled. Put that in
-    `allowedFilter` yourself, or a disabled account keeps signing in.
+    Configure `allowedFilter` to exclude disabled accounts according to your directory's
+    schema. The default object-class filter alone does not enforce that rule.
 
 For Active Directory, set the account attribute, the stable subject representation and the
 disabled-account filter to match your directory before enabling it. The shipped adapter
 targets textual subjects such as OpenLDAP's `entryUUID`.
 
-## Before you rely on it
+## Register the provider
 
-The package's own tests use a fake directory: linked, missing and revoked accounts, rejected
-credentials, mapping failures in both directions, outages, and the configurations that must be
-refused. That is a contract check.
+This reference fragment belongs in root `bootstrap.php`, before `app()->run()`. It assumes:
 
-**It is not evidence that your directory works.** Test against a real, trusted TLS directory
-before a deployment depends on it, and do not present the fixture tests as a live
-verification.
+- `$accounts` implements `ProviderInterface` for existing local accounts.
+- `$accountForSubject` and `$subjectForAccount` are closures implementing the mappings above.
+- `ldap:url`, `ldap:base_dn`, `ldap:bind_dn`, `ldap:bind_password`, `ldap:ca_file` and
+  `ldap:allowed_filter` are application configuration strings.
+
+Keep the service password in a protected environment value. These application configuration
+keys are read by this fragment; the plugin does not discover or register a provider from them.
+
+```php-inline
+use Naf\Auth\Ldap\LdapProvider;
+use Naf\Auth\Ldap\NativeDirectory;
+use function Naf\config;
+use function Naf\Auth\auth;
+
+$directory = new NativeDirectory(
+    url: config('ldap:url'),
+    baseDn: config('ldap:base_dn'),
+    bindDn: config('ldap:bind_dn'),
+    bindPassword: config('ldap:bind_password'),
+    caFile: config('ldap:ca_file'),
+    allowedFilter: config('ldap:allowed_filter'),
+);
+
+$provider = new LdapProvider($directory, $accountForSubject, $subjectForAccount, $accounts);
+auth()->addProvider('directory', $provider);
+```
+
+Pass `'directory'` as the provider name when calling `auth()->authenticate()` with
+`PasswordCredentials`. See [multiple account sources](auth.md#several-sources). Optional
+`NativeDirectory` arguments default to `usernameAttribute: 'uid'`,
+`subjectAttribute: 'entryUUID'` and `timeout: 5` seconds.
+
+## Verify the directory integration { #before-you-rely-on-it }
+
+Before deployment, test a linked active account, an unlinked account, an incorrect password,
+a disabled directory subject, a disabled local account and a directory outage against your
+actual trusted TLS directory. Verify that restoration after disabling a subject fails on the
+next request. Do not log submitted passwords.
+
+The package's fake-directory tests verify provider contracts and configuration rejection.
+They do not verify your network, certificate trust, directory schema or account mappings.

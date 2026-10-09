@@ -6,13 +6,12 @@ requires:
 
 # Sessions
 
-Data that has to survive from one request to the next: who is signed in, what somebody
-typed into the form that failed validation, the message that should appear once and then
-not again.
+`naf/session` stores data between HTTP requests and provides flash messages and session ID
+regeneration. Installing it starts a session during HTTP boot; startup is not deferred until
+the first write. CLI boot does not start a session automatically.
 
-Installing this package means every web request gets a session. The plugin starts one
-during boot — you do not call `start()` yourself, and there is no lazy mode that waits
-until something is written.
+The default storage is PHP's session handler. Configure shared storage for multiple servers.
+Form `memory()` values are separate: they come from the current request, not session storage.
 
 ## Reading and writing
 
@@ -28,11 +27,10 @@ session()->forget('user_id');
 session()->clear();                              // everything
 ```
 
-Keys are flat strings. `set()` writes straight into `$_SESSION`, so anything PHP can
-serialise goes in — but a session is a file read and written on every request, which is an
-argument for keeping it small.
+Keys are flat strings. `set()` writes into `$_SESSION`; values must be serializable by PHP.
+Keep session data small and avoid retaining stale entities or permission snapshots.
 
-## Messages that should appear once
+## Flash messages { #messages-that-should-appear-once }
 
 ```php-inline
 session()->flash('success', 'Your profile has been updated.');
@@ -52,14 +50,13 @@ second time.
 session()->regenerate();
 ```
 
-Issues a new session id and discards the old one, which is what closes the door on session
-fixation: an attacker who planted an id before sign-in no longer holds a valid one after.
-Call it when the trust level changes — at sign-in, at sign-out, when somebody becomes an
-administrator.
+Requests a new session ID and deletes the old session when regeneration is permitted.
+Regenerate when the trust level changes, such as login or privilege elevation. The Auth
+session adapter performs and verifies its own rotation during login.
 
-It is rate-limited. The default refuses to regenerate more than once every 300 seconds, so
-calling it on every request is harmless rather than a way to lose sessions. Pass a different
-interval if you want another rhythm:
+The helper normally permits regeneration at most once per 300 seconds. A call within the
+interval can leave the ID unchanged; do not treat every call as proof that rotation occurred.
+Pass another interval when the application needs different timing:
 
 ```php-inline
 session()->regenerate(60);
@@ -67,9 +64,8 @@ session()->regenerate(60);
 
 ## Storing sessions in the database
 
-The default handler is PHP's own: files in whatever `session.save_path` points at. That
-breaks the moment a second web server enters the picture, because request two lands on a
-machine that cannot see request one's file.
+The default handler is PHP's own: files in whatever `session.save_path` points at. Configure shared storage when requests can reach
+servers that do not share those files.
 
 ```php-inline
 'session' => [
@@ -82,9 +78,8 @@ This needs `naf/database`, and the table needs creating — the plugin registers
 for it. Install `naf/cli` as well to run the migration with `vendor/bin/naf db:migrate up`;
 see [Migrations](database.md#migrations).
 
-**If `naf/database` is not installed, this fails quietly.** The plugin writes a warning to
-the log and carries on with file storage. Your application works, your sessions are in
-files, and the only sign is a line in a log nobody reads. Check the log after switching.
+If `naf/database` is absent, the plugin logs a warning and retains the default handler.
+Verify the selected handler and application log after changing storage.
 
 ## Behind a proxy
 
@@ -98,6 +93,5 @@ the connection was insecure and sets a cookie without the `Secure` flag.
 ],
 ```
 
-Both together, and never `trust_proxy_headers` alone: `X-Forwarded-Proto` is a header like
-any other, and a client can send it. Trusting it without naming which addresses may set it
-lets anybody claim their connection was encrypted.
+Enable header trust only with an explicit list of trusted proxy addresses. Clients can
+supply `X-Forwarded-Proto`; accept it only from the configured proxies.

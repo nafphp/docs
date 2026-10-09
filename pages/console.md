@@ -7,12 +7,11 @@ requires:
 
 # Console commands
 
-Commands you run yourself, or that cron runs for you: a deployment step, a one-off
-import, a worker that needs to keep going. They run inside your application, so the
-container, the configuration and every plugin are there — unlike a bare PHP script
-sitting next to your project.
+`naf/cli` runs named commands inside the application's bootstrapped environment. Commands
+can use configured services, plugins and logging for imports, maintenance and workers.
+Run the examples from the application root unless another directory is specified.
 
-## Running one
+## List and run commands { #running-one }
 
 ```bash
 vendor/bin/naf command:list
@@ -43,12 +42,17 @@ To inspect plugin startup, run `vendor/bin/naf plugins:debug` (or `bin/naf plugi
 when the shortcut is installed). It shows the order, declared prerequisites and optional
 targets that are not installed. This command requires framework 0.2.7+.
 
-## Writing one
+## Define a command { #writing-one }
 
 A command is a class extending `AbstractCommand`, with a name, a `configure()` that
-declares its arguments, and a `run()` that does the work.
+declares its arguments, and a `run()` that does the work. In a starter application,
+create this file:
 
-```php-inline
+```php title="app/Commands/HelloCommand.php"
+<?php
+
+declare(strict_types=1);
+
 namespace App\Commands;
 
 use Naf\CLI\Core\AbstractCommand;
@@ -62,20 +66,31 @@ final class HelloCommand extends AbstractCommand
     protected function configure(): void
     {
         $this->setTitle('Say hello')
-            ->setDescription('Greets somebody by name')
+            ->setDescription('Greets a person by name')
             ->addArgument('name');
     }
 
     public function run(Input $input, Output $output): int
     {
-        $output->writeLine('Hello, ' . $input->getArgument('name') . '!', 'ok');
+        if ($input->getOption('help')) {
+            $this->showHelp($output);
+            return static::SUCCESS;
+        }
+
+        $name = $input->getArgument('name');
+        if (!is_string($name) || trim($name) === '') {
+            $output->writeLine('A name is required.', 'error');
+            return static::ERROR;
+        }
+
+        $output->writeLine('Hello, ' . trim($name) . '!', 'ok');
 
         return static::SUCCESS;
     }
 }
 ```
 
-## Registering it
+## Register a command { #registering-it }
 
 ```php-inline
 use function Naf\CLI\command;
@@ -83,13 +98,17 @@ use function Naf\CLI\command;
 command()->add(\App\Commands\HelloCommand::class);
 ```
 
-In your application's `bootstrap.php`. **There is no directory that gets scanned** — putting
-a class in `app/Commands/` does nothing on its own. Plugins register theirs the same way,
-which is why a command appears the moment its package is installed and not before.
+Add this registration to root `bootstrap.php`, before `app()->run()`. Commands are not
+discovered by scanning `app/Commands/`; application and plugin bootstraps register them
+explicitly.
 
 ```bash
 vendor/bin/naf hello:say World
 ```
+
+Expect `Hello, World!` and exit status 0. The command explicitly rejects a missing or empty
+name; validate inputs in `run()` rather than relying on argument metadata alone. Run
+`vendor/bin/naf hello:say --help` for the generated usage information.
 
 ## Arguments and options
 
@@ -109,17 +128,17 @@ $input->getOption('shout');       // true when present, null when not
 $input->getOption('repeat');      // the value, or an array when given more than once
 ```
 
-An option can come back as an array, so a command that only ever wants one value should say
-so rather than assuming a string.
+Repeated options can return an array. Validate option types and reject repeats when a
+command accepts only one value.
 
-## Asking a question
+## Interactive input { #asking-a-question }
 
 ```php-inline
 $name = $input->ask('What is your name? ');
 ```
 
-Blocks until somebody types something and presses return — which means a command that calls
-it cannot run from cron. Give anything scheduled its input as arguments.
+This blocks for interactive input. Commands used by cron or CI should receive required
+values as arguments or options and must not depend on an interactive terminal.
 
 ## Writing output
 
@@ -134,11 +153,10 @@ $output->writeEmptyLine();
 $output->drawStroke(40);                   // a line of dashes
 ```
 
-## The exit status
+## Exit status { #the-exit-status }
 
 `run()` returns an integer, and that integer becomes the process's exit status.
 `static::SUCCESS` is 0, `static::ERROR` is 1.
 
-That matters more than it looks: cron, CI and shell `&&` all decide what happens next by
-reading it. A command that fails and returns SUCCESS is a deployment step that reports
-green while doing nothing.
+Return a nonzero status on failure so cron, CI and shell conditionals can detect it.
+Test commands through `vendor/bin/naf` as well as their underlying services.
