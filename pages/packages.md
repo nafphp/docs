@@ -16,6 +16,7 @@ What there is, what it requires and what it suggests. Generated from the
 | **`naf/cli`**<br><span style="font-weight:400">NAF CLI Plugin for console applications.</span> | `v0.2.3` | `naf/framework` | — | `>=8.3` |
 | **`naf/client`**<br><span style="font-weight:400">NAF Client Plugin to make simple http requests.</span> | `v0.2.2` | `naf/framework` | — | `>=8.3` |
 | **`naf/database`**<br><span style="font-weight:400">NAF Database Plugin to work with various storage solutions.</span> | `v0.2.4` | `naf/framework` | — | `>=8.3` |
+| **`naf/flow`**<br><span style="font-weight:400">Reactive JavaScript components and HTML updates for NAF, automatically integrated with naf/view.</span> | `v0.1.0` | `naf/framework`, `naf/view` | — | `>=8.3` |
 | **`naf/form`**<br><span style="font-weight:400">NAF Form Plugin to make form handling easier.</span> | `v0.2.3` | `naf/framework`, `naf/session` | — | `>=8.3` |
 | **`naf/i18n`**<br><span style="font-weight:400">NAF Internationalization Plugin</span> | `v0.2.2` | `naf/framework` | — | `>=8.3` |
 | **`naf/mail`**<br><span style="font-weight:400">NAF Mail Plugin for quick email communication.</span> | `v0.2.2` | `naf/framework` | — | `>=8.3` |

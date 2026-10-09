@@ -8,21 +8,16 @@ A plugin is an ordinary Composer package that declares `"type": "naf-plugin"`. T
 is the whole discovery mechanism: the framework asks Composer which installed packages have
 it and boots them. There is nothing to register and no list to maintain.
 
-## Flow development guide
+## Flow { #flow-development-guide }
 
-Flow is being prepared for its first stable release. Its
-[development guide](https://github.com/nafphp/docs/blob/main/drafts/flow-0.1.0.md)
-contains the current installation steps, component and lifecycle API, shared stores,
-backend requests and a complete example with separate JavaScript modules and PHP templates.
-It also explains the asset and CSP integration and the current limitations.
-The [component factory section](https://github.com/nafphp/docs/blob/main/drafts/flow-0.1.0.md#component-factories-classes-and-exported-functions)
-explains the demo's class wrappers and directly passed functions, including when component
-instances and shared stores are created.
+[Flow](flow.md) connects native JavaScript components to server-rendered NAF views.
+Its chapter explains installation, lifecycle methods, reactive state, shared stores,
+backend requests, HTML fragments and CSP integration, with a complete example in
+separate component and template files.
 
-The guide is a release draft, reviewed against the RC branch. It will become a chapter
-on this site after the stable package is available on Packagist. Its development installation
-uses the explicit Git repository and RC constraint; the API may change before the first
-stable release.
+The [component factory section](flow.md#component-factories-classes-and-exported-functions)
+explains class wrappers and directly passed functions, including when component instances
+and shared stores are created.
 
 ## Plugin discovery
 
