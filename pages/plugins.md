@@ -15,10 +15,14 @@ Flow is being prepared for its first stable release. Its
 contains the current installation steps, component and lifecycle API, shared stores,
 backend requests and a complete example with separate JavaScript modules and PHP templates.
 It also explains the asset and CSP integration and the current limitations.
+The [component factory section](https://github.com/nafphp/docs/blob/main/drafts/flow-0.1.0.md#component-factories-classes-and-exported-functions)
+explains the demo's class wrappers and directly passed functions, including when component
+instances and shared stores are created.
 
 The guide is a release draft, reviewed against the RC branch. It will become a chapter
 on this site after the stable package is available on Packagist. Its development installation
-uses the explicit Git repository and RC constraint; the API may still change during review.
+uses the explicit Git repository and RC constraint; the API may change before the first
+stable release.
 
 ## Plugin discovery
 
