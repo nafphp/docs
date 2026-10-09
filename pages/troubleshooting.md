@@ -4,9 +4,18 @@ title: Troubleshooting and logging
 
 # Troubleshooting and logging
 
-Begin with the HTTP status, application log and server log. Reproduce failures locally with
-the same dependency versions and configuration. Use detailed errors locally with `APP_ENV=dev`;
-deployed applications should use `APP_ENV=prod`.
+When an example behaves differently from the guide, begin with the smallest failing request.
+Note its URL, method and HTTP status, then check the terminal running PHP or the web server
+log. If `logs/app.log` exists, look for the corresponding application message.
+
+The tutorials include an "If the result is different" section beside their verification steps.
+Start there for a symptom specific to that example, then use the sections below to investigate
+further. Reproduce the failure locally with the same dependencies and configuration.
+Use `APP_ENV=dev` for detailed local errors and keep deployed applications on `APP_ENV=prod`.
+
+A 400 or 422 response can be the expected rejection of invalid input. Compare it with the
+guide's valid request before changing configuration. For an API that hides exception details,
+read the server log rather than adding those details to the response.
 
 ## Logging
 

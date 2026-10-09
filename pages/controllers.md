@@ -4,8 +4,13 @@ title: Controllers
 
 # Controllers
 
-A controller is a class method or closure returning `Psr\Http\Message\ResponseInterface`.
-No base controller is required. [Your first application](first-app.md) provides a complete example.
+A controller handles a matched request: it checks input, calls application logic and returns
+a response. In NAF, the handler can be an ordinary class method or a closure returning
+`Psr\Http\Message\ResponseInterface`. No base controller is required.
+
+If you have completed [Your first application](first-app.md), you have already used both an
+HTML action and a JSON action. This chapter explains how to add more actions and give them
+the services they need. The snippets assume the same bootstrapped application.
 
 ## Controller classes
 
@@ -52,6 +57,9 @@ empty success response; `json($data)` creates JSON with the correct content type
 `Naf\View\render()` returns an HTML response when `naf/view` is installed.
 
 ## Dependencies
+
+As an action grows, move reusable business rules into a service and declare it in the
+controller's constructor. The action can then concentrate on HTTP input and its response.
 
 With NAF's default `AutoResolvingContainer`, controllers are built through `make()`.
 Declare services in the constructor; concrete classes with resolvable dependencies need no

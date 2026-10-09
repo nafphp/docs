@@ -9,6 +9,10 @@ requires:
 
 # A contact form
 
+Build a form that shows validation errors beside the submitted values and redirects after a
+valid message. You will capture the message in a local outbox so you can inspect the complete
+flow without configuring a mail server.
+
 | Result | Packages | Starting point |
 |---|---|---|
 | A validated message, local mail outbox and success redirect | Starter + `naf/mail` | [Your first application](../first-app.md) |
@@ -27,6 +31,9 @@ need an in-memory list, see [the dummy transport](../mail.md#testing-without-a-m
 request](post-requests.md) explains the underlying request flow.
 
 ## A local mail outbox
+
+Start by choosing where messages go. Register this application-owned transport before adding
+the form, so this exercise writes local files instead of using PHP's default mail delivery.
 
 ```bash
 mkdir -p app/Mail storage/mail
@@ -72,6 +79,9 @@ app()->run();
 
 ## The routes
 
+The outbox is configured. Next, register a GET action to display the form and a POST action
+to handle its submission. Keep the home and greeting routes from the first application.
+
 ```php title="app/routes.php"
 <?php
 use App\Controllers\HomeController;
@@ -85,6 +95,9 @@ route()->add('POST', '/contact', [ContactController::class, 'submit'], 'contact.
 ```
 
 ## The controller
+
+Add the two actions referenced by the routes. Validation happens before a message is written;
+on failure, the controller returns the same form with the submitted values and errors.
 
 ```php title="app/Controllers/ContactController.php"
 <?php
@@ -146,12 +159,11 @@ final class ContactController
 }
 ```
 
-Three things in that method are deliberate.
+The controller makes three choices that also matter when you configure real delivery.
 
-**`setFrom()` is your own address, not the visitor's.** A message claiming to come from an
-address you do not control is what every receiving mail server treats as forgery, and it will
-land your mail in a spam folder or nowhere at all. The visitor's address belongs in
-`setReplyTo()`, which is what hitting Reply should use anyway.
+**Use an address you control in `setFrom()`.** Configure it to match your delivery system's
+sender requirements. Put the visitor's address in `setReplyTo()` so replies reach that visitor
+without claiming that your application sends on their behalf.
 
 **The body is plain text.** Passing `false` to `setContent()` avoids interpreting submitted
 text as HTML. The subject is fixed; visitor text belongs in the body.
@@ -160,6 +172,9 @@ text as HTML. The subject is fixed; visitor text belongs in the body.
 one request — the redirect's — and is gone on the next reload.
 
 ## The template
+
+The controller passes a validator to the template on both GET and POST. Use it to display
+field errors, and escape submitted values when placing them back into the form.
 
 ```html+php title="app/views/contact.phtml"
 <?php
@@ -201,11 +216,10 @@ use function Naf\route;
 </form>
 ```
 
-`memory()` reads what was submitted, so a rejected form comes back filled in rather than blank —
-the difference between fixing one field and typing everything again. `error()` renders the
-message for one field, and `error_class()` gives you a class name to hang styling on. `error()` and `error_class()`
-take the validator the controller passed down, which is why `show()` passes an unused one: the
-same template serves both requests, and on the first there is simply nothing to report.
+`memory()` reads the current request, so the visitor can correct a field without retyping
+the whole message. `error()` displays a field's validation message, and `error_class()` returns
+a class name for styling. Both use the validator passed by the controller; on the initial
+GET, that validator has no errors to display.
 
 ## Try it
 
@@ -218,6 +232,21 @@ Open **http://127.0.0.1:8000/contact**. Invalid fields return HTTP 422 with erro
 submitted values. A valid name, email and message of at least ten characters redirects back
 with a thank-you. Inspect the new JSON file in `storage/mail/`; it contains the message.
 Reloading removes the flash message. A POST without a valid `_csrf` token returns 400.
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| The form returns 422 | Correct the fields with errors; the submitted text stays available for that response |
+| Submitting an old form returns 400 | Reload `/contact` for a fresh CSRF token, retain the session cookie and submit the form again |
+| A valid submission returns 500 | Inspect the PHP terminal and `logs/app.log` if it exists; check that `storage/mail/` exists and is writable by PHP |
+| A thank-you appears, but no email arrives | This exercise captures mail locally; inspect the JSON file in `storage/mail/` |
+
+If you copied only part of the recipe, check that the routes, controller, template and `Mailer`
+binding all come from this example. [Troubleshooting](../troubleshooting.md#forms-and-sessions)
+has further checks for tokens, cookies and form values.
+
+## Continue building
 
 The local outbox is application code for development, not a built-in NAF transport. To deliver
 real mail, replace its `Mailer` binding with a configured transport from [Sending mail](../mail.md)

@@ -4,7 +4,9 @@ title: Installation
 
 # Installation
 
-Use the starter for a website, or install only the core for a small HTTP service.
+Start a local NAF application and check its first HTTP response. For your first project,
+use the starter below; it provides the application layout and a working welcome page.
+The [core-only project](#core-only-project) is an alternative for a small HTTP service.
 The Composer vendor is **`naf`**; `nafphp` is the GitHub organisation.
 
 ## Requirements
@@ -30,24 +32,22 @@ document root as this project's `public/` directory.
 The starter installs `naf/framework`, `naf/view` and `naf/form`; `naf/session` arrives through
 the form package. It also registers the `App\` namespace with Composer.
 
-Starter **0.2.2** ships a working dependency lock: framework 0.2.3, form 0.2.2, session 0.2.1
-and view 0.2.1. It also excludes Nyholm PSR-7 below 1.8.2 to avoid PHP 8.4+ deprecation errors.
-The welcome page, `/contact` form and POST `/api` demonstration work directly
-after installation; no extra Composer update or response listener is needed. The contact
-example validates input and redirects; it does not send or store a message.
-
-For an application created from an older starter, update the required minimum versions:
-
-```bash
-composer require 'naf/framework:^0.2.2' 'naf/form:^0.2.1' --with-all-dependencies
-```
-
-For later compatible updates, run `composer update` and test your application before
-deploying it. Commit `composer.lock`; deployments should use `composer install` to reproduce
-that tested dependency set.
-
 Continue with [Your first application](first-app.md). It replaces the starter demonstration
 with complete files you can copy, then verifies both an HTML page and a JSON endpoint.
+You can follow it directly after a fresh installation. If you are continuing an older project,
+check [starter versions and updates](#starter-versions-and-updates) first.
+
+### If the welcome page does not appear
+
+| What you see | What to try |
+|---|---|
+| Composer reports a missing PHP extension | Enable the named extension for the PHP binary running Composer; `php --ini` shows its configuration files |
+| The server cannot bind port 8000 | Stop the earlier server or use a free port, such as 8001, in both the command and browser URL |
+| The browser cannot connect | Keep the terminal running the PHP server open and use the address printed there |
+| A PHP error or unexpected page | Confirm this terminal is in `nafphp-demo/` and that the server uses `-t public`; inspect its terminal output |
+
+For more detail, use [Troubleshooting](troubleshooting.md#routing-and-bootstrap). You can
+return to installation after resolving the specific error; a new project is usually unnecessary.
 
 ## Core-only project
 
@@ -107,6 +107,32 @@ php -S 127.0.0.1:8000 -t public
 
 In another terminal, `curl http://127.0.0.1:8000/` should return `{"ok": true}`
 (with whitespace for readability). This path needs no view, form, session or database plugin.
+For a complete application using this structure, continue with the
+[JSON API without a database](recipes/simple-json-api.md). Follow that tutorial in its own
+directory; it includes its own bootstrap, routes and Composer file.
+
+## Starter versions and updates
+
+These notes are for checking an existing project or choosing dependency updates. A fresh
+starter installation can proceed directly to [Your first application](first-app.md).
+
+??? info "Versions included in starter 0.2.2"
+
+    Starter **0.2.2** ships a working dependency lock: framework 0.2.3, form 0.2.2, session 0.2.1
+    and view 0.2.1. It excludes Nyholm PSR-7 below 1.8.2 to avoid PHP 8.4+ deprecation errors.
+    The welcome page, `/contact` form and POST `/api` demonstration work directly after
+    installation; no extra Composer update or response listener is needed. The contact
+    example validates input and redirects; it does not send or store a message.
+
+For an application created from an older starter, update the required minimum versions:
+
+```bash
+composer require 'naf/framework:^0.2.2' 'naf/form:^0.2.1' --with-all-dependencies
+```
+
+For later compatible updates, run `composer update` and test your application before
+deploying it. Commit `composer.lock`; deployments should use `composer install` to reproduce
+that tested dependency set.
 
 ## Environment and next steps
 

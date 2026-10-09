@@ -7,7 +7,7 @@ requires:
 # Handling a POST request
 
 A POST handler reads input, validates it, calls application logic and returns a response.
-This guide explains that sequence; linked recipes provide complete applications. Start from
+Follow that sequence here, then use a linked recipe to try it in a complete application. Start from
 [Your first application](../first-app.md). The starter includes the form and session packages
 used below. APIs can follow the same input flow with their own authentication and CSRF policy.
 
@@ -35,18 +35,18 @@ route()->add('GET',  '/contact', [ContactController::class, 'show'],   'contact'
 route()->add('POST', '/contact', [ContactController::class, 'submit'], 'contact.submit');
 ```
 
-Two methods, two names, one path. Naming them separately matters because `route('contact')` is
-what your form's `action` resolves to. Both names produce the same URL here; the HTTP method
-selects the handler.
+Both routes use the same path, with a separate method and name. `route('contact')` generates
+the form URL; the incoming request method selects the action. Keeping display and submission
+in separate actions makes the two responsibilities visible.
 
-You can also point both at one method and branch inside it with `is_post()`. Two methods is
-usually easier to read; one method is easier when the form and its handling are three lines.
+You can also register both routes to one action and branch with `is_post()` when that suits
+the handler. The same input checks and response rules apply.
 
 ## Reading the body
 
-`param()` is the one to reach for. It merges the query string, the form body and — when the
-request says `Content-Type: application/json` and the parsed body is empty — the decoded JSON body, so the
-same controller reads a browser form and an API client without caring which it got:
+With the routes registered, choose where the handler reads its input. Use `param()` when you
+intend to accept combined sources: it merges the query string, form body and, when the request
+has `Content-Type: application/json` and an empty parsed body, the decoded JSON body.
 
 ```php-inline
 use function Naf\param;
@@ -56,14 +56,18 @@ $city  = param()->get('address.city', 'unknown');   // dotted path into nested d
 $all   = param()->all();
 ```
 
-The default is returned when the key is absent, so `get()` never surprises you with a
-notice.
+`get()` returns the supplied default when a key is absent. Check the type of a submitted value
+before using it: a string default does not prevent the caller from sending an array.
 
-`request()->getParsedBody()` is still there when you want the body and nothing else — no query
-parameters merged in. For JSON, decode `(string) request()->getBody()` explicitly instead;
+Use `request()->getParsedBody()` for form-body-only input. For JSON endpoints that need to
+distinguish malformed JSON from invalid fields, decode `(string) request()->getBody()` explicitly;
 see [Requests and responses](../request-response.md#read-the-request).
 
 ## Checking it
+
+After checking input types, validate the field values before calling application logic.
+The following fragment shows the validator API; the [contact form](contact-form.md#the-controller)
+includes the surrounding type checks and failure response.
 
 ```php-inline
 use function Naf\Form\validator;
@@ -86,7 +90,7 @@ Rules are a `|`-separated string, or an array. Five ship with `naf/form` — `re
 An unknown rule throws instead of being skipped. Correct misspelled or unregistered rule
 names before treating a validation result as complete.
 
-## CSRF is already handled
+## Include a CSRF token { #csrf-is-already-handled }
 
 With `naf/form` installed, a listener checks POST, PUT and DELETE before
 your controller runs. Generate one token per page and reuse it across that page's forms:
@@ -96,11 +100,13 @@ your controller runs. Generate one token per page and reuse it across that page'
 <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
 ```
 
-Bearer requests skip the CSRF check automatically; the endpoint still has to verify their
-credentials. Explicit named exemptions are available for other protocol endpoints. [Forms and
+For an endpoint using its own credentials, an Authorization header beginning with `Bearer `
+exempts the request from the form plugin's CSRF check. The endpoint still needs to verify
+those credentials; the header alone does not authenticate it. Explicit named exemptions
+are available for other protocol endpoints. [Forms and
 validation](../forms.md#requests-that-carry-their-own-credentials) covers how.
 
-## Answering
+## Return a response { #answering }
 
 After a successful browser form submission, redirect:
 
@@ -118,8 +124,21 @@ payments still need application-level idempotency.
 On validation failure, return the form with errors and submitted values, usually with status
 422. Validate before performing side effects so this response does not represent partial success.
 
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| POST returns 404 | Confirm you registered a POST route as well as the GET route and that the form action targets it |
+| The browser form returns a CSRF error | Reload the GET form, retain cookies and include the generated token in the submission |
+| The validator reports an unknown rule | Check the rule name and register custom rules before validating |
+| Entered values disappear after validation fails | Return the form in the current request; `memory()` cannot carry input through a redirect |
+
+Use the complete recipe's verification steps to distinguish expected validation responses
+from an application failure. [Troubleshooting](../troubleshooting.md#forms-and-sessions)
+has further checks for form and session behavior.
+
 ## Where to go next
 
-- [A contact form](contact-form.md) — this, end to end, with mail.
-- [A login form](login-form.md) — the same shape, with a session at the end of it.
-- [A JSON API](json-api.md) — the same shape, answering machines.
+- [A contact form](contact-form.md) — validation, a local mail outbox and a success redirect.
+- [A login form](login-form.md) — credential checks, session persistence and protected account access.
+- [A JSON API with a database](json-api.md) — JSON input, field validation and persistent records.

@@ -9,6 +9,10 @@ requires:
 
 # A login form
 
+Build a browser login with a protected account page and a logout form. You will use NAF's
+authentication and session services to check credentials and keep a verified user signed in
+across requests.
+
 | Result | Packages | Starting point |
 |---|---|---|
 | Login, protected account page and CSRF-protected logout | Starter + `naf/auth`; `pdo_sqlite` for demo accounts | [Authentication quickstart](../auth.md#quickstart) |
@@ -26,6 +30,9 @@ Replace the routes, or merge the named routes when combining recipes.
 
 ## The routes
 
+With the quickstart's account source and demo user in place, register the login, account and
+logout actions. The controller below supplies the actions named here.
+
 ```php title="app/routes.php"
 <?php
 
@@ -41,15 +48,17 @@ route()->add('POST', '/login',  [SessionController::class, 'submit'], 'login.sub
 route()->add('POST', '/logout', [SessionController::class, 'logout'], 'logout');
 ```
 
-Name one of them `login`. Other packages look for a route by that name when they have to send
-somebody to sign in — [`naf/oauth-server`](../oauth-server.md) finds its sign-in page that way,
-and stops needing to be told where it is.
+Keep the sign-in route named `login`. Packages such as [`naf/oauth-server`](../oauth-server.md)
+use that name to find the application's sign-in page.
 
-**Logging out is a POST.** A `GET /logout` can be triggered by any image tag on any page, which
-means anybody can sign your users out by embedding a link. It changes state, so it takes a form
-and a CSRF token like every other form.
+**Logging out changes session state**, so it uses POST and a CSRF token. Visiting a link
+should not perform that operation; the logout form below makes the intended action explicit.
 
 ## The controller
+
+The controller connects the routes to authentication. It validates field types first, checks
+credentials through `authenticate()` and requires a verified login before returning the
+account page.
 
 ```php title="app/Controllers/SessionController.php"
 <?php
@@ -134,6 +143,9 @@ identifier and rotates the session ID. The controller does not need to modify `$
 
 ## The template
 
+Next, add the form used by `show()` and failed login attempts. It displays field errors and
+one credential-failure message while keeping the password field empty.
+
 ```html+php title="app/views/login.phtml"
 <?php
 use function Naf\Form\csrf;
@@ -163,11 +175,14 @@ use function Naf\route;
 </form>
 ```
 
-The username comes back through `memory()` after a failed attempt; the password deliberately
-does not. Putting a password back into the HTML writes it into the page source, the browser's
-back-forward cache and any proxy that logs bodies, to save one field of typing.
+`memory()` keeps the username available in the failed request so the visitor can correct it.
+Leave the password field empty after a failed attempt to keep credentials out of the returned
+HTML. The visitor can enter it again or use their password manager.
 
 ## The protected page and logout form
+
+The account action checks access on the server, including direct requests to `/account`.
+Its template can therefore show the verified username and a CSRF-protected logout button.
 
 ```html+php title="app/views/account.phtml"
 <?php
@@ -187,14 +202,33 @@ composer dump-autoload
 php -S 127.0.0.1:8000 -t public
 ```
 
-Open **http://127.0.0.1:8000/login**. Wrong credentials return 422 and retain the username.
-The demo credentials redirect to `/account`; reloading keeps you signed in. The logout button
-returns you to `/login`, and `/account` then returns 401. Submissions without a valid CSRF token
-return 400. Only call `csrf()->generate()` once per page; reuse that token if you add more forms.
+Check the complete flow in the browser:
+
+1. Open **http://127.0.0.1:8000/login** and submit incorrect credentials. Expect 422, a failure
+   message and the username you entered, with an empty password field.
+2. Sign in with **demo** and **local-demo-password**. Expect a redirect to `/account`; reload
+   that page to check that the session keeps you signed in.
+3. Use the logout button. Expect to return to `/login`; a direct visit to `/account` now returns 401.
+
+Submissions without a valid CSRF token return 400. Generate one token per page and reuse it
+if you add more forms to that page.
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| The demo credentials are refused | Check that you completed the authentication quickstart, including its seed command, and are using the exact demo credentials |
+| A submission returns 400 | Reload `/login` for a fresh form and retain the session cookie; avoid resubmitting an old form after the session changes |
+| Reloading loses the login | Use the same host for each request and check browser cookies and the Session configuration |
+| `/account` returns 401 after logout | This is the expected access check; return to `/login` to sign in again |
+| A request returns 500 | Inspect the PHP server terminal and `logs/app.log` if it exists; check the quickstart's provider, database configuration and file permissions |
+
+Keep CSRF protection enabled while diagnosing form errors. [Troubleshooting](../troubleshooting.md#forms-and-sessions)
+has more checks for session cookies and tokens.
 
 ## Requiring a login elsewhere
 
-In a controller that only signed-in people may reach:
+To protect another action, make the access requirement part of that controller action:
 
 ```php-inline
 use function Naf\Auth\auth;
@@ -203,14 +237,14 @@ auth()->requireLogin();                     // 401 if nobody is signed in
 auth()->requirePermission('posts.edit');    // 403 if they lack it
 ```
 
-Both throw, and the framework turns them into responses — there is no `if` to forget. Who is
-signed in is `auth()->user()`, which is your own model, exactly as your provider returned it.
+Both checks throw an HTTP exception when access is denied; the framework turns it into an
+error response before the action continues. `auth()->user()` returns your provider's identity
+object for the signed-in user.
 
 ## What happens on the next request
 
-Only two values are kept: which source the account came from, and its identifier. Every request
-reloads the account through that source, so a suspended or deleted account stops working at
-once rather than whenever a cached copy happens to expire. [Authentication and
-permissions](../auth.md#sessions) has the detail.
+The session stores the account source and identifier. Each request reloads the account through
+that source, so a suspended or deleted account loses access on the next request.
+[Authentication and permissions](../auth.md#sessions) explains this lifecycle.
 
 See [Testing applications](../testing.md) to automate verification and [Deployment](../deployment.md) for production setup.

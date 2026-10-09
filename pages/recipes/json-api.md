@@ -7,6 +7,10 @@ requires:
 
 # A JSON API with a database { #a-json-api }
 
+Build a small **local development API** that lists, creates, reads and deletes articles.
+You will configure SQLite, create its schema with a migration and return JSON through NAF's
+response helpers. A repository keeps the PDO queries separate from HTTP handling.
+
 | Result | Packages | Starting point |
 |---|---|---|
 | Article CRUD with SQLite, migrations and JSON errors | Core + `naf/database` 0.2.4+ + `naf/cli`; `pdo_sqlite` | [Core-only installation](../install.md#core-only-project) |
@@ -15,10 +19,8 @@ Choose this scenario when requests must save and retrieve records. For a public 
 only returns data from a PHP service, use [the JSON API without a database](simple-json-api.md)
 first. [Compare all scenarios](index.md).
 
-Build a small **local development API** that lists, creates, reads and deletes articles.
 [`naf/database`](../database.md) provides the configured SQLite connection and tracks schema
-changes; [`naf/cli`](../console.md) runs the migrations. The repository uses ordinary PDO
-prepared statements, and the controller returns JSON through NAF's response helpers.
+changes; [`naf/cli`](../console.md) runs the migrations.
 
 Begin with [the core-only installation](../install.md#core-only-project), then stop its
 development server while adding the files below. You need PHP 8.3+ with `pdo_sqlite` and
@@ -36,6 +38,9 @@ This project has no login, session or form plugin. Keep the development server b
 `127.0.0.1`; [authentication](#adding-authentication) is a separate step before deployment.
 
 ## Configure the database
+
+First, tell the database plugin where this project's SQLite file belongs. The connection
+will be supplied to your repository after the schema is ready.
 
 ```php title="app/config.php"
 <?php
@@ -56,6 +61,9 @@ and associative fetches, and binds this same connection as `PDO::class` in the c
 NAF can therefore inject it into the repository without a custom connection factory.
 
 ## Return JSON errors
+
+Before adding the endpoints, configure the error response format. This lets clients read
+JSON for failed requests as well as successful ones.
 
 ```php title="bootstrap.php"
 <?php
@@ -92,6 +100,9 @@ response hides internal details. A bootstrap parse error can happen before the l
 registered.
 
 ## Create the schema with a migration
+
+The connection is configured. Next, define and apply the table before trying to read or save
+articles through the API.
 
 ```php title="app/Migrations/CreateArticlesTable.php"
 <?php
@@ -134,16 +145,20 @@ The plugin discovers `app/Migrations` automatically. Expect `up App\Migrations\C
 and `1 migration(s) successfully executed.`. It records the migration in its `migrations`
 table; running `db:migrate up` again executes zero migrations and keeps existing articles.
 
-To undo this example on a disposable database:
+The table is now ready for the repository below. You can leave the rollback exercise until
+after the API works.
 
-```bash
-vendor/bin/naf db:migrate down --name=CreateArticlesTable
-vendor/bin/naf db:migrate up
-```
+??? note "Undo the migration in a disposable project"
 
-`down()` drops the table **and its articles**; the following `up` recreates an empty table.
-For later schema changes, use `vendor/bin/naf db:migration:create` to generate a new migration
-and fill in its `up()` and `down()` methods. Keep applied migrations unchanged.
+    These commands drop the table **and its articles**, then recreate an empty table:
+
+    ```bash
+    vendor/bin/naf db:migrate down --name=CreateArticlesTable
+    vendor/bin/naf db:migrate up
+    ```
+
+    For later schema changes, use `vendor/bin/naf db:migration:create` to generate a new
+    migration and fill in its `up()` and `down()` methods. Keep applied migrations unchanged.
 
 ## The repository
 
@@ -217,6 +232,9 @@ final class ArticleRepository
 ```
 
 ## Routes and controller
+
+The repository supplies data operations. Register the HTTP routes next, then add a controller
+to validate input, call those operations and choose response statuses.
 
 ```php title="app/routes.php"
 <?php
@@ -354,6 +372,8 @@ A 204 response has no body; `json(null, 204)` would try to encode `null` as cont
 
 ## Try it
 
+The schema and application files are in place. Start the server from the project root:
+
 ```bash
 php -S 127.0.0.1:8000 -t public
 ```
@@ -402,6 +422,22 @@ curl -i -X DELETE http://127.0.0.1:8000/api/articles/1
 | `POST` without `Content-Type: application/json` | 415 | JSON error |
 | `POST` with `{}`, an array or invalid fields | 422 | JSON error, with `fields` for invalid article fields |
 | Unknown route | 404 | JSON error |
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| The migration reports a missing SQLite driver | Enable `pdo_sqlite` for the PHP binary running the command and for the web runtime |
+| The migration or API cannot open the database | Check the configured path and that `storage/` exists and is writable by PHP |
+| The list is empty | A fresh database returns `{"data":[]}`; create an article with the POST example before reading it |
+| Creating an article returns 415 | Include `Content-Type: application/json` in the request |
+| Creating an article returns 400 or 422 | For 400, correct malformed JSON; for 422, send a JSON object with non-empty text fields within the stated limits |
+| Reading an article returns 404 | Use the `Location` returned by your own POST; an existing database may assign a different ID |
+| The response is `Internal server error` | Read `logs/app.log`; check that the migration ran and that `naf/database` is version 0.2.4+ for PDO injection |
+
+The expected 400, 415 and 422 responses let you correct a request without changing the server.
+For an unexpected failure, use the local log to find the cause; keep exception details out of
+the client response. See [Troubleshooting](../troubleshooting.md) for more checks.
 
 ## Adding authentication
 

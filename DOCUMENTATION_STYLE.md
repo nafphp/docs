@@ -18,6 +18,26 @@ Describe the current design. Previous drafts and possible future features belong
 or design proposals. "Returns null" or "throws DatabaseException" is more useful than
 "handles errors". Preserve technical qualifications when simplifying language.
 
+## Support the reader
+
+Begin tutorials with the result the reader will build, then explain the starting project and
+prerequisites. Give one recommended first path; offer alternatives by their purpose. Keep
+older-version notes and optional cleanup in clearly labelled sections or collapsed details
+so they do not interrupt the main exercise. Keep requirements that affect the next step visible.
+
+Connect steps by explaining what is now in place and what the next file adds. Describe these
+intermediate states accurately: registering a route does not mean the application works before
+its controller and template exist. End the exercise with an observable result and a next step.
+
+Use a calm, respectful tone. Explain a restriction's reason and the reader's next action.
+Avoid blame, exaggerated reassurance and promises about how quickly someone will finish.
+Friendliness comes from useful guidance, rather than jokes or repeated congratulations.
+
+Add a short "If the result is different" section near verification. Pair a recognizable symptom
+with a specific check or recovery step, and link to deeper troubleshooting when useful.
+Distinguish expected validation responses from application failures. Keep security requirements
+explicit; do not suggest disabling protection to make an example work.
+
 ## Page purpose
 
 | Type | Reader's goal | Required content |

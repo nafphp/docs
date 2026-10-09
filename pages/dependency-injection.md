@@ -4,9 +4,13 @@ title: Dependency injection
 
 # Dependency injection
 
-NAF supports constructor autowiring out of the box. The default container is
-`AutoResolvingContainer`, wrapping the PSR-11 `Container`. It can build concrete classes
-and recursively resolve their constructor dependencies without registering each class.
+Declare a required service in your class's constructor, and NAF can supply it when building
+that class. This is constructor injection. For concrete classes, NAF can also build their
+dependencies automatically; this is autowiring.
+
+The default `AutoResolvingContainer` wraps the PSR-11 `Container` and provides that behavior.
+Start with the example below. You only need explicit registrations when choosing an interface
+implementation, custom construction or a shared instance.
 
 ## Autowiring without registration
 
