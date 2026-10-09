@@ -17,6 +17,9 @@ No base controller or application-wide ORM is required.
 
 | Goal | Guide |
 |---|---|
+| Pick a small, complete application to build | [Application scenarios](recipes/index.md) |
+| Build a two-page website with a shared layout | [Small website](recipes/small-website.md) |
+| Return JSON without configuring a database | [JSON API without a database](recipes/simple-json-api.md) |
 | Build a website with templates and forms | [Install the starter](install.md#start-with-the-application-skeleton) |
 | Build an HTTP service without templates or sessions | [Core-only installation](install.md#core-only-project) |
 | Learn the layout and request handling | [Your first application](first-app.md) |
@@ -53,4 +56,4 @@ rules in application classes. Extend behavior through the container, events and 
 interfaces rather than copying framework internals.
 
 Your application defines validation rules, access policies, schemas, tests and deployment
-settings. The [worked examples](recipes/post-requests.md) show these responsibilities together.
+settings. The [worked examples](recipes/index.md) show these responsibilities together.

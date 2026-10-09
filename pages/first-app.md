@@ -227,9 +227,12 @@ service that needs no templates or forms, start with the
 
 ## Continue building
 
+- [Choose a scenario](recipes/index.md) compares complete examples and their required packages.
+- [A small website](recipes/small-website.md) builds two pages with a shared layout from an empty directory.
+- [A JSON API without a database](recipes/simple-json-api.md) returns public data from an injected service.
 - [Handling a POST request](recipes/post-requests.md) explains body data, validation and CSRF.
 - [A contact form](recipes/contact-form.md) adds an HTML form.
 - [A login form](recipes/login-form.md) signs in a user.
-- [A JSON API](recipes/json-api.md) adds persistent data and JSON error responses.
+- [A JSON API with a database](recipes/json-api.md) adds persistent data and migrations.
 
 See [Testing applications](testing.md) to automate verification and [Deployment](deployment.md) for production setup.

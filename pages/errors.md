@@ -64,7 +64,7 @@ event()->listen(Event::EXCEPTION, function (\Throwable $exception) {
         return null;
     }
 
-    log()->error('API request failed', ['exception' => $exception]);
+    log()->error('API request failed: {exception}', ['exception' => $exception]);
     $status = ErrorHandler::resolveStatusCode($exception);
     return json(['error' => $status >= 500 ? 'Internal server error' : 'Request refused'], $status);
 });

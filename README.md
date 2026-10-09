@@ -34,12 +34,14 @@ python tools/test_examples.py
 ```
 
 The test creates a fresh `composer create-project naf/app` installation and a separate core-only
-project in temporary directories. It extracts the **actual file-titled Markdown blocks**,
+project in temporary directories. The small website and storage-free JSON API each install
+their own minimal dependency set in separate projects. It extracts the **actual file-titled Markdown blocks**,
 lints their PHP and tests them through local HTTP servers. It checks HTML and JSON, validation,
 escaping, CSRF, a local mail outbox, login persistence/logout/suspension, ORM save/find and
 SQLite API persistence and errors, and database migrations (apply, repeat and roll back). It also exercises the documented
 service/HTTP tests, plugin discovery, application commands, streamed downloads, queue failure/retry,
-scheduling, MCP scopes and a fake HTTP transport.
+scheduling, MCP scopes and a fake HTTP transport. The small scenarios check shared layouts,
+HTML escaping, bounded query input, response headers and sanitized JSON failures.
 It never sends mail externally. Temporary projects and servers are cleaned up, including on
 test failure.
 

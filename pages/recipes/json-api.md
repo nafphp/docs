@@ -1,11 +1,19 @@
 ---
-title: A JSON API
+title: A JSON API with a database
 requires:
   - naf/database
   - naf/cli
 ---
 
-# A JSON API
+# A JSON API with a database { #a-json-api }
+
+| Result | Packages | Starting point |
+|---|---|---|
+| Article CRUD with SQLite, migrations and JSON errors | Core + `naf/database` 0.2.4+ + `naf/cli`; `pdo_sqlite` | [Core-only installation](../install.md#core-only-project) |
+
+Choose this scenario when requests must save and retrieve records. For a public API that
+only returns data from a PHP service, use [the JSON API without a database](simple-json-api.md)
+first. [Compare all scenarios](index.md).
 
 Build a small **local development API** that lists, creates, reads and deletes articles.
 [`naf/database`](../database.md) provides the configured SQLite connection and tracks schema
@@ -68,7 +76,7 @@ define('BASE_PATH', __DIR__);
 require __DIR__ . '/vendor/autoload.php';
 
 event()->listen(Event::EXCEPTION, static function (Throwable $exception): ResponseInterface {
-    log()->error('API request failed', ['exception' => $exception]);
+    log()->error('API request failed: {exception}', ['exception' => $exception]);
 
     $status = ErrorHandler::resolveStatusCode($exception);
 

@@ -115,5 +115,6 @@ Use these exact values: `production` is not the production constant. Keep `.env`
 `.env.local` out of version control. See [Configuration](configuration.md).
 
 - [Your first application](first-app.md) — a website and a JSON endpoint.
+- [Application scenarios](recipes/index.md) — complete small projects, from two HTML pages to a storage-free JSON API.
 - [Choosing packages](choosing-packages.md) — add only what your application needs.
 - [Requests and responses](request-response.md) — read incoming data and return a response.
