@@ -274,6 +274,7 @@
   "Naf\\Client\\Transports\\StreamTransport",
   "Naf\\Client\\Transports\\StreamingTransportInterface",
   "Naf\\Client\\Transports\\TransportInterface",
+  "Naf\\Contracts\\ConfigurationSourceInterface",
   "Naf\\Core\\App",
   "Naf\\Core\\Config",
   "Naf\\Core\\Container",
@@ -341,9 +342,13 @@
   "Naf\\MCP\\Tools\\UserToolInterface",
   "Naf\\Mail\\Core\\Mailer",
   "Naf\\Mail\\Core\\TransportInterface",
+  "Naf\\Mail\\Core\\Transport\\ConfigurableTransportInterface",
   "Naf\\Mail\\Core\\Transport\\DummyTransport",
   "Naf\\Mail\\Core\\Transport\\MailTransport",
+  "Naf\\Mail\\Core\\Transport\\SmtpSettings",
+  "Naf\\Mail\\Core\\Transport\\SmtpTransport",
   "Naf\\Mail\\Core\\Transport\\Trait\\MailMessageRenderer",
+  "Naf\\Mail\\Core\\Transport\\TransportConfiguration",
   "Naf\\Mail\\Exceptions\\MailException",
   "Naf\\Mail\\Models\\Mail",
   "Naf\\OAuth\\Client\\Account\\AccountLink",
@@ -1133,6 +1138,9 @@
    "language": ""
   },
   "mail": {
+   "mail": "[]",
+   "mail:from": "''",
+   "mail:reply_to": "''",
    "mail:transport": ""
   },
   "mcp": {
@@ -1729,7 +1737,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.9"
+   "version": "v0.2.10"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
@@ -1749,7 +1757,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "mcp": {
    "description": "NAF MCP Plugin for basic AI driven workflows.",

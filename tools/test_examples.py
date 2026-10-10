@@ -843,6 +843,21 @@ def test_alexa(root):
         rpc(call, 401)
 
 
+def test_configuration_sources(root):
+    copy_examples('configuration.md', root)
+    run([*COMPOSER, 'dump-autoload', '--no-interaction'], root)
+    output = run([*PHP, 'bin/configuration-demo.php'], root).strip().splitlines()
+    expect([json.loads(line) for line in output] == [
+        {'feature': False, 'servers': [], 'source': 'stored-json', 'default': True},
+        {'reset': True},
+    ], 'Documented early configuration source preserves false/lists and resets its layer')
+    (root / 'storage/configuration.json').unlink()
+    output = run([*PHP, 'bin/configuration-demo.php'], root).strip().splitlines()
+    expect(json.loads(output[0]) == {
+        'feature': True, 'servers': ['primary', 'backup'], 'source': 'configuration', 'default': True,
+    }, 'Missing override storage restores server configuration')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--starter', type=Path, help='Reuse installed starter dependencies; source is read-only')
@@ -881,6 +896,8 @@ def main():
                 output = run([*PHP, 'bin/mail-demo.php'], fixture)
                 expect('Stored messages: 1' in output and 'Subject: Hello from NAF' in output,
                        'Shipped DummyTransport captures the documented message')
+                expect('Sender: hello@example.com' in output and 'Text: A local test message.' in output,
+                       'Mail example applies the sender default and retains its text alternative')
             elif feature == 'orm':
                 copy_examples('orm.md', fixture)
                 for _ in range(2):
@@ -945,6 +962,10 @@ def main():
             result = client.request('/')
             expect(result[0] == 200 and json.loads(result[2]) == {'ok': True}, 'Core-only install')
         print('PASS core-only install', flush=True)
+        configuration = root / 'configuration'
+        shutil.copytree(core, configuration)
+        test_configuration_sources(configuration)
+        print('PASS early configuration sources and layer reset', flush=True)
         overview = root / 'overview'
         shutil.copytree(core, overview)
         copy_examples('index.md', overview)

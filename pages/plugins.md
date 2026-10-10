@@ -120,6 +120,14 @@ Configuration merges core defaults, plugin configuration and application configu
 that order. Later values win recursively; numeric arrays replace by position. See
 [Configuration](configuration.md#merge-order).
 
+For stored overrides needed by startup services, Framework 0.2.10+ also discovers
+`app/config_sources.php` or `src/config_sources.php`. Return a list of
+`Naf\Contracts\ConfigurationSourceInterface` classes. Their named layers load on the first
+configuration read, after registration of every plugin and before that read returns to a
+bootstrap. Plugin sources follow the resolved plugin order; host sources load last.
+Sources must not resolve configuration-dependent services. See the complete
+[configuration-source example](configuration.md#load-overrides-before-plugin-boot).
+
 ## Plugin metadata { #accessing-plugin-metadata }
 
 ```php-inline

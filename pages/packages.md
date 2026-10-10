@@ -9,7 +9,7 @@ Published packages, their required dependencies and optional integrations. Gener
 
 | Package | Version | Requires | Suggests | PHP |
 |---|---|---|---|---|
-| **`naf/framework`**<br><span style="font-weight:400">NAF - the ultra-light, functional PHP framework for fast microservices and APIs.</span> | `v0.2.9` | — | — | `>=8.3` |
+| **`naf/framework`**<br><span style="font-weight:400">NAF - the ultra-light, functional PHP framework for fast microservices and APIs.</span> | `v0.2.10` | — | — | `>=8.3` |
 | **`naf/alexa`**<br><span style="font-weight:400">Alexa+ MCP integration, OAuth setup and diagnostics for NAF.</span> | `v0.1.1` | `naf/cli`, `naf/database`, `naf/framework`, `naf/mcp`, `naf/oauth-server` | — | `>=8.3` |
 | **`naf/auth`**<br><span style="font-weight:400">Authentication and permission checks for NAF, with your own user model.</span> | `v0.2.2` | `naf/framework` | `naf/orm`, `naf/session` | `>=8.3` |
 | **`naf/auth-ldap`**<br><span style="font-weight:400">Optional TLS LDAP provider using the existing NAF Auth contract.</span> | `v0.1.0` | `naf/auth` | — | `>=8.3` |
@@ -20,7 +20,7 @@ Published packages, their required dependencies and optional integrations. Gener
 | **`naf/flow`**<br><span style="font-weight:400">Reactive JavaScript components and HTML updates for NAF, automatically integrated with naf/view.</span> | `v0.1.0` | `naf/framework`, `naf/view` | — | `>=8.3` |
 | **`naf/form`**<br><span style="font-weight:400">NAF Form Plugin to make form handling easier.</span> | `v0.2.4` | `naf/framework`, `naf/session` | — | `>=8.3` |
 | **`naf/i18n`**<br><span style="font-weight:400">NAF Internationalization Plugin</span> | `v0.2.2` | `naf/framework` | — | `>=8.3` |
-| **`naf/mail`**<br><span style="font-weight:400">NAF Mail Plugin for quick email communication.</span> | `v0.2.2` | `naf/framework` | — | `>=8.3` |
+| **`naf/mail`**<br><span style="font-weight:400">NAF Mail Plugin for quick email communication.</span> | `v0.2.3` | `naf/framework` | — | `>=8.3` |
 | **`naf/mcp`**<br><span style="font-weight:400">NAF MCP Plugin for basic AI driven workflows.</span> | `v0.2.6` | `naf/framework` | `naf/oauth-server` | `>=8.3` |
 | **`naf/oauth-client`**<br><span style="font-weight:400">Sign in with external OAuth2 and OpenID Connect providers, keeping your own user model.</span> | `v0.2.4` | `naf/auth`, `naf/framework`, `naf/session` | `naf/cli`, `naf/client`, `naf/database`, `naf/view` | `>=8.3` |
 | **`naf/oauth-server`**<br><span style="font-weight:400">Run your application as an OAuth2 authorization server and protect its APIs.</span> | `v0.2.5` | `naf/auth`, `naf/form`, `naf/framework`, `naf/session` | `naf/cli`, `naf/database`, `naf/view` | `>=8.3` |
