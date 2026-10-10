@@ -106,6 +106,7 @@ nav:
       - Rate limits: rate-limits.md
       - WebSocket notifications: websocket.md
       - MCP tools: mcp.md
+      - Alexa+ MCP server: alexa.md
   - Identity and access:
       - Authentication and permissions: auth.md
       - Authentication architecture: auth-architecture.md

@@ -17,6 +17,7 @@ KAPITEL = {
     "mail": ("Sending mail", "mail.md"), "i18n": ("Translations", "translations.md"),
     "client": ("HTTP client", "http-client.md"),
     "storage": ("File storage", "file-storage.md"), "cli": ("Console commands", "console.md"),
+    "alexa": ("Alexa+ MCP server", "alexa.md"),
     "mcp": ("MCP tools", "mcp.md"), "auth": ("Authentication and permissions", "auth.md"),
     "oauth-client": ("OAuth client", "oauth-client.md"),
     "oauth-server": ("OAuth authorization server", "oauth-server.md"),

@@ -6,34 +6,74 @@ requires:
 
 # MCP tools
 
-`naf/mcp` exposes explicitly registered tools over a JSON-RPC HTTP endpoint. Tools are PHP
-classes with input schemas and handlers. Bearer tokens and tool scopes control access;
+`naf/mcp` exposes explicitly registered tools over a stateless MCP Streamable HTTP endpoint.
+Tools are PHP classes with input schemas and handlers. Bearer tokens and tool scopes control access;
 handlers must still authorize the application data and operations they expose.
 
+This guide requires `naf/mcp` 0.2.5+, PHP 8.3+ and `naf/framework` 0.2.8+.
 Start from a bootstrapped application. The default token store uses a file, not a database.
 The example below measures files in one application-owned reports directory.
 
 ## The endpoint
 
-Installing the plugin adds one route, under two methods:
-
-| Route | Behavior |
-| --- | --- |
-| `POST /mcp` | Authenticated JSON-RPC requests and responses |
-| `GET /mcp` | returns 405 with `Allow: POST` after authentication; server-initiated streaming is not implemented |
-
-Configure clients with the `/mcp` URL and a token created below.
-Missing or invalid credentials produce 401 at the MCP authenticator. With `naf/form` 0.2.3+
-installed, exempt this protocol route from browser CSRF validation in the existing
-`app/config.php` return array:
+The `POST /mcp` endpoint implements stateless Streamable HTTP. Clients send
+`Content-Type: application/json` and `Accept: application/json, text/event-stream`.
+The default response is JSON. Enable SSE responses in the host's `app/config.php` return array:
 
 ```php-inline
-'csrf_exempt_routes' => ['mcp_server_rpc' => true],
+'mcp' => ['transport' => ['streaming' => true]],
 ```
 
-Keep MCP authentication enabled. Form 0.2.3+ does not exempt requests merely because they
-carry a Bearer header; without the route exemption, a legitimate client can receive 400
-before MCP authenticates it. This setting exempts only the named MCP POST route.
+Set `mcp:transport:streaming` back to `false` to return JSON and invoke ordinary `handle()`
+methods. Both modes use the same Streamable HTTP endpoint. The setting controls response
+streaming, not endpoint installation or authentication. Accepted notifications and client
+responses receive an empty HTTP 202. Batches and non-object JSON are rejected. Authenticated
+GET requests receive 405 with `Allow: POST`: there is no persistent GET event channel,
+session id, replay or resumability support.
+
+Initialize with a `protocolVersion`, `capabilities` object and `clientInfo`:
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"Example client","version":"1.0"}}}
+```
+
+The server negotiates 2025-11-25, 2025-06-18 and 2025-03-26. Send the negotiated
+`MCP-Protocol-Version` header on later requests. An unsupported supplied version returns
+400. A supplied `Origin` must match the configured `public_url` origin or an exact entry in
+`mcp:transport:allowed_origins` (list of origin strings, default `[]`); otherwise it returns
+403. Without either configuration, supplied Origins are rejected; the caller's Host header
+does not establish a trusted origin. An absent Origin is accepted for non-browser clients. Bind local development servers
+to loopback; use a configured public HTTPS origin in production.
+
+`StreamingToolInterface` extends the ordinary tool contract with `stream(array $args): Generator`.
+Keep a working `handle()` method for JSON mode. Yield `Progress` values and return the final result:
+
+```php-inline
+use Naf\MCP\Support\Progress;
+use Naf\MCP\Tools\StreamingToolInterface;
+
+// Add this method to a tool implementing StreamingToolInterface.
+public function stream(array $args): \Generator
+{
+    yield new Progress(0, 1, 'Reading the report');
+    $result = $this->handle($args);
+    yield new Progress(1, 1, 'Report ready');
+    return $result;
+}
+```
+
+Progress values must be finite, non-negative and strictly increase. An optional total cannot
+be smaller than progress. Notifications are sent only when the caller supplies a string or
+integer `params._meta.progressToken`. The final JSON-RPC result follows on the same SSE stream.
+The PSR-7 body reads lazily and the framework emitter sends each message as it becomes available.
+The plugin sends `X-Accel-Buffering: no` and `Cache-Control: no-cache, no-transform`.
+Verify proxy/CDN buffering and compression on the deployed host; PHP's local emitter alone
+does not prove Internet latency.
+
+MCP 0.2.5 supplies its own narrow `csrf_exempt_routes:mcp_server_rpc` exemption when
+`naf/form` is installed. Keep MCP authentication enabled. A Bearer header alone does not
+exempt a request from Form's CSRF listener. Older MCP installations with Form 0.2.3+ need
+that exact route exemption in host configuration; it can be removed after upgrading.
 
 ## A tool
 
@@ -126,9 +166,10 @@ and relevant limits so an assistant can select it correctly.
 `nullable()`, `enum()`, `min()`, `max()`, `default()`, `description()` and
 `additionalProperties()`. Finish with `toArray()`.
 
-Use `additionalProperties(false)` to describe a closed argument object. The published plugin
-advertises schemas but does not validate tool arguments against them. Validate types, allowed
-values and extra fields in `handle()`, as above; clients can ignore the schema.
+Input schemas are enforced before handlers run. Empty schemas normalize to a closed object;
+object schemas default to `additionalProperties: false`. Explicitly allow extra keys when
+needed. Invalid arguments return JSON-RPC `-32602`. Keep domain validation and data access
+checks in `handle()`; schema validation cannot decide which records a caller may access.
 
 ## Registering it
 
@@ -145,30 +186,30 @@ a repeated `name()` replaces the previous registration. Use unique tool names.
 
 ## What comes back
 
-Whatever `handle()` returns is encoded as pretty-printed JSON and delivered as a text block —
-return an array for structured application results.
+Returning `Naf\MCP\Support\ToolResult::text()` or another valid MCP result preserves its content blocks.
+Associative arrays and objects also populate `structuredContent`, with a JSON text block for
+compatibility. Lists remain JSON text. Optional `ToolMetadataInterface::metadata()` can provide
+`title`, `annotations`, `outputSchema` and `_meta`; core name, description and input schema
+come from the tool contract. A declared output schema is validated against structured content.
+Handler failures and invalid output are logged and return `isError: true` with the generic
+message `The tool could not complete the request.` Internal exception messages are no longer
+exposed to callers.
+
+For the folder example, a successful result includes both representations:
 
 ```json
 {
   "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "{\n    \"folder\": \"reports\",\n    \"bytes\": 14\n}"
-      }
-    ],
+    "content": [{"type": "text", "text": "{\n    \"folder\": \"reports\",\n    \"bytes\": 14\n}"}],
+    "structuredContent": {"folder": "reports", "bytes": 14},
     "isError": false
   }
 }
 ```
 
-Tool exceptions are logged and returned with `isError: true`. Their messages are exposed to
-clients. Use safe messages for expected failures; catch internal exceptions in the handler,
-log diagnostic details and rethrow with a message that omits secrets and private paths.
-
 ## Tokens
 
-The endpoint wants a Bearer token:
+The default `mcp:auth:driver` is `file`. The endpoint wants a Bearer token:
 
 ```http
 Authorization: Bearer mcp_...
@@ -231,30 +272,17 @@ final class ArticleSearchTool implements ToolInterface, ScopedToolInterface
 
 Three patterns are understood: `*` for everything, an exact scope like `articles:read`, and a
 prefix wildcard like `articles:*`. A scoped tool requires at least one of its declared scopes.
-If a token matches none, the tool is omitted from `tools/list` and direct calls are rejected.
+If a token matches none, the tool is omitted from `tools/list` and direct calls return HTTP 403.
 Enforce stricter combinations inside the handler when an operation requires several grants.
 
 ## What a client sees
 
-A client connects and asks what this server is:
+Initialize using the request above, then send `notifications/initialized` without an `id`.
+The notification receives HTTP 202. The initialize response announces tools capability and
+the negotiated protocol version; tool definitions follow in `tools/list`. Send
+`MCP-Protocol-Version` with that version on subsequent requests and keep both Accept media types.
 
-```json
-{ "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {} }
-```
-
-The answer announces capabilities, not tools:
-
-```json
-{
-  "result": {
-    "protocolVersion": "2025-06-18",
-    "capabilities": { "tools": {} },
-    "serverInfo": { "name": "naf-mcp", "version": "0.1.0" }
-  }
-}
-```
-
-Then it asks for the tools themselves, and gets back exactly what its token may see:
+Request the tools themselves to receive the definitions this token may see:
 
 ```json
 { "jsonrpc": "2.0", "id": 1, "method": "tools/list" }
@@ -292,6 +320,47 @@ And calls one:
   }
 }
 ```
+
+## OAuth authentication and personal tools
+
+Install `naf/oauth-server` and configure its database, scopes, public URL and canonical audience.
+Set these fragments in the host configuration, replacing the example URLs:
+
+```php-inline
+'public_url' => 'https://tools.example.com',
+'oauth_server' => [
+    'name' => 'Example tools',
+    'audience' => 'https://tools.example.com/mcp',
+    'scopes' => ['account:read' => ['label' => 'Read your account', 'permission' => 'account.read']],
+],
+'mcp' => [
+    'auth' => ['enabled' => true, 'driver' => 'oauth'],
+    'oauth' => [
+        'resource' => 'https://tools.example.com/mcp',
+        'authorization_servers' => ['https://tools.example.com'],
+        'scopes_supported' => ['account:read'],
+    ],
+],
+```
+
+`mcp:auth:driver` defaults to `file`; `oauth` delegates bearer validation to the existing
+OAuth ResourceServer. Expired, revoked, wrong-audience and deleted-account tokens fail.
+Current user permissions filter the token's usable scopes. A browser session never supplies
+a missing bearer identity. PRM is public at `/.well-known/oauth-protected-resource` and
+`/.well-known/oauth-protected-resource/mcp`; absent resource/server configuration returns 404.
+`naf/oauth-server` 0.2.4 adds the conventional authorization-server metadata route and
+resource-bound code exchange needed by Alexa.
+
+Personal tools implement `UserToolInterface` in addition to the ordinary tool/scoped contracts.
+Calling one without a linked user returns HTTP 401; a linked user missing the required scopes
+receives 403. Neither response includes `WWW-Authenticate`, matching the Alexa requirement.
+Get the authenticated user through `Naf\OAuth\Server\token()->user()`, not `auth()`'s browser
+session. Scope matching otherwise retains the existing any-of and wildcard semantics.
+
+The optional `mcp:auth:discovery_scope` (default `null`) lets an unlinked service identity
+with that scope see tool definitions, including personal tools. It does not grant execution.
+Use separate service and account-linking clients and never give a service registration user
+scopes. [Alexa+](alexa.md) supplies this profile and its setup checks.
 
 ## Grouping behaviours in one tool
 
@@ -340,3 +409,5 @@ boundary for hostile local writers. Your tool must authorize operations and vali
 
 This plugin implements tools, not MCP resources. It does not register `resources/list`,
 `resources/read` or `resources/write`. Add explicit tools for supported application operations.
+
+The [MCP Streamable HTTP specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports) describes the client transport contract.

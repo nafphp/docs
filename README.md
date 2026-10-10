@@ -42,6 +42,8 @@ SQLite API persistence and errors, and database migrations (apply, repeat and ro
 service/HTTP tests, plugin discovery, application commands, streamed downloads, queue failure/retry,
 scheduling, MCP scopes and a fake HTTP transport. The small scenarios check shared layouts,
 HTML escaping, bounded query input, response headers and sanitized JSON failures.
+The Alexa example runs in its own minimal host and checks setup, doctor, OAuth discovery,
+service tokens, JSON/SSE tool calls and revocation against the published packages.
 It never sends mail externally. Temporary projects and servers are cleaned up, including on
 test failure.
 

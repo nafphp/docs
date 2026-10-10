@@ -165,12 +165,10 @@ A missing token aborts with **400 CSRF token missing**, an invalid one with
 
 ### Requests that carry their own credentials
 
-A request whose `Authorization` header begins with `Bearer ` is let through by the CSRF
-listener. This does **not** validate the token or authenticate the caller: the endpoint
-must perform its own bearer authentication and must not fall back to a cookie login.
-
-Cookies and Basic credentials do not receive this exemption. For bearer-authenticated
-endpoints, reject invalid tokens even when the caller also has a valid browser session.
+Since Form 0.2.3, an `Authorization` header does not bypass CSRF validation. Protocol endpoints
+that authenticate independently of browser cookies need an exact route exemption, as shown
+below. The endpoint must still validate its credentials and reject invalid tokens even when
+the caller has a valid browser session.
 
 ### Routes that authenticate some other way
 
@@ -186,6 +184,9 @@ explicit exemptions in the array returned by `app/config.php`:
 It is a map rather than a list so that several plugins can contribute to it without one
 overwriting another by position — and so an application can switch a plugin's exemption
 back off with `false`.
+
+OAuth Server contributes its protocol exemptions. MCP 0.2.5+ also contributes the exact
+`mcp_server_rpc` POST route exemption, so those integrations need no duplicate host setting.
 
 Exemptions match exact route names, not paths or prefixes. Review the endpoint's own
 authentication before exempting it.

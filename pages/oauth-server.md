@@ -10,9 +10,9 @@ requires:
 using existing NAF Auth accounts. Other applications can obtain access tokens and, with the
 `openid` scope, verify user identities.
 
-Deployment requires a configured issuer, database migrations, signing keys, local login,
-registered clients and scopes. The sections below describe those steps and the guarantees
-required from the database.
+Deployment requires a configured issuer, database migrations, registered clients and scopes.
+User grants also need local login; OpenID Connect needs signing keys. The sections below
+describe those steps and the guarantees required from the database.
 
 ## Supported grants and protocols { #what-this-plugin-is }
 
@@ -217,7 +217,8 @@ usable token has no usable token, whatever else it carries.
 | `POST /oauth/revoke` | RFC 7009 |
 | `POST /oauth/introspect` | RFC 7662, for a resource server elsewhere |
 | `GET`/`POST` `/oauth/userinfo` | claims about whoever a token was issued for |
-| `GET /.well-known/openid-configuration` | what this server does |
+| `GET /.well-known/openid-configuration` | OpenID Connect discovery |
+| `GET /.well-known/oauth-authorization-server` | OAuth authorization-server metadata (0.2.4+) |
 | `GET /.well-known/jwks.json` | the keys to check its signatures with |
 
 Off with `'oauth_server' => ['routes' => false]`. The endpoints stay reachable through the
@@ -229,6 +230,27 @@ instead of the session-wide CSRF listener. Exemptions use exact route names in
 
 Introspection requires a confidential client explicitly registered with
 `--grant=introspection`. Ordinary client registration does not grant token inspection.
+
+OAuth-only discovery needs no signing key. It advertises authorization code, refresh,
+client credentials and PKCE S256. Set `public_url` to the stable public HTTPS origin used in
+the returned endpoint URLs.
+
+### Resource-bound code exchange
+
+Since 0.2.4, authorization-code token requests can supply `resource`. The PDO store compares
+it with the audience recorded at authorization, inside the atomic code claim. A mismatch
+returns `invalid_grant`, consumes the attempted code and issues no tokens. Empty or non-string
+resources return `invalid_request` before claiming the code. Omitting the parameter preserves
+existing behavior. Refresh keeps the original audience without requiring `resource` again.
+
+Custom stores can implement `ResourceTokenStoreInterface`, an additive extension of
+`TokenStoreInterface` with `redeemForResource(...)`. The existing `redeem()` signature is
+unchanged. Supplying a resource to an adapter without the new contract returns `invalid_target`.
+Verify the binding while atomically claiming the code, rather than in separate transactions.
+
+For MCP, configure the canonical `/mcp` URI as the audience and register that exact URI for
+each client. Use separate service and account-linking clients; [Alexa+](alexa.md) automates
+these registrations.
 
 ### Redirect and reauthentication requirements { #what-a-request-has-to-say-and-what-it-will-not-get-away-with }
 
@@ -310,8 +332,8 @@ Refresh tokens rotate strictly. Reusing a spent token revokes its family; there 
 window for duplicate refreshes. Clients should serialize refresh requests. The family row
 coordinates issuance with revocation so a concurrent successor cannot bypass replay detection.
 
-An authorization code submitted with the wrong client, redirect URI or PKCE verifier is
-consumed. An internal failure rolls the exchange back. Codes and bearer tokens are stored
+An authorization code submitted with the wrong client, redirect URI, PKCE verifier or resource
+is consumed. An internal failure rolls the exchange back. Codes and bearer tokens are stored
 as SHA-256 hashes; client secrets use Auth's password hasher.
 
 Account identity consists of provider and account ID. The public OIDC subject is a separate
@@ -324,15 +346,18 @@ concurrent row-locking behavior that SQLite alone cannot validate. Correct code 
 refresh rotation and family revocation depend on transactions and the database's locking.
 
 For server changes or a deployment-specific database validation, use disposable databases and
-the package's [concurrency checks](https://github.com/nafphp/oauth-server/blob/v0.2.3/tests/Concurrency/README.md).
+the package's [concurrency checks](https://github.com/nafphp/oauth-server/blob/v0.2.4/tests/Concurrency/README.md).
 They check simultaneous redemption and revocation/refresh races on SQLite, PostgreSQL and MySQL.
 Unit tests alone do not establish these guarantees.
 
 ### Upgrading
 
-The schema has changed and is not backward compatible: authorizations now carry their target
-API, families are rows of their own, and clients carry the secret they last replaced. For a disposable development database created from an earlier schema, rebuild the
-tables after backing up anything you need. For a deployed database, write and test a
+No database migration is needed when upgrading from 0.2.3 to 0.2.4.
+
+For databases predating the current 0.2 schema, the schema is not backward compatible:
+authorizations carry their target API, families have their own rows, and clients carry the
+secret they last replaced. For a disposable development database created from an earlier
+schema, rebuild the tables after backing up anything you need. For a deployed database, write and test a
 forward migration; do not drop its tables:
 
 ```bash

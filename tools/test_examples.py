@@ -5,6 +5,7 @@ No example PHP is duplicated here. Each fixture copies the documented files, the
 observable behavior through a real PHP HTTP server. Servers and fixtures are cleaned up.
 """
 import argparse
+import base64
 from contextlib import contextmanager
 import http.cookiejar
 import json
@@ -428,10 +429,6 @@ def test_integrations(root):
     registration = fragment('mcp.md', 'Register the tool in root `bootstrap.php`')
     (root / 'app/mcp.php').write_text('<?php\n\n' + registration)
     bootstrap_include(root, 'app/mcp.php')
-    # Copy the protocol route exemption documented for naf/form 0.2.3+.
-    exemption = fragment('mcp.md', 'installed, exempt this protocol route')
-    config_file = root / 'app/config.php'
-    config_file.write_text(config_file.read_text().replace('return [', 'return [\n    ' + exemption, 1))
     routes = fragment('file-downloads.md', 'Add this fragment to the existing `app/routes.php`:')
     (root / 'app/download-routes.php').write_text('<?php\n\n' + routes)
     with (root / 'app/routes.php').open('a') as file:
@@ -505,14 +502,17 @@ def test_integrations(root):
                               {'Content-Type': 'application/json', 'Authorization': 'Bearer invalid'})[0] == 401,
                'MCP rejects an invalid bearer token after the named route CSRF exemption')
 
-        def rpc(method, args=None, bearer=allowed):
+        def rpc(method, args=None, bearer=allowed, status=200):
             message = {'jsonrpc': '2.0', 'id': 1, 'method': method}
             if args is not None:
                 message['params'] = {'name': 'get_folder_size', 'arguments': args}
             result = client.request('/mcp', 'POST', json.dumps(message).encode(),
-                                    {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + bearer})
-            expect(result[0] == 200, f'MCP {method} responds to an authenticated request')
-            return json.loads(result[2])['result']
+                                    {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + bearer,
+                                     'Accept': 'application/json, text/event-stream',
+                                     'MCP-Protocol-Version': '2025-11-25'})
+            expect(result[0] == status, f'MCP {method} returns HTTP {status}')
+            envelope = json.loads(result[2])
+            return envelope.get('result', envelope)
 
         definitions = rpc('tools/list')['tools']
         expect([tool['name'] for tool in definitions] == ['get_folder_size'], 'Scoped MCP tool is advertised')
@@ -520,12 +520,95 @@ def test_integrations(root):
         result = rpc('tools/call', {'folder': 'reports'})
         expect(result['isError'] is False and json.loads(result['content'][0]['text']) == {'folder': 'reports', 'bytes': 14},
                'MCP tool counts nested application files and excludes symlinks')
-        expect(rpc('tools/call', {'folder': '../'})['isError'] is True, 'MCP handler rejects unknown folders')
-        expect(rpc('tools/call', {'folder': 'reports', 'path': '/tmp'})['isError'] is True,
-               'MCP handler rejects extra arguments independently of its advertised schema')
+        expect(result['structuredContent'] == {'folder': 'reports', 'bytes': 14}, 'MCP also returns structured content')
+        expect(rpc('tools/call', {'folder': '../'})['error']['code'] == -32602, 'MCP validates the folder enum')
+        expect(rpc('tools/call', {'folder': 'reports', 'path': '/tmp'})['error']['code'] == -32602,
+               'MCP rejects extra arguments against the closed input schema')
         expect(rpc('tools/list', bearer=denied)['tools'] == [], 'MCP hides tools outside token scopes')
-        expect(rpc('tools/call', {'folder': 'reports'}, bearer=denied)['isError'] is True,
+        expect(rpc('tools/call', {'folder': 'reports'}, bearer=denied, status=403)['error']['code'] == -32001,
                'MCP refuses direct calls outside token scopes')
+
+
+def test_alexa(root):
+    copy_examples('install.md', root)
+    run([*COMPOSER, 'require', 'naf/alexa:^0.1', '--no-interaction', '--prefer-dist'], root)
+    copy_examples('alexa.md', root)
+    environment = fragment('alexa.md', 'Set these application environment values', 'ini')
+    (root / '.env').write_text('APP_ENV=test\n' + environment)
+    registration = fragment('alexa.md', "Add this registration in the application's root `bootstrap.php`")
+    (root / 'app/alexa.php').write_text('<?php\n\n' + registration)
+    bootstrap_include(root, 'app/alexa.php')
+    run([*COMPOSER, 'dump-autoload', '--no-interaction'], root)
+    setup = run([*PHP, 'vendor/bin/naf', 'alexa:setup', '--migrate'], root)
+    plain = re.sub(r'\x1b\[[0-9;]*m', '', setup)
+    client_id = re.search(r'client_id: ([A-Za-z0-9_-]+)', plain)
+    secret = re.search(r'shown once\): ([A-Za-z0-9_-]+)', plain)
+    expect(bool(client_id and secret), 'Alexa setup prints a service client and one-time secret')
+    repeated = run([*PHP, 'vendor/bin/naf', 'alexa:setup'], root)
+    expect('Existing registration retained.' in repeated and 'shown once' not in repeated,
+           'Alexa setup reuses its client without exposing or rotating the secret')
+    doctor = run([*PHP, 'vendor/bin/naf', 'alexa:doctor', '--server-only'], root)
+    expect('OK protocol routes' in doctor and 'OK tools and account-linking scopes' in doctor,
+           'Alexa doctor validates the documented host and tool')
+    resource = 'https://tools.example.com/mcp'
+    basic = 'Basic ' + base64.b64encode((client_id[1] + ':' + secret[1]).encode()).decode()
+    with server(root) as client:
+        for path in ('/.well-known/oauth-protected-resource', '/.well-known/oauth-protected-resource/mcp'):
+            result = client.request(path)
+            metadata = json.loads(result[2])
+            expect(result[0] == 200 and metadata['resource'] == resource,
+                   'Alexa exposes canonical protected-resource metadata')
+        result = client.request('/.well-known/oauth-authorization-server')
+        metadata = json.loads(result[2])
+        expect(result[0] == 200 and metadata['code_challenge_methods_supported'] == ['S256']
+               and 'client_credentials' in metadata['grant_types_supported'],
+               'OAuth-only discovery works without signing keys')
+        fields = {'grant_type': 'client_credentials', 'scope': 'mcp:service', 'resource': resource}
+        result = client.request('/oauth/token', 'POST', urllib.parse.urlencode(fields).encode(),
+                                {'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': basic})
+        credentials = json.loads(result[2])
+        expect(result[0] == 200 and 'refresh_token' not in credentials,
+               'Alexa service client obtains a token without a refresh token')
+        headers = {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream',
+                   'Authorization': 'Bearer ' + credentials['access_token'], 'MCP-Protocol-Version': '2025-11-25'}
+
+        def rpc(message, expected=200):
+            result = client.request('/mcp', 'POST', json.dumps(message).encode(), headers)
+            expect(result[0] == expected, f'Alexa {message["method"]} returns HTTP {expected}')
+            return result
+
+        unauthenticated = client.request('/mcp', 'POST', b'{}', {'Content-Type': 'application/json'})
+        expect(unauthenticated[0] == 401 and 'WWW-Authenticate' not in unauthenticated[1],
+               'Alexa rejects missing credentials without WWW-Authenticate')
+        result = rpc({'jsonrpc': '2.0', 'id': 1, 'method': 'initialize',
+                      'params': {'protocolVersion': '2025-11-25', 'capabilities': {},
+                                 'clientInfo': {'name': 'Example test', 'version': '1.0'}}})
+        expect(json.loads(result[2])['result']['protocolVersion'] == '2025-11-25', 'Alexa negotiates the MCP version')
+        expect(rpc({'jsonrpc': '2.0', 'method': 'notifications/initialized'}, 202)[2] == '',
+               'Alexa accepts the initialized notification with an empty response')
+        result = rpc({'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'})
+        expect([tool['name'] for tool in json.loads(result[2])['result']['tools']] == ['service_status'],
+               'Alexa discovers the documented public tool')
+        call = {'jsonrpc': '2.0', 'id': 3, 'method': 'tools/call',
+                'params': {'name': 'service_status', 'arguments': {}}}
+        result = json.loads(rpc(call)[2])['result']
+        expect(result['structuredContent'] == {'status': 'available'}
+               and json.loads(result['content'][0]['text']) == {'status': 'available'},
+               'Alexa service token calls the public tool with structured and text results')
+        get = client.request('/mcp', headers=headers)
+        expect(get[0] == 405 and get[1]['Allow'] == 'POST', 'Stateless Alexa transport has no persistent GET stream')
+        config = root / 'app/config.php'
+        config.write_text(config.read_text().replace("'streaming' => false", "'streaming' => true"))
+        result = rpc(call)
+        event = re.search(r'^data: (.+)$', result[2], re.M)
+        expect('text/event-stream' in result[1]['Content-Type'] and event
+               and json.loads(event[1])['result']['structuredContent'] == {'status': 'available'},
+               'Enabling the documented setting switches Alexa responses to SSE')
+        revoked = client.request('/oauth/revoke', 'POST',
+                                 urllib.parse.urlencode({'token': credentials['access_token']}).encode(),
+                                 {'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': basic})
+        expect(revoked[0] == 200, 'Alexa service token can be revoked')
+        rpc(call, 401)
 
 
 def main():
@@ -598,6 +681,10 @@ def main():
              '--no-interaction', '--prefer-dist'], integrations)
         test_integrations(integrations)
         print('PASS service/HTTP tests, downloads, queue retry, schedule, HTTP fake and MCP scopes', flush=True)
+        alexa = root / 'alexa'
+        alexa.mkdir()
+        test_alexa(alexa)
+        print('PASS Alexa setup, doctor, OAuth discovery, service token, JSON/SSE tools and revocation', flush=True)
         core = root / 'core'
         core.mkdir()
         copy_examples('install.md', core)
