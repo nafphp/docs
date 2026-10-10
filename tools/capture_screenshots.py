@@ -123,7 +123,7 @@ def capture_error_pages(playwright, root):
 def capture_contact(playwright, starter, tmp):
     root = tmp / 'contact'
     first_app(starter, root)
-    ex.run([*ex.COMPOSER, 'require', 'naf/mail', 'naf/form:^0.2.3', '--no-interaction', '--prefer-dist'], root)
+    ex.run([*ex.COMPOSER, 'require', 'naf/mail', '--no-interaction', '--prefer-dist'], root)
     ex.copy_examples('recipes/contact-form.md', root)
     ex.run([*ex.COMPOSER, 'dump-autoload', '--no-interaction'], root)
     with ex.server(root) as client, browser_page(playwright, 640, 400) as page:
@@ -204,6 +204,7 @@ def capture_console(first, tmp):
     console(root, 'route-debug', 'route:debug')
     console(root, 'plugins-debug', 'plugins:debug')
     console(root, 'hello-say', 'hello:say', 'World')
+    console(root, 'hello-help', 'hello:say', '--help')
 
 
 def main():

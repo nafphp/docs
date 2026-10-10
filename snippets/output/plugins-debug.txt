@@ -5,4 +5,5 @@
  1. naf/cli
  2. naf/form
  3. naf/session
+    skipped: after naf/database (not installed)
  4. naf/view

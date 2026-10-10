@@ -453,6 +453,11 @@ def test_integrations(root):
            'Fake transport retries without network delivery')
     expect('Hello, World!' in run([*PHP, 'vendor/bin/naf', 'hello:say', 'World'], root),
            'Application command is registered and runs through the CLI')
+    for option in ('--help', '-h'):
+        help_output = run([*PHP, 'vendor/bin/naf', 'hello:say', option], root)
+        expect('vendor/bin/naf hello:say <name> [options]' in help_output
+               and '<info>' not in help_output and 'A name is required.' not in help_output,
+               f'Application command {option} prints help without a name')
     missing_name = subprocess.run([*PHP, 'vendor/bin/naf', 'hello:say'], cwd=root, capture_output=True)
     expect(missing_name.returncode != 0, 'Application command rejects a missing required argument')
     expect('Job queued.' in run([*PHP, 'bin/enqueue-demo.php'], root), 'Queue producer runs through application bootstrap')
@@ -636,12 +641,11 @@ def main():
             with server(starter) as client:
                 test_starter(client)
             print('PASS untouched published starter', flush=True)
-            # The form recipes update Form to 0.2.3 for csrf()->token() and the full method check.
-            run([*COMPOSER, 'require', 'naf/auth', 'naf/orm', 'naf/mail', 'naf/form:^0.2.3',
+            run([*COMPOSER, 'require', 'naf/auth', 'naf/orm', 'naf/mail',
                  '--no-interaction', '--prefer-dist'], starter)
         if args.starter:
             # Reused older starters need the same upgrade documented in the installation guide.
-            run([*COMPOSER, 'require', 'naf/framework:^0.2.2', 'naf/form:^0.2.3',
+            run([*COMPOSER, 'require', 'naf/framework:^0.2.9', 'naf/form:^0.2.4', 'naf/view:^0.2.3',
                  '--with-all-dependencies', '--no-interaction', '--prefer-dist'], starter)
         for feature in ('first-app', 'contact', 'login', 'orm', 'mail'):
             fixture = root / feature

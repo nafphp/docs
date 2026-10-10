@@ -45,6 +45,19 @@ final class Product extends AbstractModel
 `AbstractModel` inherits an array constructor and the nullable `id` property. The default table
 name is the lowercase class name plus `s`: `Product` uses `products`, with primary key `id`.
 To use another table, override `getTableName(bool $singular = false): string` in the model.
+With ORM 0.2.3+, a non-empty public `table` property is another option, used for both reads
+and writes. Add this property to the model when mapping an existing table:
+
+```php-inline
+public string $table = 'catalog_products';
+```
+
+The singular name used for foreign keys and pivot tables still comes from the class name.
+Override `getTableName()` when you need to customize that too.
+
+??? note "Public table mappings in ORM 0.2.2 and older"
+    Repositories read the public `table` property, but writes ignore it. Override
+    `getTableName()` or update ORM before saving models with this mapping.
 
 !!! warning "Only protected properties are persisted"
     The entity manager saves the model's **protected** properties that hold a scalar value or

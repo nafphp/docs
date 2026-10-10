@@ -30,8 +30,9 @@ only letters, digits, `_`, `-`, `.` and `/`; anything else, an absolute path or 
 
 The first existing file wins, in this order:
 
-1. The application paths from `config('view:paths')`. The default is `views` and
-   `app/views`, relative to the project root; absolute paths are used as given.
+1. The application paths from `config('view:paths')`. Since View 0.2.3, the defaults are
+   `views`, `app/views` and `src/views`, in that order, relative to the project root;
+   absolute paths are used as given.
 2. Each installed plugin's view directory, in [plugin boot order](plugins.md#boot-order).
    A plugin uses the first of `src/views`, `views` or `app/views` that exists.
 3. The templates shipped inside `naf/view` itself.
@@ -57,36 +58,42 @@ email, is the mistake the two names exist to prevent.
 
 ### Templates outside HTTP requests
 
-`view()`, `render()` and `s()` rely on the core guard rules `safePath` and `safeOutput`,
-which NAF registers only while handling an HTTP request. In a console command, a queue
-worker or the scheduler they throw `RuntimeException: Guard "safePath" not found.` or
-`Guard "safeOutput" not found.` (`naf/queue` registers `safePath`, so with Queue installed
-the `safeOutput` error appears first).
+Framework **0.2.9+** registers the core guard rules for every SAPI. After application boot,
+`view()`, `render()` and `s()` work in commands, queue workers and the scheduler. A job can
+use `view()` to build an email body with the same templates and escaping as an HTTP handler.
 
-To render a template in CLI code, for example an email body in a queued job, register the
-two rules in root `bootstrap.php` before `app()->run()`:
+??? note "Framework 0.2.8 and older"
 
-```php-inline
-use function Naf\guard;
+    `view()`, `render()` and `s()` rely on the core guard rules `safePath` and `safeOutput`,
+    which these releases register only while handling an HTTP request. In a console command, a queue
+    worker or the scheduler they throw `RuntimeException: Guard "safePath" not found.` or
+    `Guard "safeOutput" not found.` (`naf/queue` registers `safePath`, so with Queue installed
+    the `safeOutput` error appears first).
 
-if (!guard()->has('safePath')) {
-    guard()->register('safePath', static function (string $path): string {
-        if ($path === '' || str_contains($path, '..') || str_starts_with($path, '/')
-            || !preg_match('/^[A-Za-z0-9_\/.-]+$/', $path)) {
-            throw new \InvalidArgumentException('Insecure template path.');
-        }
-        return $path;
-    });
-}
-if (!guard()->has('safeOutput')) {
-    guard()->register('safeOutput', static fn($value) => is_array($value)
-        ? array_map(static fn($item) => htmlspecialchars((string) ($item ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), $value)
-        : htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
-}
-```
+    To render a template in CLI code, for example an email body in a queued job, register the
+    two rules in root `bootstrap.php` before `app()->run()`:
 
-For HTTP requests the core rules already exist when `bootstrap.php` runs, so the `has()`
-checks keep them and web responses retain the core behaviour.
+    ```php-inline
+    use function Naf\guard;
+
+    if (!guard()->has('safePath')) {
+        guard()->register('safePath', static function (string $path): string {
+            if ($path === '' || str_contains($path, '..') || str_starts_with($path, '/')
+                || !preg_match('/^[A-Za-z0-9_\/.-]+$/', $path)) {
+                throw new \InvalidArgumentException('Insecure template path.');
+            }
+            return $path;
+        });
+    }
+    if (!guard()->has('safeOutput')) {
+        guard()->register('safeOutput', static fn($value) => is_array($value)
+            ? array_map(static fn($item) => htmlspecialchars((string) ($item ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), $value)
+            : htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
+    }
+    ```
+
+    For HTTP requests the core rules already exist when `bootstrap.php` runs, so the `has()`
+    checks keep them and web responses retain the core behaviour.
 
 ## Partials
 
@@ -172,13 +179,22 @@ Register assets before the layout renders the corresponding collection. Duplicat
 registrations of the same asset produce one tag. Paths are HTML-escaped when rendered.
 
 JavaScript comes in two modes: `classic` renders a plain `<script src>`, `module` renders
-`type="module"`. An unrecognised mode falls back to `classic` rather than failing.
+`type="module"`. An unrecognised mode falls back to `classic`.
 
-!!! warning "Only paths ending in `.css` or `.js` are collected"
-    `add()` decides the type from the path's file extension. A path with a query string or
-    fragment, such as `/css/app.css?v=2`, and other extensions such as `.mjs` are **ignored
-    without an error**. Put a version into the file name (`/css/app.2.css`) instead of a
-    query string, or print such tags directly in the layout.
+Since View 0.2.3, `add()` reads the extension from the URL path, preserving query strings
+and fragments in the rendered tag. `.mjs` files always render as modules:
+
+```php-inline
+asset()->add('/css/app.css?v=2');
+asset()->add('/js/editor.mjs#main');
+```
+
+An unknown extension is not collected and produces a warning in the application log.
+
+??? note "View 0.2.2 and older"
+    These releases ignore query-string URLs and `.mjs` files without a warning. Use a
+    versioned filename such as `/css/app.2.css`, or update View. Their default application
+    paths are `views` and `app/views`; add `src/views` explicitly if needed.
 
 ## Template responsibilities { #what-this-is-not }
 
@@ -196,7 +212,7 @@ reload. The Flow chapter covers the existing View asset collector and a complete
 
 | Key | Type | Default | Effect |
 |---|---|---|---|
-| `view:paths` | list of directories | `['views', 'app/views']` | Application template directories, searched before plugin templates; relative to the project root unless absolute |
+| `view:paths` | list of directories | `['views', 'app/views', 'src/views']` | Application template directories, searched before plugin templates; relative to the project root unless absolute |
 
 ## If the result is different
 
@@ -204,7 +220,7 @@ reload. The Flow chapter covers the existing View asset collector and a complete
 |---|---|
 | `View x not found in any known paths.` | The file name and directory: dots in the name become `/`, and the file ends in `.phtml` under a directory from `view:paths` |
 | `Insecure path detected!` | The template name contains characters other than letters, digits, `_`, `-`, `.` and `/` |
-| `Guard "safePath" not found.` or `Guard "safeOutput" not found.` | The code runs under CLI; see [Templates outside HTTP requests](#templates-outside-http-requests) |
+| `Guard "safePath" not found.` or `Guard "safeOutput" not found.` | Check the installed framework version; CLI needs Framework 0.2.9+ or the [older-version workaround](#templates-outside-http-requests) |
 | A variable is undefined in a partial | Partials receive only the variables passed to `view()` |
-| A stylesheet or script tag is missing | The path ends in `.css` or `.js` without a query string, and `add()` runs before the layout renders that collection |
+| A stylesheet or script tag is missing | Check for an unknown-extension warning in the log and register assets before the layout renders them; query strings and `.mjs` need View 0.2.3+ |
 | `Block name was not opened.` | Every `endblock('name')` needs a preceding `block('name')` with the same name |

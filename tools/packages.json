@@ -1068,7 +1068,7 @@
    "storage:disks:local:root": "'{BASE_PATH}/storage'"
   },
   "view": {
-   "view:paths": "[\"views\",\"app/views\"]"
+   "view:paths": "[\"views\",\"app/views\",\"src/views\"]"
   },
   "websocket": {
    "websocket:address": "'0.0.0.0:8091'",
@@ -1306,7 +1306,7 @@
   "Naf\\Form\\memory": {
    "namespace": "Naf\\Form",
    "signature": "memory(string $key, mixed $default = null): ?string",
-   "summary": ""
+   "summary": "The submitted value of a field in the current request, for refilling a form"
   },
   "Naf\\Form\\memory_checked": {
    "namespace": "Naf\\Form",
@@ -1679,7 +1679,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.3"
+   "version": "v0.2.4"
   },
   "client": {
    "description": "NAF Client Plugin to make simple http requests.",
@@ -1721,7 +1721,7 @@
     "naf/session"
    ],
    "suggests": [],
-   "version": "v0.2.3"
+   "version": "v0.2.4"
   },
   "framework": {
    "description": "NAF - the ultra-light, functional PHP framework for fast microservices and APIs.",
@@ -1729,7 +1729,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.8"
+   "version": "v0.2.9"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
@@ -1806,7 +1806,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "queue": {
    "description": "NAF Queue Plugin for asynchronous jobs.",
@@ -1884,7 +1884,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "websocket": {
    "description": "A WebSocket server for NAF hosts, in plain PHP: it carries that something changed, never what.",

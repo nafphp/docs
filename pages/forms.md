@@ -13,14 +13,8 @@ check runs for every request method except GET, HEAD and OPTIONS, including PATC
 Use the examples in a bootstrapped application. Template examples assume the starter's
 `naf/view` package for HTML escaping; validation itself does not require View.
 
-!!! warning "Starter 0.2.3 still locks Form 0.2.2"
-    A fresh `composer create-project naf/app` installs `naf/form` 0.2.2. That version checks
-    only POST, PUT and DELETE, lets a `Bearer` Authorization header skip the check and has
-    no `csrf()->token()`. Update the plugin in your application:
-
-    ```bash
-    composer require 'naf/form:^0.2.3'
-    ```
+Starter 0.2.4 includes Form 0.2.4 and the CSRF behaviour described here. For older
+applications, see the [version notes](#use-the-corrected-helper-release).
 
 ## Quick start
 
@@ -207,11 +201,11 @@ use function Naf\View\s;
 so they can be dropped into the tag without a conditional. `memory_checked($key, $value)`
 compares strictly with `$value` (default `'on'`).
 
-!!! note "Limits of `memory()`"
-    `memory()` returns `null` for a missing field; its second parameter is currently ignored,
-    so write `memory('email') ?? ''`. Its return type is `?string`: if a visitor submits an
-    array such as `email[]=x`, the call throws a `TypeError` and the request fails with 500.
-    For fields that may legitimately be arrays, read `request()->getParsedBody()` yourself.
+Since Form 0.2.4, `memory($key, $default)` returns submitted strings unchanged and integers
+or floats as strings. A missing field, array or other unsupported value returns the default;
+a scalar default is converted to a string, and a non-scalar default produces `null`.
+For example, `memory('country', 'de')` returns `'de'` for a missing field or `country[]=x`.
+For fields that legitimately contain arrays, read the parsed body or `param()` directly.
 
 ## CSRF protection
 
@@ -344,10 +338,13 @@ cookies and form values.
     The template helpers in this guide require `naf/form` **0.2.1+**; `csrf()->token()`, the
     `string`, `array`, `integer` and `date` rules, the type-safe `required`/`min`/`max` checks
     and the PATCH check require **0.2.3+**.
-    Update an older installation with:
+    `memory()` honours defaults and handles array input without a `TypeError` in **0.2.4+**.
+    In 0.2.3 and older, the default is ignored and array input can cause a 500 response.
+    Starters 0.2.2 and 0.2.3 lock Form 0.2.2, which lacks `token()` and checks only
+    POST/PUT/DELETE; it also lets a Bearer header bypass CSRF. Update an older installation with:
 
     ```bash
-    composer require 'naf/form:^0.2.3'
+    composer require 'naf/form:^0.2.4'
     ```
 
     See [Installation](install.md#starter-versions-and-updates) for updating an older

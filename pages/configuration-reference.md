@@ -14,7 +14,7 @@ packages' `config.php` files and `config()` calls; see each guide for the effect
 
 ## naf/framework
 
-Version **v0.2.8** · [Fundamentals](lifecycle.md)
+Version **v0.2.9** · [Fundamentals](lifecycle.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
@@ -106,7 +106,7 @@ Version **v0.2.4** · [Database](database.md)
 
 ## naf/form
 
-Version **v0.2.3** · [Forms and validation](forms.md)
+Version **v0.2.4** · [Forms and validation](forms.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
@@ -252,11 +252,11 @@ Version **v0.1.0** · [File storage](file-storage.md)
 
 ## naf/view
 
-Version **v0.2.2** · [Views and templates](views.md)
+Version **v0.2.3** · [Views and templates](views.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
-| `view:paths` | `["views","app/views"]` | `config.php` |
+| `view:paths` | `["views","app/views","src/views"]` | `config.php` |
 
 ## naf/websocket
 

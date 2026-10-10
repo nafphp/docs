@@ -30,16 +30,14 @@ becomes an empty string. It accepts a string or a flat array of string values; n
 are not recursively supported. The view plugin's
 `Naf\View\s()` helper delegates to it.
 
-!!! warning "Core rules exist only for HTTP requests"
-    NAF registers `safePath`, `safeOutput`, `ipBlacklist` and `userAgentBlacklist` while
-    booting an HTTP request, not under CLI. In a console command, queue worker or scheduler,
-    `guard()->safeOutput()` throws `RuntimeException: Guard "safeOutput" not found.` The same
-    applies to code that uses these rules internally: `Naf\View\s()`, `view()` and `render()`
-    from `naf/view`. `naf/queue` registers its own `safePath`, but not `safeOutput`.
+Framework 0.2.9+ registers `safePath`, `safeOutput`, `ipBlacklist` and `userAgentBlacklist`
+for every SAPI. Commands, queue workers and the scheduler can use them and View's helpers
+after application boot.
 
-    In CLI code, escape with `htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')`
-    or register the rules you need in `bootstrap.php` with `guard()->has()` and
-    `guard()->register()`. See [Views](views.md#templates-outside-http-requests).
+??? note "Framework 0.2.8 and older under CLI"
+    Core rules are registered only for HTTP. View rendering and escaping can throw
+    `RuntimeException: Guard "safeOutput" not found.` Register the rules explicitly or
+    update the framework; see [Views](views.md#templates-outside-http-requests).
 
 ## CSRF comes from naf/form
 
@@ -72,10 +70,14 @@ guard()->ipBlacklist(request()->getServerParams()['REMOTE_ADDR'] ?? '', ['203.0.
 ```
 
 Without a list argument they read `guard:ipBlacklist` and `guard:userAgentBlacklist` from the
-configuration. These keys have no default: define them as arrays in `app/config.php`
-before calling the rules without a list, otherwise the call fails with a `TypeError`.
+configuration when the rule runs. In Framework 0.2.9+, a missing key means an empty list,
+so the rule returns `true`. Define the lists as arrays in `app/config.php` to block values.
 For anything beyond a short static list, use a firewall, the web server or
 [rate limits](rate-limits.md).
+
+??? note "Blocklists in Framework 0.2.8 and older"
+    Define both configuration keys before calling the rules without a list; a missing
+    key causes a `TypeError` in these releases.
 
 ## Register a rule
 

@@ -144,6 +144,12 @@ directory; it includes its own bootstrap, routes and Composer file.
 These notes are for checking an existing project or choosing dependency updates. A fresh
 starter installation can proceed directly to [Your first application](first-app.md).
 
+Starter **0.2.4** locks framework **0.2.9**, form **0.2.4**, session **0.2.3** and view
+**0.2.3** (with Nyholm PSR-7 1.8.2). Its minimum constraints require these framework,
+form and view versions, so the fixes also apply when resolving the lowest dependencies.
+Form checks every unsafe method and provides `csrf()->token()`; framework guards work
+under CLI and header listeners compose. The [package overview](packages.md) lists releases.
+
 ??? info "Versions included in starters 0.2.2 and 0.2.3"
 
     Starters **0.2.2** and **0.2.3** ship the same working dependency lock: framework 0.2.3,
@@ -153,14 +159,10 @@ starter installation can proceed directly to [Your first application](first-app.
     listener is needed. Starter 0.2.3 adds the interactive welcome page and **Start fresh**
     guidance; its dependencies are unchanged.
 
-    Newer compatible releases exist, for example framework 0.2.8 and form 0.2.3, which
-    checks CSRF for every state-changing method. The [package overview](packages.md) lists
-    the current versions.
-
 For an application created from an older starter, update the required minimum versions:
 
 ```bash
-composer require 'naf/framework:^0.2.2' 'naf/form:^0.2.3' --with-all-dependencies
+composer require 'naf/framework:^0.2.9' 'naf/form:^0.2.4' 'naf/view:^0.2.3' --with-all-dependencies
 ```
 
 To move a new or existing project to the current compatible releases, run `composer update`

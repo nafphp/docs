@@ -1,0 +1,16 @@
+ -----------
+  Say hello
+ -----------
+
+
+ Say hello
+   Greets a person by name
+
+ Usage:
+   vendor/bin/naf hello:say <name> [options]
+
+ Arguments:
+   name
+
+ Options:
+   -h, --help
