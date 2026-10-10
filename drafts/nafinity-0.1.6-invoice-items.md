@@ -37,7 +37,8 @@ Downloading does not mark hours as billed; overlapping exports repeat bookings.
 
 The destination computes the invoice totals. Review rounding before finalizing:
 neutral hours have six decimal places and Lexware quantities have four, while exact
-minutes remain in the description. FastBill's documented item fields have no unit
+minutes remain in the description. Lexware exports with more than 300 positions are
+refused; narrow the booking-date range when this happens. FastBill's documented item fields have no unit
 field; the description includes minutes and hours, and the receiving application
 configures the unit display. A percentage alone does not establish a tax case;
 the receiving invoice needs the appropriate invoice-level treatment.
