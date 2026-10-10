@@ -248,3 +248,12 @@ twice: queue delivery is at least once.
 
 Workers run under CLI. If the job renders its body with `naf/view`, register the guard
 rules described in [Templates outside HTTP requests](views.md#templates-outside-http-requests).
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| `mail:transport must name a class implementing …` | The value is a class name of a class that implements `TransportInterface` |
+| `Unable to send mail using PHP mail()` | PHP's `mail()` needs a configured delivery program (`sendmail_path`); use a capture transport locally |
+| `getMessages()` is empty in a test | The test reads a different `DummyTransport` instance; register one shared instance in the container |
+| No file appears in `storage/mail/` | The [contact recipe](recipes/contact-form.md#a-local-mail-outbox) selects `FileTransport` in `mail:transport`, and the directory is writable |

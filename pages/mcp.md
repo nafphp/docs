@@ -344,6 +344,21 @@ Set these fragments in the host configuration, replacing the example URLs:
 ],
 ```
 
+```mermaid
+sequenceDiagram
+    participant C as MCP client
+    participant P as Resource metadata
+    participant O as OAuth server
+    participant M as POST /mcp
+    C->>P: GET /.well-known/oauth-protected-resource
+    P-->>C: resource and authorization server
+    C->>O: authorization code with PKCE and resource
+    O-->>C: access token for that resource
+    C->>M: tools/call with Bearer token
+    M->>M: token, audience, scopes, permissions
+    M-->>C: tool result, or 401 / 403
+```
+
 `mcp:auth:driver` defaults to `file`; `oauth` delegates bearer validation to the existing
 OAuth ResourceServer. Expired, revoked, wrong-audience and deleted-account tokens fail.
 Current user permissions filter the token's usable scopes. A browser session never supplies

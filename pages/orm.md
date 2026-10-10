@@ -155,4 +155,13 @@ try {
 `em()->clear()` releases the manager's tracked state; call it periodically in long-running
 workers. Define and migrate your schema yourself: the ORM does not generate it.
 
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| `save()` writes empty columns or nothing | The model's columns are `protected` properties holding scalar values |
+| `SQLSTATE[HY000]: … no such table` | Create the table with a migration; the ORM does not create schemas |
+| `Column not allowed: …` | The column is a protected scalar property of the model, or listed in the repository's `$allowedColumns` |
+| The wrong table is used | The default is the lowercase class name plus `s`; override `getTableName()` |
+
 Create and evolve schemas through [Database migrations](database.md#migrations). Verify mapping and persistence with [disposable test data](testing.md#forms-sessions-and-persistence).

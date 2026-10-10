@@ -210,3 +210,22 @@ must acknowledge their own reservations.
 
 Set `queue:heartbeat_file` to an application-specific writable path for a worker heartbeat.
 Monitor its age together with failures and backlog; it proves polling, not successful jobs.
+
+## Configuration
+
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `queue:max_attempts` | int | `3` | Attempts per job before the file driver moves it to deadletter storage |
+| `queue:retry_delay` | int | `5` | Seconds to wait before retrying a failed job |
+| `queue:heartbeat_file` | string | — | File the worker updates with a timestamp on every polling pass |
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| Jobs are queued but never run | A worker consumes the job's channel: `queue:consume` reads `default` unless you pass `--channel` or `--channels` |
+| `Job class App\Jobs\… not found.` | Run `composer dump-autoload`; the class name and namespace match the file |
+| `… does not implement QueueJobInterface.` | The job class implements `Naf\Queue\Core\QueueJobInterface` |
+| A job keeps failing, then disappears | It reached `queue:max_attempts` and moved to deadletter storage; inspect it, fix the cause, run `queue:retry-failed` |
+| `Cannot write queue heartbeat.` | The directory of `queue:heartbeat_file` exists and is writable for the worker |
+| Workers on two machines do not share jobs | The file driver is local; use the [database driver](#the-database-driver-for-more-than-one-machine) |

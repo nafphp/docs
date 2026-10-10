@@ -178,3 +178,22 @@ and idempotency, as with [queue leases](queues.md#the-database-driver-for-more-t
 
 Set `schedule:heartbeat_file` to an application-specific writable path to record ticker
 polling. A heartbeat does not prove that jobs completed successfully.
+
+## Configuration
+
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `schedule:queue:coalesce` | bool | `true` | Give each class/expression pair one job id, so an unconsumed run is replaced instead of duplicated |
+| `schedule:heartbeat_file` | string | — | File the ticker updates with a timestamp on every pass |
+
+The state file location is a constructor argument of `Scheduler`, not a configuration key;
+register it as in [Registering it](#registering-it).
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| The ticker queues the job but nothing runs | A queue worker is running for the default channel |
+| The ticker queues nothing | The registration file is included from `bootstrap.php`; the cron expression matches the current minute in the PHP timezone; `schedule:list` shows the job |
+| A second `--once` pass in the same minute queues nothing | Expected: the state file records the minute |
+| A job runs twice | Two tickers use different state files; point them at the same file |

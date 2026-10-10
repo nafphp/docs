@@ -183,3 +183,12 @@ $output->drawStroke(40);                   // a line of dashes
 
 Return a nonzero status on failure so cron, CI and shell conditionals can detect it.
 Test commands through `vendor/bin/naf` as well as their underlying services.
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| `Command "name" not found` | The registration runs in `bootstrap.php` and the name matches `NAME`; `command:list` shows what is registered |
+| `Call to undefined function Naf\CLI\command()` | Call `app()` before `command()` in `bootstrap.php`; see [Register a command](#registering-it) |
+| The command is missing after adding a package | The package is installed with `composer require` and registers its commands in its bootstrap |
+| A cron job reports success although the command failed | `run()` returns `static::ERROR` (or another nonzero value) on failure |

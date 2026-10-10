@@ -160,3 +160,13 @@ Downloads are spooled before `readStream()` returns and can briefly need a secon
 file-sized disk buffer. Encoded bytes are preserved. A custom PSR-18 client must retain
 bounded streaming and disable redirects/retries for signed or credential-bearing transfers.
 The native NAF client is resolved lazily; its per-transfer options do not mutate a shared client.
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| `Storage disk 'name' is missing or is not a configuration array.` | `storage:disks` contains that name, and `storage:default` names an existing disk |
+| `Cannot configure storage disk 'name'.` | The previous exception explains the adapter option that failed, for example a missing S3 SDK |
+| `The local storage root must be an absolute filesystem directory.` | Use an absolute `root`, such as `BASE_PATH . '/storage/documents'` |
+| `FileNotFoundException` | The path is relative to the disk root and the file exists on that disk |
+| A public URL returns 404 | The web server serves the public disk's root at its `url`; the URL prefix alone publishes nothing |

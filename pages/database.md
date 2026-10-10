@@ -290,3 +290,15 @@ A connection that cannot be made throws `Naf\Database\Exceptions\DatabaseExcepti
 wrapping the original `PDOException` message. It happens while the container builds the
 connection. The failure appears when a consumer first resolves it; eager resolution during
 boot can therefore fail before the first query.
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| `database()` returns `null`, or `Database connection not found.` | `app/config.php` returns a `database` array |
+| `Database connection failed: could not find driver` | Enable the PDO extension for the driver (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`) |
+| `Database connection failed: …` with another message | Host, port, database name and credentials; the message comes from PDO |
+| `Unsupported PDO driver: …` | `database:driver` is `mysql`, `pgsql` or `sqlite` |
+| `Migration name must select exactly one migration` | The `--name` value matches one class or file name |
+| `Applied migration source is missing` | A migration that has run was deleted or renamed; restore it before rolling back |
+| `Run migrations outside application transactions.` | Do not call the runner inside your own transaction |

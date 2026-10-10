@@ -100,3 +100,25 @@ the connection was insecure and sets a cookie without the `Secure` flag.
 
 Enable header trust only with an explicit list of trusted proxy addresses. Clients can
 supply `X-Forwarded-Proto`; accept it only from the configured proxies.
+
+## Configuration
+
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `session:storage` | string | `default` | `default` uses PHP's session handler; `database` stores sessions through `naf/database` |
+| `session:database_table` | string | `sessions` | Table for database storage |
+| `session:trust_proxy_headers` | bool | `false` | Accept `X-Forwarded-Proto` from trusted proxies when deciding on the `Secure` cookie flag |
+| `session:trusted_proxies` | list of IP addresses | `[]` | Proxy addresses whose `X-Forwarded-Proto` is accepted |
+
+The session cookie is always `HttpOnly`, `SameSite=Lax`, valid for the browser session and
+bound to the request's host name.
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| Values are gone on the next request | The client keeps the session cookie; the host name stays the same; `clear()` was not called |
+| The cookie lacks `Secure` behind a TLS proxy | Configure both `session:trust_proxy_headers` and `session:trusted_proxies` |
+| `Proxy headers trusted but no trusted proxies configured` | `trust_proxy_headers` is `true` but `trusted_proxies` is empty; add the proxy addresses |
+| Database storage still writes files | `naf/database` is installed and configured; the application log has a warning otherwise |
+| A flash message appears twice or never | `getFlash()` removes the value; read it once, after the redirect |
