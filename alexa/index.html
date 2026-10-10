@@ -1,0 +1,3647 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Not Another Framework — a minimal, functional PHP microframework">
+      
+      
+      
+        <link rel="canonical" href="https://nafphp.github.io/docs/alexa/">
+      
+      
+        <link rel="prev" href="../mcp/">
+      
+      
+        <link rel="next" href="../guard/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/naf-logo-small-square.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Alexa+ MCP server - NAF</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:300,300i,400,400i,700,700i%7CIBM+Plex+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"IBM Plex Sans";--md-code-font:"IBM Plex Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#alexa-mcp-server" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="NAF" class="md-header__button md-logo" aria-label="NAF" data-md-component="logo">
+      
+  <img src="../assets/naf-logo-small-square.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NAF
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Alexa+ MCP server
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/nafphp/framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    nafphp/framework
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="NAF" class="md-nav__button md-logo" aria-label="NAF" data-md-component="logo">
+      
+  <img src="../assets/naf-logo-small-square.png" alt="logo">
+
+    </a>
+    NAF
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/nafphp/framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    nafphp/framework
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NAF overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../first-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your first application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choosing-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choosing packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fundamentals
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fundamentals
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../routing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Routing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../controllers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controllers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../request-response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requests and responses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dependency-injection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependency injection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build web pages
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Build web pages
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../views/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Views and templates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../forms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forms and validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sessions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sessions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Flow browser components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../translations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Translations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file-downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serving files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a scenario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/small-website/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Small website
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/simple-json-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JSON API without a database
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/post-requests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Handling POST requests
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/contact-form/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/login-form/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Login form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/json-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JSON API with a database
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Store data
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Store data
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database and migrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../orm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ORM and repositories
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Background work
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Background work
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../console/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Console commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../queues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Queues and workers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scheduling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduled jobs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mail/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mail delivery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../http-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HTTP client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rate-limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rate limits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WebSocket notifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alexa+ MCP server
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alexa+ MCP server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prepare-a-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prepare a host
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#register-a-public-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Register a public tool
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#set-up-and-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set up and check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-http" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify HTTP
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connect-to-alexa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connect to Alexa+
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connect to Alexa+">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obtain-amazon-tooling-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Obtain Amazon tooling access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-add-on-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create the add-on project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provision-the-service-client-at-amazon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provision the service client at Amazon
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploy-and-verify-the-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deploy and verify the connection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-account-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add account linking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prepare-the-amazon-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prepare the Amazon package
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#if-the-result-is-different" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If the result is different
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security and identity
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security and identity
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guard rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication and permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auth-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rbac/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roles and permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auth-ldap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LDAP authentication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../oauth-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OAuth client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../oauth-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OAuth authorization server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extend NAF
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Extend NAF
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugin development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../external-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    External libraries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing applications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploying applications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting and logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cheat-sheet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cheat sheet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../function-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Function index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration keys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Package overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading-from-nixphp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrading from NixPHP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built with NAF
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Built with NAF
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/nafinity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/extending-nafinity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity extensions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prepare-a-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prepare a host
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#register-a-public-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Register a public tool
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#set-up-and-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set up and check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-http" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify HTTP
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connect-to-alexa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connect to Alexa+
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connect to Alexa+">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obtain-amazon-tooling-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Obtain Amazon tooling access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-add-on-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create the add-on project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provision-the-service-client-at-amazon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provision the service client at Amazon
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploy-and-verify-the-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deploy and verify the connection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-account-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add account linking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prepare-the-amazon-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prepare the Amazon package
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#if-the-result-is-different" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If the result is different
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/nafphp/docs/edit/main/pages/alexa.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.06 9 .94.94L5.92 19H5v-.92zm3.6-6c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="alexa-mcp-server">Alexa+ MCP server<a class="headerlink" href="#alexa-mcp-server" title="Permanent link">&para;</a></h1>
+<p><code>naf/alexa</code> prepares a NAF MCP endpoint for an Alexa+ add-on. It reuses the existing MCP
+transport and tool registry, OAuth authorization server, database migrations and console.
+It supplies configuration defaults, separate OAuth client setup, local diagnostics and an
+optional Amazon manifest export. Application tools and business rules stay in the host.</p>
+<p>The example exposes one public <code>service_status</code> tool, authenticated with a service token.
+It needs no customer account linking. The NAF setup and HTTP exchange are tested against
+published packages by this documentation's example runner.</p>
+<pre class="mermaid"><code>flowchart TD
+    A["Alexa+ at Amazon"] -- "1. POST /oauth/token&lt;br/&gt;client_credentials, scope mcp:service" --&gt; O["NAF OAuth server"]
+    O -- "service access token" --&gt; A
+    A -- "2. POST /mcp with the Bearer token" --&gt; M["NAF MCP endpoint"]
+    M -- "validate token, audience and scope" --&gt; O
+    M --&gt; R["Tool registry"]
+    R --&gt; S["service_status tool"]
+    L["Optional account linking:&lt;br/&gt;authorization code, scope mcp:tools"] -.-&gt; O</code></pre>
+<p>Both the OAuth server and the MCP endpoint run in the same NAF application; the MCP endpoint
+validates tokens through the OAuth package, not over HTTP.</p>
+<p>Amazon's <a href="https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-overview.html">MCP Toolkit overview</a>
+currently lists availability in the United States. Amazon registration requires access to
+private developer tooling and a confirmed way to provision the service credentials. Read
+<a href="#connect-to-alexa">Connect to Alexa+</a> before planning deployment: the public Amazon docs
+leave the service-secret provisioning step unspecified, so this guide cannot yet establish
+an end-to-end Alexa connection. The plugin does not register or publish an add-on at Amazon.
+This integration exposes tools and data; MCP Apps visual resources and category SDK APIs
+are outside its scope.</p>
+<div class="admonition info">
+<p class="admonition-title">Required packages</p>
+<p>In an existing NAF application:</p>
+<div class="language-bash highlight"><pre><span></span><code>composer<span class="w"> </span>require<span class="w"> </span>naf/alexa
+</code></pre></div>
+<p>Also installs these transitive dependencies: <code>naf/auth</code>, <code>naf/cli</code>, <code>naf/database</code>, <code>naf/form</code>, <code>naf/mcp</code>, <code>naf/oauth-server</code>, <code>naf/session</code>.</p>
+</div>
+<h2 id="prepare-a-host">Prepare a host<a class="headerlink" href="#prepare-a-host" title="Permanent link">&para;</a></h2>
+<p>Use PHP 8.3+, <code>mbstring</code>, <code>readline</code>, PDO and <code>pdo_sqlite</code> for this example. This guide
+requires <code>naf/alexa</code> 0.1.1+, <code>naf/mcp</code> 0.2.6+ and <code>naf/oauth-server</code> 0.2.5+.
+Create a host application; only its <code>public/</code> directory is the document root:</p>
+<div class="language-bash highlight"><pre><span></span><code>composer<span class="w"> </span>create-project<span class="w"> </span>naf/app<span class="w"> </span>alexa-demo
+<span class="nb">cd</span><span class="w"> </span>alexa-demo
+composer<span class="w"> </span>require<span class="w"> </span>naf/alexa:^0.1.1
+mkdir<span class="w"> </span>-p<span class="w"> </span>storage
+</code></pre></div>
+<p>For an existing application, run the last two commands from its root instead.</p>
+<p>Composer installs <code>naf/mcp</code>, <code>naf/oauth-server</code>, <code>naf/database</code> and <code>naf/cli</code>, with their
+dependencies. Plugin boot order is automatic on the required framework 0.2.8+. Do not copy
+vendor migrations or maintain a separate HTTP dispatcher.</p>
+<p>Set these application environment values in <code>.env</code> (or the deployment environment).
+If <code>.env.local</code> exists, set them there because that file replaces <code>.env</code>:</p>
+<div class="language-ini highlight"><pre><span></span><code><span class="na">PUBLIC_URL</span><span class="o">=</span><span class="s">https://tools.example.com</span>
+<span class="na">ALEXA_MCP_RESOURCE</span><span class="o">=</span><span class="s">https://tools.example.com/mcp</span>
+<span class="na">ALEXA_NAME</span><span class="o">=</span><span class="s">Example tools</span>
+</code></pre></div>
+<p>Replace the example domain with the host's public HTTPS origin. The canonical resource must
+be that exact origin plus <code>/mcp</code>, without a trailing slash, query or fragment. This first
+profile uses the authorization server in the same host. Keep these URLs stable and ensure
+the proxy sends requests to the right application.</p>
+<p>In a new minimal host, this is a complete <code>app/config.php</code>; extend existing configuration
+instead if your application already has a database or authentication settings:</p>
+<div class="language-php highlight"><span class="filename">app/config.php</span><pre><span></span><code><span class="cp">&lt;?php</span>
+
+<span class="k">declare</span><span class="p">(</span><span class="nx">strict_types</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="k">return</span> <span class="p">[</span>
+    <span class="s1">'database'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+        <span class="s1">'driver'</span> <span class="o">=&gt;</span> <span class="s1">'sqlite'</span><span class="p">,</span>
+        <span class="s1">'database'</span> <span class="o">=&gt;</span> <span class="nx">BASE_PATH</span> <span class="o">.</span> <span class="s1">'/storage/alexa.sqlite'</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="s1">'mcp'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'transport'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'streaming'</span> <span class="o">=&gt;</span> <span class="k">false</span><span class="p">]],</span>
+<span class="p">];</span>
+</code></pre></div>
+<p>The plugin derives its OAuth issuer, MCP resource metadata and expected audience from the
+environment values. Authentication uses OAuth and remains enabled. Service discovery uses
+<code>mcp:service</code>; account linking is disabled until configured. POST responses default to JSON,
+which is a Streamable HTTP response mode. Set <code>mcp:transport:streaming</code> to <code>true</code> for SSE progress
+and final results, or <code>false</code> to use JSON. See <a href="../mcp/#the-endpoint">MCP tools</a> for streaming tools,
+client Accept headers and proxy buffering.</p>
+<h2 id="register-a-public-tool">Register a public tool<a class="headerlink" href="#register-a-public-tool" title="Permanent link">&para;</a></h2>
+<p>Create <code>app/Mcp/ServiceStatus.php</code>:</p>
+<div class="language-php highlight"><span class="filename">app/Mcp/ServiceStatus.php</span><pre><span></span><code><span class="cp">&lt;?php</span>
+
+<span class="k">declare</span><span class="p">(</span><span class="nx">strict_types</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="k">namespace</span> <span class="nx">App\Mcp</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="nx">Naf\MCP\Tools\ToolInterface</span><span class="p">;</span>
+
+<span class="k">final</span> <span class="k">class</span> <span class="nc">ServiceStatus</span> <span class="k">implements</span> <span class="nx">ToolInterface</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">name</span><span class="p">()</span><span class="o">:</span> <span class="nx">string</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="s1">'service_status'</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">description</span><span class="p">()</span><span class="o">:</span> <span class="nx">string</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="s1">'Check whether the example service is available. No personal data is returned.'</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">inputSchema</span><span class="p">()</span><span class="o">:</span> <span class="k">array</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">'type'</span> <span class="o">=&gt;</span> <span class="s1">'object'</span><span class="p">,</span> <span class="s1">'properties'</span> <span class="o">=&gt;</span> <span class="p">[],</span> <span class="s1">'additionalProperties'</span> <span class="o">=&gt;</span> <span class="k">false</span><span class="p">];</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">handle</span><span class="p">(</span><span class="k">array</span> <span class="nv">$args</span><span class="p">)</span><span class="o">:</span> <span class="nx">mixed</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">'status'</span> <span class="o">=&gt;</span> <span class="s1">'available'</span><span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>For this new application, replace root <code>bootstrap.php</code> with this complete file.
+In an existing host, add the imports and tool registration after Composer autoloading and
+before <code>app()-&gt;run()</code>, preserving its other registrations:</p>
+<div class="language-php highlight"><span class="filename">bootstrap.php</span><pre><span></span><code><span class="cp">&lt;?php</span>
+
+<span class="k">declare</span><span class="p">(</span><span class="nx">strict_types</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="k">use</span> <span class="nx">App\Mcp\ServiceStatus</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\app</span><span class="p">;</span>
+<span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\MCP\tool</span><span class="p">;</span>
+
+<span class="nb">define</span><span class="p">(</span><span class="s1">'BASE_PATH'</span><span class="p">,</span> <span class="no">__DIR__</span><span class="p">);</span>
+
+<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/vendor/autoload.php'</span><span class="p">;</span>
+
+<span class="nx">tool</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">register</span><span class="p">(</span><span class="k">new</span> <span class="nx">ServiceStatus</span><span class="p">());</span>
+
+<span class="nx">app</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
+</code></pre></div>
+<p>A service token can call this tool because it returns only public information. Implement
+personal tools with <code>UserToolInterface</code> and <code>ScopedToolInterface</code>; never expose personal data
+through an unscoped service tool.</p>
+<h2 id="set-up-and-check">Set up and check<a class="headerlink" href="#set-up-and-check" title="Permanent link">&para;</a></h2>
+<p>Run from the host root against the configured database:</p>
+<div class="language-bash highlight"><pre><span></span><code>vendor/bin/naf<span class="w"> </span>alexa:setup<span class="w"> </span>--migrate
+vendor/bin/naf<span class="w"> </span>alexa:doctor<span class="w"> </span>--server-only
+</code></pre></div>
+<p><code>--migrate</code> opts into the existing OAuth migration only. It does not run unrelated application
+migrations. Omit it when your deployment already applies OAuth migrations through <code>db:migrate up</code>.
+Setup registers a confidential client limited to <code>client_credentials</code>, <code>mcp:service</code> and this
+MCP audience. It prints the client id and secret once. Keep them in private credential storage
+for <a href="#provision-the-service-client-at-amazon">Amazon service authentication</a>. Setup does not
+send them to Amazon. Keep the secret out of source control, query strings and the manifest.</p>
+<p>Repeated setup reuses a matching registration without rotating its secret or creating another
+client. If registration and configuration differ, review the existing registration before
+revoking and recreating it. Use <code>oauth:client:rotate-secret</code> for a deliberate secret rotation.</p>
+<p>Doctor runs local diagnostics and exits; it does not start or stop an HTTP server.
+It returns exit code 0 when its selected local checks pass, or 1 on failure. It checks
+configuration, OAuth tables, discovery capabilities, client separation and tool scopes.
+A non-user tool may require only <code>mcp:service</code>, or intentionally have no scope restriction.
+A list such as <code>['mcp:service', 'mcp:tools']</code> fails diagnosis. MCP scope alternatives use OR;
+adding a service scope to a personal operation would allow service execution. Personal tools
+must implement <code>UserToolInterface</code>, enable account linking and declare nonempty scopes from
+<code>alexa:user_scopes</code>. Setup and doctor reject invalid OAuth permission mappings too.
+<code>--server-only</code> limits the checks to server configuration and skips the store listing.
+Doctor without that option also validates the local
+listing metadata. These checks do not verify public reachability, hosted image dimensions,
+latency, login/consent UX, Amazon account access or certification.</p>
+<h2 id="verify-http">Verify HTTP<a class="headerlink" href="#verify-http" title="Permanent link">&para;</a></h2>
+<p>For local protocol checks, pass the existing web entry point as the development server's
+router. PHP 8.3 otherwise treats some <code>/.well-known/</code> paths as missing static files:</p>
+<div class="language-bash highlight"><pre><span></span><code>php<span class="w"> </span>-S<span class="w"> </span><span class="m">127</span>.0.0.1:8000<span class="w"> </span>-t<span class="w"> </span>public<span class="w"> </span>public/index.php
+</code></pre></div>
+<p>Leave this terminal running and stop it with Ctrl+C. To connect Alexa, expose the application
+through a public HTTPS host or tunnel and use that origin in both environment values above.
+Restart the development server if you change the environment values. A local HTTP check alone
+does not establish public reachability.</p>
+<p>For public hosting, route these paths through the NAF front controller as described in
+<a href="../deployment/#web-server-routing">Deployment</a>.</p>
+<p>Public discovery documents must return JSON:</p>
+<div class="language-bash highlight"><pre><span></span><code>curl<span class="w"> </span>https://tools.example.com/.well-known/oauth-protected-resource/mcp
+curl<span class="w"> </span>https://tools.example.com/.well-known/oauth-protected-resource
+curl<span class="w"> </span>https://tools.example.com/.well-known/oauth-authorization-server
+</code></pre></div>
+<p>PRM names <code>https://tools.example.com/mcp</code> and the authorization server origin. The authorization
+metadata advertises <code>client_credentials</code>, authorization code, refresh and <code>S256</code>. No signing key
+is needed for OAuth-only usage. An unauthenticated MCP request returns 401 without a
+<code>WWW-Authenticate</code> header, as required by the Alexa Toolkit.</p>
+<p>Verify the service credentials independently of Amazon. Replace the client id below with
+the service id from setup. Curl prompts for its secret as the HTTP Basic password:</p>
+<div class="language-bash highlight"><pre><span></span><code><span class="nv">ALEXA_SERVICE_CLIENT_ID</span><span class="o">=</span><span class="s1">'YOUR_SERVICE_CLIENT_ID'</span>
+curl<span class="w"> </span>--fail-with-body<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--user<span class="w"> </span><span class="s2">"</span><span class="nv">$ALEXA_SERVICE_CLIENT_ID</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">'grant_type=client_credentials'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">'scope=mcp:service'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">'resource=https://tools.example.com/mcp'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s1">'https://tools.example.com/oauth/token'</span>
+</code></pre></div>
+<p>Expect an access token with <code>token_type: "Bearer"</code>, <code>scope: "mcp:service"</code> and no refresh
+token. Treat the returned access token as a credential too. Request another service token
+on expiry. Send the bearer in the Authorization header on every MCP request, with both
+accepted response media types:</p>
+<div class="language-http highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/mcp</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer YOUR_SERVICE_ACCESS_TOKEN</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">application/json, text/event-stream</span>
+
+<span class="p">{</span><span class="nt">"jsonrpc"</span><span class="p">:</span><span class="s2">"2.0"</span><span class="p">,</span><span class="nt">"id"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="nt">"method"</span><span class="p">:</span><span class="s2">"initialize"</span><span class="p">,</span><span class="nt">"params"</span><span class="p">:{</span><span class="nt">"protocolVersion"</span><span class="p">:</span><span class="s2">"2025-11-25"</span><span class="p">,</span><span class="nt">"capabilities"</span><span class="p">:{},</span><span class="nt">"clientInfo"</span><span class="p">:{</span><span class="nt">"name"</span><span class="p">:</span><span class="s2">"Example test"</span><span class="p">,</span><span class="nt">"version"</span><span class="p">:</span><span class="s2">"1.0"</span><span class="p">}}}</span>
+</code></pre></div>
+<p>Send the negotiated <code>MCP-Protocol-Version</code> header on subsequent requests. Send
+<code>notifications/initialized</code>, then <code>tools/list</code> and <code>tools/call</code> for <code>service_status</code>.
+The result contains <code>structuredContent: {"status":"available"}</code> and a JSON text content block.
+The server supports the documented 2025-03-26 client lifecycle as well as 2025-11-25.</p>
+<h2 id="connect-to-alexa">Connect to Alexa+<a class="headerlink" href="#connect-to-alexa" title="Permanent link">&para;</a></h2>
+<p>Follow these steps after the public discovery and service-token checks pass. A successful
+local exchange proves the NAF endpoint works; Amazon credential provisioning and simulator
+testing remain separate steps.</p>
+<h3 id="obtain-amazon-tooling-access">Obtain Amazon tooling access<a class="headerlink" href="#obtain-amazon-tooling-access" title="Permanent link">&para;</a></h3>
+<p>Complete Amazon's <a href="https://developer.amazon.com/docs/alexaplus/add-ons/set-up-your-development-environment.html">development-environment setup</a>.
+It requires Node.js 24+, an Alexa developer account and an AWS account admitted to Amazon's
+developer-tools role. The CLI is distributed through Amazon's private CodeArtifact registry;
+<code>npm install -g @alexa-ai/cli</code> requires that registry setup first. Contact your Amazon
+onboarding representative if your account has not been granted access. Hosting this PHP
+application on AWS is not required.</p>
+<p>After the documented installation, check the installed CLI and authenticate:</p>
+<div class="language-bash highlight"><pre><span></span><code>alexa-ai<span class="w"> </span>--version
+alexa-ai<span class="w"> </span>new<span class="w"> </span>mcp<span class="w"> </span>--help
+alexa-ai<span class="w"> </span>configure
+</code></pre></div>
+<p><code>configure</code> signs the developer into Amazon through Login with Amazon. It does not install
+the NAF service client's credentials. Keep these identities separate:</p>
+<table>
+<thead>
+<tr>
+<th>Credentials</th>
+<th>Purpose</th>
+<th>Configured by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Amazon developer login</td>
+<td>Manage add-ons at Amazon</td>
+<td><code>alexa-ai configure</code></td>
+</tr>
+<tr>
+<td>NAF service client</td>
+<td>MCP discovery and public tools using <code>mcp:service</code></td>
+<td><code>alexa:setup</code>, then Amazon service provisioning below</td>
+</tr>
+<tr>
+<td>Optional NAF account-linking client</td>
+<td>Act for a customer using user scopes</td>
+<td>Separate setup under <a href="#add-account-linking">Add account linking</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="create-the-add-on-project">Create the add-on project<a class="headerlink" href="#create-the-add-on-project" title="Permanent link">&para;</a></h3>
+<p>Run this in a directory for your Amazon add-on projects, separate from the PHP application.
+Replace the URL and service client id:</p>
+<div class="language-bash highlight"><pre><span></span><code>alexa-ai<span class="w"> </span>new<span class="w"> </span>mcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span><span class="s2">"NAF Demo"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--locale<span class="w"> </span>en-US<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--mcp-server-url<span class="w"> </span><span class="s2">"https://tools.example.com/mcp"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--requires-auth<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--auth-client-id<span class="w"> </span><span class="s2">"YOUR_SERVICE_CLIENT_ID"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--auth-scopes<span class="w"> </span><span class="s2">"mcp:service"</span>
+</code></pre></div>
+<p>The <a href="https://developer.amazon.com/docs/alexaplus/add-ons/alexa-ai-cli-reference.html">CLI reference</a>
+documents these options. Check them against the installed version's help. This command
+creates local files; it does not register credentials with Amazon. If asked about customer
+account linking, leave it disabled for the public status tool.</p>
+<p>Change into the generated project directory reported by the CLI. Complete its
+<code>addon-package/addon.json</code> with descriptions, three or four example phrases, privacy and
+terms URLs, and the required images. See <a href="#prepare-the-amazon-package">Prepare the Amazon package</a>
+for the listing fields and optional NAF export. Keep all OAuth secrets outside this package.</p>
+<h3 id="provision-the-service-client-at-amazon">Provision the service client at Amazon<a class="headerlink" href="#provision-the-service-client-at-amazon" title="Permanent link">&para;</a></h3>
+<p>Amazon's <a href="https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-authentication.html">authentication guide</a>
+requires Alexa to obtain a service token with these settings:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value for this host</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP endpoint / canonical resource</td>
+<td><code>https://tools.example.com/mcp</code></td>
+</tr>
+<tr>
+<td>Authorization server</td>
+<td><code>https://tools.example.com</code></td>
+</tr>
+<tr>
+<td>Token endpoint</td>
+<td><code>https://tools.example.com/oauth/token</code></td>
+</tr>
+<tr>
+<td>Grant type</td>
+<td><code>client_credentials</code></td>
+</tr>
+<tr>
+<td>Client authentication</td>
+<td>HTTP Basic with the service client id and secret from <code>alexa:setup</code></td>
+</tr>
+<tr>
+<td>Scope</td>
+<td><code>mcp:service</code></td>
+</tr>
+<tr>
+<td>Token-request <code>resource</code></td>
+<td><code>https://tools.example.com/mcp</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Amazon provisioning is not yet verified.</strong> As of 2026-10-10, the public authentication
+guide describes the token exchange, but neither the CLI reference nor the
+<a href="https://developer.amazon.com/docs/alexaplus/add-ons/alexa-plus-addon-api-reference.html">Add-on API reference</a>
+identifies a service-secret upload command, API operation or console field. The private CLI
+was not available for verification. There is therefore no confirmed secret-entry instruction
+in this guide yet; the <code>new mcp</code> command above is not sufficient to connect this protected host.</p>
+<p>Ask your assigned Alexa+ Solutions Architect for the service-credential provisioning
+procedure through <a href="https://developer.amazon.com/docs/alexaplus/add-ons/get-support-from-amazon.html">Amazon developer support</a>.
+Provide the settings above and your CLI version, without including the secret. A specific
+question to resolve is:</p>
+<blockquote>
+<p>How do I provision a confidential OAuth client for Tier 1 MCP service authentication?
+Which supported CLI command, API operation or Developer Hub field stores its client secret
+for the client_credentials grant, and at which step before the first authenticated deployment?</p>
+</blockquote>
+<p>Use the credential channel Amazon confirms for that purpose. The masked prompt and
+<code>ALEXA_CLIENT_SECRET</code> documented for <code>configure-account-linking</code> belong to the separate user
+client; they do not establish a service-secret provisioning mechanism. Keep service and user
+clients separate, and keep MCP authentication enabled while resolving this step.</p>
+<h3 id="deploy-and-verify-the-connection">Deploy and verify the connection<a class="headerlink" href="#deploy-and-verify-the-connection" title="Permanent link">&para;</a></h3>
+<p>Continue only after Amazon confirms the service credential provisioning and the add-on
+listing is complete. From the generated Amazon project directory, run:</p>
+<div class="language-bash highlight"><pre><span></span><code>alexa-ai<span class="w"> </span>deploy
+alexa-ai<span class="w"> </span>status
+</code></pre></div>
+<p>Deployment creates or updates the development-stage add-on and reports its add-on id.
+Open it in Amazon's <a href="https://developer.amazon.com/docs/alexaplus/add-ons/test-with-web-simulator.html">web simulator</a>
+and ask, for example, "Is the NAF demo service available?" Use your host's request tracing
+to verify the token request and a real <code>service_status</code> invocation; confirm the reply
+reflects <code>{"status":"available"}</code>. Keep tracing free of Authorization headers, tokens and
+client secrets. A successful deployment status alone does not prove a tool was called.</p>
+<p>Re-deploy after tool/schema or authentication metadata changes: Amazon refreshes its cached
+configuration on deployment. Test public latency and any SSE flushing through the actual
+proxy before certification; the QuickStart specifies a round trip below 500 ms.</p>
+<h2 id="add-account-linking">Add account linking<a class="headerlink" href="#add-account-linking" title="Permanent link">&para;</a></h2>
+<p>This optional extension is for personal tools, after service authentication works. Use your
+application's existing <code>naf/auth</code> provider and login page.
+Obtain the exact HTTPS callback URIs from Amazon's account-linking setup; do not guess them.
+Extend the host configuration with:</p>
+<div class="language-php-inline highlight"><pre><span></span><code><span class="s1">'oauth_server'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'login_route'</span> <span class="o">=&gt;</span> <span class="s1">'/login'</span><span class="p">],</span>
+<span class="s1">'alexa'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+    <span class="s1">'account_linking'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
+    <span class="s1">'redirect_uris'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'https://AMAZON_SUPPLIED_HOST/EXACT_CALLBACK'</span><span class="p">],</span>
+    <span class="s1">'user_scopes'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'mcp:tools'</span><span class="p">],</span>
+<span class="p">],</span>
+</code></pre></div>
+<p>The default <code>mcp:tools</code> scope requires the current account's <code>mcp:tools</code> permission. Grant that
+through your existing identity/provider, or define narrower application scopes and permissions
+in <code>oauth_server:scopes</code>. If changing the user scope list, also set the same list in
+<code>mcp:oauth:scopes_supported</code>; numeric configuration arrays merge by position.</p>
+<p>Run setup again. It adds a second confidential client limited to authorization code and refresh
+grants, exact callback URIs, user scopes and this audience. It never gives that client the
+service grant. Configure this separate client in Amazon's account-linking settings.</p>
+<p>Amazon's <a href="https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-account-linking.html#step-3--configure-account-linking">account-linking guide</a>
+documents this command for the user client:</p>
+<div class="language-bash highlight"><pre><span></span><code>alexa-ai<span class="w"> </span>configure-account-linking<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--addon-id<span class="w"> </span><span class="s2">"YOUR_ADDON_ID"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--stage<span class="w"> </span>development<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--client-id<span class="w"> </span><span class="s2">"YOUR_ACCOUNT_LINKING_CLIENT_ID"</span>
+</code></pre></div>
+<p>Enter the <strong>account-linking client's</strong> secret at the masked prompt. That guide also documents
+<code>ALEXA_CLIENT_SECRET</code> as an alternative for this user-client configuration. The general CLI
+reference instead shows a <code>--config-file</code> interface; inspect
+<code>alexa-ai configure-account-linking --help</code> and follow the instructions matching your installed
+version before proceeding. These public instructions have not been checked against the
+private CLI. Neither variant is a verified way to provision the service client's secret.</p>
+<p>Register all exact redirect URIs supplied by Amazon, review the discovered endpoints and
+user scopes, then deploy again. Test a personal tool in the simulator: complete your host's
+login and consent, verify the caller's identity and permissions, and test refresh and
+revocation. See <a href="../oauth-server/">OAuth authorization server</a> for the host login and consent flow.</p>
+<p>A personal tool declares its user scope. Inside its handler, obtain the token's user:</p>
+<div class="language-php-inline highlight"><pre><span></span><code><span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\OAuth\Server\token</span><span class="p">;</span>
+
+<span class="nv">$account</span> <span class="o">=</span> <span class="nx">token</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">user</span><span class="p">();</span>
+<span class="c1">// Pass this verified account to your existing application service.</span>
+</code></pre></div>
+<p>Do not read the browser session as the Alexa caller. The OAuth resource server reloads the
+token's account and rechecks current permissions. OAuth scope names are literal; wildcard-like
+names do not imply other scopes. Service discovery can list personal tool
+metadata, but invoking one without a linked account returns HTTP 401. A linked account lacking
+the required scope/permission receives 403. Authorization code exchange requires PKCE S256;
+the requested resource is checked against the code's authorized audience. Refresh keeps that
+audience without requiring the resource parameter again.</p>
+<h2 id="prepare-the-amazon-package">Prepare the Amazon package<a class="headerlink" href="#prepare-the-amazon-package" title="Permanent link">&para;</a></h2>
+<p>This is the listing reference for the <a href="#create-the-add-on-project">add-on project</a>. You can
+edit the CLI-generated package directly or prepare listing metadata in NAF and export it.</p>
+<p>Supply <code>alexa:listing</code> in host configuration using the en-US locale entry from the
+<a href="https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-quickstart.html#addonjson-schema-reference">QuickStart's <code>addon.json</code> schema</a>.
+The plugin's export validates:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name.value</code></td>
+<td>1–30 characters</td>
+</tr>
+<tr>
+<td><code>shortDescription</code>, <code>fullDescription</code></td>
+<td>1–123 and 1–4000 characters</td>
+</tr>
+<tr>
+<td><code>examplePhrases</code></td>
+<td>3–4 nonempty phrases, each at most 200 characters</td>
+</tr>
+<tr>
+<td><code>privacyAndCompliance</code> URLs</td>
+<td>HTTPS privacy policy and terms of use</td>
+</tr>
+<tr>
+<td><code>mediaAssets.icons.light</code></td>
+<td>Exactly 64, 72, 88, 126, 180 and 241 pixel square entries</td>
+</tr>
+<tr>
+<td><code>mediaAssets.icons.dark</code></td>
+<td>Optional; the same six sizes when supplied</td>
+</tr>
+<tr>
+<td><code>mediaAssets.carouselImages</code></td>
+<td>At least one 600x900 image with alt text</td>
+</tr>
+<tr>
+<td><code>mediaAssets.bannerImages</code></td>
+<td>Optional 1200x600 images with alt text</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>{size, uri}</code> objects for icons and <code>{size, uri, altText}</code> objects for other images.
+Image URIs use HTTPS and PNG, JPG, JPEG or WEBP paths. Alt text is at most 250 characters.
+The validator checks declared metadata, not remote image bytes or ownership.</p>
+<p>Export to a new file and review it alongside the CLI-generated package:</p>
+<div class="language-bash highlight"><pre><span></span><code>vendor/bin/naf<span class="w"> </span>alexa:setup<span class="w"> </span>--manifest<span class="w"> </span>storage/alexa-addon.json
+vendor/bin/naf<span class="w"> </span>alexa:doctor
+</code></pre></div>
+<p>The file uses manifest version 1.0, US distribution, the en-US listing and an MCP HTTPS
+integration pointing at the canonical resource. It contains no OAuth credentials. Setup
+refuses to overwrite an existing file. Transfer the reviewed metadata into the CLI project's
+<code>addon-package/addon.json</code> before deployment. Follow the separate
+<a href="#provision-the-service-client-at-amazon">service credential provisioning</a> and optional
+<a href="#add-account-linking">account-linking</a> steps; the export does not transmit credentials.</p>
+<p>After the connection and simulator checks pass, follow Amazon's certification procedure.</p>
+<h2 id="deployment-checks">Deployment checks<a class="headerlink" href="#deployment-checks" title="Permanent link">&para;</a></h2>
+<p>Local doctor checks validate configuration; they do not measure deployment capacity or establish
+an Amazon connection. Before exposing a host:</p>
+<ul>
+<li>Use HTTPS with a valid public certificate. Set the canonical public URL and resource,
+  and configure trusted session proxy addresses explicitly. Strip untrusted forwarded headers
+  at the edge; do not derive identity or rate-limit keys from arbitrary client headers.</li>
+<li>Limit OAuth token, introspection, revocation, authorization and login requests before
+  expensive password checks. Unknown client IDs deliberately perform a password verification
+  too. Use both peer and server-wide budgets, sized for the actual hasher and PHP worker pool.
+  Nginx provides <a href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html">request-rate limits</a>.
+  The optional <a href="../rate-limits/">NAF limiter</a> can enforce host rules before the operation;
+  installing it alone does not intercept requests.</li>
+<li>Set proxy body limits and PHP <code>post_max_size</code> for form endpoints. MCP additionally caps
+  its own JSON input with <code>mcp:transport:max_request_bytes</code> (1 MiB by default).</li>
+<li>Bound simultaneous MCP requests and SSE streams. Nginx <a href="https://nginx.org/en/docs/http/ngx_http_limit_conn_module.html">connection limits</a>
+  include concurrent HTTP/2 requests. Set tool execution deadlines and PHP worker termination
+  timeouts. A <a href="https://nginx.org/en/docs/http/ngx_http_fastcgi_module.html#fastcgi_read_timeout">FastCGI read timeout</a>
+  measures gaps between reads, so progress events alone do not enforce a total execution deadline.</li>
+<li>Run setup in a protected terminal. Newly generated secrets are deliberately printed once;
+  ordinary CI job logs, shell tracing and recorded terminals are unsuitable destinations.
+  Store credentials in a secret manager and rotate any exposed credential. Keep <code>.env</code>, the
+  database, backups and private keys outside <code>public/</code> with access limited to the application
+  and deployment users. Only the setup secret is shown; the database stores client-secret hashes.</li>
+<li>Redact Authorization/Cookie headers, credentials, authorization codes, verifiers and tokens
+  from application, proxy and tracing logs. Query strings on OAuth routes can contain sensitive
+  authorization state. Keep production errors sanitized.</li>
+<li>Monitor OAuth table growth and define retention with the <a href="../oauth-server/#pkce-format-and-consent-responses">OAuth replay guarantees</a>
+  in mind. Used refresh tokens must remain detectable while the family is usable.</li>
+</ul>
+<p>Test separate accounts using the same account-linking client. In a personal handler,
+<code>token()-&gt;user()</code> identifies the verified account; MCP's identity <code>id</code> is the OAuth client ID.
+Resolve requested object IDs through a service that checks that account's ownership and tenant.
+A scope grants an operation; it does not grant access to every object named in tool arguments.
+The existing <code>my_account</code> example derives the user from the token rather than from arguments.</p>
+<p>Finally test login, denial, consent, refresh, revocation, wrong-audience tokens, proxy flushing
+and timeouts through your public deployment. Amazon simulator/device testing and service-secret
+provisioning remain pending until developer access and Amazon's private setup instructions are
+available. No local test result substitutes for that verification.</p>
+<h2 id="if-the-result-is-different">If the result is different<a class="headerlink" href="#if-the-result-is-different" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>400, 406 or 415 before MCP handles a call:</strong> check Content-Type, Accept, protocol version and that
+  <code>csrf_exempt_routes:mcp_server_rpc</code> has not been disabled by host configuration.</li>
+<li><strong>401 with a service token on a personal tool:</strong> account linking is needed; keep the service
+  and user clients separate.</li>
+<li><strong>403 after linking:</strong> check the token's user scopes and the reloaded account's permissions.</li>
+<li><strong><code>invalid_grant</code> on code exchange:</strong> check PKCE verifier, exact callback and canonical
+  resource. A code attempted with mismatched bindings is spent; start authorization again.</li>
+<li><strong>Buffered SSE:</strong> inspect reverse-proxy/CDN buffering and compression; verify that the
+  supported framework emitter is installed.</li>
+<li><strong>Doctor passes but Amazon fails:</strong> verify public HTTPS/discovery, credentials in the correct
+  authentication tier, actual images, simulator login/consent and developer account access.</li>
+<li><strong>The service secret has no documented input:</strong> resolve
+  <a href="#provision-the-service-client-at-amazon">Amazon service provisioning</a> with your onboarding
+  contact; the account-linking secret prompt configures a different OAuth client.</li>
+<li><strong>CLI installation returns 404 or registry authentication fails:</strong> check private CodeArtifact
+  access and its registry login. The public npm registry does not provide the Alexa AI CLI.</li>
+<li><strong>Account-linking flags are rejected:</strong> compare the installed command's help with the
+  account-linking guide and CLI reference; their documented interfaces currently differ.</li>
+</ul>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-quickstart.html">Alexa+ MCP QuickStart</a></li>
+<li><a href="https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-authentication.html">Alexa+ MCP authentication</a></li>
+<li><a href="https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-account-linking.html">Alexa+ MCP account linking</a></li>
+<li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/transports">MCP Streamable HTTP</a></li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../mcp/" class="md-footer__link md-footer__link--prev" aria-label="Previous: MCP tools">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                MCP tools
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../guard/" class="md-footer__link md-footer__link--next" aria-label="Next: Guard rules">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Guard rules
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.path", "navigation.footer", "navigation.top", "navigation.tracking", "content.action.edit", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
