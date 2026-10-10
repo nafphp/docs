@@ -42,13 +42,6 @@
 .md-header__title { font-weight: 600; letter-spacing: -.01em; }
 .md-header .md-logo img, .md-header .md-logo svg { height: 1.6rem; width: auto; }
 
-/* --- Tabs: same quiet band as the header, readable labels, teal for the active tab --- */
-.md-tabs { border-bottom: 1px solid var(--naf-hairline); }
-.md-tabs__link { font-size: .78rem; opacity: .8; margin-top: .55rem; }
-/* The tab band is charcoal in both schemes, so the active label always uses the light teal. */
-.md-tabs__item--active .md-tabs__link { opacity: 1; font-weight: 600; color: #2fc3a8; }
-.md-tabs__link:hover { opacity: 1; }
-
 /* --- Navigation: no boxes, just type and a teal active state --- */
 .md-nav { font-size: .72rem; }
 .md-nav__title { font-size: .66rem; font-weight: 600; letter-spacing: .08em;
