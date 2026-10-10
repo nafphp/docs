@@ -77,35 +77,60 @@ storage or capture transports. Application code does not need a NAF base test cl
 
 ## Test HTTP behavior
 
-Create this smoke test. It requires Python 3.9+ and uses its standard library. It accepts the
-URL of an already running application and checks the tutorial's JSON endpoint and a missing
-route:
+Service tests do not exercise routing, CSRF, sessions or response emission. Test those
+through a running application. This PHPUnit test sends real HTTP requests to the server
+named in `APP_URL` (default `http://127.0.0.1:8000`) and checks the tutorial's JSON endpoint
+and a missing route:
 
-```python title="tests/http_smoke.py"
-import json
-import sys
-import urllib.error
-import urllib.request
+```php title="tests/HttpSmokeTest.php"
+<?php
 
-base = (sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8000').rstrip('/')
+declare(strict_types=1);
 
-for path, expected in [('/hello/Ada', 200), ('/does-not-exist', 404)]:
-    try:
-        response = urllib.request.urlopen(base + path, timeout=5)
-    except urllib.error.HTTPError as error:
-        response = error
-    with response:
-        status = response.status
-        body = response.read().decode()
-        if status != expected:
-            raise AssertionError(f'{path}: expected {expected}, received {status}')
-        if path == '/hello/Ada':
-            if json.loads(body) != {'hello': 'Ada'}:
-                raise AssertionError('Unexpected greeting response')
-            if response.headers.get_content_type() != 'application/json':
-                raise AssertionError('Expected JSON content type')
+use PHPUnit\Framework\TestCase;
 
-print('HTTP smoke tests passed.')
+final class HttpSmokeTest extends TestCase
+{
+    public function testHelloReturnsJson(): void
+    {
+        [$status, $headers, $body] = $this->get('/hello/Ada');
+
+        self::assertSame(200, $status);
+        self::assertStringStartsWith('application/json', $headers['content-type'] ?? '');
+        self::assertSame(['hello' => 'Ada'], json_decode($body, true, flags: JSON_THROW_ON_ERROR));
+    }
+
+    public function testUnknownRouteReturns404(): void
+    {
+        [$status] = $this->get('/does-not-exist');
+
+        self::assertSame(404, $status);
+    }
+
+    /** @return array{int, array<string, string>, string} status, lower-case headers and body */
+    private function get(string $path): array
+    {
+        $base    = rtrim(getenv('APP_URL') ?: 'http://127.0.0.1:8000', '/');
+        $context = stream_context_create(['http' => ['ignore_errors' => true, 'timeout' => 5]]);
+        $stream  = @fopen($base . $path, 'r', false, $context);
+        if ($stream === false) {
+            self::fail("No response from {$base}{$path}. Is the development server running?");
+        }
+
+        $lines = stream_get_meta_data($stream)['wrapper_data'];
+        $body  = (string) stream_get_contents($stream);
+        fclose($stream);
+
+        preg_match('{^HTTP/\S+ (\d{3})}', $lines[0], $status);
+        $headers = [];
+        foreach (array_slice($lines, 1) as $line) {
+            [$name, $value]                 = explode(':', $line, 2) + [1 => ''];
+            $headers[strtolower(trim($name))] = trim($value);
+        }
+
+        return [(int) $status[1], $headers, $body];
+    }
+}
 ```
 
 Start the server in one terminal:
@@ -125,11 +150,12 @@ Start the server in one terminal:
 In another terminal:
 
 ```bash
-python3 tests/http_smoke.py http://127.0.0.1:8000
+vendor/bin/phpunit --bootstrap vendor/autoload.php tests/HttpSmokeTest.php
 ```
 
-Expect `HTTP smoke tests passed.` A connection failure, wrong status or incorrect JSON fails
-the test. You can also inspect the responses manually:
+Expect two passing tests. A connection failure, wrong status or incorrect JSON fails the
+test. To test another address, set `APP_URL`, for example `APP_URL=http://127.0.0.1:8001`.
+You can also inspect the responses manually:
 
 ```bash
 curl -i http://127.0.0.1:8000/hello/Ada
@@ -138,9 +164,25 @@ curl -i http://127.0.0.1:8000/does-not-exist
 
 ## Forms, sessions and persistence
 
-Fetch a form and retain its cookies and CSRF token before submitting. Check valid input,
-invalid input, a missing token and an invalid token. Submit with the same cookie jar and
-generate one token per page. See [Forms](forms.md#csrf-protection).
+A form request needs the session cookie and the CSRF token from the page that rendered the
+form. With the [contact form](recipes/contact-form.md) running, these commands keep the cookie
+in `cookies.txt`, read the token from the form and check the three outcomes:
+
+```bash
+curl -s -c cookies.txt -o form.html http://127.0.0.1:8000/contact
+token=$(grep -o 'name="_csrf" value="[^"]*"' form.html | cut -d'"' -f4)
+
+curl -s -o /dev/null -w '%{http_code}\n' -b cookies.txt -d 'name=Ada' http://127.0.0.1:8000/contact
+curl -s -o /dev/null -w '%{http_code}\n' -b cookies.txt --data-urlencode "_csrf=$token" \
+  -d 'name=Ada' -d 'email=invalid' -d 'message=short' http://127.0.0.1:8000/contact
+curl -s -o /dev/null -w '%{http_code}\n' -b cookies.txt --data-urlencode "_csrf=$token" \
+  -d 'name=Ada' -d 'email=ada@example.com' -d 'message=A long enough message.' \
+  http://127.0.0.1:8000/contact
+```
+
+Expected output: `400` without a token, `422` for invalid fields and `302` for the valid
+message, which also writes one file to `storage/mail/`. Check an invalid token too, and
+delete `cookies.txt` and `form.html` afterwards.
 
 For login, verify persistence on the next request, logout and suspension. For storage, create
 a disposable schema, run migrations and assert persisted results. Never use production data.
@@ -151,8 +193,8 @@ Test jobs directly and through `queue:consume --once` when worker behavior matte
 ## Continuous integration
 
 Install the committed lock with development dependencies and run the same checks as locally.
-Start the HTTP server before smoke tests and stop it even when a check fails. Retain server
-logs for failures. Use `APP_ENV=test`; `testing` is not NAF's test environment value.
+Start the HTTP server before the HTTP tests, pass its address in `APP_URL`, and stop it even
+when a check fails. Retain server logs for failures. Use `APP_ENV=test`; `testing` is not NAF's test environment value.
 
 The starter's `composer test` checks its original demo. Replace that script after replacing
 demo routes so it runs tests for your application.

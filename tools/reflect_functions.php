@@ -29,7 +29,20 @@ foreach (get_defined_functions()['user'] as $name) {
     // Keyed by the fully qualified name. Two packages may both offer a
     // `token()`, and keying by the short one silently drops whichever was
     // read second -- from the index as well as from the checker.
+    // The first sentence of the docblock, if there is one, describes the function.
+    $summary = '';
+    foreach (preg_split('/\R/', (string) $fn->getDocComment()) as $line) {
+        $line = trim(trim($line), '/* ');
+        if ($line === '' || str_starts_with($line, '@')) {
+            if ($summary !== '') {
+                break;
+            }
+            continue;
+        }
+        $summary .= ($summary === '' ? '' : ' ') . $line;
+    }
     $result[$fn->getName()] = [
+        'summary'   => rtrim(preg_split('/(?<=\.)\s/', $summary)[0] ?? '', '.'),
         'namespace' => $fn->getNamespaceName(),
         'signature' => $fn->getShortName() . '(' . implode(', ', $params) . ')'
             . ($fn->hasReturnType() ? ': ' . $fn->getReturnType() : ''),

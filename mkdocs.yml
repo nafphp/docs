@@ -145,7 +145,10 @@ nav:
           - Troubleshooting and logging: troubleshooting.md
   - Reference:
       - Reference:
+          - Cheat sheet: cheat-sheet.md
           - Function index: function-index.md
+          - CLI commands: cli-commands.md
+          - Configuration keys: configuration-reference.md
           - Package overview: packages.md
           - Upgrading from NixPHP: upgrading-from-nixphp.md
   - Showcase:

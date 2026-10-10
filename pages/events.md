@@ -71,6 +71,27 @@ The following events describe the normal HTTP path. Payload order is part of the
 `request.end` and `request.body` are declared constants but are not dispatched by the current
 request path. There is no `response.sending` event.
 
+## Events used by the published plugins
+
+Installed plugins register listeners on these events. Your own listeners run alongside
+them; listeners with the same priority run in registration order.
+
+| Package | Event | What the listener does |
+|---|---|---|
+| `naf/form` | `controller.calling` | Checks the CSRF token and aborts with 400; see [Forms](forms.md#csrf-protection) |
+| `naf/i18n` | `request.start` | Selects the language from `?lang`, the `lang` cookie or `Accept-Language` |
+| `naf/i18n` | `response.header` | Returns the response with a `lang` cookie when the language was chosen or changed |
+| `naf/mcp` | `response.body` | Enables implicit flushing for `text/event-stream` responses |
+| `naf/rbac` | dispatches `Naf\Rbac\Events\GrantsChanged` | An object event after grants change; see [RBAC](rbac.md#telling-a-host-what-moved) |
+
+!!! warning "Only one `response.header` replacement survives"
+    Every `response.header` listener receives the original response, and only the last
+    returned response is sent. `naf/i18n` returns a response with its language cookie, so an
+    application listener that also returns a response from `response.header` (for example
+    to add security headers) replaces it, and the cookie is not sent. With a higher priority
+    your listener runs first and the i18n response replaces yours instead. When you use
+    `naf/i18n`, add such headers in your controllers or through the web server.
+
 ## Change a response
 
 PSR-7 responses are immutable: `withHeader()` returns a new response. Return it from a

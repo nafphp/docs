@@ -505,6 +505,427 @@
   "Naf\\Websocket\\Server\\Server",
   "Naf\\Websocket\\Token"
  ],
+ "command_details": {
+  "alexa:doctor": {
+   "class": "Naf\\Alexa\\Commands\\DoctorCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "server-only": "flag"
+    }
+   },
+   "description": "Check local Alexa server configuration and store-listing metadata.",
+   "package": "alexa",
+   "title": "Alexa doctor"
+  },
+  "alexa:setup": {
+   "class": "Naf\\Alexa\\Commands\\SetupCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "manifest": "value",
+     "migrate": "flag"
+    }
+   },
+   "description": "Register Alexa OAuth clients; optionally migrate OAuth tables and export addon.json.",
+   "package": "alexa",
+   "title": "Alexa setup"
+  },
+  "command:list": {
+   "class": "Naf\\CLI\\Commands\\ListCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "List all registered commands.",
+   "package": "cli",
+   "title": "Registered commands"
+  },
+  "db:migrate": {
+   "class": "Naf\\Database\\Commands\\MigrateCommand",
+   "definition": {
+    "arguments": {
+     "direction": "required"
+    },
+    "options": {
+     "n": "value",
+     "name": "value"
+    }
+   },
+   "description": "Execute migrations in either direction.",
+   "package": "database",
+   "title": "Execute Migrations"
+  },
+  "db:migration:create": {
+   "class": "Naf\\Database\\Commands\\MigrationCreateCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Create a skeleton migration in your application.",
+   "package": "database",
+   "title": "Create Migration"
+  },
+  "mcp:token:create": {
+   "class": "Naf\\MCP\\Commands\\CreateTokenCommand",
+   "definition": {
+    "arguments": {
+     "name": "optional"
+    },
+    "options": {
+     "e": "value",
+     "expires": "value",
+     "help": "flag",
+     "s": "value",
+     "scope": "value"
+    }
+   },
+   "description": "Create a Bearer token for the MCP Streamable HTTP endpoint.",
+   "package": "mcp",
+   "title": "Create MCP Token"
+  },
+  "mcp:token:list": {
+   "class": "Naf\\MCP\\Commands\\ListTokensCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "help": "flag"
+    }
+   },
+   "description": "List stored MCP Bearer tokens without exposing token secrets.",
+   "package": "mcp",
+   "title": "List MCP Tokens"
+  },
+  "mcp:token:revoke": {
+   "class": "Naf\\MCP\\Commands\\RevokeTokenCommand",
+   "definition": {
+    "arguments": {
+     "id": "required"
+    },
+    "options": {
+     "help": "flag"
+    }
+   },
+   "description": "Revoke a stored MCP Bearer token by id.",
+   "package": "mcp",
+   "title": "Revoke MCP Token"
+  },
+  "nafinity:admin": {
+   "class": "Naf\\Board\\Commands\\AdminCommand",
+   "definition": {
+    "arguments": {
+     "email": "optional"
+    },
+    "options": {
+     "force": "flag"
+    }
+   },
+   "description": "Grant the admin role to an existing account, while nobody holds it yet.",
+   "package": "board",
+   "title": "Appoint an administrator"
+  },
+  "nafinity:assets:check": {
+   "class": "Naf\\Board\\Commands\\CheckAssetsCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "package": "value"
+    }
+   },
+   "description": "Compare published package assets with their sources; optional --package=vendor/name.",
+   "package": "board",
+   "title": "Check plugin assets"
+  },
+  "nafinity:assets:publish": {
+   "class": "Naf\\Board\\Commands\\PublishAssetsCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "package": "value"
+    }
+   },
+   "description": "Copy registered package assets into the public directory; optional --package=vendor/name.",
+   "package": "board",
+   "title": "Publish plugin assets"
+  },
+  "nafinity:assets:remove": {
+   "class": "Naf\\Board\\Commands\\RemoveAssetsCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "package": "value"
+    }
+   },
+   "description": "Delete previously published package assets; optional --package=vendor/name.",
+   "package": "board",
+   "title": "Remove plugin assets"
+  },
+  "nafinity:grant-default": {
+   "class": "Naf\\Board\\Commands\\GrantDefaultCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Give accounts that hold no role at all the one an ordinary account has.",
+   "package": "board",
+   "title": "Grant the ordinary role"
+  },
+  "nafinity:migrations:rename": {
+   "class": "Naf\\Board\\Commands\\RenameMigrationNamespaceCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "apply": "flag",
+     "from": "value",
+     "to": "value"
+    }
+   },
+   "description": "Repoints recorded migrations after a namespace rename; shows the plan unless --apply is given.",
+   "package": "board",
+   "title": "Rewrite the namespace of applied migrations"
+  },
+  "nafinity:seed": {
+   "class": "Naf\\Board\\Commands\\SeedCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Create local demo accounts and projects once; refuses production.",
+   "package": "board",
+   "title": "Create Nafinity demo projects"
+  },
+  "nafinity:user": {
+   "class": "Naf\\Board\\Commands\\CreateUserCommand",
+   "definition": {
+    "arguments": {
+     "email": "optional",
+     "name": "optional"
+    },
+    "options": {
+     "admin": "flag"
+    }
+   },
+   "description": "Create an account, reading its password from standard input.",
+   "package": "board",
+   "title": "Create an account"
+  },
+  "oauth:client:create": {
+   "class": "Naf\\OAuth\\Server\\Commands\\ClientCreateCommand",
+   "definition": {
+    "arguments": {
+     "name": "required"
+    },
+    "options": {
+     "g": "value",
+     "grant": "value",
+     "p": "flag",
+     "public": "flag",
+     "r": "value",
+     "redirect": "value",
+     "s": "value",
+     "scope": "value"
+    }
+   },
+   "description": "Register an application that may ask people to sign in with this server.",
+   "package": "oauth-server",
+   "title": "Register an OAuth client"
+  },
+  "oauth:client:list": {
+   "class": "Naf\\OAuth\\Server\\Commands\\ClientListCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Show the registered applications, their kind and what they may ask for.",
+   "package": "oauth-server",
+   "title": "List OAuth clients"
+  },
+  "oauth:client:rotate-secret": {
+   "class": "Naf\\OAuth\\Server\\Commands\\ClientRotateSecretCommand",
+   "definition": {
+    "arguments": {
+     "client": "required"
+    },
+    "options": {
+     "n": "flag",
+     "now": "flag",
+     "o": "value",
+     "overlap": "value"
+    }
+   },
+   "description": "Issue a new secret for a client, keeping the old one valid for a while.",
+   "package": "oauth-server",
+   "title": "Rotate a client secret"
+  },
+  "oauth:discover": {
+   "class": "Naf\\OAuth\\Client\\Commands\\DiscoverCommand",
+   "definition": {
+    "arguments": {
+     "provider": "optional"
+    },
+    "options": []
+   },
+   "description": "Read a configured provider's metadata and print the callback URL to register with it.",
+   "package": "oauth-client",
+   "title": "Check an OAuth provider"
+  },
+  "oauth:doctor": {
+   "class": "Naf\\OAuth\\Client\\Commands\\DoctorCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Verify dependencies, connection, user model, tables, URLs and each configured login.",
+   "package": "oauth-client",
+   "title": "Check the login setup"
+  },
+  "oauth:keys:generate": {
+   "class": "Naf\\OAuth\\Server\\Commands\\KeysGenerateCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Create the signing key, or rotate to a new one. Old keys stay published.",
+   "package": "oauth-server",
+   "title": "Generate an ID token signing key"
+  },
+  "oauth:keys:prune": {
+   "class": "Naf\\OAuth\\Server\\Commands\\KeysPruneCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "o": "value",
+     "older-than": "value"
+    }
+   },
+   "description": "Remove rotated-out keys whose tokens have all expired.",
+   "package": "oauth-server",
+   "title": "Prune old signing keys"
+  },
+  "oauth:server:doctor": {
+   "class": "Naf\\OAuth\\Server\\Commands\\DoctorCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Verify the issuer, connection, schema, keys, scopes, login route and clients.",
+   "package": "oauth-server",
+   "title": "Check the OAuth server setup"
+  },
+  "oauth:server:setup": {
+   "class": "Naf\\OAuth\\Server\\Commands\\SetupCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Create the signing key if there is none, and say what is left to do.",
+   "package": "oauth-server",
+   "title": "Set up the OAuth server"
+  },
+  "plugins:debug": {
+   "class": "Naf\\CLI\\Commands\\PluginDebugCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Displays plugin boot order, declared prerequisites and absent optional targets.",
+   "package": "cli",
+   "title": "Plugin boot order"
+  },
+  "queue:consume": {
+   "class": "Naf\\Queue\\Commands\\QueueConsumeCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "channel": "value",
+     "channels": "value",
+     "max-jobs": "value",
+     "max-runtime": "value",
+     "once": "flag",
+     "v": "flag",
+     "verbose": "flag"
+    }
+   },
+   "description": "Run the queue worker",
+   "package": "queue",
+   "title": "NAF Queue Worker"
+  },
+  "queue:retry-failed": {
+   "class": "Naf\\Queue\\Commands\\QueueRetryFailedCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "keep": "flag"
+    }
+   },
+   "description": "Retry failed jobs",
+   "package": "queue",
+   "title": "NAF Queue Deadletter Retry"
+  },
+  "rbac:sync": {
+   "class": "Naf\\Rbac\\Commands\\SyncCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "reapply": "flag"
+    }
+   },
+   "description": "Write the roles installed packages declare, without overwriting local changes.",
+   "package": "rbac",
+   "title": "Sync declared roles"
+  },
+  "route:debug": {
+   "class": "Naf\\CLI\\Commands\\RouteDebugCommand",
+   "definition": {
+    "arguments": [],
+    "options": []
+   },
+   "description": "Displays current routes for an application.",
+   "package": "cli",
+   "title": "Route debug"
+  },
+  "schedule:list": {
+   "class": "Naf\\Schedule\\Commands\\ScheduleListCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "from": "value",
+     "no-sort": "flag"
+    }
+   },
+   "description": "List scheduled jobs and their next run time.",
+   "package": "schedule",
+   "title": "NAF Schedule"
+  },
+  "schedule:ticker": {
+   "class": "Naf\\Schedule\\Commands\\ScheduleTickerCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "max-jobs": "value",
+     "max-runtime": "value",
+     "once": "flag",
+     "workers": "value"
+    }
+   },
+   "description": "Execute recurring tasks with cron syntax.",
+   "package": "schedule",
+   "title": "NAF Schedule Worker"
+  },
+  "websocket:serve": {
+   "class": "Naf\\Websocket\\Commands\\ServeCommand",
+   "definition": {
+    "arguments": [],
+    "options": {
+     "address": "flag",
+     "seconds": "flag"
+    }
+   },
+   "description": "Accept browser connections and fan out what the application publishes.",
+   "package": "websocket",
+   "title": "Serve WebSocket connections"
+  }
+ },
  "commands": [
   "alexa:doctor",
   "alexa:setup",
@@ -540,262 +961,582 @@
   "schedule:ticker",
   "websocket:serve"
  ],
+ "config": {
+  "alexa": {
+   "alexa:account_linking": "false",
+   "alexa:listing": "[]",
+   "alexa:redirect_uris": "[]",
+   "alexa:user_scopes": "[\"mcp:tools\"]",
+   "mcp:auth:discovery_scope": "'mcp:service'",
+   "mcp:auth:driver": "'oauth'",
+   "mcp:auth:enabled": "true",
+   "mcp:oauth:authorization_servers": "[\"ENV:PUBLIC_URL\"]",
+   "mcp:oauth:resource": "'ENV:ALEXA_MCP_RESOURCE'",
+   "mcp:oauth:scopes_supported": "[\"mcp:tools\"]",
+   "oauth_server:audience": "'ENV:ALEXA_MCP_RESOURCE'",
+   "oauth_server:name": "'ENV:ALEXA_NAME'",
+   "oauth_server:scopes:mcp:service:label": "'Discover tools and access public data'",
+   "oauth_server:scopes:mcp:service:permission": "NULL",
+   "oauth_server:scopes:mcp:tools:label": "'Use your account through Alexa'",
+   "oauth_server:scopes:mcp:tools:permission": "'mcp:tools'",
+   "public_url": "'ENV:PUBLIC_URL'"
+  },
+  "auth": {
+   "auth:database:identifier_field": "'id'",
+   "auth:database:identity_factory": "NULL",
+   "auth:database:password_field": "'password'",
+   "auth:database:table": "'users'",
+   "auth:database:username_field": "'username'",
+   "auth:orm:identifier_field": "'id'",
+   "auth:orm:password_field": "'password'",
+   "auth:orm:repository": "NULL",
+   "auth:orm:username_field": "'username'",
+   "auth:policies": "[]",
+   "auth:providers": "[]",
+   "auth:session": "NULL",
+   "auth:users:identifier_field": "'id'",
+   "auth:users:model": "NULL",
+   "auth:users:password_field": "'password'",
+   "auth:users:store": "'orm'",
+   "auth:users:username_field": "'username'"
+  },
+  "mail": {
+   "mail:transport": "'Naf\\Mail\\Core\\Transport\\MailTransport'"
+  },
+  "mcp": {
+   "csrf_exempt_routes:mcp_server_rpc": "true",
+   "mcp:auth:discovery_scope": "NULL",
+   "mcp:auth:driver": "'file'",
+   "mcp:auth:enabled": "true",
+   "mcp:auth:token_file": "'ENV:MCP_TOKEN_FILE'",
+   "mcp:oauth:authorization_servers": "[]",
+   "mcp:oauth:resource": "NULL",
+   "mcp:oauth:scopes_supported": "NULL",
+   "mcp:transport:allowed_origins": "[]",
+   "mcp:transport:max_request_bytes": "1048576",
+   "mcp:transport:streaming": "false"
+  },
+  "oauth-client": {
+   "oauth:accounts:auto_register": "false",
+   "oauth:accounts:create": "NULL",
+   "oauth:accounts:provider": "NULL",
+   "oauth:accounts:table": "'oauth_identities'",
+   "oauth:after_login": "'/'",
+   "oauth:cache_path": "NULL",
+   "oauth:error_route": "'/'",
+   "oauth:providers": "[]",
+   "oauth:routes": "true",
+   "oauth:tokens:key": "NULL",
+   "oauth:tokens:store": "false",
+   "oauth:tokens:table": "'oauth_provider_tokens'",
+   "public_url": "NULL"
+  },
+  "oauth-server": {
+   "csrf_exempt_routes:oauth.authorize.decide": "true",
+   "csrf_exempt_routes:oauth.introspect": "true",
+   "csrf_exempt_routes:oauth.revoke": "true",
+   "csrf_exempt_routes:oauth.token": "true",
+   "csrf_exempt_routes:oauth.userinfo.post": "true",
+   "oauth_server:access_token_ttl": "3600",
+   "oauth_server:audience": "''",
+   "oauth_server:claims": "NULL",
+   "oauth_server:code_ttl": "60",
+   "oauth_server:consent_ttl": "600",
+   "oauth_server:id_token_ttl": "3600",
+   "oauth_server:key_path": "NULL",
+   "oauth_server:login_route": "NULL",
+   "oauth_server:name": "NULL",
+   "oauth_server:refresh_token_ttl": "2592000",
+   "oauth_server:routes": "true",
+   "oauth_server:scopes": "[]",
+   "public_url": "NULL"
+  },
+  "rbac": {
+   "rbac:layout": "NULL",
+   "rbac:lockout_permission": "'rbac.manage'",
+   "rbac:path": "'/admin/roles'"
+  },
+  "session": {
+   "session:database_table": "'sessions'",
+   "session:storage": "'default'",
+   "session:trust_proxy_headers": "false",
+   "session:trusted_proxies": "[]"
+  },
+  "storage": {
+   "storage:default": "'local'",
+   "storage:disks:local:adapter": "'Naf\\Storage\\Adapters\\LocalAdapter'",
+   "storage:disks:local:root": "'{BASE_PATH}/storage'"
+  },
+  "view": {
+   "view:paths": "[\"views\",\"app/views\"]"
+  },
+  "websocket": {
+   "websocket:address": "'0.0.0.0:8091'",
+   "websocket:certificate": "'/etc/nginx/ssl/fullchain.pem'",
+   "websocket:control": "'/tmp/naf-websocket.sock'",
+   "websocket:enabled": "false",
+   "websocket:key": "''",
+   "websocket:key_file": "'/etc/nginx/ssl/privkey.pem'",
+   "websocket:max_connections": "2000",
+   "websocket:origins": "[]",
+   "websocket:token_lifetime": "60",
+   "websocket:url": "''"
+  }
+ },
+ "config_reads": {
+  "alexa": {
+   "mcp:transport:streaming": "false"
+  },
+  "auth": {
+   "auth:database:identifier_field": "'id'",
+   "auth:database:identity_factory": "",
+   "auth:database:password_field": "'password'",
+   "auth:database:table": "'users'",
+   "auth:database:username_field": "'username'",
+   "auth:orm:repository": "",
+   "auth:policies": "[]",
+   "auth:providers": "[]",
+   "auth:session": "",
+   "auth:users:model": "",
+   "auth:users:store": "'orm'"
+  },
+  "board": {
+   "app:url": "",
+   "database:driver": "",
+   "ldap:connection": "",
+   "ldap:directory": "",
+   "ldap:enabled": "false",
+   "nafinity:mail_enabled": "false",
+   "nafinity:mail_from": "",
+   "nafinity:remember_days": "self::DEFAULT_DAYS",
+   "storage:disks:attachments:root": "BASE_PATH . '/storage/attachments'",
+   "websocket:url": "''"
+  },
+  "client": {
+   "client": ""
+  },
+  "database": {
+   "database": "",
+   "database:migrationPaths": ""
+  },
+  "form": {
+   "csrf_exempt_routes": "[]",
+   "csrf_validation": "true"
+  },
+  "framework": {
+   "guard:ipBlacklist": "",
+   "guard:userAgentBlacklist": ""
+  },
+  "i18n": {
+   "app:translationPath": "'/app/Resources/lang'",
+   "fallback_language": "Language::EN",
+   "language": ""
+  },
+  "mail": {
+   "mail:transport": ""
+  },
+  "mcp": {
+   "mcp:auth:discovery_scope": "",
+   "mcp:auth:driver": "'file'",
+   "mcp:auth:enabled": "true",
+   "mcp:auth:token_file": "$defaultPath",
+   "mcp:oauth:authorization_servers": "[]",
+   "mcp:oauth:resource": "",
+   "mcp:oauth:scopes_supported": "",
+   "mcp:transport:allowed_origins": "[]",
+   "mcp:transport:max_request_bytes": "1048576",
+   "mcp:transport:streaming": "false",
+   "public_url": ""
+  },
+  "oauth-client": {
+   "auth:logins": "[]",
+   "auth:providers": "[]",
+   "auth:users:model": "",
+   "oauth:accounts:auto_register": "false",
+   "oauth:accounts:create": "",
+   "oauth:accounts:provider": "",
+   "oauth:accounts:table": "'oauth_identities'",
+   "oauth:after_login": "'/'",
+   "oauth:cache_path": "",
+   "oauth:error_route": "'/'",
+   "oauth:providers": "[]",
+   "oauth:routes": "true",
+   "oauth:tokens:key": "",
+   "oauth:tokens:store": "false",
+   "oauth:tokens:table": "'oauth_provider_tokens'",
+   "public_url": ""
+  },
+  "oauth-server": {
+   "oauth_server:access_token_ttl": "3600",
+   "oauth_server:audience": "''",
+   "oauth_server:claims": "",
+   "oauth_server:code_ttl": "60",
+   "oauth_server:consent_ttl": "600",
+   "oauth_server:id_token_ttl": "3600",
+   "oauth_server:key_path": "",
+   "oauth_server:login_route": "",
+   "oauth_server:name": "",
+   "oauth_server:refresh_token_ttl": "2592000",
+   "oauth_server:routes": "true",
+   "oauth_server:scopes": "[]",
+   "public_url": ""
+  },
+  "queue": {
+   "queue:deadletterPath": "$default",
+   "queue:heartbeat_file": "",
+   "queue:max_attempts": "3",
+   "queue:path": "$basePath",
+   "queue:retry_delay": "5"
+  },
+  "rbac": {
+   "rbac:lockout_permission": "'rbac.manage'",
+   "rbac:path": "'/admin/roles'"
+  },
+  "schedule": {
+   "schedule:heartbeat_file": "",
+   "schedule:queue:coalesce": "true"
+  },
+  "session": {
+   "session:database_table": "'sessions'",
+   "session:storage": "'default'",
+   "session:trust_proxy_headers": "false",
+   "session:trusted_proxies": "[]"
+  },
+  "view": {
+   "view:paths": ""
+  },
+  "websocket": {
+   "websocket:address": "'0.0.0.0:8091'",
+   "websocket:certificate": "''",
+   "websocket:control": "'/tmp/naf-websocket.sock'",
+   "websocket:enabled": "false",
+   "websocket:key": "''",
+   "websocket:key_file": "''",
+   "websocket:max_connections": "2000",
+   "websocket:origins": "[]",
+   "websocket:token_lifetime": "60"
+  }
+ },
  "function_details": {
   "Naf\\Auth\\auth": {
    "namespace": "Naf\\Auth",
-   "signature": "auth(): Naf\\Auth\\Auth"
+   "signature": "auth(): Naf\\Auth\\Auth",
+   "summary": "The shared manager registered by the plugin bootstrap"
   },
   "Naf\\Board\\choice": {
    "namespace": "Naf\\Board",
-   "signature": "choice(array $arguments): string"
+   "signature": "choice(array $arguments): string",
+   "summary": "Render the reusable select"
   },
   "Naf\\Board\\extensions": {
    "namespace": "Naf\\Board",
-   "signature": "extensions(): Naf\\Board\\ExtensionRegistry"
+   "signature": "extensions(): Naf\\Board\\ExtensionRegistry",
+   "summary": "The container-bound extension registry"
   },
   "Naf\\Board\\field": {
    "namespace": "Naf\\Board",
-   "signature": "field(array $arguments): string"
+   "signature": "field(array $arguments): string",
+   "summary": "Render a labelled form field"
   },
   "Naf\\Board\\partial": {
    "namespace": "Naf\\Board",
-   "signature": "partial(string $template, array $data = []): string"
+   "signature": "partial(string $template, array $data = []): string",
+   "summary": "Render a mapped partial through the application's page renderer"
   },
   "Naf\\Board\\settings": {
    "namespace": "Naf\\Board",
-   "signature": "settings(): Naf\\Board\\Settings"
+   "signature": "settings(): Naf\\Board\\Settings",
+   "summary": "Declared settings for the signed-in person"
   },
   "Naf\\Board\\slot": {
    "namespace": "Naf\\Board",
-   "signature": "slot(string $slot, Naf\\Board\\Support\\SlotContextInterface|Naf\\Board\\Support\\UiContext $context, array $extra = []): string"
+   "signature": "slot(string $slot, Naf\\Board\\Support\\SlotContextInterface|Naf\\Board\\Support\\UiContext $context, array $extra = []): string",
+   "summary": "Render everything contributed to a named slot"
   },
   "Naf\\Board\\template": {
    "namespace": "Naf\\Board",
-   "signature": "template(string $template): string"
+   "signature": "template(string $template): string",
+   "summary": "Resolve a logical view name through the registered view mappings"
   },
   "Naf\\CLI\\command": {
    "namespace": "Naf\\CLI",
-   "signature": "command(): Naf\\CLI\\Support\\CommandRegistry"
+   "signature": "command(): Naf\\CLI\\Support\\CommandRegistry",
+   "summary": ""
   },
   "Naf\\Client\\client": {
    "namespace": "Naf\\Client",
-   "signature": "client(): Naf\\Client\\Core\\Client"
+   "signature": "client(): Naf\\Client\\Core\\Client",
+   "summary": ""
   },
   "Naf\\Database\\database": {
    "namespace": "Naf\\Database",
-   "signature": "database(): ?PDO"
+   "signature": "database(): ?PDO",
+   "summary": ""
   },
   "Naf\\Flow\\page": {
    "namespace": "Naf\\Flow",
-   "signature": "page(string $template, array $vars = [], ?string $fragment = null): Psr\\Http\\Message\\ResponseInterface"
+   "signature": "page(string $template, array $vars = [], ?string $fragment = null): Psr\\Http\\Message\\ResponseInterface",
+   "summary": "The host chooses both templates; clients never supply a template path"
   },
   "Naf\\Form\\csrf": {
    "namespace": "Naf\\Form",
-   "signature": "csrf(): Naf\\Form\\Support\\Csrf"
+   "signature": "csrf(): Naf\\Form\\Support\\Csrf",
+   "summary": ""
   },
   "Naf\\Form\\error": {
    "namespace": "Naf\\Form",
-   "signature": "error($field, Naf\\Form\\Core\\Validator $validator): ?string"
+   "signature": "error($field, Naf\\Form\\Core\\Validator $validator): ?string",
+   "summary": ""
   },
   "Naf\\Form\\error_class": {
    "namespace": "Naf\\Form",
-   "signature": "error_class($field, Naf\\Form\\Core\\Validator $validator): string"
+   "signature": "error_class($field, Naf\\Form\\Core\\Validator $validator): string",
+   "summary": ""
   },
   "Naf\\Form\\has_error": {
    "namespace": "Naf\\Form",
-   "signature": "has_error($field, Naf\\Form\\Core\\Validator $validator): bool"
+   "signature": "has_error($field, Naf\\Form\\Core\\Validator $validator): bool",
+   "summary": ""
   },
   "Naf\\Form\\is_post": {
    "namespace": "Naf\\Form",
-   "signature": "is_post(): bool"
+   "signature": "is_post(): bool",
+   "summary": ""
   },
   "Naf\\Form\\memory": {
    "namespace": "Naf\\Form",
-   "signature": "memory(string $key, mixed $default = null): ?string"
+   "signature": "memory(string $key, mixed $default = null): ?string",
+   "summary": ""
   },
   "Naf\\Form\\memory_checked": {
    "namespace": "Naf\\Form",
-   "signature": "memory_checked(string $key, mixed $value = 'on'): string"
+   "signature": "memory_checked(string $key, mixed $value = 'on'): string",
+   "summary": ""
   },
   "Naf\\Form\\memory_selected": {
    "namespace": "Naf\\Form",
-   "signature": "memory_selected(string $key, mixed $expectedValue): string"
+   "signature": "memory_selected(string $key, mixed $expectedValue): string",
+   "summary": ""
   },
   "Naf\\Form\\validator": {
    "namespace": "Naf\\Form",
-   "signature": "validator(): Naf\\Form\\Core\\Validator"
+   "signature": "validator(): Naf\\Form\\Core\\Validator",
+   "summary": ""
   },
   "Naf\\I18n\\lang": {
    "namespace": "Naf\\I18n",
-   "signature": "lang(): ?string"
+   "signature": "lang(): ?string",
+   "summary": ""
   },
   "Naf\\I18n\\t": {
    "namespace": "Naf\\I18n",
-   "signature": "t(string $key, array $params = []): string"
+   "signature": "t(string $key, array $params = []): string",
+   "summary": ""
   },
   "Naf\\I18n\\translation_paths": {
    "namespace": "Naf\\I18n",
-   "signature": "translation_paths(): Naf\\I18n\\Support\\TranslationPathRegistry"
+   "signature": "translation_paths(): Naf\\I18n\\Support\\TranslationPathRegistry",
+   "summary": "The registry of directories translations are read from"
   },
   "Naf\\I18n\\translator": {
    "namespace": "Naf\\I18n",
-   "signature": "translator(): Naf\\I18n\\Core\\Translator"
+   "signature": "translator(): Naf\\I18n\\Core\\Translator",
+   "summary": ""
   },
   "Naf\\MCP\\tokens": {
    "namespace": "Naf\\MCP",
-   "signature": "tokens(): Naf\\MCP\\Store\\TokenStoreInterface"
+   "signature": "tokens(): Naf\\MCP\\Store\\TokenStoreInterface",
+   "summary": ""
   },
   "Naf\\MCP\\tool": {
    "namespace": "Naf\\MCP",
-   "signature": "tool(): Naf\\MCP\\Support\\ToolRegistry"
+   "signature": "tool(): Naf\\MCP\\Support\\ToolRegistry",
+   "summary": ""
   },
   "Naf\\Mail\\mail": {
    "namespace": "Naf\\Mail",
-   "signature": "mail(): Naf\\Mail\\Models\\Mail"
+   "signature": "mail(): Naf\\Mail\\Models\\Mail",
+   "summary": ""
   },
   "Naf\\Mail\\mailer": {
    "namespace": "Naf\\Mail",
-   "signature": "mailer(?Naf\\Mail\\Core\\TransportInterface $transport = null): Naf\\Mail\\Core\\Mailer"
+   "signature": "mailer(?Naf\\Mail\\Core\\TransportInterface $transport = null): Naf\\Mail\\Core\\Mailer",
+   "summary": "Use a separate mailer for an explicit transport, or retrieve the shared mailer"
   },
   "Naf\\OAuth\\Client\\oauth": {
    "namespace": "Naf\\OAuth\\Client",
-   "signature": "oauth(string $provider): Naf\\OAuth\\Client\\Core\\Flow"
+   "signature": "oauth(string $provider): Naf\\OAuth\\Client\\Core\\Flow",
+   "summary": "The configured external provider of that name, registered by the plugin bootstrap"
   },
   "Naf\\OAuth\\Client\\oauth_button": {
    "namespace": "Naf\\OAuth\\Client",
-   "signature": "oauth_button(string $provider, ?string $label = null, ?string $next = null): string"
+   "signature": "oauth_button(string $provider, ?string $label = null, ?string $next = null): string",
+   "summary": "A link that starts a login with this provider"
   },
   "Naf\\OAuth\\Client\\oauth_token": {
    "namespace": "Naf\\OAuth\\Client",
-   "signature": "oauth_token(string $provider): ?Naf\\OAuth\\Client\\Token\\ProviderToken"
+   "signature": "oauth_token(string $provider): ?Naf\\OAuth\\Client\\Token\\ProviderToken",
+   "summary": "A provider token for the signed-in account that can be used right now"
   },
   "Naf\\OAuth\\Server\\token": {
    "namespace": "Naf\\OAuth\\Server",
-   "signature": "token(): Naf\\OAuth\\Server\\Core\\TokenContext"
+   "signature": "token(): Naf\\OAuth\\Server\\Core\\TokenContext",
+   "summary": "What the bearer token on this request allows"
   },
   "Naf\\ORM\\em": {
    "namespace": "Naf\\ORM",
-   "signature": "em(): Naf\\ORM\\Core\\EntityManager"
+   "signature": "em(): Naf\\ORM\\Core\\EntityManager",
+   "summary": ""
   },
   "Naf\\ORM\\repo": {
    "namespace": "Naf\\ORM",
-   "signature": "repo(string $repository): Naf\\ORM\\Repository\\AbstractRepository"
+   "signature": "repo(string $repository): Naf\\ORM\\Repository\\AbstractRepository",
+   "summary": ""
   },
   "Naf\\Queue\\queue": {
    "namespace": "Naf\\Queue",
-   "signature": "queue(?string $channel = null): Naf\\Queue\\Core\\Queue"
+   "signature": "queue(?string $channel = null): Naf\\Queue\\Core\\Queue",
+   "summary": ""
   },
   "Naf\\Rbac\\permissions": {
    "namespace": "Naf\\Rbac",
-   "signature": "permissions(): Naf\\Rbac\\Registry\\PermissionRegistry"
+   "signature": "permissions(): Naf\\Rbac\\Registry\\PermissionRegistry",
+   "summary": "What this installation knows how to grant"
   },
   "Naf\\Rbac\\rbac": {
    "namespace": "Naf\\Rbac",
-   "signature": "rbac(): Naf\\Rbac\\Rbac"
+   "signature": "rbac(): Naf\\Rbac\\Rbac",
+   "summary": "The roles and permissions themselves"
   },
   "Naf\\Rbac\\roles": {
    "namespace": "Naf\\Rbac",
-   "signature": "roles(): Naf\\Rbac\\Registry\\RoleRegistry"
+   "signature": "roles(): Naf\\Rbac\\Registry\\RoleRegistry",
+   "summary": "The roles a host ships with, and the kinds of place they may be granted in"
   },
   "Naf\\Schedule\\scheduler": {
    "namespace": "Naf\\Schedule",
-   "signature": "scheduler(): Naf\\Schedule\\Core\\Scheduler"
+   "signature": "scheduler(): Naf\\Schedule\\Core\\Scheduler",
+   "summary": ""
   },
   "Naf\\Session\\session": {
    "namespace": "Naf\\Session",
-   "signature": "session(): Naf\\Session\\Core\\Session"
+   "signature": "session(): Naf\\Session\\Core\\Session",
+   "summary": ""
   },
   "Naf\\Storage\\storage": {
    "namespace": "Naf\\Storage",
-   "signature": "storage(?string $name = null): Naf\\Storage\\Storage"
+   "signature": "storage(?string $name = null): Naf\\Storage\\Storage",
+   "summary": "Retrieve the configured default disk or a named disk"
   },
   "Naf\\View\\asset": {
    "namespace": "Naf\\View",
-   "signature": "asset(): Naf\\View\\Core\\Asset"
+   "signature": "asset(): Naf\\View\\Core\\Asset",
+   "summary": ""
   },
   "Naf\\View\\render": {
    "namespace": "Naf\\View",
-   "signature": "render(string $template, array $vars = []): Psr\\Http\\Message\\ResponseInterface"
+   "signature": "render(string $template, array $vars = []): Psr\\Http\\Message\\ResponseInterface",
+   "summary": ""
   },
   "Naf\\View\\s": {
    "namespace": "Naf\\View",
-   "signature": "s(array|string|null $value): array|string|null"
+   "signature": "s(array|string|null $value): array|string|null",
+   "summary": ""
   },
   "Naf\\View\\view": {
    "namespace": "Naf\\View",
-   "signature": "view(string $tpl, array $vars = []): string"
+   "signature": "view(string $tpl, array $vars = []): string",
+   "summary": ""
   },
   "Naf\\Websocket\\live": {
    "namespace": "Naf\\Websocket",
-   "signature": "live(): bool"
+   "signature": "live(): bool",
+   "summary": "Whether an installation has this switched on at all"
   },
   "Naf\\Websocket\\publisher": {
    "namespace": "Naf\\Websocket",
-   "signature": "publisher(): Naf\\Websocket\\Publisher"
+   "signature": "publisher(): Naf\\Websocket\\Publisher",
+   "summary": "How the application says that something changed"
   },
   "Naf\\Websocket\\token": {
    "namespace": "Naf\\Websocket",
-   "signature": "token(string $subject, array $channels): string"
+   "signature": "token(string $subject, array $channels): string",
+   "summary": "A token for these channels, for the browser that is being served right now"
   },
   "Naf\\abort": {
    "namespace": "Naf",
-   "signature": "abort(int $statusCode = 404, string $message = ''): never"
+   "signature": "abort(int $statusCode = 404, string $message = ''): never",
+   "summary": "Abort request with status code and message"
   },
   "Naf\\app": {
    "namespace": "Naf",
-   "signature": "app(): Naf\\Core\\App"
+   "signature": "app(): Naf\\Core\\App",
+   "summary": "Get the application instance"
   },
   "Naf\\config": {
    "namespace": "Naf",
-   "signature": "config(?string $key = null, mixed $default = null): mixed"
+   "signature": "config(?string $key = null, mixed $default = null): mixed",
+   "summary": "Get configuration value by key"
   },
   "Naf\\env": {
    "namespace": "Naf",
-   "signature": "env(): string"
+   "signature": "env(): string",
+   "summary": "Get the current environment"
   },
   "Naf\\event": {
    "namespace": "Naf",
-   "signature": "event(): Naf\\Core\\EventManager"
+   "signature": "event(): Naf\\Core\\EventManager",
+   "summary": "Get the event dispatcher instance"
   },
   "Naf\\guard": {
    "namespace": "Naf",
-   "signature": "guard(): Naf\\Support\\Guard"
+   "signature": "guard(): Naf\\Support\\Guard",
+   "summary": "Get the guard instance"
   },
   "Naf\\json": {
    "namespace": "Naf",
-   "signature": "json(mixed $data, int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface"
+   "signature": "json(mixed $data, int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface",
+   "summary": "Create JSON response"
   },
   "Naf\\log": {
    "namespace": "Naf",
-   "signature": "log(): Psr\\Log\\LoggerInterface"
+   "signature": "log(): Psr\\Log\\LoggerInterface",
+   "summary": "Get logger instance"
   },
   "Naf\\param": {
    "namespace": "Naf",
-   "signature": "param(): Naf\\Support\\RequestParameter"
+   "signature": "param(): Naf\\Support\\RequestParameter",
+   "summary": "Get request parameter handler instance"
   },
   "Naf\\plugin": {
    "namespace": "Naf",
-   "signature": "plugin(?string $name = null): Naf\\Support\\Plugin|array"
+   "signature": "plugin(?string $name = null): Naf\\Support\\Plugin|array",
+   "summary": "Get a specific plugin, or all when no argument is given"
   },
   "Naf\\redirect": {
    "namespace": "Naf",
-   "signature": "redirect(string $url, int $status = 302): Psr\\Http\\Message\\ResponseInterface"
+   "signature": "redirect(string $url, int $status = 302): Psr\\Http\\Message\\ResponseInterface",
+   "summary": "Create a redirect response"
   },
   "Naf\\refresh": {
    "namespace": "Naf",
-   "signature": "refresh(): Psr\\Http\\Message\\ResponseInterface"
+   "signature": "refresh(): Psr\\Http\\Message\\ResponseInterface",
+   "summary": "Create a refresh response redirecting to the current path"
   },
   "Naf\\request": {
    "namespace": "Naf",
-   "signature": "request(): Psr\\Http\\Message\\ServerRequestInterface|Psr\\Http\\Message\\RequestInterface"
+   "signature": "request(): Psr\\Http\\Message\\ServerRequestInterface|Psr\\Http\\Message\\RequestInterface",
+   "summary": "Get current request instance"
   },
   "Naf\\response": {
    "namespace": "Naf",
-   "signature": "response(mixed $content = '', int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface"
+   "signature": "response(mixed $content = '', int $status = 200, array $headers = []): Psr\\Http\\Message\\ResponseInterface",
+   "summary": "Create a new response"
   },
   "Naf\\route": {
    "namespace": "Naf",
-   "signature": "route(?string $name = null, array $params = []): Naf\\Core\\Route|string"
+   "signature": "route(?string $name = null, array $params = []): Naf\\Core\\Route|string",
+   "summary": "Get the route instance or generate URL for a named route"
   }
  },
  "functions": {

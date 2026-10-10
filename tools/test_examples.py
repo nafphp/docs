@@ -493,8 +493,11 @@ def test_integrations(root):
         plugin_response = client.request('/plugin-hello')
         expect(plugin_response[0] == 200 and json.loads(plugin_response[2]) == {'message': 'Hello from the plugin'},
                'Composer discovers the documented plugin and loads its route and controller')
-        expect('HTTP smoke tests passed.' in run([sys.executable, 'tests/http_smoke.py', client.base], root),
-               'Documented HTTP smoke test runs against a live application')
+        smoke = subprocess.run([*PHP, 'vendor/bin/phpunit', '--bootstrap', 'vendor/autoload.php',
+                                'tests/HttpSmokeTest.php'], cwd=root, capture_output=True, text=True,
+                               env={**os.environ, 'APP_URL': client.base})
+        expect(smoke.returncode == 0 and 'OK (2 tests' in smoke.stdout,
+               'Documented PHPUnit HTTP smoke test passes against a live application: ' + smoke.stdout[-400:])
         download = client.request('/downloads/example')
         expect(download[0] == 200 and download[2] == 'Example download\n', 'Download stream emits file contents')
         expect(download[1]['Content-Disposition'] == 'attachment; filename="example.txt"', 'Controlled download filename')
