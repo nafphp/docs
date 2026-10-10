@@ -50,8 +50,11 @@ final class RecordSignup implements QueueJobInterface
 }
 ```
 
-Jobs implement `QueueJobInterface`. Their queued payload reaches the constructor. Keep it
-serializable and pass identifiers or values rather than entity objects. Throw an exception
+Jobs implement `QueueJobInterface`. The worker builds the job with
+`make(RecordSignup::class, $payload)`: a constructor parameter typed `array` receives the whole
+payload ([why](dependency-injection.md#constructor-parameters)), and other services in the
+constructor are injected as usual. Keep the payload serializable and pass identifiers or values
+rather than entity objects. Throw an exception
 to report failure. Drivers with deadletter support retain failed work for inspection/retry.
 
 ## Queueing it
