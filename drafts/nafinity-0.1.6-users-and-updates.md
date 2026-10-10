@@ -22,7 +22,16 @@ The primary invitation action sits at the top right above the table.
 
 The editor starts with account details: name, email and active status. It shows
 the account source, creation time in UTC and email verification state. Roles and
-access appear in a separate collapsed section. Disabling an account preserves
+access appear in a separate collapsed section. Each place has one compact row:
+the board label on the left and its directly assigned roles on the right. A pencil
+disclosure reveals the existing searchable multiselect; several roles can be held
+on the same board. Global, all-board and individual-board grants remain separate.
+Changing a selection updates its summary; **Save roles** submits all rows together,
+including closed rows, through the native RBAC endpoint and privilege policy.
+Grants in unavailable or archived scopes are displayed read-only and preserved.
+Your own roles and roles viewed without `rbac.manage` have no edit controls.
+
+Disabling an account preserves
 its content, roles and memberships. You cannot disable your own account or the
 last active installation administrator.
 
@@ -168,3 +177,13 @@ Regression coverage checks bounded reads, lazy editors, literal searches, CSRF,
 unauthorized reads/writes, malformed selection, self protection, privilege reach,
 role preservation, idempotency, multiple-property merging, contributed field types
 and full rollback after a later property write fails.
+
+## Shared multiselect controls
+
+For controls contributing to the same native array, `choice()` accepts distinct
+`id` and `listId` values and `clearField: false`. Put one empty marker before all
+of those controls. Repeating the bare marker between array entries would discard
+earlier selections when PHP parses the form. Closed role rows retain their native
+checkboxes and submit with the rest of the form; JavaScript only draws the dropdown.
+The component enhances controls in `nafinity:fragment-updated` containers and
+closes their popovers on `nafinity:fragment-removing`.
