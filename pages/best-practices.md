@@ -17,6 +17,23 @@ classes with `make()` and resolve registered interfaces.
 
 Prefer class or interface names as container keys when you want typed injection. String keys
 are also supported, but you must retrieve them explicitly, for example inside a factory.
+The [controller service example](controllers.md#dependencies) defines both classes and
+shows successful lookups, invalid input and a missing resource.
+
+## Use existing extension points
+
+Use the container to select an implementation or configure a service. Use an
+[event](events.md) when independent listeners should react to a completed application
+operation, such as recording an audit entry after an import. A custom event needs both
+a dispatch site and registered listeners; naming it alone does nothing. Keep an operation's
+required business rules in the service that performs it so they cannot be skipped by a
+missing listener.
+
+Check the [existing packages](choosing-packages.md) and their configuration before adding
+another renderer, mailer or dispatcher. If an application helper is useful, import it from
+its own namespace and load its file explicitly or through Composer's `autoload.files`.
+Putting a file at `app/functions.php` alone does not load it. Reuse `response()`,
+`Naf\View\s()` and other existing helpers for the behavior they already provide.
 
 ## Read data deliberately
 

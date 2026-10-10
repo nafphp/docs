@@ -46,6 +46,10 @@ SQLite API persistence and errors, and database migrations (apply, repeat and ro
 service/HTTP tests, plugin discovery, application commands, streamed downloads, queue failure/retry,
 scheduling, MCP scopes and a fake HTTP transport. The small scenarios check shared layouts,
 HTML escaping, bounded query input, response headers and sanitized JSON failures.
+Separate controller and view fixtures check named route arguments, constructor injection,
+response types, template variables, partials, layout blocks, asset tags and custom search
+paths through real HTTP requests and CLI rendering. The ORM fixture also saves and reads a
+many-to-many relation and verifies that repeating it does not duplicate the pivot row.
 The Alexa example runs in its own minimal host and checks setup, doctor, OAuth discovery,
 service tokens, JSON/SSE tool calls and revocation against the published packages.
 It never sends mail externally. Temporary projects and servers are cleaned up, including on

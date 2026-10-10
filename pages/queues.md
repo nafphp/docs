@@ -138,6 +138,15 @@ autorestart=true
 Replace the application path and run the supervisor with access to the same configuration
 and storage as the HTTP application. See [Deployment](deployment.md).
 
+### One-off background attempts
+
+`pushAndRun($class, $payload = [])` enqueues a job and launches a detached
+`vendor/bin/naf queue:consume --once` process. It always launches the unqualified worker;
+it does not pass the queue's selected channel. A named-channel job can therefore remain
+queued, and the process can consume an earlier default-channel job instead. Its output
+is discarded and the caller does not wait for completion. Use supervised channel-aware
+workers for dependable execution and visible failures.
+
 ## Jobs that failed
 
 The worker defaults to three attempts with a five-second retry delay. Configure
