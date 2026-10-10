@@ -89,9 +89,11 @@ python tools/check_pages.py
 mkdocs build --strict
 ```
 
-The generator installs published `naf/*` libraries and reflects function signatures, namespaces
-and versions. It excludes `@internal` helpers. It writes `pages/function-index.md`,
-`pages/packages.md` and `tools/packages.json`; review and commit them together. `--project`
+The generator installs published `naf/*` libraries and reflects function signatures and
+summaries, namespaces, versions, command definitions and configuration defaults. It excludes
+`@internal` helpers. It writes `pages/function-index.md`, `pages/cli-commands.md`,
+`pages/configuration-reference.md`, `pages/packages.md` and `tools/packages.json`; review and
+commit them together. `--project`
 accepts an existing installation containing all documented packages and requires no download.
 
 `check_pages.py` recursively checks all chapters, including `pages/recipes/`, against that

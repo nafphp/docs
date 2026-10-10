@@ -28,6 +28,32 @@ Inspect the status before using the body. HTTP 4xx and 5xx responses are returne
 caller; they do not by themselves trigger an exception or retry. Transport failures raise
 `Naf\Client\Exception\ClientException`. Casting the body to a string loads it into memory.
 
+## Send JSON
+
+```php-inline
+use Nyholm\Psr7\Request;
+use function Naf\Client\client;
+
+$request = new Request('POST', 'https://api.example.com/orders', [
+    'Content-Type' => 'application/json',
+    'Accept'       => 'application/json',
+], json_encode(['sku' => 'ABC-1', 'quantity' => 2], JSON_THROW_ON_ERROR));
+
+// Creating an order is not safe to repeat, so this call must not be retried.
+$response = client()->withOptions(['retries' => 0])->sendRequest($request);
+
+if ($response->getStatusCode() !== 201) {
+    throw new RuntimeException('Order rejected with HTTP ' . $response->getStatusCode());
+}
+
+$order = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
+```
+
+Headers and the body belong to the PSR-7 request; the client sends them unchanged. Add an
+`Authorization` header the same way, with a secret read from configuration. Check the
+status and decode the body yourself: the client does not interpret JSON or throw for 4xx
+and 5xx responses.
+
 ## Configuration
 
 Add a `client` array to `app/config.php`. Per-call `withOptions()` values override that
