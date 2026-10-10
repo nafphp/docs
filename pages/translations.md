@@ -134,3 +134,12 @@ replace matching keys from earlier files; the application's configured translati
 is always read last. Use `remove('acme/blog')` to unregister a path or pass `replace: true`
 to replace an existing id. Changes to the registry reload an already-created translator on
 its next translation.
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| Keys appear instead of text | The language file exists in a translation directory and contains valid JSON; the application log names the problem |
+| The configured `language` is ignored | Browsers send `Accept-Language`, which takes precedence; see [Choosing the language](#choosing-the-language) |
+| `de-AT.json` is not used | Codes are reduced to their base language; name the file `de.json` |
+| A placeholder stays visible | The parameter name matches `:name` and the value is a scalar or `Stringable` |

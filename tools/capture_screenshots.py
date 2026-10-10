@@ -158,12 +158,37 @@ def capture_flow(playwright, starter, tmp):
     route = re.search(r'Add this route to the existing `app/routes.php`:\n\n```php-inline\n(.*?)^```',
                       (ex.PAGES / 'flow.md').read_text(), re.M | re.S)
     (root / 'app/routes.php').write_text('<?php\n\n' + route.group(1))
-    with ex.server(root, 'router.php') as client, browser_page(playwright, 640, 400) as page:
-        page.goto(client.base + '/flow-example')
+    with ex.server(root, 'router.php') as client:
+        with browser_page(playwright, 640, 400) as page:
+            page.goto(client.base + '/flow-example')
+            page.wait_for_load_state('networkidle')
+            page.locator('input').first.fill('view')
+            page.wait_for_timeout(1200)
+            shot(page, 'flow-search', selector='body')
+        record_flow(playwright, client.base)
+
+
+def record_flow(playwright, base):
+    """A few seconds of typing, so readers see both fields and the results follow along."""
+    with tempfile.TemporaryDirectory() as videos:
+        browser = playwright.chromium.launch()
+        context = browser.new_context(viewport={'width': 640, 'height': 360}, color_scheme='light',
+                                      record_video_dir=videos, record_video_size={'width': 640, 'height': 360})
+        page = context.new_page()
+        page.goto(base + '/flow-example')
         page.wait_for_load_state('networkidle')
-        page.locator('input').first.fill('view')
+        page.wait_for_timeout(600)
+        page.locator('input').first.press_sequentially('view', delay=260)
         page.wait_for_timeout(1200)
-        shot(page, 'flow-search', selector='body')
+        page.locator('input').nth(1).fill('')
+        page.locator('input').nth(1).press_sequentially('queue', delay=260)
+        page.wait_for_timeout(1500)
+        video = page.video.path()
+        context.close()
+        browser.close()
+        target = SHOTS / 'flow-search.webm'
+        shutil.copyfile(video, target)
+        print(f'  wrote {target.relative_to(ex.PAGES.parent)}', flush=True)
 
 
 def capture_console(first, tmp):

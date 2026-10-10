@@ -191,3 +191,20 @@ plugin templates as trusted code.
 [Flow](flow.md) connects JavaScript classes or object factories to individual HTML containers.
 Use it when a view needs reactive fields, shared state or backend fragments without a page
 reload. The Flow chapter covers the existing View asset collector and a complete example.
+
+## Configuration
+
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `view:paths` | list of directories | `['views', 'app/views']` | Application template directories, searched before plugin templates; relative to the project root unless absolute |
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| `View x not found in any known paths.` | The file name and directory: dots in the name become `/`, and the file ends in `.phtml` under a directory from `view:paths` |
+| `Insecure path detected!` | The template name contains characters other than letters, digits, `_`, `-`, `.` and `/` |
+| `Guard "safePath" not found.` or `Guard "safeOutput" not found.` | The code runs under CLI; see [Templates outside HTTP requests](#templates-outside-http-requests) |
+| A variable is undefined in a partial | Partials receive only the variables passed to `view()` |
+| A stylesheet or script tag is missing | The path ends in `.css` or `.js` without a query string, and `add()` runs before the layout renders that collection |
+| `Block name was not opened.` | Every `endblock('name')` needs a preceding `block('name')` with the same name |

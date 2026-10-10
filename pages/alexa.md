@@ -15,6 +15,20 @@ The example exposes one public `service_status` tool, authenticated with a servi
 It needs no customer account linking. The NAF setup and HTTP exchange are tested against
 published packages by this documentation's example runner.
 
+```mermaid
+flowchart TD
+    A["Alexa+ at Amazon"] -- "1. POST /oauth/token<br/>client_credentials, scope mcp:service" --> O["NAF OAuth server"]
+    O -- "service access token" --> A
+    A -- "2. POST /mcp with the Bearer token" --> M["NAF MCP endpoint"]
+    M -- "validate token, audience and scope" --> O
+    M --> R["Tool registry"]
+    R --> S["service_status tool"]
+    L["Optional account linking:<br/>authorization code, scope mcp:tools"] -.-> O
+```
+
+Both the OAuth server and the MCP endpoint run in the same NAF application; the MCP endpoint
+validates tokens through the OAuth package, not over HTTP.
+
 Amazon's [MCP Toolkit overview](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-overview.html)
 currently lists availability in the United States. Amazon registration requires access to
 private developer tooling and a confirmed way to provision the service credentials. Read

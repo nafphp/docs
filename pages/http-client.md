@@ -200,3 +200,14 @@ echo "HTTP transport test passed.\n";
 
 Run `php bin/http-client-demo.php` from the application root. Expect `HTTP transport test passed.`
 See [Testing applications](testing.md) for service and HTTP tests.
+
+## If the result is different
+
+| What you see | What to check |
+|---|---|
+| `HTTP request failed: …` | The message comes from the transport: DNS, TLS, timeout or connection errors |
+| `No HTTP transport available` | Every transport passed to `new Client([...])` reports `isAvailable() === false`; the default list always has the stream fallback |
+| Requests fail without `ext-curl` | The stream fallback needs `allow_url_fopen`; enable it or install `ext-curl` |
+| `The selected HTTP transport does not support streaming.` | `streaming => true` needs the cURL transport |
+| A 404 or 500 response does not throw | Expected: inspect `getStatusCode()` yourself |
+| A POST arrived twice | Set `retries` to `0` for operations that must not be repeated |
