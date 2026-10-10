@@ -535,9 +535,6 @@ def test_alexa(root):
     copy_examples('alexa.md', root)
     environment = fragment('alexa.md', 'Set these application environment values', 'ini')
     (root / '.env').write_text('APP_ENV=test\n' + environment)
-    registration = fragment('alexa.md', "Add this registration in the application's root `bootstrap.php`")
-    (root / 'app/alexa.php').write_text('<?php\n\n' + registration)
-    bootstrap_include(root, 'app/alexa.php')
     run([*COMPOSER, 'dump-autoload', '--no-interaction'], root)
     setup = run([*PHP, 'vendor/bin/naf', 'alexa:setup', '--migrate'], root)
     plain = re.sub(r'\x1b\[[0-9;]*m', '', setup)
@@ -563,12 +560,15 @@ def test_alexa(root):
         expect(result[0] == 200 and metadata['code_challenge_methods_supported'] == ['S256']
                and 'client_credentials' in metadata['grant_types_supported'],
                'OAuth-only discovery works without signing keys')
-        fields = {'grant_type': 'client_credentials', 'scope': 'mcp:service', 'resource': resource}
-        result = client.request('/oauth/token', 'POST', urllib.parse.urlencode(fields).encode(),
-                                {'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': basic})
-        credentials = json.loads(result[2])
-        expect(result[0] == 200 and 'refresh_token' not in credentials,
-               'Alexa service client obtains a token without a refresh token')
+        token_example = fragment('alexa.md', 'Verify the service credentials independently of Amazon.', 'bash')
+        command = shlex.split(token_example.split('\n', 1)[1].replace('\\\n', ''))
+        # Supply disposable fixture credentials without an interactive password prompt.
+        command[command.index('--user') + 1] = client_id[1] + ':' + secret[1]
+        command[-1] = client.base + '/oauth/token'
+        credentials = json.loads(run(command, root))
+        expect(credentials['token_type'] == 'Bearer' and credentials['scope'] == 'mcp:service'
+               and 0 < credentials['expires_in'] <= 3600 and 'refresh_token' not in credentials,
+               'Documented curl exchange obtains a short-lived service token without a refresh token')
         headers = {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream',
                    'Authorization': 'Bearer ' + credentials['access_token'], 'MCP-Protocol-Version': '2025-11-25'}
 
