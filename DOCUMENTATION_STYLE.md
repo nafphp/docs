@@ -18,6 +18,11 @@ Describe the current design. Previous drafts and possible future features belong
 or design proposals. "Returns null" or "throws DatabaseException" is more useful than
 "handles errors". Preserve technical qualifications when simplifying language.
 
+When correcting an invalid API example, preserve the useful explanation around it and
+replace the example with a working equivalent. Before removing or merging a section,
+check that its concepts, decision guidance and usable examples remain covered and linked.
+Shorter text is not a goal when it removes information a reader needs.
+
 ## Support the reader
 
 Begin tutorials with the result the reader will build, then explain the starting project and

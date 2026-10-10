@@ -7,6 +7,7 @@ observable behavior through a real PHP HTTP server. Servers and fixtures are cle
 import argparse
 import base64
 from contextlib import contextmanager
+import html
 import http.cookiejar
 import json
 import os
@@ -160,6 +161,114 @@ def test_first(client):
     expect(result[0] == 200 and json.loads(result[2]) == {'hello': 'Ada'}, 'First app JSON route')
     expect('application/json' in result[1]['Content-Type'], 'JSON content type')
     expect(client.request('/does-not-exist')[0] == 404, 'Unknown HTML route')
+
+
+def test_controllers(root):
+    routes = root / 'app/routes.php'
+    source = routes.read_text()
+    source += '\n' + fragment('controllers.md', 'Add this route to your existing `app/routes.php` to try two placeholders:')
+    source += '\n' + fragment('controllers.md', 'Add the product routes to `app/routes.php`:')
+    accepted = fragment('controllers.md', 'PSR-7 responses are immutable.')
+    source += "\nroute()->add('GET', '/accepted', static function (): ResponseInterface {\n" + accepted + "\n}, 'accepted');\n"
+    routes.write_text(source)
+    run([*PHP, '-l', str(routes)], root)
+    with server(root) as client:
+        greeting = client.request('/hello/Ada')
+        expect(greeting[0] == 200 and json.loads(greeting[2]) == {'hello': 'Ada'}, 'Controller receives its named route argument')
+        ping = client.request('/ping')
+        expect(ping[0] == 200 and ping[2] == 'Pong!'
+               and ping[1]['Content-Type'] == 'text/plain; charset=UTF-8', 'Closure returns a typed text response')
+        member = client.request('/teams/alpha/members/ada')
+        expect(member[0] == 200 and json.loads(member[2]) == {'team': 'alpha', 'member': 'ada'},
+               'Multiple route arguments follow names even when declaration order differs')
+        listing = client.request('/products')
+        expect(listing[0] == 200 and [p['id'] for p in json.loads(listing[2])['products']] == ['notebook', 'pencil'],
+               'Constructor injection resolves the complete documented application service')
+        product = client.request('/products/notebook')
+        expect(product[0] == 200 and json.loads(product[2]) == {'id': 'notebook', 'name': 'Notebook'}, 'Injected service finds a product')
+        for identifier, status, message in (('missing', 404, 'Product not found'), ('INVALID', 400, 'Invalid product identifier')):
+            result = client.request('/products/' + identifier)
+            expect(result[0] == status and json.loads(result[2]) == {'error': message}, 'Controller distinguishes invalid and missing resources')
+        result = client.request('/accepted')
+        expect(result[0] == 202 and result[1]['X-Application'] == 'Catalogue'
+               and json.loads(result[2]) == {'accepted': True}, 'Controller retains immutable status and header changes')
+
+
+def test_views(root):
+    routes = root / 'app/routes.php'
+    source = routes.read_text() + '\n' + fragment('views.md', 'For a JSON response containing a rendered fragment,')
+    routes.write_text(source)
+    run([*PHP, '-l', str(routes)], root)
+    template = root / 'app/views/hello.phtml'
+    full = template.read_text()
+    plain = next(content for name, content in BLOCKS.findall((PAGES / 'views.md').read_text())
+                 if name == 'app/views/hello.phtml')
+    template.write_text(plain)
+    with server(root) as client:
+        result = client.request('/hello')
+        expect(result[0] == 200 and '<h1>Greeting</h1>' in result[2]
+               and 'Hello, Ada &amp; friends!' in result[2], 'Standalone template receives and escapes its variables')
+        expect(result[1]['Content-Type'] == 'text/html; charset=UTF-8', 'View route explicitly sets its content type')
+    template.write_text(full)
+    with server(root) as client:
+        result = client.request('/hello')
+        expect(result[0] == 200 and '<title>Greeting</title>' in result[2]
+               and '<footer>Page: Greeting</footer>' in result[2], 'Layout receives named blocks and original data')
+        expect('<p class="greeting">Hello, Ada &amp; friends!</p>' in result[2]
+               and '&lt;p' not in result[2], 'Partial receives explicit data and returns markup without double escaping')
+        fragment_result = client.request('/hello-fragment')
+        expect(fragment_result[0] == 200 and json.loads(fragment_result[2])['html'].strip()
+               == '<p class="greeting">Hello, Ada &amp; friends!</p>', 'view() supplies a string inside a JSON response')
+    expected = '<p class="greeting">Hello, Ada &amp; friends!</p>'
+    expect(run([*PHP, 'bin/render-greeting.php'], root).strip() == expected, 'Documented CLI script boots and renders a partial')
+    expect(run([*PHP, str(root / 'bin/render-greeting.php')], root.parent).strip() == expected,
+           'Relative template paths resolve from the application root outside its working directory')
+    payload = '<img src=x onerror="alert(1)">'
+    routes.write_text(source.replace("'Ada & friends'", "'" + payload + "'"))
+    with server(root) as client:
+        result = client.request('/hello')
+        expect(result[0] == 200 and html.escape(payload, quote=True) in result[2]
+               and '<img' not in result[2], 'Partial escapes untrusted text and quoted attribute characters')
+    routes.write_text(source)
+    title_line = next(line for line in full.splitlines() if "$this->block('title')" in line)
+    template.write_text('OUTSIDE-BLOCK\n' + full.replace(title_line, ''))
+    with server(root) as client:
+        result = client.request('/hello')
+        expect(result[0] == 200 and '<title>NAF</title>' in result[2], 'Layout uses the default for an unfilled title block')
+        expect('OUTSIDE-BLOCK' not in result[2] and '<h1>Greeting</h1>' in result[2],
+               'A layout renders captured blocks rather than an implicit whole-page content variable')
+    registration = fragment('views.md', '## Assets', 'html+php')
+    duplicate_css = next(line for line in registration.splitlines() if "asset()->add('/css/app.css')" in line)
+    query_assets = fragment('views.md', 'Since View 0.2.3, `add()` reads the extension')
+    template.write_text(registration + '\n' + duplicate_css + '\n<?php\n' + query_assets + '\n?>\n' + full)
+    with server(root) as client:
+        result = client.request('/hello')
+        expected_tags = fragment('views.md', 'The registrations above produce these tags', 'html').splitlines()
+        expect(result[0] == 200 and all(tag in result[2] for tag in expected_tags), 'Asset collector produces the documented CSS and JS tags')
+        expect(result[2].count('href="/css/app.css"') == 1, 'Duplicate asset registrations produce one tag')
+        expect('href="/css/app.css?v=2"' in result[2]
+               and '<script type="module" src="/js/editor.mjs#main"></script>' in result[2], 'Asset collection retains query strings and recognizes module files')
+    template.write_text(full)
+    config = root / 'app/config.php'
+    full_config = config.read_text()
+    config.write_text("<?php return ['view' => ['paths' => ['templates']]];")
+    paths = run([*PHP, '-r', "require 'bootstrap.php'; echo json_encode(\\Naf\\config('view:paths'));"], root)
+    expect(json.loads(paths) == ['templates', 'app/views', 'src/views'], 'Short view path lists merge by numeric position')
+    config.write_text(full_config)
+    custom = root / 'templates/hello.phtml'
+    custom.parent.mkdir()
+    custom.write_text(full.replace('<h1>', '<h1 data-source="custom">'))
+    with server(root) as client:
+        result = client.request('/hello')
+        expect(result[0] == 200 and 'data-source="custom"' in result[2], 'Custom template directory takes precedence over app/views')
+    shutil.copytree(root / 'app/views/layouts', root / 'templates/layouts')
+    shutil.copytree(root / 'app/views/partials', root / 'templates/partials')
+    config.write_text('<?php\n' + fragment('views.md', 'To search only `templates/`, use a string instead of a list:'))
+    with server(root) as client:
+        result = client.request('/hello')
+        expect(result[0] == 200 and 'data-source="custom"' in result[2], 'Single directory string supports templates, layouts and partials')
+        custom.unlink()
+        expect(client.request('/hello')[0] == 500, 'Single directory setting excludes the conventional application paths')
 
 
 def test_small_website(root):
@@ -666,6 +775,11 @@ def main():
                 copy_examples('orm.md', fixture)
                 for _ in range(2):
                     expect(run([*PHP, 'bin/products-demo.php'], fixture).strip() == 'NAF for Beginners', 'ORM save/find is repeatable')
+                    expect(run([*PHP, 'bin/product-tags-demo.php'], fixture).strip() == 'Featured', 'ORM saves and reads a repeatable many-to-many relation')
+                with sqlite3.connect(fixture / 'storage/app.sqlite') as database:
+                    expect(database.execute('SELECT COUNT(*) FROM tags').fetchone()[0] == 1
+                           and database.execute('SELECT COUNT(*) FROM product_tag').fetchone()[0] == 1,
+                           'Repeated relation example retains one tag and one pivot row')
             elif feature == 'first-app':
                 # The tutorial replaces bootstrap/routes before removing the starter examples.
                 for name in ('app/Controllers/WebsiteController.php', 'app/Service/QuoteService.php',
@@ -679,6 +793,14 @@ def main():
                 if feature == 'contact': test_contact(fixture, client)
                 if feature == 'login': test_login(fixture, client)
             print(f'PASS {feature}', flush=True)
+        for chapter, test in (('controllers', test_controllers), ('views', test_views)):
+            fixture = root / chapter
+            shutil.copytree(starter, fixture)
+            copy_examples('first-app.md', fixture)
+            copy_examples(chapter + '.md', fixture)
+            run([*COMPOSER, 'dump-autoload', '--no-interaction'], fixture)
+            test(fixture)
+            print(f'PASS {chapter}', flush=True)
         flow = root / 'flow'
         shutil.copytree(starter, flow)
         run([*COMPOSER, 'require', 'naf/flow:^0.1', '--with-all-dependencies',

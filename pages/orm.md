@@ -37,8 +37,14 @@ final class Product extends AbstractModel
     protected string $sku = '';
     protected string $status = 'active';
     protected string $created_at = '';
+    protected array $tags = [];
 
     public function getName(): string { return $this->name; }
+
+    public function addTag(Tag $tag): void
+    {
+        $this->tags[] = $tag;
+    }
 }
 ```
 
@@ -146,6 +152,109 @@ public `$pivotTables` mapping on either entity can override the pivot table name
 There is no lazy loading or proxy object. Write a repository query explicitly when you need
 to load a relationship. For queries beyond the finders, use PDO through `database()`.
 
+### Save and read a many-to-many relation
+
+Continue the SQLite example above. The `Product` model's `$tags` array and `addTag()`
+method hold related entities. Create the related model and its repository:
+
+```php title="app/Models/Tag.php"
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Naf\ORM\Model\AbstractModel;
+
+final class Tag extends AbstractModel
+{
+    protected string $name = '';
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+}
+```
+
+```php title="app/Repositories/TagRepository.php"
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repositories;
+
+use App\Models\Tag;
+use Naf\ORM\Repository\AbstractRepository;
+
+final class TagRepository extends AbstractRepository
+{
+    protected function getEntityClass(): string
+    {
+        return Tag::class;
+    }
+}
+```
+
+This script creates the two additional tables, finds or creates a tag, saves the relation,
+then reads it through the pivot. As with the first script, these schema statements are for
+a disposable demonstration; deployed applications use migrations.
+
+```php title="bin/product-tags-demo.php"
+<?php
+
+declare(strict_types=1);
+
+use App\Models\{Product, Tag};
+use App\Repositories\{ProductRepository, TagRepository};
+
+use function Naf\Database\database;
+use function Naf\ORM\{em, repo};
+
+require dirname(__DIR__) . '/bootstrap.php';
+
+$pdo = database() ?? throw new \LogicException('Database is not configured.');
+$pdo->exec('CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+)');
+$pdo->exec('CREATE TABLE IF NOT EXISTS product_tag (
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    tag_id INTEGER NOT NULL REFERENCES tags(id),
+    PRIMARY KEY (product_id, tag_id)
+)');
+
+$product = repo(ProductRepository::class)->findOneBy('sku', 'ABC-1')
+    ?? throw new \LogicException('Run products-demo.php first.');
+$tags = repo(TagRepository::class);
+$tag = $tags->findOrCreateBy('name', 'Featured');
+$product->addTag($tag);
+em()->save($product);
+
+$related = $tags->findByPivot(Product::class, (int) $product->getId());
+echo implode(', ', array_map(static fn(Tag $tag): string => $tag->getName(), $related)) . "\n";
+```
+
+Run from the project root:
+
+```bash
+composer dump-autoload
+php bin/products-demo.php
+php bin/product-tags-demo.php
+```
+
+The scripts print `NAF for Beginners` and `Featured`. Repeating the second script reuses
+the tag and retains one pivot row because the pair is the pivot table's primary key.
+`findOrCreateBy('name', ...)` works here because `name` is the tag's only required scalar
+field; it does not fill other required columns or provide an atomic upsert for concurrent
+requests.
+
+The repository being called determines which entities are returned:
+`TagRepository::findByPivot(Product::class, $productId)` returns tags for a product;
+`ProductRepository::findByPivot(Tag::class, $tagId)` returns products for a tag. If you put
+such a query inside a model's `getTags()` accessor, that is application-defined loading,
+not an automatic ORM feature. Reading a product alone does not populate its `$tags` array.
+
 ## Transactions
 
 A single `em()->save()` opens a transaction when none is active. To span several saves:
@@ -165,8 +274,10 @@ try {
 }
 ```
 
-`em()->clear()` releases the manager's tracked state; call it periodically in long-running
-workers. Define and migrate your schema yourself: the ORM does not generate it.
+`em()->clear()` resets the manager's transaction bookkeeping and throws while a manager
+transaction is active. Entities are owned by application code; release those references
+when they are no longer needed in a long-running worker. The manager has no persistent
+identity map to flush. Define and migrate your schema yourself: the ORM does not generate it.
 
 ## If the result is different
 
