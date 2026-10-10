@@ -552,7 +552,7 @@ def test_alexa(root):
            'Alexa doctor validates the documented host and tool')
     resource = 'https://tools.example.com/mcp'
     basic = 'Basic ' + base64.b64encode((client_id[1] + ':' + secret[1]).encode()).decode()
-    with server(root) as client:
+    with server(root, 'public/index.php') as client:
         for path in ('/.well-known/oauth-protected-resource', '/.well-known/oauth-protected-resource/mcp'):
             result = client.request(path)
             metadata = json.loads(result[2])

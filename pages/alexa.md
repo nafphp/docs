@@ -148,6 +148,16 @@ latency, login/consent UX, Amazon account access or certification.
 
 ## Verify HTTP
 
+For local protocol checks, pass the existing web entry point as the development server's
+router. PHP 8.3 otherwise treats some `/.well-known/` paths as missing static files:
+
+```bash
+php -S 127.0.0.1:8000 -t public public/index.php
+```
+
+For public hosting, route these paths through the NAF front controller as described in
+[Deployment](deployment.md#web-server-routing).
+
 Public discovery documents must return JSON:
 
 ```bash
