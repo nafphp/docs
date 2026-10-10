@@ -110,9 +110,17 @@ print('HTTP smoke tests passed.')
 
 Start the server in one terminal:
 
-```bash
-APP_ENV=test php -S 127.0.0.1:8000 -t public
-```
+=== "macOS / Linux"
+
+    ```bash
+    APP_ENV=test php -S 127.0.0.1:8000 -t public
+    ```
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    $env:APP_ENV = "test"; php -S 127.0.0.1:8000 -t public
+    ```
 
 In another terminal:
 

@@ -36,9 +36,10 @@ Replace the routes, or merge the named routes when combining recipes.
 ## The routes
 
 With the quickstart's account source and demo user in place, register the login, account and
-logout actions. The controller below supplies the actions named here.
+logout actions. The controller below supplies the actions named here; the highlighted lines
+are new compared with the first application.
 
-```php title="app/routes.php"
+```php title="app/routes.php" hl_lines="4 9 10 11 12"
 <?php
 
 use App\Controllers\HomeController;

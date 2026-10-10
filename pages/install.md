@@ -19,11 +19,25 @@ The Composer vendor is **`naf`**; `nafphp` is the GitHub organisation.
 
 Run this from the directory in which you keep your projects:
 
-```bash
-composer create-project naf/app nafphp-demo
-cd nafphp-demo
-APP_ENV=dev php -S 127.0.0.1:8000 -t public
-```
+=== "macOS / Linux"
+
+    ```bash
+    composer create-project naf/app nafphp-demo
+    cd nafphp-demo
+    APP_ENV=dev php -S 127.0.0.1:8000 -t public
+    ```
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    composer create-project naf/app nafphp-demo
+    cd nafphp-demo
+    $env:APP_ENV = "dev"; php -S 127.0.0.1:8000 -t public
+    ```
+
+`APP_ENV=dev` selects detailed local error pages for this server process. You can instead
+put `APP_ENV=dev` into a `.env` file in the project root, which works on every platform;
+[Your first application](first-app.md) does that.
 
 Open **http://127.0.0.1:8000/**. You should see the NAF welcome page. Stop the development
 server with Ctrl+C. Keep it bound to localhost; on a deployed site, configure the web server's

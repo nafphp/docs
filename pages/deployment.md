@@ -36,42 +36,98 @@ both trusted addresses and header handling for [sessions](sessions.md#behind-a-p
 
 ## Web server routing
 
-This Nginx example assumes `/var/www/my-app/public` and PHP-FPM at `/run/php/php-fpm.sock`.
-Replace the host, paths and socket with your server's values. Configure TLS separately.
+Every web server needs the same four rules:
 
-```nginx
-server {
-    listen 80;
-    server_name app.example.com;
-    root /var/www/my-app/public;
-    index index.php;
+1. Serve the project's `public/` directory as the document root, and nothing above it.
+2. Serve existing static files directly.
+3. Send every other request to `public/index.php`, keeping the original path and query.
+4. Run only `index.php` as PHP, and refuse hidden files except `/.well-known/`, which OAuth
+   and OpenID Connect metadata use.
 
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
+The examples assume the project in `/var/www/my-app` and PHP-FPM listening on
+`/run/php/php-fpm.sock`. Replace the host name, paths and socket with your server's values,
+and configure TLS separately.
+
+=== "Nginx"
+
+    ```nginx
+    server {
+        listen 80;
+        server_name app.example.com;
+        root /var/www/my-app/public;
+        index index.php;
+
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location = /index.php {
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+            fastcgi_pass unix:/run/php/php-fpm.sock;
+        }
+
+        location ~ \.php$ {
+            return 404;
+        }
+
+        location ~ /\.(?!well-known/) {
+            deny all;
+        }
     }
+    ```
 
-    location = /index.php {
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
-        fastcgi_pass unix:/run/php/php-fpm.sock;
-    }
+    Consult Nginx's [request routing](https://nginx.org/en/docs/http/ngx_http_core_module.html#try_files)
+    and [FastCGI parameters](https://nginx.org/en/docs/http/ngx_http_fastcgi_module.html#fastcgi_param)
+    when adapting it.
 
-    location ~ \.php$ {
-        return 404;
-    }
+=== "Apache"
 
-    location ~ /\.(?!well-known/) {
-        deny all;
-    }
-}
-```
+    Requires `mod_dir`, `mod_proxy` and `mod_proxy_fcgi`:
 
-Static files are served directly; other paths reach the front controller. This includes dynamic
-assets such as Flow's `/_flow/flow.js`. The dotfile rule permits `/.well-known/` for OAuth/OIDC
-metadata while denying other hidden paths. Validate and reload Nginx using the server's normal
-administration procedure. Consult Nginx's [request routing](https://nginx.org/en/docs/http/ngx_http_core_module.html#try_files)
-and [FastCGI parameters](https://nginx.org/en/docs/http/ngx_http_fastcgi_module.html#fastcgi_param)
-when adapting it. [Flow](flow.md#development-server) has a router for local PHP servers.
+    ```apache
+    <VirtualHost *:80>
+        ServerName app.example.com
+        DocumentRoot /var/www/my-app/public
+
+        <Directory /var/www/my-app/public>
+            AllowOverride None
+            Require all granted
+            DirectoryIndex index.php
+            FallbackResource /index.php
+        </Directory>
+
+        # Only the front controller runs PHP; requests for other PHP files are refused.
+        <FilesMatch "\.php$">
+            Require all denied
+        </FilesMatch>
+        <Files "index.php">
+            Require all granted
+            SetHandler "proxy:unix:/run/php/php-fpm.sock|fcgi://localhost"
+        </Files>
+
+        # Hidden files stay private, except /.well-known/ for OAuth and OpenID metadata.
+        <LocationMatch "/\.(?!well-known/)">
+            Require all denied
+        </LocationMatch>
+    </VirtualHost>
+    ```
+
+    `FallbackResource` hands requests for nonexistent files to `index.php` while keeping the
+    original URL, which NAF uses for routing. On shared hosting without access to the
+    virtual host, point the domain at `public/` and put the `FallbackResource /index.php`
+    line into `public/.htaccess`; the host must allow `Indexes` overrides. See Apache's
+    [`FallbackResource`](https://httpd.apache.org/docs/2.4/mod/mod_dir.html#fallbackresource)
+    and [PHP-FPM proxy](https://httpd.apache.org/docs/2.4/mod/mod_proxy_fcgi.html) documentation.
+
+Static files are served directly; other paths reach the front controller. This includes
+dynamic assets such as Flow's `/_flow/flow.js`. Validate and reload the configuration using
+the server's normal administration procedure. [Flow](flow.md#development-server) has a router
+for local PHP servers.
+
+After reloading, check the four rules: the home page and an application route answer from
+NAF, an unknown path returns NAF's 404 page, a CSS file is served directly, and requests for
+`/.env` or `/composer.json` do not return those files.
 
 ## Persistent storage and permissions
 

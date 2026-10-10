@@ -32,14 +32,27 @@ composer remove nixphp/framework
 composer require naf/framework:^0.2
 ```
 
-Then rewrite the references in your own code. On macOS:
+Then rewrite the references in your own code. The commands skip `vendor/`, which Composer
+manages:
 
-```bash
-grep -rl -e 'NixPHP\\' -e 'nixphp/' --include='*.php' --include='composer.json' . \
-  | xargs sed -i '' -e 's/NixPHP\\/Naf\\/g' -e 's#nixphp/#naf/#g'
-```
+=== "macOS"
 
-On Linux, `sed -i` takes no argument — drop the `''`.
+    ```bash
+    grep -rl --exclude-dir=vendor -e 'NixPHP\\' -e 'nixphp/' --include='*.php' --include='composer.json' . \
+      | xargs sed -i '' -e 's/NixPHP\\/Naf\\/g' -e 's#nixphp/#naf/#g'
+    ```
+
+=== "Linux"
+
+    ```bash
+    grep -rl --exclude-dir=vendor -e 'NixPHP\\' -e 'nixphp/' --include='*.php' --include='composer.json' . \
+      | xargs sed -i -e 's/NixPHP\\/Naf\\/g' -e 's#nixphp/#naf/#g'
+    ```
+
+=== "Windows"
+
+    Use your editor's project-wide search and replace on `*.php` files and `composer.json`,
+    excluding `vendor/`: replace `NixPHP\` with `Naf\` and `nixphp/` with `naf/`.
 
 ## The old packages
 

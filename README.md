@@ -18,10 +18,13 @@ mkdocs serve
 ```
 
 Read [DOCUMENTATION_STYLE.md](DOCUMENTATION_STYLE.md) before changing prose or examples.
-The website groups getting started, tutorials, core concepts, plugins, persistence, integrations,
-identity, testing/deployment and reference. Each chapter declares package requirements in front
-matter; the hook renders install commands and transitive dependencies after its introduction.
-Keep existing page URLs and useful heading anchors when reorganizing content.
+The website has four tabs. **Learn** holds getting started and the tutorials; **Guides** groups
+the chapters by reader task (fundamentals, web pages, data, background work, integrations,
+security and identity, extending NAF, operating); **Reference** holds generated and lookup
+pages; **Showcase** describes applications built with NAF. Each chapter declares package
+requirements in front matter; the hook renders install commands and transitive dependencies
+after its introduction. Keep existing page URLs and useful heading anchors when reorganizing
+content: change `nav:` rather than moving files.
 
 The Plugins section includes the [Flow chapter](pages/flow.md). Its complete PHP and
 HTML-fragment example is copied into a fresh application and checked against the published

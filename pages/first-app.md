@@ -235,11 +235,21 @@ them, use these steps after checking that your own pages no longer depend on the
     reference `WebsiteController` or a `QuoteService` binding. Save any changes you want to
     keep, then run this from your project root:
 
-    ```bash
-    rm app/Controllers/WebsiteController.php app/Service/QuoteService.php \
-      app/views/welcome.phtml app/views/contact.phtml app/Jobs/SendMailJob.php
-    composer dump-autoload
-    ```
+    === "macOS / Linux"
+
+        ```bash
+        rm app/Controllers/WebsiteController.php app/Service/QuoteService.php \
+          app/views/welcome.phtml app/views/contact.phtml app/Jobs/SendMailJob.php
+        composer dump-autoload
+        ```
+
+    === "Windows (PowerShell)"
+
+        ```powershell
+        Remove-Item app/Controllers/WebsiteController.php, app/Service/QuoteService.php,
+          app/views/welcome.phtml, app/views/contact.phtml, app/Jobs/SendMailJob.php
+        composer dump-autoload
+        ```
 
     The quotes belong to `QuoteService`; remove that file only when your own pages no longer
     use it. `SendMailJob` is an unused example. The empty `app/config.php` above removes the
@@ -248,13 +258,21 @@ them, use these steps after checking that your own pages no longer depend on the
     If your starter includes a shared contact-form template or interactive demo script,
     remove those unused files too:
 
-    ```bash
-    rm -f app/views/partials/contact-form.phtml public/js/demo.js
-    ```
+    === "macOS / Linux"
+
+        ```bash
+        rm -f app/views/partials/contact-form.phtml public/js/demo.js
+        ```
+
+    === "Windows (PowerShell)"
+
+        ```powershell
+        Remove-Item app/views/partials/contact-form.phtml, public/js/demo.js -ErrorAction SilentlyContinue
+        ```
 
     Remove the script's `asset()->add()` registration from the shared layout if you keep that
-    layout for your own pages. The `-f` allows this step to work with older starters that do
-    not include these files.
+    layout for your own pages. The `-f` (or `-ErrorAction SilentlyContinue`) allows this step
+    to work with older starters that do not include these files.
 
     This tutorial's `home.phtml` is a complete HTML document. If your application also no
     longer uses the shared demo layout, you can remove `app/views/layout.phtml` and
@@ -279,6 +297,8 @@ them, use these steps after checking that your own pages no longer depend on the
     cd my-next-app
     APP_ENV=dev php -S 127.0.0.1:8000 -t public
     ```
+
+    In PowerShell, set the variable with `$env:APP_ENV = "dev"` before starting the server.
 
     Your old project stays available while you copy over anything you need. A fresh starter
     includes its demo again; use the steps above to replace it with your own pages. For an

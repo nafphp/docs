@@ -8,7 +8,7 @@
    --------------------------------------------------------------------------- */
 
 [data-md-color-scheme="default"] {
-  --naf-teal:      #0e8874;
+  --naf-teal:      #0b7a68;   /* 5.2:1 on white, WCAG AA for body-size links */
   --naf-hairline:  #e2e6e9;
   --naf-surface:   #f7f9fa;
   --naf-nav-section: #10151a;   /* deutlich dunkler als die Links darunter */
@@ -42,6 +42,13 @@
 .md-header__title { font-weight: 600; letter-spacing: -.01em; }
 .md-header .md-logo img, .md-header .md-logo svg { height: 1.6rem; width: auto; }
 
+/* --- Tabs: same quiet band as the header, readable labels, teal for the active tab --- */
+.md-tabs { border-bottom: 1px solid var(--naf-hairline); }
+.md-tabs__link { font-size: .78rem; opacity: .8; margin-top: .55rem; }
+/* The tab band is charcoal in both schemes, so the active label always uses the light teal. */
+.md-tabs__item--active .md-tabs__link { opacity: 1; font-weight: 600; color: #2fc3a8; }
+.md-tabs__link:hover { opacity: 1; }
+
 /* --- Navigation: no boxes, just type and a teal active state --- */
 .md-nav { font-size: .72rem; }
 .md-nav__title { font-size: .66rem; font-weight: 600; letter-spacing: .08em;
@@ -63,8 +70,8 @@
 .md-nav__link--active, .md-nav__link--active:focus {
   color: var(--naf-teal); font-weight: 600; }
 
-/* --- Prose --- */
-.md-typeset { font-size: .78rem; line-height: 1.72; }
+/* --- Prose: never below Material's own .8rem body size --- */
+.md-typeset { font-size: .8rem; line-height: 1.7; }
 .md-typeset h1 { font-weight: 600; letter-spacing: -.02em;
   color: var(--md-default-fg-color); margin: 0 0 1.2rem; }
 .md-typeset h2 { font-weight: 600; letter-spacing: -.01em;
@@ -80,11 +87,10 @@
 /* --- Tables: hairlines, no shadow --- */
 .md-typeset table:not([class]) {
   border: 1px solid var(--naf-hairline); border-radius: 3px;
-  font-size: .72rem; box-shadow: none; }
+  font-size: .76rem; box-shadow: none; }
 .md-typeset table:not([class]) th {
-  background: var(--naf-surface); font-weight: 600; font-size: .64rem;
-  letter-spacing: .06em; text-transform: uppercase;
-  color: var(--md-default-fg-color--light); }
+  background: var(--naf-surface); font-weight: 600; font-size: .74rem;
+  color: var(--md-default-fg-color); }
 .md-typeset table:not([class]) td { border-top: 1px solid var(--naf-hairline); }
 
 /* --- The requires box: the one element that gets colour --- */
@@ -115,6 +121,36 @@
 .md-typeset table:not([class]) code { white-space: nowrap; }
 .md-typeset table:not([class]) td:first-child { white-space: normal; }
 .md-typeset__table { overflow-x: auto; }
+
+/* On narrow screens, unbreakable code cells squeezed the prose columns into very tall
+   rows and pushed the last column out of view. Give every column a readable minimum
+   width instead and let the table scroll sideways inside its own wrapper. */
+@media screen and (max-width: 44.9375em) {
+  .md-typeset table:not([class]) th,
+  .md-typeset table:not([class]) td { min-width: 5.5rem; }
+  .md-typeset table:not([class]) th:last-child,
+  .md-typeset table:not([class]) td:last-child { min-width: 15rem; }
+  .md-typeset__scrollwrap {
+    background:
+      linear-gradient(to right, var(--md-default-bg-color) 30%, transparent) left / 1.5rem 100% no-repeat local,
+      linear-gradient(to left, var(--md-default-bg-color) 30%, transparent) right / 1.5rem 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.18), transparent) left / .6rem 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.18), transparent) right / .6rem 100% no-repeat scroll;
+  }
+}
+
+/* --- Screenshots: a hairline frame so light pages do not dissolve into the page --- */
+.md-typeset img.screenshot, .md-typeset .screenshot img {
+  border: 1px solid var(--naf-hairline); border-radius: 4px;
+  box-shadow: 0 .2rem .8rem rgba(0, 0, 0, .08); }
+
+/* --- Grid cards on the overview page use the brand colour for icons --- */
+.md-typeset .grid.cards .lg { color: var(--naf-teal); }
+.md-typeset .grid.cards > ul > li { border-color: var(--naf-hairline); }
+.md-typeset .grid.cards > ul > li:hover { border-color: var(--naf-teal); }
+
+/* --- Mermaid diagrams follow the theme colours --- */
+.md-typeset .mermaid { text-align: center; }
 
 /* --- The mark's left half is charcoal and disappears on a dark ground, so the
        dark theme gets the light artwork instead. --- */

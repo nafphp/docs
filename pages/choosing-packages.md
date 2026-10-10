@@ -6,33 +6,43 @@ title: Choosing packages
 
 Choose packages by the capabilities your application needs. Composer installs required
 dependencies automatically; suggested packages are optional and must be installed explicitly.
-The [package overview](packages.md) lists published versions and dependency relationships.
-
-Start a website with `composer create-project naf/app my-app`. For an HTTP service without
-templates or sessions, use the [core-only installation](install.md#core-only-project).
 The commands below extend an existing Composer project; they do not create its bootstrap,
-routes or configuration.
-
-The [application scenarios](recipes/index.md) pair each result with its package set and a
-worked guide. Start with [a small website](recipes/small-website.md)
-or [a JSON API without a database](recipes/simple-json-api.md) in an empty directory.
+routes or configuration. To start a project, see [Installation](install.md) or pick a
+complete [application scenario](recipes/index.md).
 
 ## Package selection { #the-short-version }
 
-| Capability | Install | Additional setup |
-|---|---|---|
-| HTTP routing and JSON | `naf/framework` | Bootstrap and web entry point |
-| Templates and layouts | `naf/view` | PHP views and optional layout |
-| Form validation and CSRF | `naf/form` | Validation rules and tokens; includes `naf/session` |
-| SQL and migrations | `naf/database` | Database configuration and PDO driver; commands also need `naf/cli` |
-| Entities and repositories | `naf/orm` | Models and schema; includes `naf/database` |
-| Authentication | `naf/auth` | Identity and provider; add sessions for persistent browser login |
-| Editable roles | `naf/rbac` | Migrations, permissions and role synchronization |
-| Background jobs | `naf/queue` | Queue worker; includes `naf/cli` |
-| Scheduled jobs | `naf/schedule` | Ticker and worker; includes Queue and CLI |
-| External sign-in | `naf/oauth-client` | Provider credentials and local account mapping |
-| OAuth authorization server | `naf/oauth-server` | Issuer, clients and scopes; login for user grants, keys for OIDC |
-| Alexa+ MCP server | `naf/alexa` | Public HTTPS, OAuth database, separate clients and Amazon CLI access |
+| Capability | Install | Brings along | Additional setup | Guide |
+|---|---|---|---|---|
+| HTTP routing and JSON | `naf/framework` | — | Bootstrap and web entry point | [Routing](routing.md) |
+| Templates and layouts | `naf/view` | — | PHP views and optional layout | [Views](views.md) |
+| Form validation and CSRF | `naf/form` | `naf/session` | Validation rules and tokens | [Forms](forms.md) |
+| Browser sessions | `naf/session` | — | Optional database storage | [Sessions](sessions.md) |
+| Translated text | `naf/i18n` | — | JSON language files | [Translations](translations.md) |
+| Browser components | `naf/flow` | `naf/view` | Module script in the layout | [Flow](flow.md) |
+| SQL and migrations | `naf/database` | — | Database configuration and PDO driver; commands also need `naf/cli` | [Database](database.md) |
+| Entities and repositories | `naf/orm` | `naf/database` | Models and schema | [ORM](orm.md) |
+| Local, S3 and WebDAV files | `naf/storage` | — | Disk configuration; S3 needs `aws/aws-sdk-php`, WebDAV `ext-dom` | [File storage](file-storage.md) |
+| Console commands | `naf/cli` | — | Command registration | [Console](console.md) |
+| Background jobs | `naf/queue` | `naf/cli` | Queue worker | [Queues](queues.md) |
+| Scheduled jobs | `naf/schedule` | `naf/queue`, `naf/cli` | Ticker and worker | [Scheduling](scheduling.md) |
+| Mail delivery | `naf/mail` | — | Transport selection | [Mail](mail.md) |
+| Outgoing HTTP requests | `naf/client` | — | Timeouts and retries | [HTTP client](http-client.md) |
+| Database-backed limits | `naf/rate-limit` | — | Limiter table | [Rate limits](rate-limits.md) |
+| WebSocket notifications | `naf/websocket` | — | Signing key and a supervised server | [WebSocket](websocket.md) |
+| Authentication | `naf/auth` | — | Identity and provider; add sessions for persistent browser login | [Authentication](auth.md) |
+| Editable roles | `naf/rbac` | `naf/auth`, `naf/database` | Migrations, permissions and role synchronization | [RBAC](rbac.md) |
+| LDAP sign-in | `naf/auth-ldap` | `naf/auth` | Directory connection | [LDAP](auth-ldap.md) |
+| External sign-in | `naf/oauth-client` | `naf/auth`, `naf/session` | Provider credentials and local account mapping | [OAuth client](oauth-client.md) |
+| OAuth authorization server | `naf/oauth-server` | `naf/auth`, `naf/form`, `naf/session` | Issuer, clients and scopes; login for user grants, keys for OIDC | [OAuth server](oauth-server.md) |
+| MCP tools | `naf/mcp` | — | Tools and scoped tokens | [MCP](mcp.md) |
+| Alexa+ MCP server | `naf/alexa` | `naf/mcp`, `naf/oauth-server`, `naf/database`, `naf/cli` | Public HTTPS, OAuth database, separate clients and Amazon CLI access | [Alexa+](alexa.md) |
+
+The starter (`composer create-project naf/app`) already includes `naf/framework`, `naf/view`,
+`naf/form` and `naf/session`. The [package overview](packages.md) lists published versions
+and complete dependency relationships.
+
+The sections below add the decisions behind the most common choices.
 
 ## Webhooks and HTTP services { #one-endpoint-that-answers }
 
@@ -182,14 +192,7 @@ See [Mail](mail.md), and use a queue when delivery should happen outside the HTT
 
 ## Other integrations { #more-optional-capabilities }
 
-| Capability | Package | Guide |
-|---|---|---|
-| HTTP requests | `naf/client` | [HTTP client](http-client.md) |
-| Local, S3 and WebDAV files | `naf/storage`; S3 also needs `aws/aws-sdk-php`, WebDAV `ext-dom` | [File storage](file-storage.md) |
-| Database-backed limits | `naf/rate-limit` | [Rate limits](rate-limits.md) |
-| LDAP authentication | `naf/auth-ldap` | [LDAP provider](auth-ldap.md) |
-| WebSocket notifications | `naf/websocket` | [WebSockets](websocket.md) |
-| Browser components | `naf/flow` | [Flow](flow.md) |
-
-Each guide names optional dependencies and configuration. Continue with
-[Application lifecycle](lifecycle.md) and [Deployment](deployment.md).
+HTTP requests, file storage, rate limits, LDAP, WebSocket notifications and Flow components
+are listed in the [selection table](#the-short-version). Each guide names optional
+dependencies and configuration. Continue with [Application lifecycle](lifecycle.md) and
+[Deployment](deployment.md).
