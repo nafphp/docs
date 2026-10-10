@@ -126,7 +126,7 @@ Version **v0.2.2** · [Sending mail](mail.md)
 
 ## naf/mcp
 
-Version **v0.2.5** · [MCP tools](mcp.md)
+Version **v0.2.6** · [MCP tools](mcp.md)
 
 | Signature | Namespace to import from | Guide |
 | --- | --- | --- |
@@ -145,7 +145,7 @@ Version **v0.2.4** · [OAuth client](oauth-client.md)
 
 ## naf/oauth-server
 
-Version **v0.2.4** · [OAuth authorization server](oauth-server.md)
+Version **v0.2.5** · [OAuth authorization server](oauth-server.md)
 
 | Signature | Namespace to import from | Guide |
 | --- | --- | --- |

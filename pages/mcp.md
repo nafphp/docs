@@ -10,7 +10,7 @@ requires:
 Tools are PHP classes with input schemas and handlers. Bearer tokens and tool scopes control access;
 handlers must still authorize the application data and operations they expose.
 
-This guide requires `naf/mcp` 0.2.5+, PHP 8.3+ and `naf/framework` 0.2.8+.
+This guide requires `naf/mcp` 0.2.6+, PHP 8.3+ and `naf/framework` 0.2.8+.
 Start from a bootstrapped application. The default token store uses a file, not a database.
 The example below measures files in one application-owned reports directory.
 
@@ -270,8 +270,9 @@ final class ArticleSearchTool implements ToolInterface, ScopedToolInterface
 }
 ```
 
-Three patterns are understood: `*` for everything, an exact scope like `articles:read`, and a
-prefix wildcard like `articles:*`. A scoped tool requires at least one of its declared scopes.
+With the default File-Token driver, three patterns are understood: `*` for everything, an exact
+scope like `articles:read`, and a prefix wildcard like `articles:*`. A scoped tool requires at
+least one of its declared scopes.
 If a token matches none, the tool is omitted from `tools/list` and direct calls return HTTP 403.
 Enforce stricter combinations inside the handler when an operation requires several grants.
 
@@ -348,14 +349,18 @@ OAuth ResourceServer. Expired, revoked, wrong-audience and deleted-account token
 Current user permissions filter the token's usable scopes. A browser session never supplies
 a missing bearer identity. PRM is public at `/.well-known/oauth-protected-resource` and
 `/.well-known/oauth-protected-resource/mcp`; absent resource/server configuration returns 404.
-`naf/oauth-server` 0.2.4 adds the conventional authorization-server metadata route and
-resource-bound code exchange needed by Alexa.
+Use `naf/oauth-server` 0.2.5+ for OAuth authentication. It includes the conventional
+authorization-server metadata and resource-bound code exchange needed by Alexa, together
+with strict scope-policy and PKCE validation.
 
 Personal tools implement `UserToolInterface` in addition to the ordinary tool/scoped contracts.
 Calling one without a linked user returns HTTP 401; a linked user missing the required scopes
 receives 403. Neither response includes `WWW-Authenticate`, matching the Alexa requirement.
 Get the authenticated user through `Naf\OAuth\Server\token()->user()`, not `auth()`'s browser
-session. Scope matching otherwise retains the existing any-of and wildcard semantics.
+session. OAuth scope names are matched literally: `*` and `notes:*` do not grant any other
+scope. The File-Token driver's documented wildcards remain available. A tool's scope list
+keeps its any-of semantics for both drivers; marking a tool with `UserToolInterface` is an
+additional linked-user requirement, not another scope alternative.
 
 The optional `mcp:auth:discovery_scope` (default `null`) lets an unlinked service identity
 with that scope see tool definitions, including personal tools. It does not grant execution.
@@ -404,6 +409,27 @@ not total directory size or the resulting size of an appended file.
 The store is not itself an MCP tool. Keep its root and parent directories under application
 control, without caller-created symlinks. Its path checks are not a filesystem isolation
 boundary for hostile local writers. Your tool must authorize operations and validate paths.
+
+## Request sizes and execution limits
+
+MCP 0.2.6+ limits the JSON request body to 1 MiB before decoding. Set
+`mcp:transport:max_request_bytes` to a positive integer in bytes below `PHP_INT_MAX`:
+
+```php-inline
+// In the array returned by app/config.php:
+'mcp' => ['transport' => ['max_request_bytes' => 262144]],
+```
+
+A request exceeding the limit receives HTTP 413. The limit also applies without
+`Content-Length`, and the controller reads at most the limit plus one byte before deciding.
+It bounds the controller's input buffer; decoded objects, schemas and tool results consume
+additional memory. Configure request limits at the proxy and PHP layer too, before PHP
+accepts and parses input.
+
+Streaming does not impose an application execution deadline. Bound work in the tool's
+service, set PHP worker timeouts, and limit concurrent requests at the proxy. Verify progress
+flushing and disconnect behavior through that deployed proxy. See the [Alexa deployment
+checks](alexa.md#deployment-checks) for the authentication and streaming boundary.
 
 ## Resources
 
