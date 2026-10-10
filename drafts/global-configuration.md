@@ -97,4 +97,3 @@ redaction, which cannot replace a provider's schema.
 
 Before publication, update the Nafinity settings, configuration and plugin guides
 and regenerate the API inventory for the released signatures.
-
