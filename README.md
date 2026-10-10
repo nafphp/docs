@@ -18,10 +18,11 @@ mkdocs serve
 ```
 
 Read [DOCUMENTATION_STYLE.md](DOCUMENTATION_STYLE.md) before changing prose or examples.
-The website has four tabs. **Learn** holds getting started and the tutorials; **Guides** groups
-the chapters by reader task (fundamentals, web pages, data, background work, integrations,
-security and identity, extending NAF, operating); **Reference** holds generated and lookup
-pages; **Showcase** describes applications built with NAF. Each chapter declares package
+The website lists all chapters in one navigation, grouped by reader task: getting started,
+fundamentals, web pages, tutorials, data, background work, integrations, security and identity,
+extending NAF and operating. Reference pages and applications built with NAF follow these
+guides. Keep the complete chapter list available from every page when reorganizing the
+navigation. Each chapter declares package
 requirements in front matter; the hook renders install commands and transitive dependencies
 after its introduction. Keep existing page URLs and useful heading anchors when reorganizing
 content: change `nav:` rather than moving files.

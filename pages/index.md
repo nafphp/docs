@@ -13,6 +13,10 @@ Application code uses ordinary PHP classes and explicitly imported helper functi
 handlers return PSR-7 responses; controllers receive services through their constructors.
 No base controller or application-wide ORM is required.
 
+For individual topics, start with [Routing](routing.md), [Controllers](controllers.md),
+[Views and templates](views.md), [Forms and validation](forms.md) or
+[Dependency injection](dependency-injection.md). The navigation lists the full set of chapters.
+
 ## A first route
 
 ```php title="app/routes.php"
