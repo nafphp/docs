@@ -1,6 +1,6 @@
 # Documentation follow-up for the pending package fixes
 
-The 2026-10-10 documentation review found five package bugs. Their fixes are open as pull
+The 2026-10-10 documentation review found six package bugs. Their fixes are open as pull
 requests and are **not released yet**, so the published guides describe the released
 behaviour and its workarounds. After each release is on Packagist, apply the matching section
 below, rerun `tools/gen_reference.py`, `tools/check_pages.py`, `mkdocs build --strict` and
@@ -44,6 +44,13 @@ Plain help output with a `vendor/bin/naf` usage line.
 
 - `pages/console.md`: replace the paragraph about literal markers with the new output; add the
   help output to `tools/capture_screenshots.py` (`hello:say --help`) and include it.
+
+## naf/orm 0.2.3 (nafphp/orm#3)
+
+A model's public `table` property is now used for writes as well as reads.
+
+- `pages/orm.md`: mention the public `table` property as an alternative to overriding
+  `getTableName()`, for 0.2.3+ (before, writes ignored it).
 
 ## naf/app 0.2.4 (nafphp/app#4)
 
