@@ -48,8 +48,9 @@ With `naf/view`, a template imports and calls `s()` explicitly:
 <h1>Hello, <?= s($name) ?>!</h1>
 ```
 
-Form values need escaping too. Call `csrf()->generate()` once per rendered page and reuse the
-token for multiple forms: each call replaces the stored token. See [Forms](forms.md).
+Form values need escaping too. Print the CSRF token with `csrf()->token()` (Form 0.2.3+),
+which reuses the session's token for every form and tab; `csrf()->generate()` replaces it.
+See [Forms](forms.md).
 
 ## Keep deployment and local development distinct
 

@@ -107,8 +107,13 @@ vendor/bin/naf hello:say World
 ```
 
 Expect `Hello, World!` and exit status 0. The command explicitly rejects a missing or empty
-name; validate inputs in `run()` rather than relying on argument metadata alone. Run
-`vendor/bin/naf hello:say --help` for the generated usage information.
+name; validate inputs in `run()` rather than relying on argument metadata alone.
+
+`vendor/bin/naf hello:say --help` prints the title, description, arguments and options
+declared in `configure()`, because the example calls `showHelp()` for `--help`. The current
+`naf/cli` release prints the formatting markers literally (for example `<info>hello:say</info>`)
+and ends with an outdated `php cli.php command-name --help` hint; the listed arguments and
+options are correct.
 
 ## Arguments and options
 
@@ -146,8 +151,8 @@ values as arguments or options and must not depend on an interactive terminal.
 $output->writeLine('Done.', 'ok');        // green
 $output->writeLine('Careful.', 'warning'); // yellow
 $output->writeLine('Failed.', 'error');    // red
-$output->writeLine('Report', 'title');     // light green background
-$output->writeLine('Section', 'headline'); // light blue background
+$output->writeLine('Report', 'title');     // light green on a black background
+$output->writeLine('Section', 'headline'); // light blue on a black background
 $output->writeLine('Plain text');          // no colour
 $output->writeEmptyLine();
 $output->drawStroke(40);                   // a line of dashes

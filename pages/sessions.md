@@ -24,8 +24,13 @@ $id       = session()->get('user_id');
 $language = session()->get('language', 'en');   // default when the key is absent
 
 session()->forget('user_id');
-session()->clear();                              // everything
+session()->clear();                              // end the session
 ```
+
+`clear()` empties the session, destroys it in the session store and expires the session
+cookie. Values set later in the same request are not saved. It does nothing when no session
+is active. To sign a user out but keep carts or flash messages, use `auth()->logout()`
+from [Authentication](auth.md#sessions) instead.
 
 Keys are flat strings. `set()` writes into `$_SESSION`; values must be serializable by PHP.
 Keep session data small and avoid retaining stale entities or permission snapshots.

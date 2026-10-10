@@ -22,13 +22,23 @@ return render('product.detail', ['product' => $product]);
 ```
 
 That loads `app/views/product/detail.phtml` — dots become directory separators — and wraps
-the result in a response, which is what a controller returns.
+the result in a response, which is what a controller returns. Template names may contain
+only letters, digits, `_`, `-`, `.` and `/`; anything else, an absolute path or `..` throws
+`InvalidArgumentException` before a file is read.
 
-Views are searched in your application's view directory and in every plugin's, so a plugin
-can ship a template and your application can override it by putting a file at the same name.
-`config('view:paths')` replaces the default application search paths (`views`, `app/views`).
-Include those entries too if you want to keep them alongside custom directories; plugin
-view paths are still searched afterwards.
+### Where templates are found
+
+The first existing file wins, in this order:
+
+1. The application paths from `config('view:paths')`. The default is `views` and
+   `app/views`, relative to the project root; absolute paths are used as given.
+2. Each installed plugin's view directory, in [plugin boot order](plugins.md#boot-order).
+   A plugin uses the first of `src/views`, `views` or `app/views` that exists.
+3. The templates shipped inside `naf/view` itself.
+
+An application can therefore override a plugin template by creating a file with the same
+relative name. Setting `view:paths` replaces the default application paths; include
+`app/views` again if you want to keep it alongside custom directories.
 
 ## render() or view()
 
@@ -37,12 +47,62 @@ render('mail.welcome', ['name' => $name]);  // → a PSR-7 ResponseInterface
 view('mail.welcome', ['name' => $name]);    // → a string
 ```
 
-`render()` is for a controller answering a request. `view()` is for everywhere else: the
-body of an email, a fragment for a JSON payload, a template rendered in a queue job where
-there is no response to return.
+`render()` is for a controller answering a request. `view()` returns the HTML as a string:
+a partial inside another template, the body of an email, or a fragment for a JSON payload.
+`render()` always creates a 200 response; change it with `->withStatus(422)` and similar
+PSR-7 methods.
 
 Sending a `view()` result where a response belongs, or returning a `render()` result into an
 email, is the mistake the two names exist to prevent.
+
+### Templates outside HTTP requests
+
+`view()`, `render()` and `s()` rely on the core guard rules `safePath` and `safeOutput`,
+which NAF registers only while handling an HTTP request. In a console command, a queue
+worker or the scheduler they throw `RuntimeException: Guard "safePath" not found.` or
+`Guard "safeOutput" not found.` (`naf/queue` registers `safePath`, so with Queue installed
+the `safeOutput` error appears first).
+
+To render a template in CLI code, for example an email body in a queued job, register the
+two rules in root `bootstrap.php` before `app()->run()`:
+
+```php-inline
+use function Naf\guard;
+
+if (!guard()->has('safePath')) {
+    guard()->register('safePath', static function (string $path): string {
+        if ($path === '' || str_contains($path, '..') || str_starts_with($path, '/')
+            || !preg_match('/^[A-Za-z0-9_\/.-]+$/', $path)) {
+            throw new \InvalidArgumentException('Insecure template path.');
+        }
+        return $path;
+    });
+}
+if (!guard()->has('safeOutput')) {
+    guard()->register('safeOutput', static fn($value) => is_array($value)
+        ? array_map(static fn($item) => htmlspecialchars((string) ($item ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), $value)
+        : htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
+}
+```
+
+For HTTP requests the core rules already exist when `bootstrap.php` runs, so the `has()`
+checks keep them and web responses retain the core behaviour.
+
+## Partials
+
+A partial is an ordinary template rendered into another one with `view()`. Pass the
+variables it needs explicitly:
+
+```html+php
+<?php use function Naf\View\view; ?>
+<section class="contact">
+    <?= view('partials.contact-form', ['check' => $check, 'token' => $token]) ?>
+</section>
+```
+
+`app/views/partials/contact-form.phtml` receives only `$check` and `$token`; variables of
+the outer template are not shared automatically. The partial escapes its own output, as any
+template does. The starter's welcome and contact pages share their form this way.
 
 ## Escaping
 
@@ -109,10 +169,16 @@ Collect them anywhere — a view, a partial, a controller — and print them onc
 ```
 
 Register assets before the layout renders the corresponding collection. Duplicate
-registrations of the same asset produce one tag.
+registrations of the same asset produce one tag. Paths are HTML-escaped when rendered.
 
 JavaScript comes in two modes: `classic` renders a plain `<script src>`, `module` renders
 `type="module"`. An unrecognised mode falls back to `classic` rather than failing.
+
+!!! warning "Only paths ending in `.css` or `.js` are collected"
+    `add()` decides the type from the path's file extension. A path with a query string or
+    fragment, such as `/css/app.css?v=2`, and other extensions such as `.mjs` are **ignored
+    without an error**. Put a version into the file name (`/css/app.2.css`) instead of a
+    query string, or print such tags directly in the layout.
 
 ## Template responsibilities { #what-this-is-not }
 

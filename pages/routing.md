@@ -20,7 +20,11 @@ route()->add('GET', '/ping', fn() => response('Pong!'), 'ping');
 
 The route name is the fourth argument. The methods `GET`, `POST`, `PUT`, `PATCH`, `DELETE`,
 `OPTIONS` and `HEAD` can all be registered, but each needs its own matching registration.
-A GET route does not automatically provide HEAD or OPTIONS.
+A GET route does not automatically provide HEAD or OPTIONS. Write the method in upper case:
+the request method is compared in upper case, so a route registered as `'get'` never matches.
+
+`route()->remove('name')` removes a registration and returns whether one existed. Registering
+a route under an existing name replaces it in its original position.
 
 ## Route parameters
 
@@ -52,8 +56,10 @@ with `rawurlencode()` when generating a URL. Route names also identify CSRF exem
 active navigation:
 
 ```php-inline
-route()->current();                  // current route name, or null
-route()->active('users.show');       // 'active' when it matches, otherwise ''
+route()->current();                                  // current route name, or null
+route()->active('users.show');                       // 'active' when it matches, otherwise ''
+route()->active(['users.index', 'users.show']);      // any of several names
+route()->active('users.show', 'is-current');         // a custom class name
 ```
 
 ## See what is registered

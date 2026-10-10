@@ -68,14 +68,19 @@ to English.
 
 ## Choosing the language
 
-The language is detected once per request, in this order:
+For every HTTP request, the plugin selects the language at `request.start`, in this order:
 
 1. the `lang` query parameter — `/page?lang=de`
 2. a `lang` cookie
 3. the browser's `Accept-Language` header, best match first
 
-Whatever is found is written back as a cookie, so the choice survives the next request
-without the query parameter.
+When a query parameter is present or no `lang` cookie exists yet, the selected language is
+written back as a `lang` cookie (30 days, `SameSite=Lax`), so the choice survives the next
+request without the query parameter.
+
+Language codes are reduced to their base language: `de-AT`, `de_AT` and `de` all select
+`de.json`. Regional files such as `de-AT.json` are therefore never loaded. A code that is
+not two or three letters falls back to `fallback_language`.
 
 To set it yourself:
 
@@ -96,15 +101,23 @@ nothing validates the code against that list.
 ## Configuration
 
 ```php-inline
-'language'          => null,        // forced language; null means detect
-'fallback_language' => 'en',        // used when nothing was detected
+'language'          => null,        // starting language before detection
+'fallback_language' => 'en',        // used when `language` is null and for invalid codes
 'app' => [
     'translationPath' => '/app/Resources/lang',
 ],
 ```
 
-`translationPath` is relative to your application's base path. One JSON file per language,
-named by its code.
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `language` | string or null | `null` | Language the translator starts with. Detection on each HTTP request replaces it as soon as a query parameter, cookie or `Accept-Language` header is present |
+| `fallback_language` | string | `en` | Starting language when `language` is `null`, and replacement for invalid codes |
+| `app:translationPath` | string | `/app/Resources/lang` | Application translation directory, relative to the project root |
+
+`language` does **not** force a language for web requests: browsers send `Accept-Language`,
+and detection overrides the configured value. It mainly matters for CLI code and requests
+without any language information. To force a language for a request, call
+`translator()->setLanguage()` in your controller, which runs after detection.
 
 ## Translations from plugins
 

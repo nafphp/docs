@@ -100,7 +100,8 @@ Database and CLI:
 vendor/bin/naf db:migrate up
 ```
 
-MySQL/MariaDB DDL can commit implicitly, leaving partial work after a failure. A code rollback
+Do not run `db:migrate down` without `--name` in production: it reverts every applied
+migration. MySQL/MariaDB DDL can commit implicitly, leaving partial work after a failure. A code rollback
 does not reverse schema changes. Plan compatibility with the previous application release and
 recovery using [migration transaction behavior](database.md#migrations-and-transactions).
 

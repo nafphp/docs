@@ -54,7 +54,9 @@ composer require naf/view naf/form
 ```
 
 The starter already includes these packages. View renders PHP templates; Form validates input
-and checks CSRF tokens on POST, PUT and DELETE. Form installs Session for token storage.
+and checks CSRF tokens for every method except GET, HEAD and OPTIONS (Form 0.2.3+; the
+starter locks 0.2.2, so run `composer require 'naf/form:^0.2.3'`). Form installs Session for
+token storage.
 The `memory()` helper reads the current request; it does not preserve input across redirects.
 
 For two HTML pages without submissions, install only `naf/view` on top of the core and follow
@@ -183,7 +185,7 @@ See [Mail](mail.md), and use a queue when delivery should happen outside the HTT
 | Capability | Package | Guide |
 |---|---|---|
 | HTTP requests | `naf/client` | [HTTP client](http-client.md) |
-| Local, S3 and WebDAV files | `naf/storage` | [File storage](file-storage.md) |
+| Local, S3 and WebDAV files | `naf/storage`; S3 also needs `aws/aws-sdk-php`, WebDAV `ext-dom` | [File storage](file-storage.md) |
 | Database-backed limits | `naf/rate-limit` | [Rate limits](rate-limits.md) |
 | LDAP authentication | `naf/auth-ldap` | [LDAP provider](auth-ldap.md) |
 | WebSocket notifications | `naf/websocket` | [WebSockets](websocket.md) |

@@ -44,6 +44,13 @@ final class Product extends AbstractModel
 
 `AbstractModel` inherits an array constructor and the nullable `id` property. The default table
 name is the lowercase class name plus `s`: `Product` uses `products`, with primary key `id`.
+To use another table, override `getTableName(bool $singular = false): string` in the model.
+
+!!! warning "Only protected properties are persisted"
+    The entity manager saves the model's **protected** properties that hold a scalar value or
+    `null`. Public and private properties are ignored without an error, and so are properties
+    holding arrays or objects (other than related entities, see below). Declare columns as
+    `protected` properties with defaults, as in the example, and expose them through methods.
 
 ```php title="app/Repositories/ProductRepository.php"
 <?php
