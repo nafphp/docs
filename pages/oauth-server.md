@@ -119,6 +119,12 @@ All lifetimes are integers in seconds:
 | `oauth_server:code_ttl` | `60` | Authorization-code lifetime: one minute. |
 | `oauth_server:consent_ttl` | `600` | Pending consent-request lifetime: ten minutes. |
 
+A shorter access-token lifetime reduces the time a leaked token can be used, but requires
+more frequent renewal. A refresh token permits renewal for its own lifetime and needs
+separate protection and revocation handling; it is not a longer browser login session.
+Choose lifetimes for the client and data being accessed, rather than increasing every TTL
+to avoid renewal. Expiry and explicit revocation are separate checks.
+
 ### Profile claims { #saying-more-than-who }
 
 `UserInterface::getProfile()` supplies the standard profile data. Configure a claims mapper
@@ -226,6 +232,11 @@ does not reach. `can()` is the same check as a plain bool.
 
 User-token authorization checks the token scope and the account's current permission.
 A permission removed from the account is denied on a subsequent check.
+
+For example, a token issued with `posts.read` cannot write posts even when its owner is an
+administrator with `posts.edit`. Conversely, a token carrying `posts.write` cannot keep
+writing after that account loses the mapped `posts.edit` permission. Check the scope at
+each protected operation; signing in or recognizing a token alone does not authorize it.
 
 A client-credentials token represents an application. `user()` returns `null`; authorization
 uses the client's registered grants and token scopes.

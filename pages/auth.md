@@ -422,21 +422,23 @@ precedence and can store the authentication record elsewhere.
 
 ## Multiple account sources { #several-sources }
 
-Register as many as you like and name the one you mean:
+Register as many as you like and name the one you mean. This fragment extends the quickstart
+with the application-owned `ApiUserProvider` shown in [Writing your own provider](#writing-your-own-provider):
 
 ```php-inline
 // auth.providers in app/config.php
+// Import OrmProvider and your application's ApiUserProvider in that file.
 'providers' => [
     'database' => OrmProvider::class,
-    'ldap' => LdapProvider::class,
+    'api' => ApiUserProvider::class,
 ],
 ```
 
 ```php-inline
 // Application logic
 
-auth()->authenticate($credentials, 'ldap');   // only LDAP is asked
-auth()->providerName();                  // 'ldap'
+auth()->authenticate($credentials, 'api');   // only the API provider is asked
+auth()->providerName();                     // 'api' after successful authentication
 ```
 
 With one provider the name is optional. With several, `authenticate()` without one throws rather than
@@ -444,14 +446,21 @@ guessing. A failed attempt never falls through to the next source, and a restore
 comes from the source it was created with — even when two sources use the same identifiers.
 
 A configured class name must have a container binding. Custom provider factories belong in the
-application bootstrap, alongside their dependencies:
+application bootstrap, alongside their dependencies. Import `Naf\app` with `use function`
+and `Naf\Auth\Support\PasswordHasher` with `use`, plus your application's provider and client:
 
 ```php-inline
 $container = app()->container();
-$container->set(LdapProvider::class, static fn() => new LdapProvider(
-    $container->get(LdapClient::class),
+$container->set(ApiUserProvider::class, static fn() => new ApiUserProvider(
+    $container->get(UserApi::class),
+    $container->get(PasswordHasher::class),
 ));
 ```
+
+`ApiUserProvider`, `UserApi` and `ApiUser` are application types, not shipped NAF classes.
+Import them from your application's namespace and bind `UserApi` to your backend client.
+The factory matches the two constructor arguments in the provider example below. For a
+directory login, use the actual four-argument provider setup in [LDAP authentication](auth-ldap.md#register-the-provider).
 
 Provider resolution is lazy and uses `get()`; no implicit construction or autowiring fallback.
 Finish booting the plugins and registering application dependencies before calling `auth()`.

@@ -182,6 +182,32 @@ Local files are not automatically shared across machines. Queue also ships SQLit
 drivers. Custom drivers implement `QueueDriverInterface`; channel, deadletter and lease
 capabilities use additional interfaces.
 
+### Custom file locations
+
+For example, keep pending and failed jobs in separate application directories. Add this
+fragment to root `bootstrap.php`, after Composer autoloading and before `app()->run()`:
+
+```php-inline
+use Naf\Queue\Core\Queue;
+use Naf\Queue\Drivers\FileDriver;
+use function Naf\app;
+
+$container = app()->container();
+$container->set(Queue::class, static fn() => new Queue(new FileDriver(
+    BASE_PATH . '/storage/jobs/pending',
+    BASE_PATH . '/storage/jobs/failed',
+)));
+```
+
+Create both directories with `mkdir -p storage/jobs/pending storage/jobs/failed` and make
+them writable by the producer and worker. The driver adds channel subdirectories itself.
+Repeat the enqueue and consume commands above: jobs now pass through `storage/jobs/pending/`;
+exhausted failures go to `storage/jobs/failed/`. Run every producer, ticker, worker and retry
+command with this same binding. Register it before any service retains a Queue instance;
+replacing a binding cannot change an object already held by another service.
+If you include `app/schedule.php` from the Scheduling guide, put this binding before that
+include: registering a schedule resolves the scheduler, which retains its Queue instance.
+
 ### The database driver, for more than one machine
 
 Use `PDODriver` for a queue shared through a database. This fragment belongs in an explicit

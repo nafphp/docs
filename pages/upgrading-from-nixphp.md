@@ -19,6 +19,10 @@ called at all on a machine with Nix installed.
 | Plugin package type | `nixphp-plugin` | `naf-plugin` |
 | CLI binary | `nix` | `naf` |
 
+The base-path rename above concerns the framework's internal core directory. Your application
+bootstrap still defines `BASE_PATH` as its own project root before loading Composer, as in
+[Installation](install.md). Do not replace that application constant with `NAF_BASE_PATH`.
+
 ## Plugins have to move with the framework
 
 Plugins are discovered by their Composer package type, and that type is now `naf-plugin`.

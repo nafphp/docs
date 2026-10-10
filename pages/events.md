@@ -10,7 +10,7 @@ Listeners are callables registered during bootstrap. Custom events can carry any
 use function Naf\{event, log};
 
 event()->listen('product.created', function (object $product) {
-    log()->info('Product created', ['id' => $product->id]);
+    log()->info('Product created: {id}', ['id' => $product->id]);
 });
 
 // After your application creates a product:
@@ -20,6 +20,74 @@ event()->dispatch('product.created', $product);
 `listen($event, $listener, $priority = 0)` runs higher priorities first.
 `dispatch()` returns an array of listener results. Use closures or `[ListenerClass::class, 'handle']`;
 NAF constructs class-based listeners through the default container.
+
+## A complete custom event flow
+
+An event connects application work to optional reactions. The code doing the work must
+dispatch it; registering a listener alone never causes it to run. This example records an
+import result without a database or external delivery.
+
+Start from [Your first application](first-app.md). Add these complete files, then run
+`composer dump-autoload` and `php bin/events-demo.php` from the project root.
+
+```php title="app/Listeners/RecordImport.php"
+<?php
+
+declare(strict_types=1);
+
+namespace App\Listeners;
+
+use Psr\Log\LoggerInterface;
+
+final class RecordImport
+{
+    public function __construct(private LoggerInterface $logger) {}
+
+    public function handle(string $source, int $count): string
+    {
+        $this->logger->info('Imported {count} records from {source}.', [
+            'count' => $count,
+            'source' => $source,
+        ]);
+
+        return 'logged';
+    }
+}
+```
+
+```php title="bin/events-demo.php"
+<?php
+
+declare(strict_types=1);
+
+use App\Listeners\RecordImport;
+
+use function Naf\event;
+
+require dirname(__DIR__) . '/bootstrap.php';
+
+event()->listen('app.catalog.imported', [RecordImport::class, 'handle'], priority: 10);
+event()->listen('app.catalog.imported', static function (string $source, int $count): string {
+    echo "Imported {$count} records from {$source}.", PHP_EOL;
+
+    return 'reported';
+});
+
+$results = event()->dispatch('app.catalog.imported', 'catalog.csv', 3);
+echo implode(', ', $results), PHP_EOL;
+```
+
+Expect `Imported 3 records from catalog.csv.` followed by `logged, reported`.
+The class listener receives the configured PSR-3 logger through constructor injection and
+writes to `logs/app.log`. Dispatch arguments become listener arguments in the same order.
+Priority 10 runs before priority 0; results follow that execution order.
+Choose event names with an application or package prefix and keep their payload contract
+stable, so an unrelated plugin listener cannot accidentally receive different arguments.
+
+Listeners run synchronously in the dispatching process. An exception stops dispatch and
+propagates to the caller; the event manager does not undo earlier writes or deliveries.
+Keep required business rules in the application service, dispatch after the relevant work
+succeeds, and use [Queue](queues.md) when a reaction should run in a worker.
 
 ## Object events { #an-event-can-be-an-object }
 
