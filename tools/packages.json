@@ -411,6 +411,7 @@
   "Naf\\OAuth\\Server\\Store\\PdoTokens",
   "Naf\\OAuth\\Server\\Store\\ResourceTokenStoreInterface",
   "Naf\\OAuth\\Server\\Store\\TokenStoreInterface",
+  "Naf\\OAuth\\Server\\Support\\Pkce",
   "Naf\\OAuth\\Server\\Support\\Views",
   "Naf\\ORM\\Core\\EntityInterface",
   "Naf\\ORM\\Core\\EntityManager",
@@ -876,7 +877,7 @@
     "naf/oauth-server"
    ],
    "suggests": [],
-   "version": "v0.1.0"
+   "version": "v0.1.1"
   },
   "auth": {
    "description": "Authentication and permission checks for NAF, with your own user model.",
@@ -1019,7 +1020,7 @@
    "suggests": [
     "naf/oauth-server"
    ],
-   "version": "v0.2.5"
+   "version": "v0.2.6"
   },
   "oauth-client": {
    "description": "Sign in with external OAuth2 and OpenID Connect providers, keeping your own user model.",
@@ -1053,7 +1054,7 @@
     "naf/database",
     "naf/view"
    ],
-   "version": "v0.2.4"
+   "version": "v0.2.5"
   },
   "orm": {
    "description": "NAF ORM Plugin.",

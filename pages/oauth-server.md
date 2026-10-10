@@ -10,6 +10,8 @@ requires:
 using existing NAF Auth accounts. Other applications can obtain access tokens and, with the
 `openid` scope, verify user identities.
 
+This guide requires `naf/oauth-server` 0.2.5+ and PHP 8.3+.
+
 Deployment requires a configured issuer, database migrations, registered clients and scopes.
 User grants also need local login; OpenID Connect needs signing keys. The sections below
 describe those steps and the guarantees required from the database.
@@ -68,7 +70,13 @@ redirect URIs or subject identifiers. Relying parties configure their own displa
 
 Scopes describe requested API access; permissions describe the account's authority. A scope
 can map to a permission. If `permission` is omitted, the scope name is used; a string scope
-definition supplies its label.
+definition supplies its label. Explicit `permission => null` means no additional account
+permission and is appropriate only for scopes you deliberately allow that way. Boolean,
+numeric, array, object, empty-string and whitespace-only values are configuration errors;
+they never mean `null`. OAuth server 0.2.5+ validates the whole policy when it is constructed
+and before the built-in token endpoint can issue a grant. [Alexa setup and diagnostics](alexa.md)
+use the same policy. Correct the configuration before serving requests; this error is a server
+failure, not a client's `invalid_scope`.
 
 The built-in `openid`, `profile` and `email` scopes expose the consenting account's identity
 and allowed profile data. They do not require an additional application permission.
@@ -352,7 +360,10 @@ Unit tests alone do not establish these guarantees.
 
 ### Upgrading
 
-No database migration is needed when upgrading from 0.2.3 to 0.2.4.
+No database migration is needed when upgrading from 0.2.3 or 0.2.4 to 0.2.5.
+Review custom scope definitions: explicit `permission` values must be null or nonempty
+strings. Ensure account-linking clients generate valid PKCE S256 verifiers and challenges
+as described below.
 
 For databases predating the current 0.2 schema, the schema is not backward compatible:
 authorizations carry their target API, families have their own rows, and clients carry the
@@ -368,3 +379,36 @@ On MySQL the identifier columns are given a binary collation, because the defaul
 case-insensitive and these hold values where `aB` and `Ab` are different identifiers.
 
 ---
+
+## PKCE format and consent responses
+
+OAuth server 0.2.5+ requires a verifier of 43–128 unreserved ASCII characters:
+letters, digits, `-`, `.`, `_` and `~`. The S256 challenge is exactly 43 unpadded base64url
+characters. Missing or malformed values and unsupported `plain` return `invalid_request`;
+a well-formed proof that does not match the code returns `invalid_grant`. Generate a fresh
+cryptographically random verifier for every authorization. Format validation cannot establish
+how a client generated its randomness. These requirements follow [RFC 7636](https://www.rfc-editor.org/rfc/rfc7636.html#section-4.1).
+
+Consent HTML, protocol-error pages and redirects sent by the authorization controller have
+`Cache-Control: no-store`, `Pragma: no-cache`, `Referrer-Policy: no-referrer`,
+`X-Frame-Options: DENY` and `Content-Security-Policy: frame-ancestors 'none'`. Keep these
+headers when overriding consent views or composing responses. Apply suitable protection to
+the host's own login screen too.
+
+The consent POST uses its request-bound HMAC CSRF check. Its exact-route exemption from
+`naf/form` is intentional: replacing it with the session-wide token would invalidate parallel
+consent forms. Stored consent binds the session, provider and user; the submitted form cannot
+replace the validated client, redirect, resource or scopes.
+
+Authorization state is request-scoped. The supported front controller boots a fresh application
+for each web request and exits after emission. `ResourceServer` caches its bound request's
+context. A custom persistent HTTP adapter must create a fresh application/container and
+request-bound services for every request; rebinding only `ServerRequestInterface` leaves
+already-resolved services holding the old request. Reusing those instances is unsupported.
+
+The PDO store does not automatically delete old OAuth rows. Plan database retention and monitor
+growth. In particular, used codes and refresh-token tombstones support replay detection: deleting
+them while their authorization family can still issue tokens weakens that guarantee. Implement
+and test retention against family lifetimes and concurrent refresh/revocation before scheduling it.
+Keep subject mappings stable while their accounts remain linked. Key pruning is a separate
+operation and does not prune token or consent tables.

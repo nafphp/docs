@@ -27,13 +27,13 @@ are outside its scope.
 ## Prepare a host
 
 Use PHP 8.3+, `mbstring`, `readline`, PDO and `pdo_sqlite` for this example. This guide
-requires `naf/alexa` 0.1.0+, `naf/mcp` 0.2.5+ and `naf/oauth-server` 0.2.4+.
+requires `naf/alexa` 0.1.1+, `naf/mcp` 0.2.6+ and `naf/oauth-server` 0.2.5+.
 Create a host application; only its `public/` directory is the document root:
 
 ```bash
 composer create-project naf/app alexa-demo
 cd alexa-demo
-composer require naf/alexa
+composer require naf/alexa:^0.1.1
 mkdir -p storage
 ```
 
@@ -168,6 +168,11 @@ revoking and recreating it. Use `oauth:client:rotate-secret` for a deliberate se
 Doctor runs local diagnostics and exits; it does not start or stop an HTTP server.
 It returns exit code 0 when its selected local checks pass, or 1 on failure. It checks
 configuration, OAuth tables, discovery capabilities, client separation and tool scopes.
+A non-user tool may require only `mcp:service`, or intentionally have no scope restriction.
+A list such as `['mcp:service', 'mcp:tools']` fails diagnosis. MCP scope alternatives use OR;
+adding a service scope to a personal operation would allow service execution. Personal tools
+must implement `UserToolInterface`, enable account linking and declare nonempty scopes from
+`alexa:user_scopes`. Setup and doctor reject invalid OAuth permission mappings too.
 `--server-only` limits the checks to server configuration and skips the store listing.
 Doctor without that option also validates the local
 listing metadata. These checks do not verify public reachability, hosted image dimensions,
@@ -406,7 +411,8 @@ $account = token()->user();
 ```
 
 Do not read the browser session as the Alexa caller. The OAuth resource server reloads the
-token's account and rechecks current permissions. Service discovery can list personal tool
+token's account and rechecks current permissions. OAuth scope names are literal; wildcard-like
+names do not imply other scopes. Service discovery can list personal tool
 metadata, but invoking one without a linked account returns HTTP 401. A linked account lacking
 the required scope/permission receives 403. Authorization code exchange requires PKCE S256;
 the requested resource is checked against the code's authorized audience. Refresh keeps that
@@ -451,6 +457,48 @@ refuses to overwrite an existing file. Transfer the reviewed metadata into the C
 [account-linking](#add-account-linking) steps; the export does not transmit credentials.
 
 After the connection and simulator checks pass, follow Amazon's certification procedure.
+
+## Deployment checks
+
+Local doctor checks validate configuration; they do not measure deployment capacity or establish
+an Amazon connection. Before exposing a host:
+
+- Use HTTPS with a valid public certificate. Set the canonical public URL and resource,
+  and configure trusted session proxy addresses explicitly. Strip untrusted forwarded headers
+  at the edge; do not derive identity or rate-limit keys from arbitrary client headers.
+- Limit OAuth token, introspection, revocation, authorization and login requests before
+  expensive password checks. Unknown client IDs deliberately perform a password verification
+  too. Use both peer and server-wide budgets, sized for the actual hasher and PHP worker pool.
+  Nginx provides [request-rate limits](https://nginx.org/en/docs/http/ngx_http_limit_req_module.html).
+  The optional [NAF limiter](rate-limits.md) can enforce host rules before the operation;
+  installing it alone does not intercept requests.
+- Set proxy body limits and PHP `post_max_size` for form endpoints. MCP additionally caps
+  its own JSON input with `mcp:transport:max_request_bytes` (1 MiB by default).
+- Bound simultaneous MCP requests and SSE streams. Nginx [connection limits](https://nginx.org/en/docs/http/ngx_http_limit_conn_module.html)
+  include concurrent HTTP/2 requests. Set tool execution deadlines and PHP worker termination
+  timeouts. A [FastCGI read timeout](https://nginx.org/en/docs/http/ngx_http_fastcgi_module.html#fastcgi_read_timeout)
+  measures gaps between reads, so progress events alone do not enforce a total execution deadline.
+- Run setup in a protected terminal. Newly generated secrets are deliberately printed once;
+  ordinary CI job logs, shell tracing and recorded terminals are unsuitable destinations.
+  Store credentials in a secret manager and rotate any exposed credential. Keep `.env`, the
+  database, backups and private keys outside `public/` with access limited to the application
+  and deployment users. Only the setup secret is shown; the database stores client-secret hashes.
+- Redact Authorization/Cookie headers, credentials, authorization codes, verifiers and tokens
+  from application, proxy and tracing logs. Query strings on OAuth routes can contain sensitive
+  authorization state. Keep production errors sanitized.
+- Monitor OAuth table growth and define retention with the [OAuth replay guarantees](oauth-server.md#pkce-format-and-consent-responses)
+  in mind. Used refresh tokens must remain detectable while the family is usable.
+
+Test separate accounts using the same account-linking client. In a personal handler,
+`token()->user()` identifies the verified account; MCP's identity `id` is the OAuth client ID.
+Resolve requested object IDs through a service that checks that account's ownership and tenant.
+A scope grants an operation; it does not grant access to every object named in tool arguments.
+The existing `my_account` example derives the user from the token rather than from arguments.
+
+Finally test login, denial, consent, refresh, revocation, wrong-audience tokens, proxy flushing
+and timeouts through your public deployment. Amazon simulator/device testing and service-secret
+provisioning remain pending until developer access and Amazon's private setup instructions are
+available. No local test result substitutes for that verification.
 
 ## If the result is different
 

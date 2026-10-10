@@ -531,7 +531,9 @@ def test_integrations(root):
 
 def test_alexa(root):
     copy_examples('install.md', root)
-    run([*COMPOSER, 'require', 'naf/alexa:^0.1', '--no-interaction', '--prefer-dist'], root)
+    installation = fragment('alexa.md', 'Create a host application;', 'bash')
+    require_command = next(line for line in installation.splitlines() if line.startswith('composer require '))
+    run([*COMPOSER, *shlex.split(require_command)[1:], '--no-interaction', '--prefer-dist'], root)
     copy_examples('alexa.md', root)
     environment = fragment('alexa.md', 'Set these application environment values', 'ini')
     (root / '.env').write_text('APP_ENV=test\n' + environment)
