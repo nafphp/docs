@@ -140,7 +140,8 @@
 }
 
 /* --- Screenshots: a hairline frame so light pages do not dissolve into the page --- */
-.md-typeset img.screenshot, .md-typeset .screenshot img {
+.md-typeset video.screenshot { max-width: 100%; height: auto; }
+.md-typeset img.screenshot, .md-typeset video.screenshot, .md-typeset .screenshot img {
   border: 1px solid var(--naf-hairline); border-radius: 4px;
   box-shadow: 0 .2rem .8rem rgba(0, 0, 0, .08); }
 

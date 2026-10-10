@@ -635,13 +635,21 @@ php -S 127.0.0.1:8000 -t public router.php
 ```
 
 Open `/flow-example`. Typing in either field updates the other and reloads only the
-results.
+results. Clicking reset does the same through a store method. Submitting with JavaScript
+disabled still requests `/flow-example?q=...` and renders a complete page.
 
-![The Flow example after typing "view": both the search field and the shared query show "view", and the result list contains only "Views and templates"](assets/screenshots/flow-search.webp){ .screenshot loading=lazy }
+<video class="screenshot" controls muted loop playsinline preload="none" width="640"
+       poster="../assets/screenshots/flow-search.webp"
+       aria-label="Typing view into the search field, then queue into the shared query field: both fields stay in sync and the result list updates without a page reload">
+  <source src="../assets/screenshots/flow-search.webm" type="video/webm">
+</video>
 
-The example has no stylesheet; the screenshot shows the browser's default styles. Clicking reset does the same through a store method. Submitting with JavaScript
-disabled still requests `/flow-example?q=...` and renders a complete page. To inspect the
-backend response directly:
+The recording types `view` into the search field and then `queue` into the shared query
+field. Both fields stay in sync through the store, and only the result list is replaced:
+first "Views and templates", then "Queues and workers". The example has no stylesheet, so the
+browser's default styles are expected.
+
+To inspect the backend response directly:
 
 ```bash
 curl -H 'X-Flow: fragment' 'http://127.0.0.1:8000/flow-example?q=view'

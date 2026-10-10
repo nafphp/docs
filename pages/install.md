@@ -43,8 +43,8 @@ Open **http://127.0.0.1:8000/**. You should see the NAF welcome page:
 
 ![The starter's welcome page with the headline "It works. Now make it yours.", buttons for the first application and a fresh start, and a quote panel](assets/screenshots/starter-welcome.webp){ .screenshot loading=lazy }
 
-Stop the development server with Ctrl+C. Keep it bound to localhost; on a deployed site, configure the web server's
-document root as this project's `public/` directory.
+Stop the development server with Ctrl+C. Keep it bound to localhost; on a deployed site,
+configure the web server's document root as this project's `public/` directory.
 
 The starter installs `naf/framework`, `naf/view` and `naf/form`; `naf/session` arrives through
 the form package. It also registers the `App\` namespace with Composer.
