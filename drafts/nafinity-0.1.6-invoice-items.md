@@ -32,7 +32,8 @@ was settled and are not a confirmed service period for the invoice.
 The JSON downloads contain API position fragments. They are not complete invoice
 requests and cannot be uploaded through the tools' web CSV import screens. The
 receiving integration must authenticate, supply invoice details and handle duplicate
-submissions. Nafinity stores no provider credentials and makes no provider API calls.
+submissions. File downloads store no provider credentials and make no provider API calls. For direct
+draft creation, see [the API workflow draft](nafinity-0.1.6-invoice-api.md).
 Downloading does not mark hours as billed; overlapping exports repeat bookings.
 
 The destination computes the invoice totals. Review rounding before finalizing:
