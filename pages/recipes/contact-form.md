@@ -20,8 +20,14 @@ flow without configuring a mail server.
 Choose this scenario when a website needs to accept a message. If you only need to display
 pages, start with [the small website](small-website.md). [Compare all scenarios](index.md).
 
-Start from [Your first application](../first-app.md), then run `composer require naf/mail`.
-The starter already supplies the other packages listed above. Each titled block is a complete
+Start from [Your first application](../first-app.md), then install Mail and update Form:
+
+```bash
+composer require naf/mail 'naf/form:^0.2.3'
+```
+
+The starter already supplies View and Session. It locks Form 0.2.2; version 0.2.3 checks
+every state-changing request method and provides `csrf()->token()`, which the template uses. Each titled block is a complete
 file; create missing directories and replace the tutorial's corresponding files. If you combine
 recipes, merge their routes and service bindings instead of discarding the existing ones.
 
@@ -32,8 +38,8 @@ request](post-requests.md) explains the underlying request flow.
 
 ## A local mail outbox
 
-Start by choosing where messages go. Register this application-owned transport before adding
-the form, so this exercise writes local files instead of using PHP's default mail delivery.
+Start by choosing where messages go. This application-owned transport writes each message to
+a local file instead of using PHP's default mail delivery.
 
 ```bash
 mkdir -p app/Mail storage/mail
@@ -62,20 +68,23 @@ final class FileTransport implements TransportInterface
 }
 ```
 
-```php title="bootstrap.php"
+Select it in the `mail:transport` setting. This replaces the tutorial's empty configuration;
+merge the `mail` key if your configuration already has other settings:
+
+```php title="app/config.php"
 <?php
 
-define('BASE_PATH', __DIR__);
-require __DIR__ . '/vendor/autoload.php';
+declare(strict_types=1);
 
 use App\Mail\FileTransport;
-use Naf\Mail\Core\Mailer;
-use function Naf\app;
 
-app()->container()->set(Mailer::class, static fn() => new Mailer(new FileTransport()));
-
-app()->run();
+return [
+    'mail' => ['transport' => FileTransport::class],
+];
 ```
+
+The shared `mailer()` now builds `FileTransport` through the container. Keep the
+tutorial's `bootstrap.php` unchanged.
 
 ## The routes
 
@@ -210,7 +219,7 @@ use function Naf\route;
               class="<?= error_class('message', $check) ?>"><?= s(memory('message') ?? '') ?></textarea>
     <?= error('message', $check) ?>
 
-    <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
+    <input type="hidden" name="_csrf" value="<?= s(csrf()->token()) ?>">
 
     <button type="submit">Send</button>
 </form>
@@ -242,15 +251,15 @@ Reloading removes the flash message. A POST without a valid `_csrf` token return
 | A valid submission returns 500 | Inspect the PHP terminal and `logs/app.log` if it exists; check that `storage/mail/` exists and is writable by PHP |
 | A thank-you appears, but no email arrives | This exercise captures mail locally; inspect the JSON file in `storage/mail/` |
 
-If you copied only part of the recipe, check that the routes, controller, template and `Mailer`
-binding all come from this example. [Troubleshooting](../troubleshooting.md#forms-and-sessions)
+If you copied only part of the recipe, check that the routes, controller, template and the
+`mail:transport` setting all come from this example. [Troubleshooting](../troubleshooting.md#forms-and-sessions)
 has further checks for tokens, cookies and form values.
 
 ## Continue building
 
 The local outbox is application code for development, not a built-in NAF transport. To deliver
-real mail, replace its `Mailer` binding with a configured transport from [Sending mail](../mail.md)
-and use sender/recipient addresses you control. Check the boolean result before reporting
+real mail, select a configured transport in `mail:transport` as described in
+[Sending mail](../mail.md#switching-to-real-delivery) and use sender/recipient addresses you control. Check the boolean result before reporting
 success. Use a [queue](../queues.md) when delivery should happen outside the request.
 
 See [Testing applications](../testing.md) to automate verification and [Deployment](../deployment.md) for production setup.

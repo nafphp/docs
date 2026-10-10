@@ -307,6 +307,7 @@ def test_starter(client):
 
 def test_contact(root, client):
     token = csrf(client.request('/contact'))
+    expect(csrf(client.request('/contact')) == token, 'csrf()->token() reuses the session token')
     expect(client.form('/contact', {'name': 'Ada'})[0] == 400, 'Missing CSRF rejected')
     invalid = client.form('/contact', {'_csrf': token, 'name': '<script>alert(1)</script>',
                                       'email': 'invalid', 'message': 'short'})
@@ -630,12 +631,14 @@ def main():
             with server(starter) as client:
                 test_starter(client)
             print('PASS untouched published starter', flush=True)
-            run([*COMPOSER, 'require', 'naf/auth', 'naf/orm', 'naf/mail', '--no-interaction', '--prefer-dist'], starter)
+            # The form recipes update Form to 0.2.3 for csrf()->token() and the full method check.
+            run([*COMPOSER, 'require', 'naf/auth', 'naf/orm', 'naf/mail', 'naf/form:^0.2.3',
+                 '--no-interaction', '--prefer-dist'], starter)
         if args.starter:
             # Reused older starters need the same upgrade documented in the installation guide.
-            run([*COMPOSER, 'require', 'naf/framework:^0.2.2', 'naf/form:^0.2.1',
+            run([*COMPOSER, 'require', 'naf/framework:^0.2.2', 'naf/form:^0.2.3',
                  '--with-all-dependencies', '--no-interaction', '--prefer-dist'], starter)
-        for feature in ('first-app', 'contact', 'login', 'orm'):
+        for feature in ('first-app', 'contact', 'login', 'orm', 'mail'):
             fixture = root / feature
             shutil.copytree(starter, fixture)
             copy_examples('first-app.md', fixture)
@@ -645,6 +648,11 @@ def main():
                 copy_examples('auth.md', fixture)
                 copy_examples('recipes/login-form.md', fixture)
                 expect('Demo account ready.' in run([*PHP, 'bin/seed-demo.php'], fixture), 'Seed account')
+            elif feature == 'mail':
+                copy_examples('mail.md', fixture)
+                output = run([*PHP, 'bin/mail-demo.php'], fixture)
+                expect('Stored messages: 1' in output and 'Subject: Hello from NAF' in output,
+                       'Shipped DummyTransport captures the documented message')
             elif feature == 'orm':
                 copy_examples('orm.md', fixture)
                 for _ in range(2):

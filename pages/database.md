@@ -93,32 +93,87 @@ not enforce those business rules.
 
 ## Migrations
 
-A migration is a class with `up()` and `down()`. Application migrations may live in
-`app/Migrations` or `src/Migrations`; both directories are discovered when present.
-The commands require the optional CLI package first:
+A migration is a class with `up()` and `down()` methods that receive the PDO connection.
+Application migrations may live in `app/Migrations` or `src/Migrations`; both directories
+are discovered when present. The commands require the optional CLI package:
 
 ```bash
 composer require naf/cli
 ```
 
+### Create a migration
+
 ```bash
 vendor/bin/naf db:migration:create
 ```
 
-writes a skeleton there for you to fill in.
+The command takes no name. It writes `app/Migrations/Migration<timestamp>.php` (always
+under `app/`, even in a `src/` layout) with this skeleton:
 
-```bash
-vendor/bin/naf db:migrate up       # apply what has not run
-vendor/bin/naf db:migrate down     # roll back
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Migrations;
+
+use Naf\Database\Core\AbstractMigration;
+use PDO;
+
+class Migration1760000000 extends AbstractMigration
+{
+    public function up(PDO $connection): void
+    {
+    }
+
+    public function down(PDO $connection): void
+    {
+    }
+}
 ```
 
-Pass the direction once, as the positional argument `up` or `down`.
+Fill in both directions. `down()` must undo exactly what `up()` created:
 
-To run a single one:
+```php-inline
+public function up(PDO $connection): void
+{
+    $connection->exec('CREATE TABLE products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name VARCHAR(200) NOT NULL,
+        price_cents INTEGER NOT NULL
+    )');
+}
+
+public function down(PDO $connection): void
+{
+    $connection->exec('DROP TABLE products');
+}
+```
+
+You may rename the class and its file to something descriptive, such as
+`CreateProductsTable`; keep the class name, file name and namespace consistent. Migrations
+are tracked by fully qualified class name and run in file-name order, so keep a sortable
+prefix (for example the timestamp) when you rename them. The SQL above uses SQLite syntax;
+write the DDL your database expects. The [JSON API tutorial](recipes/json-api.md#create-the-schema-with-a-migration)
+shows a complete, tested migration.
+
+### Run and roll back
 
 ```bash
+vendor/bin/naf db:migrate up       # apply every migration that has not run yet
 vendor/bin/naf db:migrate up --name=CreateProductsTable
+vendor/bin/naf db:migrate down --name=CreateProductsTable
 ```
+
+Pass the direction as the positional argument `up` or `down`. `--name` (short `-n`) selects
+exactly one migration by class name or file name without `.php`, or by fully qualified class
+name; a name that matches nothing or several migrations fails without running anything.
+
+!!! danger "`db:migrate down` without `--name` reverts every applied migration"
+    Without `--name`, `down` runs `down()` for **all** applied migrations in reverse order,
+    including the tables that plugins contributed (sessions, OAuth, RBAC and others). This
+    usually deletes data. Roll back a single migration with `--name`, and take a backup
+    before running `down` against a database that matters.
 
 ### Plugins bring their own
 
@@ -167,29 +222,60 @@ transaction to undo the statements that already committed.
 
 ## Configuration
 
-```php-inline
-'database' => [
-    'driver'   => 'mysql',
-    'host'     => '127.0.0.1',
-    'database' => 'naf',
-    'username' => 'root',
-    'password' => '',
-    'charset'  => 'utf8mb4',
-],
-```
+The `database` array in `app/config.php` selects the driver and connection:
 
-The port is filled in from the driver when you leave it out — 3306 for MySQL, 5432 for
-PostgreSQL.
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `database:driver` | string | `mysql` | `mysql`, `pgsql` or `sqlite`; any other value throws `DatabaseException` |
+| `database:host` | string | `127.0.0.1` | Server host (MySQL, PostgreSQL) |
+| `database:port` | int | `3306` / `5432` | Server port; the default depends on the driver |
+| `database:database` | string | `''`; SQLite `:memory:` | Database name, or the SQLite file path |
+| `database:username` | string | `null` | Login name |
+| `database:password` | string | `null` | Password; use an `ENV:` reference |
+| `database:charset` | string | `utf8mb4` | MySQL connection character set |
+| `database:migrationPaths` | list of directories | `[]` | Additional directories scanned for migrations |
 
-SQLite takes a path instead of a host, and defaults to an in-memory database when you give
-it none:
+Without a `database` array, `database()` returns `null` and migration commands report
+`Database connection not found.`
 
-```php-inline
-'database' => [
-    'driver'   => 'sqlite',
-    'database' => '/var/data/app.sqlite',   // or ':memory:'
-],
-```
+=== "MySQL / MariaDB"
+
+    ```php-inline
+    'database' => [
+        'driver'   => 'mysql',
+        'host'     => '127.0.0.1',
+        'database' => 'naf',
+        'username' => 'naf',
+        'password' => 'ENV:DB_PASSWORD',
+        'charset'  => 'utf8mb4',
+    ],
+    ```
+
+=== "PostgreSQL"
+
+    ```php-inline
+    'database' => [
+        'driver'   => 'pgsql',
+        'host'     => '127.0.0.1',
+        'port'     => 5432,
+        'database' => 'naf',
+        'username' => 'naf',
+        'password' => 'ENV:DB_PASSWORD',
+    ],
+    ```
+
+=== "SQLite"
+
+    ```php-inline
+    'database' => [
+        'driver'   => 'sqlite',
+        'database' => BASE_PATH . '/storage/app.sqlite',   // or ':memory:'
+    ],
+    ```
+
+Enable the matching PDO extension (`pdo_mysql`, `pdo_pgsql` or `pdo_sqlite`). SQLite takes a
+file path instead of a host and defaults to an in-memory database when you give none; its
+parent directory must be writable.
 
 An in-memory database lasts only for the connection. Use a persistent file path for data
 that must survive requests or process restarts.

@@ -19,6 +19,11 @@ abort(404, 'The requested item was not found.');
 response itself. Code after the call is not executed unless an outer layer catches the exception.
 Avoid catching and discarding it inside a broad `catch (Throwable)`.
 
+`abort()` passes the message through `htmlspecialchars()` before storing it, so
+`$exception->getMessage()` returns `&quot;`, `&lt;` and similar entities for such characters.
+Keep abort messages plain, or decode them with `htmlspecialchars_decode()` when a JSON
+listener returns them to clients.
+
 ## Default output
 
 The core supplies diagnostic and sanitized error templates. `APP_ENV=prod` and `APP_ENV=test`

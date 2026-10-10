@@ -82,6 +82,8 @@ require_once BASE_PATH . '/app/schedule.php';
 
 Each scheduled class can be registered once; a second registration replaces the first.
 `vendor/bin/naf schedule:list` shows registered jobs and their next occurrence.
+`--from="2026-10-12 08:00"` calculates occurrences from another start time, and `--no-sort`
+keeps registration order instead of sorting by the next occurrence.
 
 ## Ticker and worker { #two-processes-not-one }
 

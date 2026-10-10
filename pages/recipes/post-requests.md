@@ -83,27 +83,31 @@ if (!$check->isValid()) {
 }
 ```
 
-Rules are a `|`-separated string, or an array. Five ship with `naf/form` — `required`, `email`,
-`min`, `max` and `boolean` — and anything else you register yourself; see
-[Forms and validation](../forms.md#your-own-rules).
+Rules are a `|`-separated string, or an array. Form 0.2.3 ships nine — `required`, `string`,
+`array`, `integer`, `email`, `min`, `max`, `boolean` and `date` — and anything else you
+register yourself; see [Forms and validation](../forms.md#built-in-rules). Only `min` and
+`max` accept a missing value; the other rules fail when the field is absent.
 
 An unknown rule throws instead of being skipped. Correct misspelled or unregistered rule
 names before treating a validation result as complete.
 
 ## Include a CSRF token { #csrf-is-already-handled }
 
-With `naf/form` installed, a listener checks POST, PUT and DELETE before
-your controller runs. Generate one token per page and reuse it across that page's forms:
+With `naf/form` 0.2.3 installed, a listener checks every request method except GET, HEAD and
+OPTIONS before your controller runs; Form 0.2.2 and older checked only POST, PUT and DELETE.
+Print the session's token in every form:
 
 ```html+php
 <?php use function Naf\Form\csrf; ?>
-<input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
+<input type="hidden" name="_csrf" value="<?= csrf()->token() ?>">
 ```
 
-For an endpoint using its own credentials, an Authorization header beginning with `Bearer `
-exempts the request from the form plugin's CSRF check. The endpoint still needs to verify
-those credentials; the header alone does not authenticate it. Explicit named exemptions
-are available for other protocol endpoints. [Forms and
+`csrf()->token()` (Form 0.2.3+) reuses the stored token across forms and tabs. On older
+releases, call `csrf()->generate()` once per page and reuse its value.
+
+Since Form 0.2.3, an `Authorization: Bearer` header no longer skips the check. An endpoint
+that authenticates its callers with its own credentials needs an explicit named exemption
+and must still verify those credentials. [Forms and
 validation](../forms.md#requests-that-carry-their-own-credentials) covers how.
 
 ## Return a response { #answering }

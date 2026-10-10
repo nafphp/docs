@@ -32,6 +32,15 @@ document root as this project's `public/` directory.
 The starter installs `naf/framework`, `naf/view` and `naf/form`; `naf/session` arrives through
 the form package. It also registers the `App\` namespace with Composer.
 
+The welcome page links to the source files that produce it and includes two interactive
+examples: a contact form and a JSON request. They use `fetch()` to show field errors,
+success feedback, the JSON response and the HTTP status without leaving the page; the
+normal form submission still works without JavaScript. Both examples are protected by the
+form plugin's CSRF check. The contact form only validates; it does not send or store a
+message. **Start fresh** opens the cleanup steps, with Copy buttons for the terminal
+commands; it does not delete files itself. The `showQuote` setting in `app/config.php`
+switches the rotating quote panel off.
+
 Continue with [Your first application](first-app.md). It replaces the starter demonstration
 with complete files you can copy, then verifies both an HTML page and a JSON endpoint.
 You can follow it directly after a fresh installation. If you are continuing an older project,
@@ -116,22 +125,27 @@ directory; it includes its own bootstrap, routes and Composer file.
 These notes are for checking an existing project or choosing dependency updates. A fresh
 starter installation can proceed directly to [Your first application](first-app.md).
 
-??? info "Versions included in starter 0.2.2"
+??? info "Versions included in starters 0.2.2 and 0.2.3"
 
-    Starter **0.2.2** ships a working dependency lock: framework 0.2.3, form 0.2.2, session 0.2.1
-    and view 0.2.1. It excludes Nyholm PSR-7 below 1.8.2 to avoid PHP 8.4+ deprecation errors.
-    The welcome page, `/contact` form and POST `/api` demonstration work directly after
-    installation; no extra Composer update or response listener is needed. The contact
-    example validates input and redirects; it does not send or store a message.
+    Starters **0.2.2** and **0.2.3** ship the same working dependency lock: framework 0.2.3,
+    form 0.2.2, session 0.2.1 and view 0.2.1. They exclude Nyholm PSR-7 below 1.8.2 to avoid
+    PHP 8.4+ deprecation errors. The welcome page, `/contact` form and POST `/api`
+    demonstration work directly after installation; no extra Composer update or response
+    listener is needed. Starter 0.2.3 adds the interactive welcome page and **Start fresh**
+    guidance; its dependencies are unchanged.
+
+    Newer compatible releases exist, for example framework 0.2.8 and form 0.2.3, which
+    checks CSRF for every state-changing method. The [package overview](packages.md) lists
+    the current versions.
 
 For an application created from an older starter, update the required minimum versions:
 
 ```bash
-composer require 'naf/framework:^0.2.2' 'naf/form:^0.2.1' --with-all-dependencies
+composer require 'naf/framework:^0.2.2' 'naf/form:^0.2.3' --with-all-dependencies
 ```
 
-For later compatible updates, run `composer update` and test your application before
-deploying it. Commit `composer.lock`; deployments should use `composer install` to reproduce
+To move a new or existing project to the current compatible releases, run `composer update`
+and test your application before deploying it. Commit `composer.lock`; deployments should use `composer install` to reproduce
 that tested dependency set.
 
 ## Environment and next steps

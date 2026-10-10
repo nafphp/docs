@@ -24,8 +24,9 @@ below before starting the server again.
 ??? info "Continuing with an older starter"
 
     The tutorial requires `naf/framework` **0.2.2 or newer** and `naf/form` **0.2.1 or newer**.
-    Starter 0.2.2 already includes compatible dependencies. For an older application, follow
-    the [dependency update](install.md#starter-versions-and-updates) before continuing.
+    Starters 0.2.2 and 0.2.3 already include compatible dependencies. For an older
+    application, follow the [dependency update](install.md#starter-versions-and-updates)
+    before continuing. The later form recipes update `naf/form` to 0.2.3 themselves.
 
 ## Files and bootstrap
 

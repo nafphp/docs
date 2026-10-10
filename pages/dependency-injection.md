@@ -116,6 +116,13 @@ For each remaining parameter with a single class or interface type, the containe
 
 Scalar and other built-in types use an explicit value, their default or `null` when allowed.
 Registering a key such as `'prefix'` does not inject a `$prefix` constructor parameter.
+
+!!! warning "Unmatched explicit values fill required scalar parameters"
+    When you pass explicit values but none matches a required scalar parameter by name or
+    position, the container does not fail. It injects the only explicit value you passed,
+    whatever its name, or the whole array for a parameter typed `array`. For a class with a
+    required `int $timeout`, the misspelled `make(ApiClient::class, ['tiemout' => 5])`
+    therefore still sets `$timeout` to 5. Check parameter names, or pass values by position.
 Configure such values through `make()` parameters or a factory. Union and intersection
 types are not autowired; supply an explicit value when no default or nullable fallback exists.
 Circular constructor dependencies throw `ContainerException`.

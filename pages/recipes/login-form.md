@@ -23,7 +23,12 @@ public APIs can start without accounts; [compare the scenarios](index.md).
 First complete [the authentication quickstart](../auth.md#quickstart), including its SQLite
 config, user model and seed command. It builds on [Your first
 application](../first-app.md). These steps provide the account **demo** with password
-**local-demo-password** for local use. The packages above supply the form and session.
+**local-demo-password** for local use. The starter supplies Form and Session; update Form to
+0.2.3 or newer, which the templates need for `csrf()->token()`:
+
+```bash
+composer require 'naf/form:^0.2.3'
+```
 
 Each titled block below is a complete file. Keep the authentication bootstrap and config.
 Replace the routes, or merge the named routes when combining recipes.
@@ -169,7 +174,7 @@ use function Naf\route;
     <input id="password" type="password" name="password">
     <?= error('password', $check) ?>
 
-    <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
+    <input type="hidden" name="_csrf" value="<?= s(csrf()->token()) ?>">
 
     <button type="submit">Sign in</button>
 </form>
@@ -192,7 +197,7 @@ use function Naf\route;
 ?>
 <h1>Signed in as <?= s($user->getUsername()) ?></h1>
 <form action="<?= route('logout') ?>" method="post">
-    <input type="hidden" name="_csrf" value="<?= csrf()->generate() ?>">
+    <input type="hidden" name="_csrf" value="<?= s(csrf()->token()) ?>">
     <button type="submit">Sign out</button>
 </form>
 ```
@@ -210,8 +215,8 @@ Check the complete flow in the browser:
    that page to check that the session keeps you signed in.
 3. Use the logout button. Expect to return to `/login`; a direct visit to `/account` now returns 401.
 
-Submissions without a valid CSRF token return 400. Generate one token per page and reuse it
-if you add more forms to that page.
+Submissions without a valid CSRF token return 400. `csrf()->token()` reuses the session's
+token, so additional forms and open tabs remain valid.
 
 ## If the result is different
 

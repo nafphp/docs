@@ -65,8 +65,9 @@ it is not a setter. `env()` returns the environment name, not an arbitrary varia
 
 | Symptom | Cause to check | Action |
 |---|---|---|
-| CSRF token missing | No token field/header | Include `_csrf` or `X-CSRF-Token` and retain cookies |
-| CSRF token invalid | Replaced token or lost session | Generate once per page; fetch a new form after token replacement |
+| 400 `CSRF token missing or malformed.` | No token field/header, or a non-string value | Include `_csrf` or `X-CSRF-Token` and retain cookies |
+| 400 `CSRF token invalid.` | Replaced token or lost session | Render tokens with `csrf()->token()`; fetch a new form after `generate()` replaced the token |
+| PATCH or other methods return 400 | Form 0.2.3 checks every method except GET, HEAD and OPTIONS | Send the token with these requests too |
 | Undefined template helper | Missing import | Import from `Naf\Form` or `Naf\View` in that template |
 | Input lost after redirect | Request-only `memory()` | Render validation errors in the current request or explicitly persist fields |
 | Database sessions use files | Missing Database plugin | Inspect the warning, install/configure Database and migrate |
