@@ -1,0 +1,8 @@
+ -------------------
+  Plugin boot order
+ -------------------
+
+ 1. naf/cli
+ 2. naf/form
+ 3. naf/session
+ 4. naf/view

@@ -240,7 +240,17 @@ php -S 127.0.0.1:8000 -t public
 
 Open **http://127.0.0.1:8000/contact**. Invalid fields return HTTP 422 with errors and the
 submitted values. A valid name, email and message of at least ten characters redirects back
-with a thank-you. Inspect the new JSON file in `storage/mail/`; it contains the message.
+with a thank-you.
+
+=== "Invalid input (422)"
+
+    ![The contact form after submitting "not-an-address" and a short message: the fields keep their values and show "Please enter a valid email address." and "At least 10 characters."](../assets/screenshots/contact-form-errors.webp){ .screenshot loading=lazy }
+
+=== "After a valid message"
+
+    ![The contact form after the redirect, with the notice "Thank you — we will get back to you." above empty fields](../assets/screenshots/contact-form-sent.webp){ .screenshot loading=lazy }
+
+The recipe adds no stylesheet, so the browser's default form styles are expected. Inspect the new JSON file in `storage/mail/`; it contains the message.
 Reloading removes the flash message. A POST without a valid `_csrf` token returns 400.
 
 ## If the result is different

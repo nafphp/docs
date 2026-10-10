@@ -424,10 +424,11 @@ def test_integrations(root):
     copy_examples('plugins.md', plugin)
     run([*COMPOSER, 'config', 'repositories.docs-plugin', 'path', str(plugin)], root)
     run([*COMPOSER, 'require', 'example/naf-hello:@dev', '--no-interaction', '--prefer-dist'], root)
-    bootstrap_include(root, 'app/schedule.php')
+    # Commands first: their registration must work before anything else has booted NAF.
     command = fragment('console.md', '## Register a command')
     (root / 'app/commands.php').write_text('<?php\n\n' + command)
     bootstrap_include(root, 'app/commands.php')
+    bootstrap_include(root, 'app/schedule.php')
     registration = fragment('mcp.md', 'Register the tool in root `bootstrap.php`')
     (root / 'app/mcp.php').write_text('<?php\n\n' + registration)
     bootstrap_include(root, 'app/mcp.php')

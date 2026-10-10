@@ -74,7 +74,9 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: [snippets]
+      check_paths: true
   - pymdownx.tabbed: { alternate_style: true }
   - pymdownx.details
 
