@@ -1,7 +1,9 @@
-# Global configuration and early configuration sources
+# Nafinity global configuration
 
-Waiting for `naf/framework` v0.2.10, `naf/mail` v0.2.3 and `naf/board` v0.1.6 to be
-released and available on Packagist. Keep this material outside `pages/` until then.
+Waiting for `naf/board` v0.1.6 to be released and available on Packagist.
+Keep this material outside `pages/` until then. Framework 0.2.10 configuration sources
+and Mail 0.2.3 SMTP/provider metadata are documented in the published configuration,
+plugin and mail guides.
 
 ## Configure the installation in Global settings
 
@@ -78,41 +80,5 @@ If a startup override prevents access to the administration:
 The private storage location/key and recovery switch are outside editable config,
 so changing a database or path setting cannot move the override store itself.
 
-## Framework: load a configuration source before plugin boot
-
-A plugin or host may provide `app/config_sources.php` or `src/config_sources.php`;
-the first existing spelling wins. The file returns a list of classes implementing
-`Naf\Contracts\ConfigurationSourceInterface`. All plugins are registered before
-configuration sources load, and the host's source file is processed last.
-
-A source has a no-argument constructor, a stable `name(): string`, and
-`load(string $basePath): array`. It returns literal values under colon-separated
-paths, such as `['mail:smtp:port' => 465]`. Source values are not expanded as
-environment references. A source must not call `config()` or resolve services that
-depend on configuration; doing so would create a boot cycle.
-
-`Config::overlay($name, $values)` replaces a named layer. An empty layer resets it.
-`base()` returns resolved server configuration, `raw()` retains environment
-references, `source($key)` identifies the active source, and `overrides($name)`
-returns one layer. Later layers win, and array-valued overrides replace whole lists.
-These APIs do not update dependencies already held by instantiated services.
-
-Nafinity supplies its own source and encrypted store; installations do not need to
-copy that implementation or call a loader from their `config.php`.
-
-## Mail: describe configurable provider fields
-
-`Naf\Mail\Core\Transport\ConfigurableTransportInterface` optionally extends the
-existing transport contract with `configurationFields(): array`. Each colon-separated
-path maps to a field description with `label`, `type`, `default`, `index`,
-`options` and `sensitive`. This is metadata only: it does not connect or send mail.
-
-`TransportConfiguration::fields($class)` returns the selected provider's metadata,
-including the built-in SMTP description. Existing transports continue to work
-without the optional interface. Board converts the descriptions into its existing
-typed setting definitions and renders them centrally. Providers must explicitly
-mark secrets; unknown configuration also receives conservative name/structure
-redaction, which cannot replace a provider's schema.
-
-Before publication, update the Nafinity settings, configuration and plugin guides
-and regenerate the API inventory for the released signatures.
+Before publication, update the Nafinity settings guide and regenerate the API inventory
+for the released Board signatures.

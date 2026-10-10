@@ -14,7 +14,7 @@ packages' `config.php` files and `config()` calls; see each guide for the effect
 
 ## naf/framework
 
-Version **v0.2.9** · [Fundamentals](lifecycle.md)
+Version **v0.2.10** · [Fundamentals](lifecycle.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
@@ -125,10 +125,12 @@ Version **v0.2.2** · [Translations](translations.md)
 
 ## naf/mail
 
-Version **v0.2.2** · [Sending mail](mail.md)
+Version **v0.2.3** · [Sending mail](mail.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
+| `mail:from` | `''` | code |
+| `mail:reply_to` | `''` | code |
 | `mail:transport` | `'Naf\Mail\Core\Transport\MailTransport'` | `config.php` |
 
 ## naf/mcp

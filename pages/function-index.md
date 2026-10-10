@@ -14,7 +14,7 @@ for services exposed through these helpers.
 
 ## naf/framework
 
-Version **v0.2.9** · [Fundamentals](lifecycle.md)
+Version **v0.2.10** · [Fundamentals](lifecycle.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -117,7 +117,7 @@ Version **v0.2.2** · [Translations](translations.md)
 
 ## naf/mail
 
-Version **v0.2.2** · [Sending mail](mail.md)
+Version **v0.2.3** · [Sending mail](mail.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |

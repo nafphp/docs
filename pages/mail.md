@@ -16,7 +16,7 @@ transport call does not prove that a recipient received the message.
 
 ## Sending a message
 
-`mail()` hands you an empty message, `mailer()` sends it. Both are imported from
+`mail()` creates a message with configured sender defaults, and `mailer()` sends it. Both are imported from
 `Naf\Mail`.
 
 ```php-inline
@@ -57,8 +57,16 @@ method to remove a recipient — build the message with the ones you want.
 ->setContent('Welcome!', false)          // plain text
 ```
 
-There is no multipart alternative: a message is one or the other. If your recipients need
-both, that is a transport concern, not this object's.
+With **naf/mail 0.2.3+**, add a text alternative to an HTML message:
+
+```php-inline
+->setContent('<b>Welcome!</b>')
+->setTextContent('Welcome!')
+```
+
+Both built-in delivery transports send these as `multipart/alternative`. With
+`setContent($body, false)`, the main body is plain text and a text alternative is ignored.
+`getTextContent()` returns the supplied alternative or null.
 
 ## Attachments
 
@@ -80,8 +88,9 @@ The `cid:` reference uses the name you gave, not the path.
 
 ## Delivery failures { #when-it-does-not-go-out }
 
-`send()` is typed to return `bool`, but the shipped transport never returns `false` — it
-throws `Naf\Mail\Exceptions\MailException` when PHP's `mail()` refuses the message.
+`send()` returns `bool`. The PHP-mail transport throws
+`Naf\Mail\Exceptions\MailException` when PHP's `mail()` refuses the message. The SMTP
+transport wraps connection and delivery failures in the same exception, preserving the cause.
 
 ```php-inline
 use Naf\Mail\Exceptions\MailException;
@@ -94,18 +103,101 @@ try {
 }
 ```
 
-Checking the return value instead will not catch a failure. A transport of your own may
-return `false`, so if you write one, decide which of the two you mean and be consistent.
+Checking the return value alone will not catch an exception. Custom transports, or a
+cancelled SMTP send, may return `false`; callers that accept either should handle both.
 
 ## Configuration
 
 | Key | Type | Default | Effect |
 |---|---|---|---|
 | `mail:transport` | class name | `Naf\Mail\Core\Transport\MailTransport` | Transport used by the shared `mailer()`; the class must implement `TransportInterface` |
+| `mail:from` | string | empty | Default sender for `Mailer::createMail()` and `mail()` |
+| `mail:reply_to` | string | empty | Default Reply-To; an unset message Reply-To falls back to its sender |
+| `mail:username` | string | empty | Shared SMTP login; falls back to From when authentication is enabled |
+| `mail:password` | string | empty | Shared SMTP password or OAuth access token |
+| `mail:smtp:host` | string | empty | Required SMTP hostname or IP |
+| `mail:smtp:port` | integer | automatic | 465 for TLS, 587 for STARTTLS, otherwise 25; `mailpit` defaults to 1025 |
+| `mail:smtp:security` | string | `auto` | `auto`, `starttls`, `tls` or `none` |
+| `mail:smtp:authentication` | string | `auto` | `auto`, `off`, `on`, `login`, `plain`, `cram-md5`, `xoauth2` or `oauth` |
+| `mail:smtp:username` | string | inherited | Nonempty value overrides the shared username |
+| `mail:smtp:password` | string | inherited | Nonempty value overrides the shared password/token |
+| `mail:smtp:timeout` | number | `15` | Connection timeout in seconds; greater than zero and at most 300 |
+| `mail:smtp:ca_file` | string | empty | Optional readable CA file; system trust is used otherwise |
 
 The mailer takes the transport from the container when that class is registered there, and
 otherwise builds it with `make()`, so the transport's constructor dependencies are autowired.
 `mail:transport` and the shipped `DummyTransport` require `naf/mail` **0.2.2** or newer.
+Sender defaults, text alternatives, SMTP and provider metadata require **0.2.3+**.
+Explicit `setFrom()` and `setReplyTo()` calls override the configured defaults.
+
+## Send through SMTP
+
+The built-in `Naf\Mail\Core\Transport\SmtpTransport` uses Symfony Mailer. Composer installs
+that dependency and requires OpenSSL alongside the existing fileinfo and mbstring extensions.
+Merge this fragment into `app/config.php` and provide the environment values on the server:
+
+```php-inline
+use Naf\Mail\Core\Transport\SmtpTransport;
+
+return [
+    'mail' => [
+        'transport' => SmtpTransport::class,
+        'from' => 'support@example.com',
+        'reply_to' => 'support@example.com',
+        'username' => 'ENV:MAIL_USERNAME',
+        'password' => 'ENV:MAIL_PASSWORD',
+        'smtp' => [
+            'host' => 'smtp.example.com',
+            'port' => 587,
+            'security' => 'starttls',
+            'authentication' => 'on',
+        ],
+    ],
+];
+```
+
+Authentication requires encryption, a username and a password/token. `on` negotiates a
+supported mechanism; select `login`, `plain`, `cram-md5` or `xoauth2` to require one.
+`oauth` is an alias for `xoauth2`; obtaining and refreshing the access token belongs to the
+application. `auto` enables authentication when a shared or SMTP-specific login/password
+is supplied. From alone does not enable it. An empty protocol-specific credential inherits
+the shared value.
+
+Automatic security selects implicit TLS for port 465, unencrypted delivery for `localhost`,
+`127.0.0.1`, `::1` and `mailpit`, and STARTTLS for other hosts. TLS certificates and hostnames
+are always verified. Explicit STARTTLS fails if the server cannot upgrade; use `ca_file`
+for a private trusted CA. Unencrypted mode cannot send authentication credentials.
+
+The transport validates configuration and opens a connection only when sending or checking.
+An incomplete SMTP configuration therefore does not break unrelated pages. To check TLS and
+login without sending a message, run this fragment after application bootstrap:
+
+```php-inline
+use Naf\Mail\Core\Transport\SmtpTransport;
+
+(new SmtpTransport())->checkConnection();
+```
+
+Connection checks may throw configuration or Symfony transport exceptions. Catch `Throwable`
+at an administrative boundary and show a suitable message without exposing credentials.
+
+## Describe provider configuration fields
+
+`ConfigurableTransportInterface` optionally extends `TransportInterface` with static
+`configurationFields(): array`. A configuration renderer can request metadata without
+constructing a transport:
+
+```php-inline
+use Naf\Mail\Core\Transport\{SmtpTransport, TransportConfiguration};
+
+$fields = TransportConfiguration::fields(SmtpTransport::class);
+```
+
+Each key is a colon-separated configuration path. A description can contain `label`, `type`,
+`default`, `index`, `options` and `sensitive`. The built-in SMTP metadata supplies choices,
+port/time limits and a secret flag for its password. Existing transports without the optional
+interface return an empty description. Mark credentials explicitly as sensitive; metadata
+does not itself render, validate, persist or redact values.
 
 ## Testing without a mail server
 
@@ -132,7 +224,10 @@ declare(strict_types=1);
 use Naf\Mail\Core\Transport\DummyTransport;
 
 return [
-    'mail' => ['transport' => DummyTransport::class],
+    'mail' => [
+        'transport' => DummyTransport::class,
+        'from' => 'hello@example.com',
+    ],
 ];
 ```
 
@@ -182,10 +277,10 @@ if (!$container->has(DummyTransport::class)) {
 }
 
 $message = mail()
-    ->setFrom('hello@example.com')
     ->addTo('reader@example.com')
     ->setSubject('Hello from NAF')
-    ->setContent('A local test message.', false);
+    ->setContent('<b>A local test message.</b>')
+    ->setTextContent('A local test message.');
 
 if (!mailer()->send($message)) {
     throw new RuntimeException('The transport reported a failure.');
@@ -194,6 +289,8 @@ if (!mailer()->send($message)) {
 $messages = $container->get(DummyTransport::class)->getMessages();
 echo 'Stored messages: ' . count($messages) . PHP_EOL;
 echo 'Subject: ' . $messages[0]->getSubject() . PHP_EOL;
+echo 'Sender: ' . $messages[0]->getFrom() . PHP_EOL;
+echo 'Text: ' . $messages[0]->getTextContent() . PHP_EOL;
 ```
 
 ```bash
@@ -205,6 +302,8 @@ Expected output:
 ```text
 Stored messages: 1
 Subject: Hello from NAF
+Sender: hello@example.com
+Text: A local test message.
 ```
 
 `getMessages()` returns the recorded `Mail` objects; `getRecipients()`, `getContent()`,
@@ -222,7 +321,7 @@ preview to `storage/mail/`, which remains available after the response or redire
 ## Real delivery and custom transports { #switching-to-real-delivery }
 
 The default `MailTransport` uses PHP's `mail()`, which needs a configured delivery system on
-the server. For SMTP or an external provider, implement
+the server. Use the built-in [SMTP transport](#send-through-smtp) for direct SMTP. For another provider, implement
 `TransportInterface::sendMail(Mail $mail): bool` with your chosen library and select the
 class in `mail:transport`:
 
