@@ -26,6 +26,11 @@ The plugin does not create accounts or link by email. Store links in application
 persistence and use the immutable directory subject, rather than a changeable username.
 A missing link prevents authentication.
 
+The directory alone verifies the submitted password. After a successful bind, the local
+account provider is called through `find()` to load the linked identity; its `authenticate()`
+method never receives the directory password. Keep local account loading separate from
+directory credential verification when adapting this integration.
+
 Session restoration calls the directory again through `find()`. A missing or disallowed
 subject prevents restoration; directory outages throw instead of falling back to local
 credentials. Auth also checks local account activity. With session persistence enabled,

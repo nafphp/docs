@@ -10,6 +10,11 @@ requires:
 Applications and plugins declare available permissions in code. The privilege policy controls
 which accounts can manage roles or grant access.
 
+Auth verifies an identity and asks what it may do. RBAC supplies editable roles and stored
+assignments for that identity; it does not replace the account provider or sign-in flow.
+Use Auth alone when application code can supply fixed grants. Add RBAC when administrators
+need to compose roles and assign them globally or within a project, team or tenant.
+
 Install the package, configure a database, run its migrations and synchronize declared roles.
 The migration and synchronization commands also require `naf/cli`.
 
@@ -54,6 +59,8 @@ Your user model already implements `Naf\Auth\Identity\UserInterface`. Point its 
 methods here and everything downstream — `auth()->can()`, `requirePermission()` — works
 unchanged:
 
+Import `Naf\Rbac\rbac` with `use function` in the user model's file.
+
 ```php-inline
 public function getRoles(): iterable
 {
@@ -94,6 +101,9 @@ A grant is a person, a role, and where it applies:
 
 ```php-inline
 use Naf\Rbac\Scope;
+use function Naf\Rbac\rbac;
+
+$rbac = rbac();
 
 $rbac->assignments->assign(7, [$adminId]);                                 // everywhere
 $rbac->assignments->assign(7, [$maintainerId], Scope::allOf('project'));   // on every board
@@ -109,6 +119,9 @@ $rbac->allows(7, 'board.settings', Scope::of('project', 5));
 Three spellings reach a place — everywhere, every instance of its kind, and that instance —
 and `Scope::covers()` is the only thing that decides which.
 
+The variables above are IDs of existing stored roles. Resolve those roles in the application
+before assigning them; a role definition object is not a stored role ID.
+
 An installation-wide grant covers every board. Use distinct permission names when global
 administration and board-specific access must be separate capabilities.
 
@@ -116,8 +129,10 @@ A role says where it may be handed out at all, so an installation-wide role cann
 on one board and a board role cannot be granted installation-wide:
 
 ```php-inline
-new RoleDefinition('admin', 'Administrator', permissions: [...]);
-new RoleDefinition('maintainer', 'Maintainer', permissions: [...], scopeType: 'project');
+use Naf\Rbac\Definition\RoleDefinition;
+
+new RoleDefinition('admin', 'Administrator', permissions: ['rbac.manage']);
+new RoleDefinition('maintainer', 'Maintainer', permissions: ['board.settings'], scopeType: 'project');
 ```
 
 Editing a role is deliberately **not** scoped. A role is one object held in many places, so
@@ -131,20 +146,24 @@ one source per kind, and every screen offers it from then on:
 
 ```php-inline
 use Naf\Rbac\Contracts\ScopeSourceInterface;
+use function Naf\Rbac\roles;
 
 final class Boards implements ScopeSourceInterface
 {
+    /** @param array<string, string> $names */
+    public function __construct(private array $names) {}
+
     public function type(): string   { return 'project'; }
     public function label(): string  { return 'Boards'; }
 
     /** @return array<string,string> */
     public function instances(): array
     {
-        return $this->repository->namesById();   // 7 => 'Nafinity'
+        return $this->names;
     }
 }
 
-roles()->scope(new Boards($repository));
+roles()->scope(new Boards(['7' => 'Example board', '12' => 'Documentation']));
 ```
 
 Teams, tenants, single tickets: another registration, no change in here. The type is a string
@@ -154,10 +173,17 @@ the host chooses, and `Scope::of('team', 'design')` works the moment something a
 `instances()` is called while a screen renders, so it may return only what the person granting
 is allowed to see. An empty list hides the kind.
 
+This example supplies a fixed map so the whole contract is visible. In an application,
+inject your board repository through an explicit constructor and query it in `instances()`.
+Filter its result for the current administrator before returning the ID-to-label map.
+
 ## Synchronize declared roles { #keeping-declarations-and-stored-roles-honest }
 
 Synchronization preserves changes made to stored roles. New declarations do not overwrite
 an administrator's customized grants automatically.
+
+Run `rbac:sync` after installing a package that declares roles or changing those declarations.
+New role declarations can be added, while existing roles remain under administrator control.
 
 `rbac:sync` reports differences between stored roles and their current declarations,
 including newly declared permissions:
@@ -209,6 +235,7 @@ A grant change is dispatched as an event, so a host that keeps a history can rec
 
 ```php-inline
 use Naf\Rbac\Events\GrantsChanged;
+use function Naf\event;
 
 event()->listen(GrantsChanged::class, function (GrantsChanged $moved): void {
     // actorId, targetId, scope, before, after

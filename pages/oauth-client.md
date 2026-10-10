@@ -335,13 +335,24 @@ finishes it must be the person who started it:
 
 ## Custom login integration { #doing-it-yourself }
 
-For application-owned routes, call `oauth()` to use the protocol flow directly:
+For application-owned routes, call `oauth()` to use the protocol flow directly. The start
+action and callback action are separate HTTP handlers. In the **start action**:
 
 ```php-inline
-use function Naf\Auth\auth;
+use function Naf\redirect;
 use function Naf\OAuth\Client\oauth;
 
 return redirect(oauth('google')->authorizationUrl());
+```
+
+In the **callback action**, after the provider redirects back:
+
+```php-inline
+use Naf\OAuth\Client\Token\Tokens;
+use function Naf\app;
+use function Naf\redirect;
+use function Naf\Auth\auth;
+use function Naf\OAuth\Client\oauth;
 
 $callback = oauth('google')->callback();   // throws unless everything verifies
 $external = $callback->identity;
@@ -350,13 +361,22 @@ $user = $yourAccounts->findBySubject($external->issuer, $external->subject)
     ?? throw new RuntimeException('Not linked.');
 
 auth()->setIdentity($user, 'database');
+if ($callback->token !== null) {
+    app()->container()->get(Tokens::class)->remember($callback);
+}
 
 return redirect($callback->redirectTo);
 ```
 
-A custom callback must call `Tokens::remember($callback)` after successful sign-in when
-provider token storage is enabled. Do not retain credentials from a callback the application
-refuses to complete.
+These are handler fragments: `$yourAccounts` is your application's account lookup service,
+which finds the linked identity by **issuer and subject**, and `'database'` must be a registered
+Auth provider able to reload that identity. Configure Google's callback URL to reach this
+callback handler. Handle rejected or unlinked accounts before completing sign-in.
+
+`remember()` is an instance method on the container's `Tokens` service. Resolve it only
+when the callback carries a token: the default token-store binding throws when provider
+token storage is disabled. Call it only after successful sign-in. Do not retain credentials
+from a callback the application refuses to complete.
 
 ---
 

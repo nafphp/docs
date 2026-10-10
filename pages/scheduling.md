@@ -28,7 +28,7 @@ use Naf\Schedule\Core\ScheduledJobInterface;
 
 final class RecordHeartbeat implements QueueJobInterface, ScheduledJobInterface
 {
-    public function __construct(private array $payload = []) {}
+    public function __construct(private string $message = 'Scheduled heartbeat executed.') {}
 
     public function getCronExpression(): string
     {
@@ -37,7 +37,7 @@ final class RecordHeartbeat implements QueueJobInterface, ScheduledJobInterface
 
     public function execute(Output $output): void
     {
-        $output->writeLine('Scheduled heartbeat executed.');
+        $output->writeLine($this->message);
     }
 }
 ```
@@ -84,6 +84,30 @@ Each scheduled class can be registered once; a second registration replaces the 
 `vendor/bin/naf schedule:list` shows registered jobs and their next occurrence.
 `--from="2026-10-12 08:00"` calculates occurrences from another start time, and `--no-sort`
 keeps registration order instead of sorting by the next occurrence.
+
+### Passing job data
+
+Replace the final registration in `app/schedule.php` with this fragment to supply data:
+
+```php-inline
+scheduler()->addScheduledJob(RecordHeartbeat::class, [
+    'message' => 'Scheduled catalog check executed.',
+]);
+```
+
+The ticker constructs the job with that payload to read its cron expression, then queues
+the payload for the worker to construct it again. Here `message` matches the constructor
+parameter `$message`; explicit names take precedence over its default. Keep job data
+JSON-serializable and validate values before using them. Reserve keys beginning with `_`
+for queue metadata.
+The worker now prints `Scheduled catalog check executed.`. A second registration of the
+same class replaces its payload; it does not create another schedule. Payload values are
+not part of the class/expression key used for minute tracking and coalescing.
+
+If a job instead takes the whole array, use a required `array $payload` parameter with
+nonempty job data, as in [Queues](queues.md#a-job). An optional
+`array $payload = []` uses its default before the container's unmatched-array fallback,
+so unrelated keys such as `message` would be ignored. See [constructor parameter resolution](dependency-injection.md).
 
 ## Ticker and worker { #two-processes-not-one }
 
@@ -155,6 +179,14 @@ that must eventually run, persist completion state and check overdue work in app
 By default, the scheduler adds a deterministic `_job_id` for each class/expression pair.
 The file queue uses it as a filename, so later occurrences replace an unconsumed run of that
 same schedule. This suits work such as rebuilding the latest cache state.
+
+| Work | Coalescing choice |
+|---|---|
+| Refresh a snapshot, rebuild a cache or synchronize the latest state | Keep `true` when one pending run can replace an older pending run |
+| Process each observed occurrence, such as recording a periodic audit sample | Use `false` and make individual runs identifiable and safe to retry |
+
+Disabling coalescing preserves runs that the ticker actually queues. It does not recover
+occurrences missed while the ticker was stopped, or make delivery exactly once.
 
 Add this fragment to `app/config.php` when every occurrence must be queued separately:
 

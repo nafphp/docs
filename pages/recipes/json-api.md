@@ -451,9 +451,10 @@ appropriate authentication and authorization policy to each operation:
 | Tools called by a language model | [MCP](../mcp.md) |
 
 If you adapt this code into the website starter, `naf/form` also runs: POST and DELETE require
-CSRF protection. Keep that protection for requests authenticated by cookies. A header beginning
-with `Bearer` bypasses the form plugin's CSRF check, but **does not authenticate the request**.
-Validate credentials independently and never fall back to cookie authentication after an
-invalid bearer token. See [requests that carry their own credentials](../forms.md#requests-that-carry-their-own-credentials).
+CSRF protection. Keep that protection for requests authenticated by cookies. Form 0.2.3+
+also checks requests carrying a Bearer header. For a bearer-only endpoint, exempt its exact
+route name through the documented Form configuration and validate credentials independently.
+Never fall back to cookie authentication after an invalid bearer token. See
+[requests that carry their own credentials](../forms.md#requests-that-carry-their-own-credentials).
 
 See [Testing applications](../testing.md) to automate verification and [Deployment](../deployment.md) for production setup.

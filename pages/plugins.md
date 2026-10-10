@@ -150,9 +150,7 @@ flowchart TD
     E --> F["Register every plugin"]
     F --> G["Boot each plugin in order:<br/>config, routes, functions.php,<br/>view_helpers.php, bootstrap.php"]
     G --> H["Load app/routes.php"]
-    H --> I{"HTTP request?"}
-    I -- yes --> J["Register core guard rules"]
-    I -- "no (CLI)" --> K["Skip guard rules"]
+    H --> I["Register core guard rules<br/>for HTTP and CLI (Framework 0.2.9+)"]
 ```
 
 Framework 0.2.7+ reads boot order from each installed plugin's `composer.json`. All plugins

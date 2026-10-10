@@ -50,6 +50,10 @@ Separate controller and view fixtures check named route arguments, constructor i
 response types, template variables, partials, layout blocks, asset tags and custom search
 paths through real HTTP requests and CLI rendering. The ORM fixture also saves and reads a
 many-to-many relation and verifies that repeating it does not duplicate the pivot row.
+The chapter audit also exercises custom event listeners and their result order, bilingual
+translation files, custom queue paths, scheduled payloads, RBAC scope sources and the
+cheat-sheet layout fragment, plus the application Auth provider and WebSocket flags.
+See [the content audit](CONTENT_AUDIT.md) for chapter coverage.
 The Alexa example runs in its own minimal host and checks setup, doctor, OAuth discovery,
 service tokens, JSON/SSE tool calls and revocation against the published packages.
 It never sends mail externally. Temporary projects and servers are cleaned up, including on

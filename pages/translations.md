@@ -49,6 +49,58 @@ in the translation file so each language can use its own word order.
 Values that are neither scalar nor `Stringable` are skipped rather than converted, so an
 array passed by accident leaves the placeholder standing instead of printing `Array`.
 
+## A complete bilingual example
+
+Start from [Your first application](first-app.md), run `composer require naf/i18n` and add
+these complete files. Both languages use the same keys; the placeholder moves with the
+sentence, rather than being concatenated around translated fragments.
+
+```json title="app/Resources/lang/en.json"
+{
+    "welcome": "Welcome to our site!",
+    "greeting": "Hello, :name!",
+    "nav.home": "Home"
+}
+```
+
+```json title="app/Resources/lang/de.json"
+{
+    "welcome": "Willkommen auf unserer Seite!",
+    "greeting": "Hallo, :name!",
+    "nav.home": "Startseite"
+}
+```
+
+```php title="bin/translations-demo.php"
+<?php
+
+declare(strict_types=1);
+
+use function Naf\I18n\{lang, t, translator};
+
+require dirname(__DIR__) . '/bootstrap.php';
+
+foreach (['en', 'de'] as $language) {
+    translator()->setLanguage($language);
+    echo lang(), ': ', t('greeting', ['name' => 'Ada']), ' ', t('nav.home'), PHP_EOL;
+}
+
+echo t('missing.key'), PHP_EOL;
+```
+
+Run `php bin/translations-demo.php`. Expect:
+
+```text
+en: Hello, Ada! Home
+de: Hallo, Ada! Startseite
+missing.key
+```
+
+This script selects languages explicitly because there is no HTTP request to detect.
+Save JSON as UTF-8. Translation and HTML escaping are separate operations: in a PHP
+template, import `Naf\View\s` and print `s(t('greeting', ['name' => $name]))` when the result
+belongs in HTML text or a quoted attribute.
+
 ## Missing translations { #when-a-key-is-missing }
 
 `t()` returns the key itself:

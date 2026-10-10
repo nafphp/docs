@@ -35,6 +35,21 @@ key is absent. The web process and server must use the same key and `websocket:c
 For HTTPS, configure `websocket:certificate` and `websocket:key_file`, expose `wss://`, and
 list allowed page origins explicitly. An empty origins list accepts any origin.
 
+Before including live-update controls or issuing a page token, check whether the feature
+is configured:
+
+```php-inline
+use function Naf\Websocket\live;
+
+if (live()) {
+    // Include this application's live-update controls.
+}
+```
+
+`live()` requires an enabled flag and a nonempty signing key. It recognizes environment
+strings such as `true` and `false`; it does not probe the server or guarantee message
+delivery. A failed publication still needs the handling described below.
+
 ## Change notifications { #it-carries-that-something-changed-never-what }
 
 A message says which channel and which revision. Whoever receives it fetches the new state

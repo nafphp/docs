@@ -182,8 +182,9 @@ without claiming that your application sends on their behalf.
 **The body is plain text.** Passing `false` to `setContent()` avoids interpreting submitted
 text as HTML. The subject is fixed; visitor text belongs in the body.
 
-**The success path redirects.** The thank-you lives in a flash message, which survives exactly
-one request — the redirect's — and is gone on the next reload.
+**The success path redirects.** The thank-you lives in a flash message, which is removed
+when the destination reads it with `getFlash()`. Refreshing then repeats a GET without the
+message, not the POST that sent the mail.
 
 ## The template
 

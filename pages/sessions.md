@@ -38,16 +38,26 @@ Keep session data small and avoid retaining stale entities or permission snapsho
 ## Flash messages { #messages-that-should-appear-once }
 
 ```php-inline
+use function Naf\Session\session;
+
 session()->flash('success', 'Your profile has been updated.');
 ```
 
 ```php-inline
-$message = session()->getFlash('success');       // returns it and deletes it
+$message = session()->getFlash('success', '');   // returns it and deletes it; '' if absent
 ```
 
 `getFlash()` removes the value as it reads it, so a refresh does not show the message
 again. Read it once and put it in a variable — asking twice gives you the default the
 second time.
+
+A common flow is **POST → flash → redirect → GET → read**: after saving a form, set the
+message and return a redirect; the destination reads it once and escapes it with `s()`.
+Refreshing the destination then repeats only the GET and the message is gone. Flash data
+does not expire simply because another request happened: it remains until read or the
+session ends. See the complete [contact-form example](recipes/contact-form.md) for the
+controller, redirect and template together. `memory()` serves a different purpose: it reads
+input from the current request and cannot repopulate a form after a redirect.
 
 ## Regenerating the session id
 

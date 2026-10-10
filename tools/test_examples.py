@@ -249,6 +249,18 @@ def test_views(root):
         expect('href="/css/app.css?v=2"' in result[2]
                and '<script type="module" src="/js/editor.mjs#main"></script>' in result[2], 'Asset collection retains query strings and recognizes module files')
     template.write_text(full)
+    cheat = root / 'app/views/cheat.phtml'
+    cheat.write_text(fragment('cheat-sheet.md', '## Views', 'html+php'))
+    (root / 'app/views/partials/card.phtml').write_text(
+        '<?php use function Naf\\View\\s; ?><p class="card"><?= s($item) ?></p>')
+    routes.write_text(source + "\nroute()->add('GET', '/cheat', static fn() => render('cheat', "
+                     "['pageTitle' => 'Cards & examples', 'item' => '<Ada>']), 'cheat');\n")
+    with server(root) as client:
+        result = client.request('/cheat')
+        expect(result[0] == 200 and '<h1>Cards &amp; examples</h1>' in result[2]
+               and '<p class="card">&lt;Ada&gt;</p>' in result[2], 'Cheat-sheet layout retains and escapes its content block')
+        expect('href="/css/app.css"' in result[2], 'Cheat-sheet layout emits its collected stylesheet')
+    routes.write_text(source)
     config = root / 'app/config.php'
     full_config = config.read_text()
     config.write_text("<?php return ['view' => ['paths' => ['templates']]];")
@@ -554,6 +566,7 @@ def test_integrations(root):
     (reports / 'nested/second.txt').write_text('Second\n')
     (reports / 'outside.txt').symlink_to(root / 'composer.json')
     run([*COMPOSER, 'dump-autoload', '--no-interaction'], root)
+    test_chapter_examples(root)
 
     expect('OK (2 tests, 2 assertions)' in run(
         [*PHP, 'vendor/bin/phpunit', '--bootstrap', 'vendor/autoload.php', 'tests/GreetingTest.php'], root),
@@ -593,6 +606,42 @@ def test_integrations(root):
     expect((root / 'storage/schedule-state.json').is_file(), 'Scheduler writes application-specific state')
     expect('Scheduled heartbeat executed.' in run([*PHP, 'vendor/bin/naf', 'queue:consume', '--once'], root),
            'Ticker and worker execute the documented scheduled job')
+
+    # Re-run the actual producer, failure/retry and scheduler harness with the documented binding.
+    (root / 'app/custom-queue.php').write_text('<?php\n' + fragment('queues.md', '### Custom file locations'))
+    bootstrap = root / 'bootstrap.php'
+    bootstrap.write_text(bootstrap.read_text().replace("require_once BASE_PATH . '/app/schedule.php';",
+        "require_once BASE_PATH . '/app/custom-queue.php';\nrequire_once BASE_PATH . '/app/schedule.php';"))
+    for name in ('pending', 'failed'):
+        (root / 'storage/jobs' / name).mkdir(parents=True)
+    producer.write_text(producer.read_text().replace("'user_id' => 0", "'user_id' => 42"))
+    run([*PHP, 'bin/enqueue-demo.php'], root)
+    expect(len(list((root / 'storage/jobs/pending').rglob('*.job'))) == 1
+           and not list((root / 'storage/queue').glob('*.job')), 'Custom FileDriver receives the producer job')
+    expect('Recorded signup for user 42' in run([*PHP, 'vendor/bin/naf', 'queue:consume', '--once'], root),
+           'CLI worker uses the custom queue binding')
+    producer.write_text(producer.read_text().replace("'user_id' => 42", "'user_id' => 0"))
+    run([*PHP, 'bin/enqueue-demo.php'], root)
+    for attempt in range(3):
+        failed = subprocess.run([*PHP, 'vendor/bin/naf', 'queue:consume', '--once', '--verbose'],
+                                cwd=root, capture_output=True, text=True)
+        expect(failed.returncode != 0 and 'positive user_id' in failed.stdout + failed.stderr,
+               f'Custom queue fails worker attempt {attempt + 1}')
+    failures = list((root / 'storage/jobs/failed').rglob('*.job'))
+    expect(len(failures) == 1, 'Custom FileDriver retains exhausted failures in its configured directory')
+    run([*PHP, 'vendor/bin/naf', 'queue:retry-failed'], root)
+    expect(not failures[0].exists() and len(list((root / 'storage/jobs/pending').rglob('*.job'))) == 1,
+           'Retry command moves a custom deadletter back to the configured pending directory')
+    # Remove this intentionally failing demo before testing a scheduled payload.
+    for job in (root / 'storage/jobs/pending').rglob('*.job'):
+        job.unlink()
+    schedule = root / 'app/schedule.php'
+    schedule.write_text(schedule.read_text().replace('scheduler()->addScheduledJob(RecordHeartbeat::class);',
+                        fragment('scheduling.md', '### Passing job data')))
+    (root / 'storage/schedule-state.json').unlink()
+    run([*PHP, 'vendor/bin/naf', 'schedule:ticker', '--once'], root)
+    expect('Scheduled catalog check executed.' in run([*PHP, 'vendor/bin/naf', 'queue:consume', '--once'], root),
+           'Scheduled payload survives ticker serialization and worker construction with custom storage')
 
     def token(scope):
         output = run([*PHP, 'vendor/bin/naf', 'mcp:token:create', 'Documentation test', '--scope', scope], root)
@@ -647,6 +696,67 @@ def test_integrations(root):
         expect(rpc('tools/list', bearer=denied)['tools'] == [], 'MCP hides tools outside token scopes')
         expect(rpc('tools/call', {'folder': 'reports'}, bearer=denied, status=403)['error']['code'] == -32001,
                'MCP refuses direct calls outside token scopes')
+
+
+def test_chapter_examples(root):
+    for page in ('events.md', 'translations.md'):
+        copy_examples(page, root)
+    run([*COMPOSER, 'dump-autoload', '--no-interaction'], root)
+    output = run([*PHP, 'bin/events-demo.php'], root)
+    expect(output.strip().splitlines() == ['Imported 3 records from catalog.csv.', 'logged, reported'],
+           'Custom class and closure listeners receive payloads and return results in priority order')
+    expect('Imported 3 records from catalog.csv.' in (root / 'logs/app.log').read_text(),
+           'Event listener receives the configured PSR-3 logger and expands its placeholders')
+    output = run([*PHP, 'bin/translations-demo.php'], root)
+    expect(output.strip().splitlines() == ['en: Hello, Ada! Home', 'de: Hallo, Ada! Startseite', 'missing.key'],
+           'Bilingual JSON files, placeholder substitution, literal dotted keys and missing-key fallback')
+    scope = root / 'bin/scope-demo.php'
+    scope.write_text("<?php\nrequire dirname(__DIR__) . '/bootstrap.php';\n"
+                     + fragment('rbac.md', '## Register a scope source')
+                     + "\necho json_encode(roles()->scopeSource('project')->instances());\n")
+    expect(json.loads(run([*PHP, 'bin/scope-demo.php'], root)) == {'7': 'Example board', '12': 'Documentation'},
+           'Complete RBAC scope source registers and exposes its ID-to-label map')
+    provider = root / 'bin/provider-demo.php'
+    provider.write_text("<?php\nrequire dirname(__DIR__) . '/bootstrap.php';\nuse function Naf\\app;\n"
+                        + fragment('auth.md', '## Writing your own provider') + '''
+final class ApiUser implements \\Naf\\Auth\\Identity\\IdentityInterface
+{
+    public function __construct(public string $passwordHash) {}
+    public function getIdentifier(): string { return '42'; }
+    public function getRoles(): iterable { return []; }
+    public function getPermissions(): iterable { return []; }
+}
+final class UserApi
+{
+    public function __construct(private ApiUser $user) {}
+    public function byEmail(string $email): ?ApiUser { return $email === 'ada' ? $this->user : null; }
+    public function byId(string $id): ?ApiUser { return $id === '42' ? $this->user : null; }
+    public function updateHash(string $id, string $hash): void { $this->user->passwordHash = $hash; }
+}
+$hasher = app()->container()->get(PasswordHasher::class);
+app()->container()->set(UserApi::class, new UserApi(new ApiUser($hasher->hash('demo-password'))));
+''' + fragment('auth.md', 'Custom provider factories belong in the') + '''
+$provider = $container->get(ApiUserProvider::class);
+echo json_encode([
+    $provider->authenticate(new \\Naf\\Auth\\Credentials\\PasswordCredentials('ada', 'demo-password'))?->getIdentifier(),
+    $provider->authenticate(new \\Naf\\Auth\\Credentials\\PasswordCredentials('ada', 'wrong')),
+    $provider->authenticate(new \\Naf\\Auth\\Credentials\\PasswordCredentials('missing', 'demo-password')),
+    $provider->find('42')?->getIdentifier(),
+]);
+''')
+    expect(json.loads(run([*PHP, 'bin/provider-demo.php'], root)) == ['42', None, None, '42'],
+           'Application provider and documented container factory authenticate and load through an in-memory API fixture')
+    # The configuration check must distinguish string false from PHP truthiness.
+    config = root / 'app/config.php'
+    original = config.read_text()
+    try:
+        for enabled, key, expected in [('false', 'test-key', False), ('true', '', False), ('true', 'test-key', True)]:
+            config.write_text('<?php return ' + "['websocket' => ['enabled' => '" + enabled
+                              + "', 'key' => '" + key + "']];")
+            output = run([*PHP, '-r', "require 'bootstrap.php'; echo json_encode(\\Naf\\Websocket\\live());"], root)
+            expect(json.loads(output) is expected, f'WebSocket live() evaluates enabled={enabled}, key present={bool(key)}')
+    finally:
+        config.write_text(original)
 
 
 def test_alexa(root):
@@ -817,6 +927,7 @@ def main():
         integrations = root / 'integrations'
         shutil.copytree(starter, integrations)
         run([*COMPOSER, 'require', 'naf/client', 'naf/queue', 'naf/schedule', 'naf/mcp',
+             'naf/i18n', 'naf/rbac', 'naf/websocket',
              '--with-all-dependencies', '--no-interaction', '--prefer-dist'], integrations)
         run([*COMPOSER, 'require', '--dev', 'phpunit/phpunit:^12.1',
              '--no-interaction', '--prefer-dist'], integrations)

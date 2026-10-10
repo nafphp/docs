@@ -42,12 +42,23 @@ Check the type of every value before using it; a field can arrive as an array.
 ## Views
 
 ```html+php
-<?php use function Naf\View\{asset, s, view}; ?>
-<?php $this->setLayout('layouts.main') ?>
-<h1><?= s($title) ?></h1>
+<?php
+use function Naf\View\{asset, s, view};
+
+asset()->add('/css/app.css');
+$this->setLayout('layouts.main');
+$this->block('content');
+?>
+<h1><?= s($pageTitle) ?></h1>
 <?= view('partials.card', ['item' => $item]) ?>
-<?php asset()->add('/css/app.css') ?>
+<?php $this->endblock('content'); ?>
 ```
+
+This template expects `$pageTitle` and `$item`, plus an application partial at
+`app/views/partials/card.phtml`. The layout must print `$this->getBlock('content')` and
+the collected CSS tags; see the complete layout in the Views guide. Content outside a
+captured block is not automatically inserted into a layout.
+Keep data keys distinct from block names such as `title` and `content`.
 
 ```php-inline
 use function Naf\View\render;
