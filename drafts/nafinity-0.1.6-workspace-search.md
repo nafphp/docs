@@ -24,18 +24,19 @@ Suggestions include at most eight tickets and six additional matching boards. Th
 result page includes at most 50 tickets and 20 matching boards. If more results
 exist, refine the query. Percent signs and underscores are searched literally.
 
-**New ticket** follows the search. Inside a writable board it opens that board's
-ticket dialog. Outside a board, choose a writable, unarchived board first. A
-read-only board and the ticket-creation page omit another creation action. The
-project name remains visible in the top bar on board, ticket and project-settings
-pages. Other pages use their existing heading without a repeated top-bar label.
+**New ticket** appears in the project heading and opens that board's ticket dialog.
+It uses the same primary action style as **New project** in the project overview.
+The action is available only in a writable project; workspace pages and read-only
+boards omit it. The top bar contains search only. The project name remains visible
+there on board, ticket and project-settings pages. Other pages use their existing
+heading without a repeated top-bar label.
 
 ### Extending the top bar
 
 The `topbar.tools` UI slot uses `PageSlotContext`. Extensions can add controls there
 or explicitly replace the `core.topbar.workspace` contribution through the existing
-UI registry. The standard contribution contains search and ticket creation; account
-actions remain in `topbar.actions`.
+UI registry. The standard contribution contains workspace search; ticket creation
+belongs to the project heading. Account actions remain in `topbar.actions`.
 
 Implementation and verification: see the package's `docs/Settings-And-AI.md`,
 `docs/Extensibility.md`, `WorkspaceSearchOverHttpTest` and
