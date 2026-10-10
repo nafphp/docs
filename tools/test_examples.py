@@ -25,7 +25,8 @@ import urllib.parse
 import urllib.request
 
 PAGES = Path(__file__).resolve().parent.parent / 'pages'
-BLOCKS = re.compile(r'^```[\w+-]+ title="([^"]+)"\n(.*?)^```\s*$', re.M | re.S)
+# File-titled blocks may carry further attributes such as hl_lines="3 4" after the title.
+BLOCKS = re.compile(r'^```[\w+-]+ title="([^"]+)"[^\n]*\n(.*?)^```\s*$', re.M | re.S)
 PHP = shlex.split(os.environ.get('PHP_COMMAND', 'php'))
 COMPOSER = shlex.split(os.environ.get('COMPOSER_COMMAND', 'composer'))
 checks = 0
@@ -703,6 +704,15 @@ def main():
             result = client.request('/')
             expect(result[0] == 200 and json.loads(result[2]) == {'ok': True}, 'Core-only install')
         print('PASS core-only install', flush=True)
+        overview = root / 'overview'
+        shutil.copytree(core, overview)
+        copy_examples('index.md', overview)
+        with server(overview) as client:
+            result = client.request('/hello/Ada')
+            expect(result[0] == 200 and result[2] == '{\n    "hello": "Ada"\n}'
+                   and result[1]['Content-Type'] == 'application/json; charset=UTF-8',
+                   'Overview route returns the documented JSON')
+        print('PASS overview example', flush=True)
         for scenario, test in (('small-website', test_small_website), ('simple-json-api', test_simple_api)):
             fixture = root / scenario
             fixture.mkdir()

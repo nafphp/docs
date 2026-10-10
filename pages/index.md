@@ -13,27 +13,92 @@ Application code uses ordinary PHP classes and explicitly imported helper functi
 handlers return PSR-7 responses; controllers receive services through their constructors.
 No base controller or application-wide ORM is required.
 
+## A first route
+
+```php title="app/routes.php"
+<?php
+
+use function Naf\{json, route};
+
+route()->add('GET', '/hello/{name}', function (string $name) {
+    return json(['hello' => $name]);
+}, 'hello');
+```
+
+```bash
+curl http://127.0.0.1:8000/hello/Ada
+```
+
+```text
+{
+    "hello": "Ada"
+}
+```
+
+The placeholder `{name}` reaches the closure's `$name` argument, and `json()` returns a PSR-7
+response with `Content-Type: application/json; charset=UTF-8`. [Your first
+application](first-app.md) builds this endpoint and an HTML page step by step.
+
 ## Choose a starting point
-
-If this is your first time using NAF, [install the starter](install.md#start-with-the-application-skeleton)
-and follow [Your first application](first-app.md). You will build an HTML page and a JSON
-endpoint before moving on to forms, services or persistence. You can learn the core concepts
-as you use them; no need to read every reference chapter first.
-
-If you already have a particular application in mind, choose one of these paths:
-
-| Goal | Guide |
-|---|---|
-| Pick a small, complete application to build | [Application scenarios](recipes/index.md) |
-| Build a two-page website with a shared layout | [Small website](recipes/small-website.md) |
-| Return JSON without configuring a database | [JSON API without a database](recipes/simple-json-api.md) |
-| Build a website with templates and forms | [Install the starter](install.md#start-with-the-application-skeleton) |
-| Build an HTTP service without templates or sessions | [Core-only installation](install.md#core-only-project) |
-| Learn the layout and request handling | [Your first application](first-app.md) |
-| Select packages for an existing application | [Choosing packages](choosing-packages.md) |
 
 You need PHP 8.3 or newer and Composer. Individual packages require additional extensions;
 the installation guide and package chapters name them.
+
+<div class="grid cards" markdown>
+
+-   :material-download-outline:{ .lg .middle } **Install the starter**
+
+    ---
+
+    Create a project with a working welcome page, templates and forms.
+
+    [:octicons-arrow-right-24: Installation](install.md)
+
+-   :material-school-outline:{ .lg .middle } **Build your first application**
+
+    ---
+
+    An HTML page and a JSON endpoint, with every file and the expected results.
+
+    [:octicons-arrow-right-24: Your first application](first-app.md)
+
+-   :material-map-outline:{ .lg .middle } **Pick a scenario**
+
+    ---
+
+    Small website, JSON APIs, contact form or login: complete, tested examples.
+
+    [:octicons-arrow-right-24: Application scenarios](recipes/index.md)
+
+-   :material-package-variant:{ .lg .middle } **Choose packages**
+
+    ---
+
+    Find the optional package for templates, persistence, identity or jobs.
+
+    [:octicons-arrow-right-24: Choosing packages](choosing-packages.md)
+
+-   :material-console:{ .lg .middle } **HTTP service without templates**
+
+    ---
+
+    Start from the core alone for webhooks and JSON services.
+
+    [:octicons-arrow-right-24: Core-only installation](install.md#core-only-project)
+
+-   :material-book-open-variant:{ .lg .middle } **Look something up**
+
+    ---
+
+    Function signatures, published packages and their versions.
+
+    [:octicons-arrow-right-24: Function index](function-index.md)
+
+</div>
+
+If this is your first time using NAF, install the starter and follow Your first application.
+You can learn the core concepts as you use them; there is no need to read every reference
+chapter first.
 
 ## Target audience
 

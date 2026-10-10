@@ -27,15 +27,25 @@ theme:
     text: IBM Plex Sans
     code: IBM Plex Mono
   features:
+    - navigation.tabs
     - navigation.sections
+    - navigation.path
     - navigation.footer
     - navigation.top
     - navigation.tracking
+    - content.action.edit
+    - content.code.annotate
     - content.code.copy
     - content.tabs.link
+    - content.tooltips
     - search.highlight
+    - search.share
     - search.suggest
     - toc.follow
+  icon:
+    edit: material/pencil-outline
+
+edit_uri_template: https://github.com/nafphp/docs/edit/main/pages/{path}
 
 extra_css:
   - assets/extra.css
@@ -45,6 +55,11 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - toc: { permalink: true }
+  - abbr
+  - def_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       use_pygments: true
       pygments_lang_class: true
@@ -53,78 +68,88 @@ markdown_extensions:
           lang: php
           options:
             startinline: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.tabbed: { alternate_style: true }
   - pymdownx.details
 
 nav:
-  - Getting started:
-      - NAF overview: index.md
-      - Installation: install.md
-      - Your first application: first-app.md
-      - Choosing packages: choosing-packages.md
-  - Tutorials and task guides:
-      - Choose a scenario: recipes/index.md
-      - Small website: recipes/small-website.md
-      - JSON API without a database: recipes/simple-json-api.md
-      - Handling POST requests: recipes/post-requests.md
-      - Contact form: recipes/contact-form.md
-      - Login form: recipes/login-form.md
-      - JSON API with a database: recipes/json-api.md
-  - Core concepts:
-      - Application lifecycle: lifecycle.md
-      - Routing: routing.md
-      - Controllers: controllers.md
-      - Requests and responses: request-response.md
-      - Configuration: configuration.md
-      - Dependency injection: dependency-injection.md
-      - Events: events.md
-      - Error handling: errors.md
-      - Guard rules: guard.md
-      - Serving files: file-downloads.md
-      - External libraries: external-libraries.md
-      - Application design: best-practices.md
-  - Plugins:
-      - Plugin development: plugins.md
-      - Views and templates: views.md
-      - Forms and validation: forms.md
-      - Flow browser components: flow.md
-      - Translations: translations.md
-  - Persistence:
-      - Sessions: sessions.md
-      - Database and migrations: database.md
-      - ORM and repositories: orm.md
-      - File storage: file-storage.md
-  - Commands and integrations:
-      - Console commands: console.md
-      - Queues and workers: queues.md
-      - Scheduled jobs: scheduling.md
-      - Mail delivery: mail.md
-      - HTTP client: http-client.md
-      - Rate limits: rate-limits.md
-      - WebSocket notifications: websocket.md
-      - MCP tools: mcp.md
-      - Alexa+ MCP server: alexa.md
-  - Identity and access:
-      - Authentication and permissions: auth.md
-      - Authentication architecture: auth-architecture.md
-      - Roles and permissions: rbac.md
-      - LDAP authentication: auth-ldap.md
-      - OAuth client: oauth-client.md
-      - OAuth authorization server: oauth-server.md
-  - Testing and deployment:
-      - Testing applications: testing.md
-      - Deploying applications: deployment.md
-      - Troubleshooting and logging: troubleshooting.md
-  - Built with NAF:
-      - Nafinity application: built-with/nafinity.md
-      - Nafinity extensions: built-with/extending-nafinity.md
+  - Learn:
+      - Get started:
+          - NAF overview: index.md
+          - Installation: install.md
+          - Your first application: first-app.md
+          - Choosing packages: choosing-packages.md
+      - Tutorials:
+          - Choose a scenario: recipes/index.md
+          - Small website: recipes/small-website.md
+          - JSON API without a database: recipes/simple-json-api.md
+          - Handling POST requests: recipes/post-requests.md
+          - Contact form: recipes/contact-form.md
+          - Login form: recipes/login-form.md
+          - JSON API with a database: recipes/json-api.md
+  - Guides:
+      - Fundamentals:
+          - Application lifecycle: lifecycle.md
+          - Routing: routing.md
+          - Controllers: controllers.md
+          - Requests and responses: request-response.md
+          - Configuration: configuration.md
+          - Dependency injection: dependency-injection.md
+          - Events: events.md
+          - Error handling: errors.md
+      - Build web pages:
+          - Views and templates: views.md
+          - Forms and validation: forms.md
+          - Sessions: sessions.md
+          - Flow browser components: flow.md
+          - Translations: translations.md
+          - Serving files: file-downloads.md
+      - Store data:
+          - Database and migrations: database.md
+          - ORM and repositories: orm.md
+          - File storage: file-storage.md
+      - Background work:
+          - Console commands: console.md
+          - Queues and workers: queues.md
+          - Scheduled jobs: scheduling.md
+      - Integrations:
+          - Mail delivery: mail.md
+          - HTTP client: http-client.md
+          - Rate limits: rate-limits.md
+          - WebSocket notifications: websocket.md
+          - MCP tools: mcp.md
+          - Alexa+ MCP server: alexa.md
+      - Security and identity:
+          - Guard rules: guard.md
+          - Authentication and permissions: auth.md
+          - Authentication architecture: auth-architecture.md
+          - Roles and permissions: rbac.md
+          - LDAP authentication: auth-ldap.md
+          - OAuth client: oauth-client.md
+          - OAuth authorization server: oauth-server.md
+      - Extend NAF:
+          - Plugin development: plugins.md
+          - External libraries: external-libraries.md
+          - Application design: best-practices.md
+      - Operate:
+          - Testing applications: testing.md
+          - Deploying applications: deployment.md
+          - Troubleshooting and logging: troubleshooting.md
   - Reference:
-      - Function index: function-index.md
-      - Package overview: packages.md
-      - Upgrading from NixPHP: upgrading-from-nixphp.md
+      - Reference:
+          - Function index: function-index.md
+          - Package overview: packages.md
+          - Upgrading from NixPHP: upgrading-from-nixphp.md
+  - Showcase:
+      - Built with NAF:
+          - Nafinity application: built-with/nafinity.md
+          - Nafinity extensions: built-with/extending-nafinity.md
 
 validation:
   nav:

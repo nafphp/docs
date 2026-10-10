@@ -50,6 +50,46 @@ explicit; do not suggest disabling protection to make an example work.
 A plugin chapter can combine setup and reference, with descriptive headings. Link to related
 material instead of repeating it. Split chapters when tasks need independent instructions.
 
+## Package chapter outline
+
+Package chapters follow one outline so readers find the same information in the same place.
+Omit a section that has nothing to say; do not reorder the ones that remain.
+
+1. A one-paragraph summary: what the package does and what it leaves to the application.
+2. The "Required packages" box, generated from the page's `requires:` front matter.
+3. A quick start: the smallest complete, copyable example and its expected result.
+4. Concepts and tasks as H2 sections, each with an example.
+5. Configuration: a table of every key with its full colon path, type, default and effect.
+6. API details: helpers and classes with their signatures; link the function index.
+7. "If the result is different": a symptom → check table.
+8. Related pages.
+
+Version history ("since 0.2.x", older starters, removed workarounds) goes into a collapsed
+`??? note` box at the end of the page or section. Keep a short minimum-version statement
+beside a feature when readers on the current starter lock need it to succeed.
+
+## Formatting patterns
+
+- **Content tabs** (`=== "Label"`) for genuine alternatives: macOS/Linux and Windows
+  commands, database drivers, web servers. Never put file-titled blocks inside tabs; the
+  example runner only reads blocks that start at the line's beginning.
+- **Expected output** follows a command as a `text` block introduced by "Expected output:".
+  Do not give output blocks a title; titles are reserved for files.
+- **Admonitions** for security requirements (`warning`), destructive commands (`danger`),
+  version notes (collapsed `??? note`) and short side remarks (`note`). Keep the main
+  procedure outside them.
+- **Code annotations** (`# (1)!` with a numbered list after the block) explain individual
+  lines when a paragraph after the block would have to repeat the code.
+- **Line highlighting** (`hl_lines="3 4"`) marks the lines that changed when a page extends a
+  file the reader created earlier.
+- **Diagrams** use Mermaid fences (```` ```mermaid ````). Describe the diagram's message in
+  the surrounding text as well, so the page works without it.
+- **Screenshots** show browser UI only; terminal output is copyable text instead. Generate
+  them with `tools/capture_screenshots.py`, store them under `pages/assets/screenshots/`,
+  give every image alt text that states what the reader should notice, and add the
+  `screenshot` class for the frame.
+- **Link text** names the target ("Forms and validation"), never "here" or "Behavior".
+
 ## Examples and configuration
 
 - State the starting application, packages, extensions and minimum versions.

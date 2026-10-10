@@ -89,9 +89,10 @@ tutorial's `bootstrap.php` unchanged.
 ## The routes
 
 The outbox is configured. Next, register a GET action to display the form and a POST action
-to handle its submission. Keep the home and greeting routes from the first application.
+to handle its submission. Keep the home and greeting routes from the first application;
+the highlighted lines are new.
 
-```php title="app/routes.php"
+```php title="app/routes.php" hl_lines="3 8 9"
 <?php
 use App\Controllers\HomeController;
 use App\Controllers\ContactController;
