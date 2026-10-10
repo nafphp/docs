@@ -31,7 +31,8 @@ or [a JSON API without a database](recipes/simple-json-api.md) in an empty direc
 | Background jobs | `naf/queue` | Queue worker; includes `naf/cli` |
 | Scheduled jobs | `naf/schedule` | Ticker and worker; includes Queue and CLI |
 | External sign-in | `naf/oauth-client` | Provider credentials and local account mapping |
-| OAuth authorization server | `naf/oauth-server` | Issuer, keys, clients, scopes and local login |
+| OAuth authorization server | `naf/oauth-server` | Issuer, clients and scopes; login for user grants, keys for OIDC |
+| Alexa+ MCP server | `naf/alexa` | Public HTTPS, OAuth database, separate clients and Amazon CLI access |
 
 ## Webhooks and HTTP services { #one-endpoint-that-answers }
 
@@ -71,9 +72,9 @@ PHP service. The [JSON API with a database](recipes/json-api.md) adds SQLite per
 write operations and migrations when your application needs them.
 
 Choose authentication separately. A bearer-authenticated endpoint must verify its token.
-If Form is also installed, its CSRF listener exempts an Authorization header beginning with
-`Bearer `; this does not authenticate the caller. Cookie-authenticated APIs may still need
-CSRF protection. See [CSRF](forms.md#csrf-protection).
+If Form 0.2.3+ is also installed, a Bearer header does not bypass CSRF validation. Exempt only
+the exact protocol route names that authenticate their own callers. Cookie-authenticated APIs
+still need CSRF protection. See [CSRF](forms.md#csrf-protection).
 
 ## Database access { #something-to-store-it-in }
 
@@ -157,6 +158,16 @@ composer require naf/mcp
 
 Register tools and issue scoped access tokens. Tools enforce application access rules for
 their data and actions. See [MCP tools](mcp.md).
+
+## Alexa+ MCP server
+
+```bash
+composer require naf/alexa
+```
+
+This installs MCP, OAuth Server, Database and CLI. Configure the public HTTPS resource,
+register separate service and account-linking clients, and run local diagnostics. Amazon
+onboarding and deployment use the Alexa AI CLI. Follow [Alexa+ MCP server](alexa.md).
 
 ## Mail delivery { #sending-mail }
 

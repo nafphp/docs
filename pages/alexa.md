@@ -1,23 +1,28 @@
-# Alexa+ MCP server
+---
+title: Alexa+ MCP server
+requires:
+  - naf/alexa
+---
 
-Publication gate: wait for `naf/mcp` 0.2.5, `naf/oauth-server` 0.2.4 and `naf/alexa` 0.1.0
-on Packagist. Then move this guide into `pages/alexa.md`, add it under integrations in
-`mkdocs.yml`, update package selection and refresh the generated published inventory.
+# Alexa+ MCP server
 
 `naf/alexa` prepares a NAF MCP endpoint for an Alexa+ add-on. It reuses the existing MCP
 transport and tool registry, OAuth authorization server, database migrations and console.
 It supplies configuration defaults, separate OAuth client setup, local diagnostics and an
 optional Amazon manifest export. Application tools and business rules stay in the host.
 
-Amazon's MCP Toolkit documentation currently describes US distribution and an Alexa developer
-preview onboarding process. Confirm your account's access before planning deployment. The
-plugin does not register or publish an add-on at Amazon. This initial integration exposes
-tools and data; MCP Apps visual resources and category SDK APIs are outside its scope.
+Amazon's [QuickStart](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-quickstart.html)
+uses a US/en-US manifest. Its [CLI setup guide](https://developer.amazon.com/docs/alexaplus/add-ons/set-up-your-development-environment.html)
+requires an Alexa developer account and access to Amazon's package registry. Confirm your
+account's access before planning deployment. The plugin does not register or publish an add-on
+at Amazon. This integration exposes tools and data; MCP Apps visual resources and category SDK
+APIs are outside its scope.
 
 ## Prepare a host
 
 Start from a working `naf/app` application with PHP 8.3+, `mbstring`, `readline`, PDO and the
-PDO driver for your database. Only `public/` is the document root. After the publication gate:
+PDO driver for your database. This guide requires `naf/alexa` 0.1.0+, `naf/mcp` 0.2.5+ and
+`naf/oauth-server` 0.2.4+. Only `public/` is the document root:
 
 ```bash
 composer require naf/alexa
@@ -62,7 +67,7 @@ The plugin derives its OAuth issuer, MCP resource metadata and expected audience
 environment values. Authentication uses OAuth and remains enabled. Service discovery uses
 `mcp:service`; account linking is disabled until configured. POST responses default to JSON,
 which is a Streamable HTTP response mode. Set `mcp:transport:streaming` to `true` for SSE progress
-and final results, or `false` to use JSON. See the MCP transport guide for streaming tools,
+and final results, or `false` to use JSON. See [MCP tools](mcp.md#the-endpoint) for streaming tools,
 client Accept headers and proxy buffering.
 
 ## Register a public tool
@@ -143,6 +148,16 @@ latency, login/consent UX, Amazon account access or certification.
 
 ## Verify HTTP
 
+For local protocol checks, pass the existing web entry point as the development server's
+router. PHP 8.3 otherwise treats some `/.well-known/` paths as missing static files:
+
+```bash
+php -S 127.0.0.1:8000 -t public public/index.php
+```
+
+For public hosting, route these paths through the NAF front controller as described in
+[Deployment](deployment.md#web-server-routing).
+
 Public discovery documents must return JSON:
 
 ```bash
@@ -169,7 +184,8 @@ Accept: application/json, text/event-stream
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"Example test","version":"1.0"}}}
 ```
 
-Send `notifications/initialized`, then `tools/list` and `tools/call` for `service_status`.
+Send the negotiated `MCP-Protocol-Version` header on subsequent requests. Send
+`notifications/initialized`, then `tools/list` and `tools/call` for `service_status`.
 The result contains `structuredContent: {"status":"available"}` and a JSON text content block.
 The server supports the documented 2025-03-26 client lifecycle as well as 2025-11-25.
 
@@ -215,13 +231,15 @@ audience without requiring the resource parameter again.
 
 ## Prepare the Amazon package
 
-Install/configure Amazon's Alexa AI CLI using your preview account's instructions. Generate
-its project with `alexa-ai new mcp` and your MCP URL, using the options supported by your
-installed CLI. The documentation currently varies between the CLI reference and QuickStart;
-check `alexa-ai new mcp --help` rather than assuming a particular private CLI version.
+Install and configure Amazon's Alexa AI CLI through the setup guide linked above. Generate
+its project with `alexa-ai new mcp` and your MCP URL. The
+[CLI reference](https://developer.amazon.com/docs/alexaplus/add-ons/alexa-ai-cli-reference.html)
+documents `--name` and `--mcp-server-url`; check `alexa-ai new mcp --help` for the options in
+your installed version.
 
-Supply `alexa:listing` in host configuration using the en-US locale entry from Amazon's
-`addon.json` schema. The export validates:
+Supply `alexa:listing` in host configuration using the en-US locale entry from the
+[QuickStart's `addon.json` schema](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-quickstart.html#addonjson-schema-reference).
+The plugin's export validates:
 
 | Field | Requirement |
 | --- | --- |
@@ -258,7 +276,7 @@ SSE flushing through the actual proxy; the QuickStart specifies a round trip bel
 
 ## If the result is different
 
-- **400 before MCP handles a call:** check Content-Type, Accept, protocol version and that
+- **400, 406 or 415 before MCP handles a call:** check Content-Type, Accept, protocol version and that
   `csrf_exempt_routes:mcp_server_rpc` has not been disabled by host configuration.
 - **401 with a service token on a personal tool:** account linking is needed; keep the service
   and user clients separate.
@@ -268,7 +286,7 @@ SSE flushing through the actual proxy; the QuickStart specifies a round trip bel
 - **Buffered SSE:** inspect reverse-proxy/CDN buffering and compression; verify that the
   supported framework emitter is installed.
 - **Doctor passes but Amazon fails:** verify public HTTPS/discovery, credentials in the correct
-  authentication tier, actual images, simulator login/consent and preview access.
+  authentication tier, actual images, simulator login/consent and developer account access.
 
 ## Sources
 
