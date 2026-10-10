@@ -14,7 +14,7 @@ for services exposed through these helpers.
 
 ## naf/framework
 
-Version **v0.2.8** · [Fundamentals](lifecycle.md)
+Version **v0.2.9** · [Fundamentals](lifecycle.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -58,7 +58,7 @@ Version **v0.1.5** · [Nafinity](built-with/nafinity.md)
 
 ## naf/cli
 
-Version **v0.2.3** · [Console commands](console.md)
+Version **v0.2.4** · [Console commands](console.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -90,7 +90,7 @@ Version **v0.1.0** · [Flow](flow.md)
 
 ## naf/form
 
-Version **v0.2.3** · [Forms and validation](forms.md)
+Version **v0.2.4** · [Forms and validation](forms.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -99,7 +99,7 @@ Version **v0.2.3** · [Forms and validation](forms.md)
 | <code>error_class($field, Naf\Form\Core\Validator $validator): string</code> | — | `Naf\Form` | [Forms and validation](forms.md) |
 | <code>has_error($field, Naf\Form\Core\Validator $validator): bool</code> | — | `Naf\Form` | [Forms and validation](forms.md) |
 | <code>is_post(): bool</code> | — | `Naf\Form` | [Forms and validation](forms.md) |
-| <code>memory(string $key, mixed $default = null): ?string</code> | — | `Naf\Form` | [Forms and validation](forms.md) |
+| <code>memory(string $key, mixed $default = null): ?string</code> | The submitted value of a field in the current request, for refilling a form | `Naf\Form` | [Forms and validation](forms.md) |
 | <code>memory_checked(string $key, mixed $value = &#x27;on&#x27;): string</code> | — | `Naf\Form` | [Forms and validation](forms.md) |
 | <code>memory_selected(string $key, mixed $expectedValue): string</code> | — | `Naf\Form` | [Forms and validation](forms.md) |
 | <code>validator(): Naf\Form\Core\Validator</code> | — | `Naf\Form` | [Forms and validation](forms.md) |
@@ -153,7 +153,7 @@ Version **v0.2.5** · [OAuth authorization server](oauth-server.md)
 
 ## naf/orm
 
-Version **v0.2.2** · [ORM and repositories](orm.md)
+Version **v0.2.3** · [ORM and repositories](orm.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -204,7 +204,7 @@ Version **v0.1.0** · [File storage](file-storage.md)
 
 ## naf/view
 
-Version **v0.2.2** · [Views and templates](views.md)
+Version **v0.2.3** · [Views and templates](views.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |

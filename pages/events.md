@@ -84,13 +84,16 @@ them; listeners with the same priority run in registration order.
 | `naf/mcp` | `response.body` | Enables implicit flushing for `text/event-stream` responses |
 | `naf/rbac` | dispatches `Naf\Rbac\Events\GrantsChanged` | An object event after grants change; see [RBAC](rbac.md#telling-a-host-what-moved) |
 
-!!! warning "Only one `response.header` replacement survives"
-    Every `response.header` listener receives the original response, and only the last
-    returned response is sent. `naf/i18n` returns a response with its language cookie, so an
-    application listener that also returns a response from `response.header` (for example
-    to add security headers) replaces it, and the cookie is not sent. With a higher priority
-    your listener runs first and the i18n response replaces yours instead. When you use
-    `naf/i18n`, add such headers in your controllers or through the web server.
+Framework 0.2.9+ chains `response.header` listeners through `EventManager::dispatchResponse()`.
+Each listener receives the response returned by the previous listener. Application headers
+and the language cookie from `naf/i18n` therefore survive together, provided listeners modify
+the response they receive. A return value other than `ResponseInterface` leaves it unchanged.
+
+??? note "Framework 0.2.8 and older"
+    Every header listener receives the original response and only the last returned
+    replacement survives. An application header listener can discard the i18n language
+    cookie, or vice versa. Update the framework, or add those headers in controllers or
+    through the web server.
 
 ## Change a response
 
@@ -107,10 +110,11 @@ event()->listen(Event::RESPONSE_HEADER, function (ResponseInterface $response) {
 });
 ```
 
-The last returned `ResponseInterface` is used. Every listener receives the original
-response argument; returned replacements are not passed to subsequent listeners. Returning a response from `controller.called` or
-`response.send` does not replace the response being sent. The `exception` hook also supports
-returned responses; see [Errors and aborting](errors.md).
+The returned response becomes the next header listener's argument. Listeners run in priority
+order, with equal priorities preserving registration order. Returning a response from
+`controller.called` or `response.send` does not replace the response being sent.
+The `exception` hook uses `dispatchForResponse()`: it selects the last returned response
+without chaining replacements. See [Errors and aborting](errors.md).
 
 The response-body and response-end events are too late to change headers. Raw fatal-error
 emission can bypass this normal event path; do not depend on these listeners for cleanup

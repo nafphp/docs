@@ -246,8 +246,9 @@ a job build and send the message in the worker. Pass plain values such as addres
 subject and record identifiers rather than the `Mail` object, and make the job safe to run
 twice: queue delivery is at least once.
 
-Workers run under CLI. If the job renders its body with `naf/view`, register the guard
-rules described in [Templates outside HTTP requests](views.md#templates-outside-http-requests).
+Workers can render mail bodies with `naf/view` after application boot. Framework 0.2.9+
+provides the required guards under CLI; older versions need the registration described in
+[Templates outside HTTP requests](views.md#templates-outside-http-requests).
 
 ## If the result is different
 

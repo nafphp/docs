@@ -20,16 +20,20 @@ flow without configuring a mail server.
 Choose this scenario when a website needs to accept a message. If you only need to display
 pages, start with [the small website](small-website.md). [Compare all scenarios](index.md).
 
-Start from [Your first application](../first-app.md), then install Mail and update Form:
+Start from [Your first application](../first-app.md), then install Mail:
 
 ```bash
-composer require naf/mail 'naf/form:^0.2.3'
+composer require naf/mail
 ```
 
-The starter already supplies View and Session. It locks Form 0.2.2; version 0.2.3 checks
-every state-changing request method and provides `csrf()->token()`, which the template uses. Each titled block is a complete
-file; create missing directories and replace the tutorial's corresponding files. If you combine
+Starter 0.2.4 already supplies View, Session and Form 0.2.4, including `csrf()->token()`
+and CSRF checks for every unsafe method. Each titled block is a complete file; create
+missing directories and replace the tutorial's corresponding files. If you combine
 recipes, merge their routes and service bindings instead of discarding the existing ones.
+
+??? note "Applications from older starters"
+    Starters 0.2.2 and 0.2.3 lock Form 0.2.2. Before using this template, update with
+    `composer require 'naf/form:^0.2.4' --with-all-dependencies`.
 
 This local exercise writes messages to `storage/mail/` and shows a thank-you after redirecting.
 It works without a mail server and sends nothing externally. For automated tests that only

@@ -74,12 +74,13 @@ final class HelloCommand extends AbstractCommand
     {
         $this->setTitle('Say hello')
             ->setDescription('Greets a person by name')
-            ->addArgument('name');
+            ->addArgument('name')
+            ->addOption('help', 'h');
     }
 
     public function run(Input $input, Output $output): int
     {
-        if ($input->getOption('help')) {
+        if ($input->getOption('help') || $input->getOption('h')) {
             $this->showHelp($output);
             return static::SUCCESS;
         }
@@ -128,10 +129,16 @@ The command explicitly rejects a missing or empty name; validate inputs in `run(
 than relying on argument metadata alone.
 
 `vendor/bin/naf hello:say --help` prints the title, description, arguments and options
-declared in `configure()`, because the example calls `showHelp()` for `--help`. The current
-`naf/cli` release prints the formatting markers literally (for example `<info>hello:say</info>`)
-and ends with an outdated `php cli.php command-name --help` hint; the listed arguments and
-options are correct.
+declared in `configure()`, because the example calls `showHelp()` for `--help`. CLI 0.2.4+
+prints plain text with a `vendor/bin/naf` usage line:
+
+```text
+--8<-- "output/hello-help.txt"
+```
+
+??? note "CLI 0.2.3 and older"
+    Help prints literal `<info>` and `<comment>` markers and an outdated `php cli.php`
+    hint. The argument and option definitions still apply; update CLI for corrected output.
 
 ## Arguments and options
 

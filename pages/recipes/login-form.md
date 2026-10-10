@@ -23,12 +23,12 @@ public APIs can start without accounts; [compare the scenarios](index.md).
 First complete [the authentication quickstart](../auth.md#quickstart), including its SQLite
 config, user model and seed command. It builds on [Your first
 application](../first-app.md). These steps provide the account **demo** with password
-**local-demo-password** for local use. The starter supplies Form and Session; update Form to
-0.2.3 or newer, which the templates need for `csrf()->token()`:
+**local-demo-password** for local use. Starter 0.2.4 supplies Form 0.2.4 and Session,
+including `csrf()->token()`, which the templates use.
 
-```bash
-composer require 'naf/form:^0.2.3'
-```
+??? note "Applications from older starters"
+    Starters 0.2.2 and 0.2.3 lock Form 0.2.2. Before using these templates, update with
+    `composer require 'naf/form:^0.2.4' --with-all-dependencies`.
 
 Each titled block below is a complete file. Keep the authentication bootstrap and config.
 Replace the routes, or merge the named routes when combining recipes.

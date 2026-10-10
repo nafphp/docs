@@ -18,7 +18,8 @@ The first `app()` creates `App` with `AutoResolvingContainer(new Container())`. 
 2. Registers core services, including configuration, routing, events, logging and errors.
 3. Discovers installed Composer packages with type `naf-plugin` and registers all plugins.
 4. Resolves plugin order, then loads each plugin's routes and helpers before its bootstrap.
-5. Loads application routes and, for HTTP, registers core guard rules.
+5. Loads application routes and registers core guard rules, including under CLI since
+   Framework 0.2.9.
 
 Configuration is resolved lazily and merged in core, plugin, application order. Application
 values win. See [Configuration](configuration.md) and [Plugin order](plugins.md#boot-order).
@@ -103,6 +104,8 @@ headers, return a new response from `response.header`. A response returned from
 
 Under CLI, `app()->run()` returns without routing or emitting HTTP. Commands still use
 application boot, services and configuration. Test routing through a running HTTP application.
+Framework 0.2.9+ also registers the core guard rules under CLI, so View rendering and HTML
+escaping work in commands and workers after boot.
 
 Workers can process many jobs in one process. Shared services and plugin state can survive
 between jobs; do not keep request identities or mutable job data in shared services. Bound
