@@ -8,8 +8,8 @@ add `topbar.tools` to its UI-slot reference.
 
 ## Searching across boards
 
-Use the search in the top bar to find boards by name or ticket key, and tickets by
-title, plain description or reference. Enter at least two characters. Suggestions
+Use the single global search in the top bar to find boards by name or ticket key,
+and tickets by title, plain description or reference. Enter at least two characters. Suggestions
 appear after a short pause and are grouped under their board names. Each response
 replaces the groups dynamically; new boards do not need a predefined result slot.
 Only boards you can currently read appear. Matching closed tickets and archived
@@ -27,9 +27,11 @@ exist, refine the query. Percent signs and underscores are searched literally.
 **New ticket** appears in the project heading and opens that board's ticket dialog.
 It uses the same primary action style as **New project** in the project overview.
 The action is available only in a writable project; workspace pages and read-only
-boards omit it. The top bar contains search only. The project name remains visible
-there on board, ticket and project-settings pages. Other pages use their existing
-heading without a repeated top-bar label.
+boards omit it. The top bar contains search without a project-name prefix on every
+application page. The project heading and sidebar identify the current board.
+The board's filter row contains dedicated filters, with no second text search.
+Existing links with a board text filter still work; changing another filter retains
+it, and **Reset** clears it with the other filters.
 
 ### Extending the top bar
 
