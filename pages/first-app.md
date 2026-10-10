@@ -181,7 +181,11 @@ composer dump-autoload
 php -S 127.0.0.1:8000 -t public
 ```
 
-Open **http://127.0.0.1:8000/**: the page says **Hello, World!**.
+Open **http://127.0.0.1:8000/**: the page says **Hello, World!** and links to the JSON
+endpoint. It has no styles yet; the template contains only the heading and the link.
+
+![An unstyled page with the heading "Hello, World!" and the link "Try the JSON endpoint"](assets/screenshots/first-app-home.webp){ .screenshot loading=lazy }
+
 In another terminal:
 
 ```bash

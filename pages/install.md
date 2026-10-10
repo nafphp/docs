@@ -39,8 +39,11 @@ Run this from the directory in which you keep your projects:
 put `APP_ENV=dev` into a `.env` file in the project root, which works on every platform;
 [Your first application](first-app.md) does that.
 
-Open **http://127.0.0.1:8000/**. You should see the NAF welcome page. Stop the development
-server with Ctrl+C. Keep it bound to localhost; on a deployed site, configure the web server's
+Open **http://127.0.0.1:8000/**. You should see the NAF welcome page:
+
+![The starter's welcome page with the headline "It works. Now make it yours.", buttons for the first application and a fresh start, and a quote panel](assets/screenshots/starter-welcome.webp){ .screenshot loading=lazy }
+
+Stop the development server with Ctrl+C. Keep it bound to localhost; on a deployed site, configure the web server's
 document root as this project's `public/` directory.
 
 The starter installs `naf/framework`, `naf/view` and `naf/form`; `naf/session` arrives through
@@ -54,6 +57,8 @@ form plugin's CSRF check. The contact form only validates; it does not send or s
 message. **Start fresh** opens the cleanup steps, with Copy buttons for the terminal
 commands; it does not delete files itself. The `showQuote` setting in `app/config.php`
 switches the rotating quote panel off.
+
+![The welcome page's two demonstrations: a contact form, and a JSON request for the name Ada that shows HTTP 200 and the response body](assets/screenshots/starter-demos.webp){ .screenshot loading=lazy }
 
 Continue with [Your first application](first-app.md). It replaces the starter demonstration
 with complete files you can copy, then verifies both an HTML page and a JSON endpoint.

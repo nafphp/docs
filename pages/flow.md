@@ -15,6 +15,16 @@ Flow connects PHP templates to ordinary JavaScript objects. PHP owns routing, in
 validation, authentication and response generation. The browser owns the current page's
 interactive state. The following chain uses those responsibilities directly:
 
+```mermaid
+flowchart TD
+    V["PHP view with a flow container"] --> R["Flow runtime from asset()"]
+    R --> F["Your component, Flow.register()"]
+    F -- "a field changes" --> U["update(changes)"]
+    U -- "client request" --> P["Same PHP route: page or fragment"]
+    P -- "HTML fragment" --> X["Flow reconciles the target"]
+    X --> F
+```
+
 1. Composer installs Flow and View. NAF discovers both plugins and boots Flow after View.
 2. Flow adds its runtime to `asset()`. The layout renders that collector once, together
    with the application's external module.
@@ -625,7 +635,11 @@ php -S 127.0.0.1:8000 -t public router.php
 ```
 
 Open `/flow-example`. Typing in either field updates the other and reloads only the
-results. Clicking reset does the same through a store method. Submitting with JavaScript
+results.
+
+![The Flow example after typing "view": both the search field and the shared query show "view", and the result list contains only "Views and templates"](assets/screenshots/flow-search.webp){ .screenshot loading=lazy }
+
+The example has no stylesheet; the screenshot shows the browser's default styles. Clicking reset does the same through a store method. Submitting with JavaScript
 disabled still requests `/flow-example?q=...` and renders a complete page. To inspect the
 backend response directly:
 

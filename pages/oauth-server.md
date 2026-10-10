@@ -33,6 +33,29 @@ opts into it per request by asking for the `openid` scope — it is not a mode t
 Deliberately not offered: the Implicit and Password grants, wildcard redirect URIs, and the
 `max_age` and `prompt` parameters.
 
+The authorization code flow with PKCE, as a client application uses it. Step 2 sends
+`client_id`, `redirect_uri`, `scope`, `state` and the `code_challenge`; step 8 authenticates
+confidential clients and sends the original `code_verifier`. The ID token is returned only
+when the client asked for the `openid` scope.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Browser
+    participant C as Client app
+    participant S as OAuth server
+    C->>C: code_verifier, S256 challenge
+    C->>U: redirect to /oauth/authorize
+    U->>S: GET /oauth/authorize
+    S->>U: login, then consent screen
+    U->>S: POST /oauth/authorize
+    S->>U: redirect with code, state
+    U->>C: GET redirect_uri?code=…
+    C->>S: POST /oauth/token (code, verifier)
+    S-->>C: access, refresh, ID token
+    C->>S: API call with Bearer token
+```
+
 ---
 
 ## Configuration

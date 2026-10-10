@@ -17,6 +17,13 @@ Run the examples from the application root unless another directory is specified
 vendor/bin/naf command:list
 ```
 
+In an application with `naf/cli` and the `hello:say` command from this chapter, the output
+looks like this:
+
+```text
+--8<-- "output/command-list.txt"
+```
+
 With no arguments at all, the binary prints the same list. Every installed plugin
 contributes its commands, so what you see depends on what you have installed.
 
@@ -93,21 +100,32 @@ final class HelloCommand extends AbstractCommand
 ## Register a command { #registering-it }
 
 ```php-inline
+use App\Commands\HelloCommand;
+use function Naf\app;
 use function Naf\CLI\command;
 
-command()->add(\App\Commands\HelloCommand::class);
+app(); // Boots NAF and its plugins; naf/cli defines command() during this boot.
+command()->add(HelloCommand::class);
 ```
 
-Add this registration to root `bootstrap.php`, before `app()->run()`. Commands are not
-discovered by scanning `app/Commands/`; application and plugin bootstraps register them
-explicitly.
+Add this registration to root `bootstrap.php`, after requiring Composer's autoloader and
+before `app()->run()`. The `app()` call matters: `naf/cli` loads its helper functions while
+NAF boots its plugins, so calling `command()` before the first `app()` fails with
+`Call to undefined function Naf\CLI\command()`. Commands are not discovered by scanning
+`app/Commands/`; application and plugin bootstraps register them explicitly.
 
 ```bash
 vendor/bin/naf hello:say World
 ```
 
-Expect `Hello, World!` and exit status 0. The command explicitly rejects a missing or empty
-name; validate inputs in `run()` rather than relying on argument metadata alone.
+Expected output, with exit status 0:
+
+```text
+--8<-- "output/hello-say.txt"
+```
+
+The command explicitly rejects a missing or empty name; validate inputs in `run()` rather
+than relying on argument metadata alone.
 
 `vendor/bin/naf hello:say --help` prints the title, description, arguments and options
 declared in `configure()`, because the example calls `showHelp()` for `--help`. The current

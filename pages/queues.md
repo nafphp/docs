@@ -10,6 +10,15 @@ requires:
 a CLI worker constructs the job and calls `execute()`. Installing Queue also installs CLI.
 The default file driver needs writable local storage and a running worker.
 
+```mermaid
+flowchart TD
+    H["HTTP handler or command"] -- "queue()->push()" --> Q[("Queue storage")]
+    Q -- reserve --> W["queue:consume worker"]
+    W -- "execute()" --> J["Your job"]
+    W -- "attempts exhausted" --> D[("Deadletter")]
+    D -- "queue:retry-failed" --> Q
+```
+
 ## A job
 
 Start from [Your first application](first-app.md), install Queue, and create this file. The

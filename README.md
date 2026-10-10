@@ -66,6 +66,21 @@ The configured `php-inline` lexer enables highlighting without adding a tag to t
 Use `bash` for shell commands, `ini` for environment files and `text` for directory trees or
 command output. Reserve file titles for complete files so the example runner can test them.
 
+## Refresh screenshots and console output
+
+```sh
+pip install -r requirements-screenshots.txt
+python -m playwright install chromium
+python tools/capture_screenshots.py
+```
+
+The script builds the same fixtures as the example runner from the published starter and
+packages, drives them with Playwright and writes WebP images to `pages/assets/screenshots/`
+and command output to `snippets/output/`, which pages include with `--8<--`. Refresh both after
+releases that change a visible page or a command's output, then review the images before
+committing them. Screenshots show browser UI only; terminal output stays copyable text.
+Every image needs alt text describing what the reader should notice.
+
 ## Refresh generated references
 
 ```sh

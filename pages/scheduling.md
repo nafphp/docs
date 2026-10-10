@@ -87,6 +87,17 @@ keeps registration order instead of sorting by the next occurrence.
 
 ## Ticker and worker { #two-processes-not-one }
 
+Scheduling needs two processes. The ticker only decides that a job is due and queues it; a
+queue worker runs it:
+
+```mermaid
+flowchart TD
+    S[("Scheduler state file")] <--> T["schedule:ticker"]
+    T -- "due this minute" --> Q[("Queue storage")]
+    Q --> W["queue:consume worker"]
+    W -- "execute()" --> J["Your scheduled job"]
+```
+
 Verify the example from the project root:
 
 ```bash

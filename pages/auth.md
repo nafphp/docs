@@ -27,22 +27,25 @@ account lifecycle remain application responsibilities.
 
 ### Main services { #the-whole-picture }
 
-```text
-  login form
-      │  PasswordCredentials(username, password)
-      ▼
- auth()->authenticate()
-      │
-      ▼
-  your provider ──────────────▶ your user model        ← you own both of these
-      │                          (IdentityInterface)
-      │ verified
-      ▼
-  session: ['provider' => 'database', 'identifier' => '42']   ← never more than this
-      │
-      ▼
-  next request: provider->find('42') ──▶ your user model, freshly loaded
+```mermaid
+sequenceDiagram
+    participant F as Login handler
+    participant A as auth()
+    participant P as Your provider
+    participant S as Session
+    F->>A: authenticate(credentials)
+    A->>P: verify credentials
+    P-->>A: your user model
+    A->>S: store provider + identifier
+    Note over F,S: The next request
+    A->>S: read provider + identifier
+    A->>P: find('42')
+    P-->>A: fresh user model, or null
 ```
+
+You own the provider and the user model. The session stores never more than the provider
+name and the identifier, for example `['provider' => 'database', 'identifier' => '42']`.
+Permission checks then ask the freshly loaded model for its roles and permissions.
 
 The integration has these responsibilities:
 

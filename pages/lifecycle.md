@@ -40,6 +40,19 @@ yet exist. Constructor injection and lazy factories resolve dependencies later.
 Configuration files return arrays without queries or delivery operations. Plugins must be
 installed through Composer. Application helper files need `autoload.files` or an explicit include.
 
+A plugin's helper functions, such as `Naf\CLI\command()`, `Naf\Queue\queue()` or
+`Naf\View\render()`, are loaded while NAF boots the plugin during the first `app()` call.
+Code in root `bootstrap.php` that uses them must run after that call. Starting a registration
+block with `app()` or `app()->container()` is enough:
+
+```php-inline
+use function Naf\app;
+use function Naf\CLI\command;
+
+app(); // Boots NAF and every installed plugin.
+command()->add(\App\Commands\HelloCommand::class);
+```
+
 ## HTTP handling
 
 During `run()`, NAF:
@@ -50,6 +63,33 @@ During `run()`, NAF:
 4. Dispatches `controller.calling` and invokes the handler with named route parameters.
 5. Receives a PSR-7 response and dispatches `controller.called`.
 6. Finalizes and emits status, headers and body through the response events.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant B as Browser
+    participant I as index.php
+    participant A as NAF
+    participant R as Router
+    participant C as Controller
+    B->>I: GET /hello/Ada
+    I->>A: bootstrap.php: app()
+    Note over A: boot: .env, services,<br/>plugins, routes, guards
+    I->>A: run()
+    A->>A: request.start
+    A->>R: match GET /hello/Ada
+    R-->>A: handler, name = Ada
+    A->>A: controller.calling (CSRF)
+    A->>C: hello(name: "Ada")
+    C-->>A: response
+    A->>A: controller.called, response.send
+    A->>A: response.header
+    A-->>B: status, headers, body
+```
+
+After the body, NAF dispatches `response.body` and `response.end`. An exception at any step
+after boot leaves this path: an `exception` listener may return a
+response, otherwise the error handler renders one, and the response events still run.
 
 Routing and controller exceptions enter the [error path](errors.md). An `exception` listener
 can return a response; otherwise the error handler renders one. Normal emission terminates

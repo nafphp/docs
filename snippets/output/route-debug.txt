@@ -1,0 +1,9 @@
+ -------------
+  Route debug
+ -------------
+
+ home
+ [GET] /                 App\Controllers\HomeController::index
+
+ hello
+ [GET] /hello/{name}     App\Controllers\HomeController::hello

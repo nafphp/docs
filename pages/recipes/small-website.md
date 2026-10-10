@@ -287,6 +287,8 @@ Open **http://127.0.0.1:8000/**. You should see “Hello, visitor!”, the greet
 About link. Submit the name Ada; the URL becomes `/?name=Ada` and the heading says
 “Hello, Ada!”. Both pages use the same navigation and stylesheet.
 
+![The small website after submitting Ada: navigation with Home and About, the heading "Hello, Ada!", the name field and a "Preview greeting" button](../assets/screenshots/small-website-home.webp){ .screenshot loading=lazy }
+
 Run these checks in another terminal:
 
 ```bash

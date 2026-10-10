@@ -30,6 +30,17 @@ The core supplies diagnostic and sanitized error templates. `APP_ENV=prod` and `
 use sanitized output; `dev` shows diagnostics. Use the exact names documented in
 [Configuration](configuration.md#application-environment).
 
+=== "APP_ENV=dev"
+
+    ![The diagnostic error page: the exception message, the file and line, a highlighted source excerpt and the stack trace](assets/screenshots/error-page-dev.webp){ .screenshot loading=lazy }
+
+=== "APP_ENV=prod"
+
+    ![The sanitized error page: "Error 500", "Something unexpected happened" and a link back, without any file names or code](assets/screenshots/error-page-prod.webp){ .screenshot loading=lazy }
+
+Both pages answer an exception thrown by a route handler with status 500. The diagnostic
+page shows file paths and source code, which is why it must never reach production.
+
 Placing `app/views/errors/404.phtml` in your application **does not automatically override**
 the core error handler. To customize an error, return a response from the `exception` event.
 

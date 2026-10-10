@@ -141,6 +141,20 @@ asset collection and HTTP response mechanisms described here.
 
 ## Boot order
 
+```mermaid
+flowchart TD
+    A["First app() call"] --> B["Load .env.local or .env"]
+    B --> C["Register core services"]
+    C --> D["Find installed packages of type naf-plugin"]
+    D --> E["Resolve order from extra.naf.boot<br/>and the optional app/plugins.php"]
+    E --> F["Register every plugin"]
+    F --> G["Boot each plugin in order:<br/>config, routes, functions.php,<br/>view_helpers.php, bootstrap.php"]
+    G --> H["Load app/routes.php"]
+    H --> I{"HTTP request?"}
+    I -- yes --> J["Register core guard rules"]
+    I -- "no (CLI)" --> K["Skip guard rules"]
+```
+
 Framework 0.2.7+ reads boot order from each installed plugin's `composer.json`. All plugins
 are registered before any bootstrap runs. `hasPlugin()` says a plugin is registered;
 `isBooted()` says its bootstrap has finished. Prefer lazy service factories when another
@@ -189,8 +203,13 @@ plugin's prerequisite. Application routes load after all plugin bootstraps; appl
 service bindings belong in the root `bootstrap.php` before `app()->run()`.
 
 With `naf/cli` 0.2.3+, run `vendor/bin/naf plugins:debug` to see the resolved order,
-prerequisites and skipped optional targets. `App::getPluginBootPlan()` exposes the same
-information to application code.
+prerequisites and skipped optional targets. For the starter with `naf/cli` added:
+
+```text
+--8<-- "output/plugins-debug.txt"
+```
+
+`App::getPluginBootPlan()` exposes the same information to application code.
 
 The loader also accepts `src/config.php`, `src/routes.php` and `src/functions.php` when their
 `app/` counterparts are absent. Keep one layout per package to avoid competing files.

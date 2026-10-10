@@ -1,0 +1,12 @@
+ ---------------------
+  Registered commands
+ ---------------------
+
+ Say hello
+ hello:say .  .  .  .  .Greets a person by name
+
+ Plugin boot order
+ plugins:debug .  .  .  Displays plugin boot order, declared prerequisites and absent optional targets.
+
+ Route debug
+ route:debug .  .  .  . Displays current routes for an application.
