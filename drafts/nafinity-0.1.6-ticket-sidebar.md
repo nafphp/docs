@@ -46,6 +46,14 @@ click an attribute to open its input. Leaving a field updates the draft's displa
 Escape restores only the field currently being edited to its value when opened.
 The ticket is saved once you choose **Ticket erstellen**.
 
+Opening the creation drawer keeps the board address, including its filters. Back
+closes the drawer through the existing changed-draft confirmation. Reloading returns
+to the board; changed drafts trigger the browser's native warning before reloading
+or leaving the page. An untouched draft, an opened empty description editor, and a
+draft with every change restored do not warn. Once creation succeeds, the address
+changes to the saved ticket. Open the direct creation address in a new tab for a
+standalone page; it also remains the fallback without JavaScript.
+
 The drawer and the standalone creation address use `ticket.phtml` and
 `ticket/field.phtml`, as do saved tickets. The shared field component provides the
 read display and editor container, and the same browser open/close and keyboard
@@ -90,3 +98,9 @@ in drawer and standalone draft/detail responses and the native form fallback.
 `ticket-creation.test.js` checks one module identity, lazy single editor creation,
 local field confirmation and field-scoped Escape. Browser checks cover the draft,
 creation, saved description editing and 390/320 px layouts.
+
+Navigation verification: `ticket-navigation.test.js` covers the unchanged board
+address, changed-draft Back handling, saved-ticket URLs, native new-tab links,
+actual field changes, restored values, lazy empty descriptions and accepted creation
+when refreshing the saved ticket fails. Browser checks cover Back, retaining a draft,
+reload protection, restoring all changes, and the transition to the saved ticket.
