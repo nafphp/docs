@@ -65,6 +65,13 @@ Unsaved form fields stay in their original DOM nodes. The native stack has no fi
 depth; the visual offset is bounded to fit the screen. Reduced motion skips animations.
 Direct links such as `#themes` and `#email-design` restore the same parent hierarchy.
 
+Project and installation role lists open their existing edit/create forms in child dialogs.
+Board members open **Add member** or **Invite a new person** over the unchanged list and
+pending invitations. The theme library and installation default stay in the parent; choosing
+or importing a theme opens its editor with the live preview. Closing an editor preserves
+its draft and returns focus to the trigger; saving uses the existing endpoints and restores
+the containing settings card. Without JavaScript these forms remain native disclosures.
+
 Extensions can set `parent: 'application'` or another same-scope section id on
 `Naf\Board\Definition\SettingSection`. The generic renderer handles child cards and
 modal shells without feature-specific JavaScript. Authorized children of a removed or
