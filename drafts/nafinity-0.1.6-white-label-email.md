@@ -75,6 +75,11 @@ or importing a theme opens its editor with the live preview. Closing an editor p
 its draft and returns focus to the trigger; saving uses the existing endpoints and restores
 the containing settings card. Without JavaScript these forms remain native disclosures.
 
+The installation's people directory also uses the shared settings shell for account details,
+inviting a person and bulk changes. Search and selection remain in the parent list; children
+share its stacking, ancestor navigation, close controls and focus restoration. Invitation and
+bulk forms retain their existing authorization and submission paths.
+
 Extensions can set `parent: 'application'` or another same-scope section id on
 `Naf\Board\Definition\SettingSection`. The generic renderer handles child cards and
 modal shells without feature-specific JavaScript. Authorized children of a removed or
