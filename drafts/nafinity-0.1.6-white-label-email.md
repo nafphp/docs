@@ -55,9 +55,10 @@ clients as well as in the browser preview. No remote fonts are loaded.
 and advanced display options. Technical application values and activity-log retention appear
 under **Application & activity log** when advanced settings are enabled. Opening a child
 settings card keeps its parent underneath.
-The parent moves upward and leaves a named close header. Each ancestor header stays
-operable through the active dialog, while background forms remain inert. Closing a middle
-header closes it and every descendant, newest first; the oldest closes the whole stack.
+The parent moves upward and leaves a named navigation header. Each ancestor header stays
+operable through the active dialog, while background forms remain inert. Clicking its title
+returns to that dialog by closing only its descendants, newest first. The separate close
+button also closes the chosen dialog; the oldest close button closes the whole stack.
 A dirty or busy dialog can stop the cascade through its normal cancel guard. Deep stacks
 keep all ancestor names available in a scrollable strip. Closing a child restores its
 parent's position, scroll and focused trigger.
@@ -66,6 +67,8 @@ depth; the visual offset is bounded to fit the screen. Reduced motion skips anim
 Direct links such as `#themes` and `#email-design` restore the same parent hierarchy.
 
 Project and installation role lists open their existing edit/create forms in child dialogs.
+Columns, swimlanes and labels use those same editors for existing entries and additions,
+while reorder controls stay in the parent list.
 Board members open **Add member** or **Invite a new person** over the unchanged list and
 pending invitations. The theme library and installation default stay in the parent; choosing
 or importing a theme opens its editor with the live preview. Closing an editor preserves
