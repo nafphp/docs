@@ -1,0 +1,93 @@
+# White-label identity and email design
+
+Waiting for `naf/board` v0.1.6 to be released and available on Packagist.
+Keep this draft outside `pages/` until then. After release, add the administrator
+steps to the Nafinity chapter and link the mail template contract from its extension guide.
+
+## Use one public identity
+
+Open **Global settings → Appearance & landing page** to choose the application
+name and upload a PNG, JPEG or WebP logo. The same identity appears in navigation,
+sign-in, public account pages, browser titles and favicon, the local AI assistant,
+notification preferences and outgoing email. The branding wordmark's chosen font
+and color also apply to the email header. A logo in email uses the public application
+URL; configure `app:url` to an HTTP or HTTPS address that recipients can reach.
+
+New invoice drafts use the application name in their external reference. The
+reference is frozen with the provider payload when the draft is prepared. Renaming
+the application does not change a prepared or previously submitted reference.
+Older drafts display the reference from their stored provider payload so a person
+can still find an uncertain submission in the external invoicing account.
+
+Technical names such as Composer packages, namespaces, commands, configuration
+paths, browser storage keys and AI tool identifiers retain their existing names.
+Demo board names and the documented demo password identify fixture data; changing
+the application branding does not rename projects or change credentials.
+
+## Design outgoing email
+
+An administrator with `settings.manage` opens **Global settings → Email design**.
+Choose the background, surface, text, secondary text, border and accent colors,
+then adjust font family, base size, corner radius and spacing. The design is global;
+a recipient's personal application theme does not change sent email.
+
+The live preview uses sample data. Switch between invitation, password reset,
+email verification, security notice and notification, and choose Desktop or Mobile
+width. Previewing sends no email and does not save the draft. **Save email design**
+applies it to subsequent messages; **Reset email design** restores server defaults.
+An outdated configuration revision is rejected rather than overwriting a newer edit.
+
+The preview and sender use the same HTML renderer and CSS inliner. Colors and scale
+variables are resolved to literal values before CSS is embedded into the elements.
+Email clients support different CSS features; check important layouts in the intended
+clients as well as in the browser preview. No remote fonts are loaded.
+
+## Add custom email CSS
+
+Custom CSS is applied after the shared base styles and before inlining. Use the
+stable layout classes `.email-header`, `.email-brand-name`, `.email-title`,
+`.email-content`, `.email-intro`, `.email-paragraph`, `.email-button`,
+`.email-highlight` and `.email-footer`.
+
+```css
+.email-title {
+  color: var(--accent);
+  padding-bottom: var(--space-16);
+}
+
+.email-button {
+  border-radius: var(--radius-8);
+}
+```
+
+The designer uses the same semantic names and scale catalog as interface themes:
+`--bg`, `--surface`, `--text`, `--muted`, `--line`, `--accent`, `--on-accent`,
+`--font-family`, `--font-size`, `--radius`, `--density`, `--space-*`, `--font-*`
+and `--radius-*`. Font stacks use the shared System, Serif and Monospace choices.
+Use simple `var(--name)` references to these known tokens. The validator rejects
+unknown variables, invalid values, imports, resource URLs and active CSS. Custom CSS
+is limited to 32 KiB. Email layout is table based and does not require scripts.
+
+## Host defaults and template overrides
+
+The typed installation setting `appearance.email` maps to `nafinity:email_design`.
+It holds `common`, `colors` and `css`; omitted common and color entries inherit the
+shared email defaults. Only installation administrators can read or write the
+preview and save endpoints. Generic settings API writes run the same validator.
+
+Board message producers use `Naf\Board\Mail\Messages` and native `mail/...` views.
+The shared `mail/layout` contains the branding and stable CSS classes. Messages
+have HTML and a plain-text alternative with their action URLs. A host can override
+an individual view or the shared layout through its existing view paths. A custom
+layout without `data-email-layout` is left intact and is responsible for its own
+styles; layouts retaining that marker participate in the shared design inliner.
+
+## If the result is different
+
+| Symptom | Check |
+| --- | --- |
+| Changes appear only in the preview | Save the email design; drafts do not change outgoing messages. |
+| A newer edit is reported | Reload global settings and apply the edit to the latest revision. |
+| A custom rule is rejected | Check CSS syntax, token names, the 32 KiB limit and resource URL restrictions. |
+| A logo is missing in a recipient's client | Check the public `app:url` and whether that client blocks remote images. |
+| A host template ignores the design | Keep `data-email-layout` on the layout body to use the shared inliner, or maintain the override's own styles. |
