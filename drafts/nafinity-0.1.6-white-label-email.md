@@ -90,7 +90,11 @@ stacking, parent suspension, focus restoration and animated exit automatically.
 Theme and email previews use sandboxed inline HTML documents with no scripts. Theme
 samples no longer load a separate page into the frame, so the installation can retain
 `X-Frame-Options: DENY` and `frame-ancestors 'none'`. Both previews keep their styles
-isolated from settings and use the modal body as their scroll container.
+isolated from settings and use the modal body as their scroll container. Theme samples
+allow local stylesheets, icons and fonts from the exact HTTP origin, including the port,
+so Firefox also renders their inline documents. The installation does not need to relax
+its frame protection. Hosts that map an internal web-server port to a different public
+port need the request-authority correction prepared for `naf/framework` v0.2.11.
 
 ## Add custom email CSS
 
