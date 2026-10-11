@@ -37,6 +37,27 @@ footer have separate spacing. The composer stays outside the refreshed comment
 list, preserving an unsent draft when new comments arrive. Sidebar labels and
 values share their first text baseline, including open inline editors.
 
+## Create with the same ticket view
+
+**+ Neues Ticket** opens the shared ticket view with a local draft. The title opens
+for typing immediately. Description and metadata show their values or muted
+placeholders. Click **Beschreibung einfügen** to open one description editor;
+click an attribute to open its input. Leaving a field updates the draft's display.
+Escape restores only the field currently being edited to its value when opened.
+The ticket is saved once you choose **Ticket erstellen**.
+
+The drawer and the standalone creation address use `ticket.phtml` and
+`ticket/field.phtml`, as do saved tickets. The shared field component provides the
+read display and editor container, and the same browser open/close and keyboard
+handlers serve both modes. Draft fields belong to one native creation form;
+saved fields retain their existing automatic save forms. Required draft fields
+open when native validation needs them. Without JavaScript, the native inputs
+and plain-text description remain available.
+
+The `core.extensions` asset loads the ticket module once, so it owns one editor
+registry and one write queue. Quill initializes when the description is first
+opened and is reused on later edits.
+
 ## Contribute fields through the existing registry
 
 The visibility form uses `TicketFieldRegistry` and persists registered field
@@ -63,3 +84,9 @@ Verification: Board `TicketSidebarPreferencesOverHttpTest` and
 standalone and drawer views, native save/reset, invalid choices, unchanged ticket
 values, creation inputs, conditional refresh, contributed fields, escaping and
 unique switch labels. Browser checks cover desktop and 390/320 px widths.
+
+Creation verification: `TicketCreationOverHttpTest` checks the shared field contract
+in drawer and standalone draft/detail responses and the native form fallback.
+`ticket-creation.test.js` checks one module identity, lazy single editor creation,
+local field confirmation and field-scoped Escape. Browser checks cover the draft,
+creation, saved description editing and 390/320 px layouts.
