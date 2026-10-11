@@ -106,7 +106,8 @@ also stays deduplicated after copying or mailbox recreation. SMTP confirmations 
 delivered again if a process stops after delivery but before recording it.
 
 Unknown or ambiguous references, unmatched senders, automatic replies, empty messages and
-oversized messages stay in the mailbox with their existing flags. The importer advances
+oversized messages stay in the mailbox with their existing flags. Invalid date headers and
+header conflicts detected as sender spoofing are skipped in the same way. The importer advances
 past these messages so they cannot block later replies. To revisit them after correcting
 the ticket configuration, run one bounded rescan and then continue normal polling:
 

@@ -181,9 +181,16 @@ and full rollback after a later property write fails.
 ## Shared multiselect controls
 
 For controls contributing to the same native array, `choice()` accepts distinct
-`id` and `listId` values and `clearField: false`. Put one empty marker before all
+`id` values and `clearField: false`; `listId` is derived from the native control ID and
+can be overridden explicitly. Put one empty marker before all
 of those controls. Repeating the bare marker between array entries would discard
 earlier selections when PHP parses the form. Closed role rows retain their native
 checkboxes and submit with the rest of the form; JavaScript only draws the dropdown.
 The component enhances controls in `nafinity:fragment-updated` containers and
 closes their popovers on `nafinity:fragment-removing`.
+
+Short choice lists focus their labelled listbox rather than an anonymous popup. Arrow keys
+move between options; Home/End reach the first/last option, and Enter or Space selects it.
+Searchable choices focus the combobox and keep text editing keys available. Escape closes the
+choice and returns focus to its trigger. The application layout offers **Skip to content**
+as the first keyboard link, targeting the focusable main region.
