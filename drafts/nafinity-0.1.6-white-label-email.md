@@ -6,7 +6,7 @@ steps to the Nafinity chapter and link the mail template contract from its exten
 
 ## Use one public identity
 
-Open **Global settings → Appearance & landing page** to choose the application
+Open **Global settings → Design & appearance → Appearance & landing page** to choose the application
 name and upload a PNG, JPEG or WebP logo. The same identity appears in navigation,
 sign-in, public account pages, browser titles and favicon, the local AI assistant,
 notification preferences and outgoing email. The branding wordmark's chosen font
@@ -26,7 +26,7 @@ the application branding does not rename projects or change credentials.
 
 ## Design outgoing email
 
-An administrator with `settings.manage` opens **Global settings → Email design**.
+An administrator with `settings.manage` opens **Global settings → Design & appearance → Email design**.
 Choose the background, surface, text, secondary text, border and accent colors,
 then adjust font family, base size, corner radius and spacing. The design is global;
 a recipient's personal application theme does not change sent email.
@@ -37,10 +37,39 @@ width. Previewing sends no email and does not save the draft. **Save email desig
 applies it to subsequent messages; **Reset email design** restores server defaults.
 An outdated configuration revision is rejected rather than overwriting a newer edit.
 
+Click **Send a test email to me** to send the selected sample with the current unsaved
+design through the configured mail transport. The server resolves the signed-in account's
+current email address; the action cannot send to another recipient. It does not save the
+design, create a real invitation/reset code or change notification preferences. Automatic
+preview updates never send mail. Three test emails per account per minute are allowed.
+A transport failure keeps the draft intact and asks you to check email configuration.
+
 The preview and sender use the same HTML renderer and CSS inliner. Colors and scale
 variables are resolved to literal values before CSS is embedded into the elements.
 Email clients support different CSS features; check important layouts in the intended
 clients as well as in the browser preview. No remote fonts are loaded.
+
+## Grouped settings and modal navigation
+
+**Design & appearance** contains branding and landing page, interface themes, email design
+and advanced display options. Opening a child settings card keeps its parent underneath.
+The parent moves upward and leaves a quiet strip with a close mark; only the top dialog
+accepts input. Closing a child restores its parent's position, scroll and focused trigger.
+Unsaved form fields stay in their original DOM nodes. The native stack has no fixed logical
+depth; the visual offset is bounded to fit the screen. Reduced motion skips animations.
+Direct links such as `#themes` and `#email-design` restore the same parent hierarchy.
+
+Extensions can set `parent: 'appearance'` or another same-scope section id on
+`Naf\Board\Definition\SettingSection`. The generic renderer handles child cards and
+modal shells without feature-specific JavaScript. Authorized children of a removed or
+hidden parent appear at the root; cyclic parent definitions are rejected. New dialogs
+opened through the existing `data-dialog` controls or shared `assets/dialog.js` receive
+stacking, parent suspension, focus restoration and animated exit automatically.
+
+Theme and email previews use sandboxed inline HTML documents with no scripts. Theme
+samples no longer load a separate page into the frame, so the installation can retain
+`X-Frame-Options: DENY` and `frame-ancestors 'none'`. Both previews keep their styles
+isolated from settings and use the modal body as their scroll container.
 
 ## Add custom email CSS
 
@@ -89,5 +118,6 @@ styles; layouts retaining that marker participate in the shared design inliner.
 | Changes appear only in the preview | Save the email design; drafts do not change outgoing messages. |
 | A newer edit is reported | Reload global settings and apply the edit to the latest revision. |
 | A custom rule is rejected | Check CSS syntax, token names, the 32 KiB limit and resource URL restrictions. |
+| A test email does not arrive | Check the configured mail transport and recipient account address; a successful send means the transport accepted the message, not a guarantee of inbox placement. |
 | A logo is missing in a recipient's client | Check the public `app:url` and whether that client blocks remote images. |
 | A host template ignores the design | Keep `data-email-layout` on the layout body to use the shared inliner, or maintain the override's own styles. |
