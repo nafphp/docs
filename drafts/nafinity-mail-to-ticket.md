@@ -174,9 +174,11 @@ confirmations. Dynamic values are escaped inside the layout, including in queue 
 
 Override `app/src/views/mail/layout.phtml` to change the common design, or override an
 individual view with the same name. PHP and template changes need no image rebuild.
-Environment changes need `make run`. The installation's General settings card shows the
-effective notification switch and sender from server configuration; those fields are
-read-only and are not stored as personal preferences.
+Environment changes need `make run`. The global mail settings show the effective
+notification switch, sender and registered transport configuration. Administrators can
+override server values or select **Serverkonfiguration** to inherit them again. These
+settings apply to the installation; changes affect new requests, and running workers
+need restarting.
 
 ## If the result is different
 
