@@ -6,7 +6,7 @@ steps to the Nafinity chapter and link the mail template contract from its exten
 
 ## Use one public identity
 
-Open **Global settings → Design & appearance → Appearance & landing page** to choose the application
+Open **Global settings → General → Appearance & landing page** to choose the application
 name and upload a PNG, JPEG or WebP logo. The same identity appears in navigation,
 sign-in, public account pages, browser titles and favicon, the local AI assistant,
 notification preferences and outgoing email. The branding wordmark's chosen font
@@ -26,7 +26,7 @@ the application branding does not rename projects or change credentials.
 
 ## Design outgoing email
 
-An administrator with `settings.manage` opens **Global settings → Design & appearance → Email design**.
+An administrator with `settings.manage` opens **Global settings → General → Email design**.
 Choose the background, surface, text, secondary text, border and accent colors,
 then adjust font family, base size, corner radius and spacing. The design is global;
 a recipient's personal application theme does not change sent email.
@@ -51,15 +51,17 @@ clients as well as in the browser preview. No remote fonts are loaded.
 
 ## Grouped settings and modal navigation
 
-**Design & appearance** contains branding and landing page, interface themes, email design
-and advanced display options. Opening a child settings card keeps its parent underneath.
+**General** contains branding and landing page, interface themes, email design
+and advanced display options. Technical application values and activity-log retention appear
+under **Application & activity log** when advanced settings are enabled. Opening a child
+settings card keeps its parent underneath.
 The parent moves upward and leaves a quiet strip with a close mark; only the top dialog
 accepts input. Closing a child restores its parent's position, scroll and focused trigger.
 Unsaved form fields stay in their original DOM nodes. The native stack has no fixed logical
 depth; the visual offset is bounded to fit the screen. Reduced motion skips animations.
 Direct links such as `#themes` and `#email-design` restore the same parent hierarchy.
 
-Extensions can set `parent: 'appearance'` or another same-scope section id on
+Extensions can set `parent: 'application'` or another same-scope section id on
 `Naf\Board\Definition\SettingSection`. The generic renderer handles child cards and
 modal shells without feature-specific JavaScript. Authorized children of a removed or
 hidden parent appear at the root; cyclic parent definitions are rejected. New dialogs
