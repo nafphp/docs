@@ -72,17 +72,22 @@ Version **v0.2.2** · [Authentication and permissions](auth.md)
 
 ## naf/board
 
-Version **v0.1.5** · [Nafinity](built-with/nafinity.md)
+Version **v0.1.6** · [Nafinity](built-with/nafinity.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
-| `app:url` | — | code |
+| `app:name` | `'Nafinity'` | code |
+| `app:url` | `''` | code |
+| `board_mail` | `[]` | code |
 | `database:driver` | — | code |
 | `ldap:connection` | — | code |
 | `ldap:directory` | — | code |
 | `ldap:enabled` | `false` | code |
+| `mail` | `[]` | code |
+| `mail:transport` | — | code |
+| `nafinity:exports:key` | — | code |
 | `nafinity:mail_enabled` | `false` | code |
-| `nafinity:mail_from` | — | code |
+| `nafinity:mail_from` | `''` | code |
 | `nafinity:remember_days` | computed in code | code |
 | `storage:disks:attachments:root` | computed in code | code |
 | `websocket:url` | `''` | code |

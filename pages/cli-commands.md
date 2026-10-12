@@ -30,7 +30,7 @@ Version **v0.1.1** · [Alexa+ MCP server](alexa.md)
 
 ## naf/board
 
-Version **v0.1.5** · [Nafinity](built-with/nafinity.md)
+Version **v0.1.6** · [Nafinity](built-with/nafinity.md)
 
 | Command | Purpose | Arguments | Options |
 | --- | --- | --- | --- |
@@ -39,6 +39,9 @@ Version **v0.1.5** · [Nafinity](built-with/nafinity.md)
 | `nafinity:assets:publish` | Copy registered package assets into the public directory; optional --package=vendor/name. | — | `--package=…` |
 | `nafinity:assets:remove` | Delete previously published package assets; optional --package=vendor/name. | — | `--package=…` |
 | `nafinity:grant-default` | Give accounts that hold no role at all the one an ordinary account has. | — | — |
+| `nafinity:mail:check` | Check IMAP TLS/login/folder and the integration account without importing or sending mail. | — | — |
+| `nafinity:mail:poll` | Append authorized replies to known cases; --rescan revisits retained messages. | — | `--rescan` |
+| `nafinity:mail:smtp:check` | Verify the configured naf/mail SMTP TLS connection and login without sending mail. | — | — |
 | `nafinity:migrations:rename` | Repoints recorded migrations after a namespace rename; shows the plan unless --apply is given. | — | `--from=…`, `--to=…`, `--apply` |
 | `nafinity:seed` | Create local demo accounts and projects once; refuses production. | — | — |
 | `nafinity:user` | Create an account, reading its password from standard input. | `email` (optional), `name` (optional) | `--admin` |

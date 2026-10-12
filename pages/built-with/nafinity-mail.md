@@ -1,9 +1,10 @@
+---
+title: Mail replies to Nafinity tickets
+---
+
 # Mail replies to Nafinity tickets
 
-Pending **naf/board v0.1.6** and the corresponding Nafinity deployment changes.
-SMTP uses the published **naf/mail v0.2.3**.
-Keep this draft outside `pages/` until the board release is published and the installation
-example passes against Packagist.
+This workflow requires `naf/board` 0.1.6 or newer and `naf/mail` 0.2.3 or newer. Configure an existing SMTP/IMAP account in your installation; no extra Board integration package is needed.
 
 Nafinity natively polls an existing IMAP mailbox and appends authorized replies as comments
 to existing tickets. An incoming message never creates a ticket. The installation sends
@@ -15,7 +16,7 @@ incoming port, public MX record or additional mail server on the Nafinity host.
 
 Update the board in the application and migrate its tables:
 
-```sh
+```bash
 bin/composer update naf/board naf/mail --with-dependencies
 bin/naf db:migrate up
 ```
@@ -25,7 +26,7 @@ mode the normal Board checkout supplies it through the existing development mani
 
 Use a dedicated Nafinity integration account. Its email address does not need a mailbox:
 
-```sh
+```bash
 openssl rand -hex 32 | bin/naf nafinity:user mailbot@operator.example 'Mail import'
 ```
 
@@ -35,7 +36,7 @@ account; the comment text identifies the original sender as `E-Mail von …`.
 
 Configure the skeleton's private `.env`:
 
-```dotenv
+```ini
 NAFINITY_MAIL_FROM=support@operator.example
 NAFINITY_SMTP_HOST=smtp.provider.example
 NAFINITY_MAIL_PASSWORD=replace-with-provider-credential
@@ -57,7 +58,7 @@ confirmations use the same sender independently of that notification switch.
 
 Apply the environment and check both connections:
 
-```sh
+```bash
 make run
 make mail-check
 make mail-imap-check
@@ -111,7 +112,7 @@ header conflicts detected as sender spoofing are skipped in the same way. The im
 past these messages so they cannot block later replies. To revisit them after correcting
 the ticket configuration, run one bounded rescan and then continue normal polling:
 
-```sh
+```bash
 bin/naf nafinity:mail:poll --rescan
 bin/naf nafinity:mail:poll
 ```
@@ -132,7 +133,7 @@ IMAP keys live under `mail:imap:`. The skeleton maps them from environment varia
 another host supplies its own configuration with NAF's `ENV:NAME` references. Shared
 keys are `mail:from`, `mail:reply_to`, `mail:username` and `mail:password`. SMTP lives
 under `mail:smtp:` and uses `Naf\Mail\Core\Transport\SmtpTransport` as `mail:transport`.
-See [Sending mail](../pages/mail.md#send-through-smtp) for the reusable transport's PHP configuration.
+See [Sending mail](../mail.md#send-through-smtp) for the reusable transport's PHP configuration.
 
 | Key | Skeleton variable | Default | Effect |
 |---|---|---|---|
