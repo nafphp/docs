@@ -1,16 +1,58 @@
-# Nafinity users and Update properties
+---
+title: Nafinity accounts and invitations
+---
 
-Publication gate: wait for `naf/board` 0.1.6 on Packagist. This draft describes
-changes on the release-candidate branch, not the currently published package.
-After release, merge the account tasks into `pages/built-with/nafinity.md` and
-link the extension reference from that chapter. Keep this file outside `pages/`
-until that verification is complete.
+# Nafinity accounts and invitations
 
-The UI and HTTP behavior below are covered by the Board's isolated database and
-HTTP suites. The extension fragment assumes a Board provider and an application
-handler implementing `BulkPropertyHandlerInterface`; it is a reference fragment,
-not a standalone application.
+With `naf/board` 0.1.6 or newer, invite people into a board, manage authorized accounts and issue one-use password recovery links. Installation roles and board membership remain separate.
 
+## Inviting people and assigning boards
+
+**Invite person** in installation settings and **Invite new person** in a board's
+member settings share the same invitation service. Choose an initial board, email and board
+role. The default is Member; only a current owner can grant Owner or Manager. Project custom
+roles follow the same permission checks as direct membership changes. With email delivery
+enabled, the form can send the invitation; otherwise it returns a link to copy and share.
+No administrator chooses the recipient's password.
+
+The recipient opens the link, enters a name and their own password, and immediately reaches
+the inviting board. The email is bound to the invitation and cannot be changed at registration.
+The password follows the same 15-character/72-byte rule as password changes. New invited
+accounts receive only the selected board membership, with no installation role or right to
+create projects. An invitation does not set `email_verified_at`: administrators may copy links,
+so possession alone does not prove delivery to the named mailbox.
+
+Use **Search accounts** in another board's member settings to add that person later. After
+two characters, autocomplete finds active accounts by name or email, and selecting a result
+fills the email. A complete email also works without JavaScript. Only people allowed to manage
+members of that board can use the directory; it returns at most 20 names and email addresses.
+Adding existing accounts continues to use the regular membership service and its role checks.
+Already existing accounts cannot be recreated through an invitation. If an account is created
+after a link was issued, its owner must sign in with that account before joining. Existing active
+membership and credentials are preserved.
+
+Links expire after seven days, can be used once and can be revoked under **Pending invitations**.
+Inviting the same address to the same board again replaces the previous link. Different boards
+can have separate invitations. Acceptance rechecks the inviting person's current membership,
+role permissions, the custom role and the board's archive state. Revocation, expiry, loss of
+the sponsor's rights, archiving and project deletion prevent registration through that link.
+Registration, membership assignment and consuming the token commit together. The database
+stores only the SHA-256 token hash; audit events contain no invitation token or email.
+
+The public link and confirmation pages use `Cache-Control: private, no-store` and
+`Referrer-Policy: no-referrer`. Creation, searches and acceptance use NAF's persistent rate
+limiter; all writes require native CSRF protection. The public URL comes from `app:url`, not
+the request's Host header. Email is sent synchronously through NAF's Mailer. A delivery failure
+returns 503 and preserves any previous invitation. SMTP and SQL cannot commit atomically:
+a delivered link can be unusable if a later event or commit refuses the write.
+
+`M202610100001ProjectInvitations` adds `project_invitations`. The public contract is
+`InvitationServiceInterface`; UI entry points call it rather than creating accounts directly.
+Installation administrators retain the programmatic `AccountServiceInterface::create()` API
+for provisioning. Regression coverage lives in `InvitationTest`, `InvitationOverHttpTest` and
+the browser account-search tests.
+
+## Find accounts
 
 The installation's Users card uses a searchable table, ordered by name and id,
 with at most 50 accounts per page. Search matches literal name/email substrings;
@@ -89,6 +131,8 @@ cannot be rolled back and may contain a link that a later refusal invalidates.
 Account audit data records the changed field names, without credential values,
 email values or raw recovery tokens.
 
+## Update global roles
+
 Select individual rows or all eligible rows on the current page to reveal the
 bulk action bar with its **Update** action. Search and pagination clear the selection. The confirmation
 form states the target count and requires explicitly enabling each property;
@@ -103,58 +147,6 @@ idempotent. Scoped roles remain in the individual editor: board membership has
 additional rules and must not be inferred from a global grant operation.
 The role choices are restricted to the actor's current authority. Account names,
 credentials, account activation and personal preferences are not mass editable.
-
-## Extension API
-
-`BulkProperty` is an explicit opt-in, separate from settings and ticket-field
-definitions. A registered field does not automatically become mass editable.
-A provider registers a resource/key pair, existing field type and domain handler:
-
-```php
-use Naf\Board\Definition\BulkProperty;
-
-$context->bulkProperties()->add(new BulkProperty(
-    key: 'review_state',
-    resource: 'example.records',
-    label: 'Review state',
-    type: 'select',
-    handler: ReviewStateBulkHandler::class,
-    options: ['choices' => ['pending' => 'Pending', 'reviewed' => 'Reviewed']],
-));
-```
-
-The registry follows the normal ordering, duplicate/replacement and removal rules.
-Identity is `resource:key`; `forResource()` returns definitions keyed by property.
-Providers and host overrides can replace/remove definitions through
-`bulkProperties()`. Removal removes the capability, without deleting stored data.
-
-Implement `Naf\Board\Contracts\BulkPropertyHandlerInterface`:
-
-- `options(BulkProperty $property, int $actor): array` authorizes the operation
-  and resolves server-side type options, including currently permitted choices.
-  It must refuse unauthorized use even if the property was visible earlier.
-- `prepare(BulkProperty $property, int $actor, array $targets, mixed $value): Closure`
-  runs in the batch transaction. Lock aggregates in deterministic order, verify
-  every target's existence, authorization and domain invariants, and check expected
-  versions for replacement operations. Return a write closure using the same PDO
-  connection. Never commit, send mail, perform network calls or write files here.
-  For several properties on the same aggregate, the closure must merge with earlier
-  writes in this transaction rather than replaying a prepared stale snapshot.
-
-`BulkUpdateService::properties($resource)` returns authorized definitions and
-resolved options for a form. It hides only permission denials; unexpected errors
-remain visible. `apply($resource, $targets, $values)` accepts 1–50 explicit ids and
-1–20 opted-in keys, validates raw values before normalization through the existing
-field types, prepares every write before executing any, and commits once. Any
-exception rolls back every target, property and database-backed audit event.
-Targets are deduplicated and sorted. Omitted keys are unchanged. Unknown keys,
-invalid shapes, invalid values and implicit “all results” selections are refused.
-No table or column names come from request input.
-
-The service is reusable by other controllers. A new resource still needs its own
-read/UI authorization and CSRF-protected endpoint; registering a property creates
-no public route. Ticket handlers must retain project authorization, project locks,
-ticket versions and board revisions. The framework cannot infer those rules.
 
 ## Initial HTTP surface and guarantees
 
@@ -178,19 +170,11 @@ unauthorized reads/writes, malformed selection, self protection, privilege reach
 role preservation, idempotency, multiple-property merging, contributed field types
 and full rollback after a later property write fails.
 
-## Shared multiselect controls
+## If the result is different
 
-For controls contributing to the same native array, `choice()` accepts distinct
-`id` values and `clearField: false`; `listId` is derived from the native control ID and
-can be overridden explicitly. Put one empty marker before all
-of those controls. Repeating the bare marker between array entries would discard
-earlier selections when PHP parses the form. Closed role rows retain their native
-checkboxes and submit with the rest of the form; JavaScript only draws the dropdown.
-The component enhances controls in `nafinity:fragment-updated` containers and
-closes their popovers on `nafinity:fragment-removing`.
-
-Short choice lists focus their labelled listbox rather than an anonymous popup. Arrow keys
-move between options; Home/End reach the first/last option, and Enter or Space selects it.
-Searchable choices focus the combobox and keep text editing keys available. Escape closes the
-choice and returns focus to its trigger. The application layout offers **Skip to content**
-as the first keyboard link, targeting the focusable main region.
+| Symptom | Check |
+| --- | --- |
+| The reset-link action is unavailable | Check `users.reset_password` separately from account-edit rights; role synchronization preserves existing role definitions. |
+| An invitation or reset link is no longer valid | Check expiry, revocation, current sponsor/issuer rights and the target account's current state. |
+| An account editor reports a conflict | Reopen it to obtain the latest revision before applying the change. |
+| Email delivery fails | Verify the configured transport; the operation preserves the previous invitation/reset link on a delivery failure. |

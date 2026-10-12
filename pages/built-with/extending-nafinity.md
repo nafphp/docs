@@ -49,6 +49,7 @@ Use the same registration conventions across the registries below.
 | `fieldTypes()` | How a kind of value is validated, stored and drawn |
 | `boardFilters()` | A filter, with its own SQL condition |
 | `estimationScales()` | A scale a project can pick |
+| `bulkProperties()` | Explicitly opted-in properties and domain handlers for transactional batches |
 | `activityTypes()` | An entry kind for the history |
 | `exporters()` | A format a board can be written in |
 | `ui()` | Contributions into named slots and panels |
@@ -69,14 +70,14 @@ analysis and tests to catch misspelled listener keys.
 
 | Event | Carries | When |
 |---|---|---|
-| `Change` | project, ticket, actor, type, payload | Anything was written — 24 kinds, from `ticket.moved` to `account.created` |
+| `Change` | project, ticket, actor, type, payload | A registered application change, from `ticket.moved` to `account.created` |
 | `GrantsChanged` | actor, subject, scope, before, after | Roles or permissions moved (from [`naf/rbac`](../rbac.md)) |
 | `SignIn` | email, provider, outcome, account | Somebody tried to sign in, successfully or not |
 | `ExportStarted` | format, project, columns | An export is about to write its first record |
 | `ExportLine` | format, project, ticket, row | One record, before it is written |
 | `ExportFinished` | format, project, columns, count | An export wrote its last record |
 
-One write event rather than twenty-four is deliberate. The listeners that exist mostly
+One write event serves all registered change kinds. The listeners that exist mostly
 want *everything* — the audit log and the live updates do — and a plugin that wants one
 kind writes one line:
 
@@ -93,8 +94,7 @@ event()->listen(Change::class, function (Change $change): void {
 Both outcomes travel on it, because the interesting one is usually the failure, and it carries
 the address as typed even when no account answers to it.
 
-Splitting it would make the two listeners that want everything register twenty-four times
-to get it.
+Listeners interested in every change register once against `Change::class`.
 
 ### A listener can refuse
 
@@ -201,6 +201,181 @@ synchronously or through a promise. The board mounts each contributed root once 
 its disposer once when closing the drawer or replacing a fragment. A disposer returned
 after the root was removed is still called. Own listeners, timers and retained nodes
 must be released there; a module failure leaves the fixed ticket areas available.
+
+
+
+## Personal ticket field visibility
+
+The visibility form uses `TicketFieldRegistry` and persists registered field
+keys through the existing `project_user` setting `ticket_fields`. Its value is
+a key-to-boolean map; an omitted key means visible. No separate field list,
+preference table or write endpoint is needed. The standard sidebar renderers
+apply the selection to core and contributed attributes.
+
+A contributed panel receives the existing `TicketSlotContext`. Use
+`$slot->shows($key)` for a registered field and `$slot->fieldsIn($group)` for
+readable, visible metadata definitions. `$slot->showsGroup($group, $unavailable)`
+checks whether a group contains a visible field; its optional second argument
+lists field keys unavailable on the current ticket. These helpers preserve read
+permissions and do not hide creation inputs. A custom panel that renders fields
+directly must use these helpers to respect the person's selection.
+
+Removing a contributed field leaves its stored choice harmless. Registering the
+same key again restores that choice unless the person saved a new selection in
+the meantime. Conditional information retains its refresh marker, so a timestamp
+can appear when the ticket is closed after the view opened.
+
+## Top-bar contributions
+
+The `topbar.tools` UI slot uses `PageSlotContext`. Extensions can add controls there
+or explicitly replace the `core.topbar.workspace` contribution through the existing
+UI registry. The standard contribution contains workspace search; ticket creation
+belongs to the project heading. Account actions remain in `topbar.actions`.
+
+## Content after board filters
+
+The `board.filters.after` slot receives `BoardSlotContext`, including normalized `filters`, project scope and CSRF `token`. The `core.board.saved_views` contribution supplies personal views through a data provider. Extensions may explicitly replace it through the UI registry; boards rendered through the common page renderer retain the same contribution.
+
+
+## Opt into transactional bulk properties
+
+`BulkProperty` is an explicit opt-in, separate from settings and ticket-field
+definitions. A registered field does not automatically become mass editable.
+A provider registers a resource/key pair, existing field type and domain handler:
+
+```php-inline
+use Naf\Board\Definition\BulkProperty;
+
+$context->bulkProperties()->add(new BulkProperty(
+    key: 'review_state',
+    resource: 'example.records',
+    label: 'Review state',
+    type: 'select',
+    handler: ReviewStateBulkHandler::class,
+    options: ['choices' => ['pending' => 'Pending', 'reviewed' => 'Reviewed']],
+));
+```
+
+The registry follows the normal ordering, duplicate/replacement and removal rules.
+Identity is `resource:key`; `forResource()` returns definitions keyed by property.
+Providers and host overrides can replace/remove definitions through
+`bulkProperties()`. Removal removes the capability, without deleting stored data.
+
+Implement `Naf\Board\Contracts\BulkPropertyHandlerInterface`:
+
+- `options(BulkProperty $property, int $actor): array` authorizes the operation
+  and resolves server-side type options, including currently permitted choices.
+  It must refuse unauthorized use even if the property was visible earlier.
+- `prepare(BulkProperty $property, int $actor, array $targets, mixed $value): Closure`
+  runs in the batch transaction. Lock aggregates in deterministic order, verify
+  every target's existence, authorization and domain invariants, and check expected
+  versions for replacement operations. Return a write closure using the same PDO
+  connection. Never commit, send mail, perform network calls or write files here.
+  For several properties on the same aggregate, the closure must merge with earlier
+  writes in this transaction rather than replaying a prepared stale snapshot.
+
+`BulkUpdateService::properties($resource)` returns authorized definitions and
+resolved options for a form. It hides only permission denials; unexpected errors
+remain visible. `apply($resource, $targets, $values)` accepts 1–50 explicit ids and
+1–20 opted-in keys, validates raw values before normalization through the existing
+field types, prepares every write before executing any, and commits once. Any
+exception rolls back every target, property and database-backed audit event.
+Targets are deduplicated and sorted. Omitted keys are unchanged. Unknown keys,
+invalid shapes, invalid values and implicit “all results” selections are refused.
+No table or column names come from request input.
+
+The service is reusable by other controllers. A new resource still needs its own
+read/UI authorization and CSRF-protected endpoint; registering a property creates
+no public route. Ticket handlers must retain project authorization, project locks,
+ticket versions and board revisions. The framework cannot infer those rules.
+
+## Shared multiselect controls
+
+For controls contributing to the same native array, `choice()` accepts distinct
+`id` values and `clearField: false`; `listId` is derived from the native control ID and
+can be overridden explicitly. Put one empty marker before all
+of those controls. Repeating the bare marker between array entries would discard
+earlier selections when PHP parses the form. Closed role rows retain their native
+checkboxes and submit with the rest of the form; JavaScript only draws the dropdown.
+The component enhances controls in `nafinity:fragment-updated` containers and
+closes their popovers on `nafinity:fragment-removing`.
+
+Short choice lists focus their labelled listbox rather than an anonymous popup. Arrow keys
+move between options; Home/End reach the first/last option, and Enter or Space selects it.
+Searchable choices focus the combobox and keep text editing keys available. Escape closes the
+choice and returns focus to its trigger. The application layout offers **Skip to content**
+as the first keyboard link, targeting the focusable main region.
+
+## Reusable notices
+
+Invitations, user administration, settings, exports and invoice drafts use the
+shared `src/views/components/notice.phtml` component. Invitation forms separate
+introductory guidance, form fields and delivery notices with consistent spacing.
+
+Render reusable notices through the native partial helper:
+
+```html+php
+<?= \Naf\Board\partial('components/notice', [
+    'severity' => 'warning',
+    'title'    => \Naf\I18n\t('Check before saving'),
+    'message'  => \Naf\I18n\t('This change ends existing sessions.'),
+]) ?>
+```
+
+`message` and the optional `title` are translated plain text; the component escapes both.
+There is no raw HTML argument. `severity` accepts `notice`, `info` (the default), `warning`
+and `error`. Unknown values fall back to `info`. Each variant has a local Material Symbols
+icon, its own colour and an accessible severity label. Errors use `role="alert"`; other
+variants use `role="note"`. Use errors for actual failures rather than general guidance.
+
+For a dynamic message, `messageAttributes` can carry trusted view attributes such as
+`['data-account-status' => true, 'role' => 'status']`. The hook is on the message paragraph,
+so replacing its `textContent` preserves the icon. An empty notice without a title is hidden.
+Keep attribute names in application code; message and attribute values remain escaped.
+Shared styling lives in `app.css`, icons in `icons.css`. The ordinary application layout
+loads both. A standalone page using this component must also load those stylesheets.
+
+Notice partials use the same override lookup as other views. Existing `field()` and
+`choice()` components remain the entry points for form controls; this component does not
+change form submission or introduce a second rendering layer.
+
+## Shared token contract
+
+`src/Resources/public/assets/theme-tokens.json` is the canonical catalog for
+built-in palettes, editable tokens and numeric bounds. `Themes::compile()`
+builds saved and preview CSS from it. `tools/build-themes.php` generates
+`tokens.css` as the shipped fallback. After changing the catalog, run:
+
+```bash
+php tools/build-themes.php
+npx prettier --write src/Resources/public/assets/tokens.css
+```
+
+Components use the same semantic colors (`--bg`, `--surface`, `--text`,
+`--muted`, `--line`, `--accent` and status colors) and the derived scales:
+`--font-N`, `--space-N` and `--radius-N`. The common `--font-size`,
+`--density` and `--radius` values determine those scales. Use
+`--radius-full` for pills. Structural dimensions, such as panel widths,
+icon geometry and image aspect ratios, remain component dimensions.
+
+Extensions should consume these tokens in their own stylesheets. User-supplied
+ticket colors remain ticket data. Explicit branding font/color settings apply
+to the brand word only and continue to take precedence there.
+
+Stylesheet addresses contain a SHA-256 content version and can be cached for
+one year. A saved edit creates a new URL. An old uncached version returns 404;
+an already cached file may remain available until its cache expires.
+Theme definitions and revision state are read on the next request.
+
+## Shared mail layout
+
+See [host defaults and template overrides](nafinity-appearance.md#host-defaults-and-template-overrides) for the `mail/...` view contract and `data-email-layout` marker. Message producers share the same branding, CSS inliner and plain-text alternative.
+
+
+## Enforce an optional WIP policy
+
+Core WIP values are advisory. The separately installable Composer example in `examples/nafinity-wip-policy` demonstrates an admission rule through native project settings and `Change` listeners. Creating, moving, reopening, restoring or transferring open work into a full column returns 409 and rolls back native database effects. Ordinary edits, reordering and departures remain available. Project managers can disable enforcement. See the [versioned setup and policy reference](https://github.com/nafphp/board/blob/main/docs/Workflow-Policies.md); the example is not an independently published Packagist package.
+
 
 ## Extension reference { #the-full-reference }
 

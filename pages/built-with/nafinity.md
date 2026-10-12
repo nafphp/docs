@@ -15,7 +15,7 @@ The repository you clone is a skeleton. The product is a dependency.
 ```text
 naf/nafinity     the installation you own
   └── naf/board  everything the application does
-        └── naf/framework and eighteen other plugins
+        └── naf/framework and the required NAF plugins
 ```
 
 Keep host configuration and extensions in the skeleton. Product code belongs to `naf/board`;
@@ -61,6 +61,11 @@ Nafinity runs on MariaDB or MySQL; Compose brings MariaDB along. MySQL 8.x
 installations need `naf/board` 0.1.5 or newer, including its `naf/rbac` 0.1.3
 minimum, so role migrations and writes quote the reserved `system` column.
 
+Back up the database and private storage before upgrading. For the workflows below, use
+`naf/board` 0.1.6 or newer. After updating, apply migrations, synchronize roles, publish
+assets, restart long-running services and run `make health`. The new time journal starts
+with the migration; historical ticket totals are not backfilled.
+
 `composer install` takes `naf/board` and the plugins from Packagist, from the committed lock when present, otherwise by resolving manifest constraints. When to update them is your decision: `make composer-update`, then
 `make migrate`, `make roles` and `make assets`.
 
@@ -104,9 +109,11 @@ storage as well as database readiness.
 
 ## Account appearance and language
 
-Personal settings choose Classic or Anthracite separately from light, dark or system
-brightness. They persist for the account across projects and sign-in; existing accounts
-start with Classic. The brightness button changes brightness while retaining the palette.
+Personal settings choose a built-in or published custom theme separately from light, dark
+or system brightness. These choices persist across projects and sign-in. Existing accounts
+retain their explicit palette; new preferences can follow the installation default.
+The brightness button retains the selected theme. Administrators can publish custom themes;
+see [appearance and configuration](nafinity-appearance.md).
 
 German is the base language. English covers core navigation, ticket fragments, validation,
 activity vocabulary, AI tool titles and browser messages. Project names, ticket text and
@@ -121,6 +128,14 @@ all active boards the current account may export. CSV, JSON and installed export
 use the same selection; status, archive state and inclusive UTC update dates can narrow the
 result. Each board's export and field permissions are checked separately, including in a
 combined download. Managing installation settings does not grant access to another board.
+
+## Daily workflows
+
+- [Working with tickets](nafinity-tickets.md): workspace search, saved/shareable filters, My tickets, relevant notifications, keyboard access, personal sidebar and relationships.
+- [Accounts and invitations](nafinity-accounts.md): invite people, edit authorized accounts, manage global roles and recover local passwords.
+- [Hours and invoice drafts](nafinity-invoices.md): personal time reports, invoice positions and durable draft handovers.
+- [Appearance and configuration](nafinity-appearance.md): shared branding, themes, email design and sourced installation overrides.
+- [Mail replies](nafinity-mail.md): append authorized replies from an existing mailbox to existing tickets.
 
 ## Host customization { #making-it-yours }
 

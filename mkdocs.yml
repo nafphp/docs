@@ -149,6 +149,11 @@ nav:
       - Upgrading from NixPHP: upgrading-from-nixphp.md
   - Built with NAF:
       - Nafinity application: built-with/nafinity.md
+      - Nafinity tickets: built-with/nafinity-tickets.md
+      - Nafinity accounts: built-with/nafinity-accounts.md
+      - Nafinity hours and invoices: built-with/nafinity-invoices.md
+      - Nafinity appearance: built-with/nafinity-appearance.md
+      - Nafinity mail replies: built-with/nafinity-mail.md
       - Nafinity extensions: built-with/extending-nafinity.md
 
 validation:

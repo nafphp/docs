@@ -1,8 +1,10 @@
-# White-label identity and email design
+---
+title: Nafinity appearance and configuration
+---
 
-Waiting for `naf/board` v0.1.6 to be released and available on Packagist.
-Keep this draft outside `pages/` until then. After release, add the administrator
-steps to the Nafinity chapter and link the mail template contract from its extension guide.
+# Nafinity appearance and configuration
+
+Administrators with `settings.manage` can configure public identity, interface themes, outgoing email design and installation values in `naf/board` 0.1.6 or newer. Personal theme and brightness choices remain independent.
 
 ## Use one public identity
 
@@ -94,7 +96,74 @@ isolated from settings and use the modal body as their scroll container. Theme s
 allow local stylesheets, icons and fonts from the exact HTTP origin, including the port,
 so Firefox also renders their inline documents. The installation does not need to relax
 its frame protection. Hosts that map an internal web-server port to a different public
-port need the request-authority correction prepared for `naf/framework` v0.2.11.
+port can encounter a request-authority limitation in `naf/framework` 0.2.10: the preview
+may retain the internal port in its asset origin. Verify the preview at the public address;
+mapped-port deployments need the framework correction before relying on this preview path.
+
+## Manage themes
+
+An administrator with `settings.manage` opens **Global settings → General → Themes**.
+Choose a built-in palette as a template, enter a name, adjust typography,
+corner radius, spacing and the separate light and dark colors, then save.
+The isolated preview updates while typing and uses the same compiler as the
+saved stylesheet. Changes in the preview do not affect the installation.
+
+**Publish for all users** makes a saved theme selectable in personal settings.
+Leave it off to keep a draft. Choose any published theme as the installation
+default; anonymous pages, including sign-in, use that default. Each person
+selects their theme in the account's personal settings, independently of the
+Light, Dark or System brightness setting. **Installation default** follows
+future administrator changes. Existing explicit Classic or Anthracite choices
+remain explicit after migration; new preferences follow the installation default.
+
+Copy a theme to edit a separate variant. Built-in palettes remain available.
+Deleting or unpublishing a personally selected theme falls back to the installation
+default without rewriting that person's stored selection. A theme currently used
+as the installation default must be replaced before it can be deleted or unpublished.
+Theme names and definitions are installation data, not project-specific settings.
+
+## Custom CSS, import and recovery
+
+**Custom CSS** is loaded after the application's component styles and generated
+variables. Reuse semantic variables and the shared scales instead of repeating
+literal colors or spacing. For example:
+
+```css
+.ticket-detail {
+    border-top: 2px solid var(--accent);
+    padding-top: var(--space-16);
+}
+```
+
+The example assumes a Nafinity ticket view. It changes the existing
+`.ticket-detail` component without changing its stored content.
+Use `html[data-theme='dark']` for dark-only rules, and
+`@media (prefers-color-scheme: dark)` with `html[data-theme='system']`
+for System mode.
+
+CSS is limited to 32 KiB of UTF-8 and checked with a strict CSS parser.
+Imports, resource URLs, image resource functions and active legacy CSS syntax
+are rejected, including escaped forms. Themes support local CSS customization;
+they do not install remote fonts or fetch third-party stylesheets. Custom CSS
+can still hide controls or affect readability. The editor's sample runs in a
+sandboxed iframe without scripts or form submissions, so an unsaved rule cannot
+hide the surrounding editor.
+
+**Export** downloads a versioned JSON document. **Import theme** validates it
+before replacing the editor draft; save to persist it. Theme files can be up to
+64 KiB, including their JSON envelope. The installation supports up to 16 custom
+themes plus its built-ins. Theme configuration is stored through the existing
+encrypted installation configuration store, with the same revision conflict
+checks and audit trail as other global settings.
+
+If saved CSS prevents normal use, open `/settings?appearance=default#themes`.
+That request uses the built-in standard stylesheet and skips custom theme CSS.
+The bypass does not change anyone's preferences. Theme saves return to this
+safe editor address. **Restore server defaults** removes the administration
+override for `nafinity:themes`; host configuration remains the default source.
+
+Published theme CSS is public, including custom CSS and literal text inside it.
+Keep credentials and private data out of theme definitions.
 
 ## Add custom email CSS
 
@@ -146,3 +215,60 @@ styles; layouts retaining that marker participate in the shared design inliner.
 | A test email does not arrive | Check the configured mail transport and recipient account address; a successful send means the transport accepted the message, not a guarantee of inbox placement. |
 | A logo is missing in a recipient's client | Check the public `app:url` and whether that client blocks remote images. |
 | A host template ignores the design | Keep `data-email-layout` on the layout body to use the shared inliner, or maintain the override's own styles. |
+
+## Installation configuration
+
+Global settings use the same typed fields and cards as personal/project settings.
+Every leaf of the merged server configuration is described automatically; provider
+metadata supplies choices, ranges and secret fields, including SMTP configuration.
+Lists and structured values use JSON. Existing application definitions and extension
+replacements take precedence over generated fields.
+
+Installation settings initially show the standard fields and cards. The native
+**Advanced settings** switch reveals generated configuration cards below them and
+an **Advanced settings** fieldset below standard fields in mixed dialogs. The view
+preference is kept per administrator in the current browser tab; it does not change
+configuration. Hidden advanced controls are disabled and omitted from saves, so a
+standard-field save preserves all advanced overrides. Direct links to advanced cards
+reveal the advanced view. Extensions can opt fields in with `advanced: true` on
+`SettingDefinition` (the default remains false).
+
+New scalar, nested and list entries in the host's `config.php` are discovered on the
+next request without a schema registration; lists use JSON and secret-like paths
+retain the shared write-only treatment. A central display glossary capitalizes known
+abbreviations such as MCP, RBAC, API, SMTP and IMAP; unknown words are humanized and
+explicit provider labels take precedence. Literal configuration paths remain unchanged.
+
+The source next to each field distinguishes administration overrides, environment
+references, server configuration and declared defaults. Editing a field selects an
+administration override. Choosing **Server configuration** deletes that override;
+**Clear value** stores an explicit null where allowed. Passwords are write-only: a
+blank password input retains the previous value. Secrets never appear in HTML, JSON
+read responses or audit payloads.
+
+Writes require installation `settings.manage` and native CSRF validation. The global
+endpoint is `GET/POST /api/settings/application`; values cannot be written into personal
+preferences. Form revisions reject stale edits with 409. Validation is all-or-nothing;
+database changes must connect to an existing application database where the current
+administrator remains active and authorized. Existing mail adapters validate active
+mail configuration without sending a message. The audit records changed/reset keys.
+
+Overrides load before any plugin boots through the framework's `config_sources.php`
+convention, so database, sessions, auth and mail see the same values. They live outside
+the database in `storage/configuration/values.enc`, encrypted through the existing token
+cipher, with a generated `key` beside it. The directory is private (0700), files are 0600,
+and writes are locked and atomic. All application processes/replicas must share this
+private storage; back it up with its key. The key's protection rests on filesystem access.
+
+New requests read the saved configuration; restart already-running queue/schedule/socket
+workers after changing their configuration. If a start-critical override prevents boot,
+set the process environment `NAFINITY_CONFIG_OVERRIDES=0` and restart affected processes
+to recover using server configuration. Restore a valid encrypted file and its key, or
+move `storage/configuration/values.enc` aside, before removing the recovery override.
+The fixed storage location and recovery switch deliberately remain outside editable config.
+
+Custom mail transports may implement `ConfigurableTransportInterface::configurationFields()`
+to return colon-separated config paths with label, type, default, index, options and sensitive
+metadata. This optional contract extends the existing transport interface; it introduces
+no dependency on Board or its renderer. Extensions can also declare application
+`SettingDefinition` values with `configKey` using the existing registry.
