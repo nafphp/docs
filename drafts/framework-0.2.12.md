@@ -118,6 +118,10 @@ Keep the PDO requirement for older releases. Database-backed features need PDO a
 driver; forms use mbstring. A current starter may still lock an older framework and therefore
 require PDO until updated.
 
+The core now requires Nyholm PSR-7 1.8.2 or newer. The lowest-dependency matrix exposed
+implicit-nullable deprecations in earlier versions on PHP 8.4/8.5. Composer resolves
+this minimum automatically when updating the framework.
+
 Upgrade with `composer require 'naf/framework:^0.2.12' --with-all-dependencies`.
 Run application tests for these observable corrections:
 
