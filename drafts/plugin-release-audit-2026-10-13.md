@@ -37,13 +37,13 @@ This audit compares fetched remote main, local and remote branches, stable GitHu
 
 - Auth v0.2.3: merged commit 44f392db0fe73765b683b177462351689301c785; GitHub and Packagist verified. 99 tests / 290 assertions, analysis, style and strict validation passed; exact merge CI covers PHP 8.3/8.4/8.5.
 - RBAC v0.1.4: PR #4, cfa8063ac01ccdd77446e797f930ecab0f2b2f92. A real browser test found the reduced-motion specificity defect; the correction, negative regression and authenticated rendered host pass. PHP tests: 50 / 71 with the local MySQL acceptance skipped; PR CI covers MySQL 8.4 and the browser regression.
-- Monitoring v0.1.0: PR #1, 68d0c9ffb1d09d0e4e40a63410d25eebd009b09a. 57 unit tests / 146 assertions, real HTTP/UDP and CLI-host checks, formatting, strict validation and PHP 8.3/8.4/8.5 PR CI pass.
+- Monitoring v0.1.0: PR #1, 196faa9f7736f16150bbaa496ecdfc625390e8d4. 57 unit tests / 146 assertions, real HTTP/UDP and CLI-host checks, formatting, strict validation and PHP 8.3/8.4/8.5 PR CI pass.
 - CMS: draft PR #2. 493 tests / 2455 assertions, analysis and style pass in an isolated install. The committed lock still resolves naf/cli 0.2.0 and vendor/bin/naf docs:check fails before dispatch. CLI/package/reference/asset/database release gates remain incomplete; no stable package is listed on Packagist.
 - Sanity: draft PR #2 is explicitly unfinished. sanity() targets a missing class, the validator/converter traits are not integrated, and there is no behavioral suite or runtime contract ready for publication.
 
 ## Older branches
 
-The Board event patch on feat/rbac-priorities-and-interface-pass has the same stable patch ID as the version already on main. Flow runtime, tests and manifests match the old RC; only newer contributor documentation differs. The CLI launcher installer in the old RC is byte-identical to main; main contains subsequent command/help/debug additions. Old i18n, Session and Storage branches do not contain missing runtime fixes. Framework plugin-completion experiments were withdrawn and are not release candidates.
+The Board event patch on feat/rbac-priorities-and-interface-pass has the same stable patch ID as the version already on main. Flow runtime, tests and manifests match the old RC; only newer contributor documentation differs. The CLI launcher installer in the old RC is byte-identical to main; main contains subsequent command/help/debug additions. Old i18n, Session and Storage branches do not contain missing runtime fixes. The CMS ai-enhancement branch remains a separate, unmerged experiment based on an older application layout; it is not part of the prepared package RC. Framework plugin-completion experiments were withdrawn and are not release candidates.
 
 ## Related foundation packages
 
