@@ -138,6 +138,7 @@ nav:
       - Application design: best-practices.md
   - Operate:
       - Testing applications: testing.md
+      - API compatibility and support: compatibility.md
       - Deploying applications: deployment.md
       - Troubleshooting and logging: troubleshooting.md
   - Reference:
