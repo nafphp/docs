@@ -72,7 +72,7 @@ Version **v0.2.2** · [Authentication and permissions](auth.md)
 
 ## naf/board
 
-Version **v0.1.6** · [Nafinity](built-with/nafinity.md)
+Version **v0.1.7** · [Nafinity](built-with/nafinity.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
