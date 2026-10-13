@@ -109,9 +109,28 @@ Views retain core and contributed filters. A removed DQL property returns HTTP 4
 
 Choose **My tickets** in the workspace menu. The list contains your current assignments across all readable, active projects. It starts with open tickets; choose closed or all non-archived tickets and sort by due date or last change. Pages contain up to 50 tickets, including results beyond the board's 300-card display limit. Archived tickets/projects and projects you can no longer read are excluded.
 
+## Follow tickets
+
+Use `naf/board` 0.1.8 or newer for the compact eye and followed-ticket overview.
+The eye beside a ticket's number and status toggles your personal subscription.
+An accent-colored eye with an outlined background means you follow the ticket;
+a muted eye means you do not. Its tooltip names the action, and screen readers
+receive the action label and pressed state. Read-only project members can
+follow too. Following does not change the ticket version; transferring a
+ticket clears its subscriptions from the original project.
+
+With JavaScript, toggling the eye preserves the open drawer, keyboard focus
+and unsaved ticket edits. Native forms remain available without JavaScript.
+
+Choose **Followed tickets** beside **My tickets** in the workspace menu to see
+only tickets you follow. The list spans currently readable, active projects,
+starts with open tickets and supports closed/all status, due-date/last-change
+sorting and pages of 50 tickets. Archived tickets/projects and projects you can
+no longer read are excluded. Assignments and subscriptions remain separate lists.
+
 ## Choose relevant notifications
 
-In personal settings, **Notify me about** defaults to all project changes. Choose **My tickets, mentions and followed tickets** to receive changes for tickets you created, are assigned to, follow or are newly mentioned in. Open a ticket and choose **Follow ticket** to subscribe personally; readers can follow too. Following does not change the ticket version. A transfer clears subscriptions from the original project.
+In personal settings, **Notify me about** defaults to all project changes. Choose **My tickets, mentions and followed tickets** to receive changes for tickets you created, are assigned to, follow or are newly mentioned in. Use the [ticket eye](#follow-tickets) to follow a ticket. Your personal scope and channel settings still determine whether following produces notifications.
 
 Comment mentions use the displayed member handles. Email addresses do not count, and editing an existing mention does not notify the same person again. Your own changes, inactive memberships, muted projects and disabled channels remain silent. The mail worker checks current preferences and involvement again before delivery. Pre-feature in-app notifications have no relevance classification and remain available in all-changes mode.
 
@@ -217,5 +236,6 @@ without replacing existing ticket pairs.
 | --- | --- |
 | A shared view cannot be opened | Check current project membership and whether a contributed filter's plugin is installed. |
 | An assignment is missing from My tickets | Check that the ticket and project are active, the assignment is current and you can still read the project. |
+| A ticket is missing from Followed tickets | Check the eye state, list status filter, active ticket/project and current project access. |
 | A followed ticket stays silent | Check the personal notification channel, project muting and current membership. |
 | A save reports a conflict | Reload the latest ticket or view and apply the change to its current version. |

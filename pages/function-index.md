@@ -44,7 +44,7 @@ Version **v0.2.2** · [Authentication and permissions](auth.md)
 
 ## naf/board
 
-Version **v0.1.7** · [Nafinity](built-with/nafinity.md)
+Version **v0.1.8** · [Nafinity](built-with/nafinity.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
