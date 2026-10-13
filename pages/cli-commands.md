@@ -30,7 +30,7 @@ Version **v0.1.1** · [Alexa+ MCP server](alexa.md)
 
 ## naf/board
 
-Version **v0.1.6** · [Nafinity](built-with/nafinity.md)
+Version **v0.1.7** · [Nafinity](built-with/nafinity.md)
 
 | Command | Purpose | Arguments | Options |
 | --- | --- | --- | --- |

@@ -4,7 +4,7 @@ title: Working with Nafinity tickets
 
 # Working with Nafinity tickets
 
-Use `naf/board` 0.1.6 or newer for workspace search, personal views, relevant notifications and the shared ticket editor. Board permissions and version checks apply to every ticket change.
+Use `naf/board` 0.1.7 or newer for Advanced DQL, compact board filters, workspace search, personal views, relevant notifications and the shared ticket editor. Board permissions and version checks apply to every ticket change.
 
 ## Searching across boards
 
@@ -29,15 +29,81 @@ It uses the same primary action style as **New project** in the project overview
 The action is available only in a writable project; workspace pages and read-only
 boards omit it. The top bar contains search without a project-name prefix on every
 application page. The project heading and sidebar identify the current board.
-The board's filter row contains dedicated filters, with no second text search.
-Existing links with a board text filter still work; changing another filter retains
-it, and **Reset** clears it with the other filters.
+The board's **Filter** control opens dedicated dropdowns. Simple mode has no
+second text search; Advanced DQL can express the existing board text search.
+Existing board text-filter links remain valid. Switching modes retains every
+condition, and **Reset** clears them with the other filters.
+
+## Filter a board with dropdowns or DQL
+
+Open **Filter** above the board to use the dropdowns. **Advanced** replaces the
+dropdowns with a DQL field and translates their current values. Press Enter or
+**Apply** to run the query. **Simple filters** validates and applies the query,
+then fills the dropdowns that can represent its conditions.
+
+```text
+status = open AND assignee = me
+priority IN (high, urgent) AND due < 2030-01-01
+board = NAF AND column = "In Arbeit"
+(label = "Design" OR label = "Produkt") AND assignee != none
+```
+
+| Property | Accepted values |
+|---|---|
+| `status` | `open`, `closed`, `archived` |
+| `board` | Board ticket key, such as `NAF`, or project id |
+| `assignee` | `me`, `none`, user id, exact active project member name or email |
+| `column`, `swimlane` | Id or exact displayed name |
+| `label` | Id, exact displayed name, or `none` |
+| `priority` | Registered priority id, including contributed priorities |
+| `title` | Title equality; `~` matches a literal substring |
+| `text` | Existing database fulltext search over title and description, using `~` or `=` |
+| `number` | Positive ticket number; also `<`, `<=`, `>`, `>=` |
+| `due`, `created`, `updated` | `YYYY-MM-DD`; also `<`, `<=`, `>`, `>=`; `due = none` finds missing dates |
+
+Use `=`, `!=`, `IN (...)` or `NOT IN (...)` for every property. `NOT` binds before
+`AND`, then `OR`; parentheses set an explicit order. Property names and keywords
+are case-insensitive. Value ids and displayed names keep their exact spelling.
+Quote names containing spaces with single or double quotes. Escape a quote of the
+same kind or a backslash with a backslash. `ticket.status`, `board.identifier`
+and `assigned` are aliases for `status`, `board` and `assignee`; `q` aliases `text`.
+
+The expression always filters the current authorized board. A `board` condition
+cannot turn it into a cross-board search or grant access to another project.
+Archived tickets remain excluded unless the expression explicitly references
+the `archived` status. An open/closed dropdown continues to exclude archives
+when combined with such an expression. Created/updated comparisons use stored
+UTC dates.
+
+`me` means the current reader, including after returning to dropdowns and when
+another member opens the link. Selecting a named person retains a fixed user id.
+Conditions involving `OR`, negation, lists, repeated properties or values a
+dropdown cannot represent remain visible as additional DQL. Switching modes
+preserves every condition. Structured plugin filters remain in their original
+filter envelope, with a visible summary in Advanced.
+
+Queries use one line and reject control characters. They allow up to 2000
+characters, 256 tokens, 12 nested groups/negations and
+20 values per list. Invalid syntax, properties or values show an editable field
+error and return HTTP 422. They do not display unfiltered cards. Board cards,
+counts and live updates use the same query and retain the 300-card display limit.
+
+The Filter disclosure, dropdowns, mode controls and query field remain keyboard
+operable. Advanced has a field label, a short input hint, expandable help and
+an announced error message. Native GET forms also support mode switching and
+filtering without JavaScript.
 
 ## Save and share board views
 
-Open **Saved views** below a board's filters. Name the current filter combination and save it. Each person can keep up to 20 views per board. The displayed link contains the filters, so another project member can open the same view without receiving your private bookmark or any additional permissions. The recipient's current access is checked when opening it.
+Open **Views** beside **Filter** to manage personal views in the shared dialog.
+Name the current filter combination and save it. Each person can keep up to
+20 views per board. The displayed link contains dropdown filters, DQL and
+contributed filters, so another project member can open the same view without
+receiving your bookmark or additional permissions. The recipient's current
+access is checked when opening it. An `assignee = me` view means the recipient's
+assignments when shared.
 
-Views retain core and contributed filters. Removing a plugin leaves its saved filter intact; opening that view reports an unknown filter rather than showing a wider result. A stale save asks you to reload instead of overwriting another change. **Remove** deletes only your bookmark.
+Views retain core and contributed filters. A removed DQL property returns HTTP 422 instead of widening the saved view. Removing a plugin leaves its saved filter intact; opening that view reports an unknown filter rather than showing a wider result. A stale save asks you to reload instead of overwriting another change. **Remove** deletes only your bookmark.
 
 ## Find your assignments
 

@@ -195,6 +195,7 @@
   "Naf\\Board\\Modules\\CoreAi",
   "Naf\\Board\\Modules\\CoreAssets",
   "Naf\\Board\\Modules\\CoreBoard",
+  "Naf\\Board\\Modules\\CoreBoardDql",
   "Naf\\Board\\Modules\\CoreBulkProperties",
   "Naf\\Board\\Modules\\CoreConfiguration",
   "Naf\\Board\\Modules\\CoreEstimation",
@@ -257,6 +258,7 @@
   "Naf\\Board\\Services\\ApplicationSettings",
   "Naf\\Board\\Services\\AttachmentService",
   "Naf\\Board\\Services\\AuditLog",
+  "Naf\\Board\\Services\\BoardDql",
   "Naf\\Board\\Services\\BoardQuery",
   "Naf\\Board\\Services\\BrandingSettings",
   "Naf\\Board\\Services\\BulkUpdateService",
@@ -308,6 +310,7 @@
   "Naf\\Board\\Support\\BrowserWords",
   "Naf\\Board\\Support\\CardContext",
   "Naf\\Board\\Support\\ContainerLogger",
+  "Naf\\Board\\Support\\DqlParser",
   "Naf\\Board\\Support\\Duration",
   "Naf\\Board\\Support\\Fields\\AbstractFieldType",
   "Naf\\Board\\Support\\Fields\\BoardFilterVisibilityType",
@@ -1811,7 +1814,7 @@
     "naf/view"
    ],
    "suggests": [],
-   "version": "v0.1.6"
+   "version": "v0.1.7"
   },
   "cli": {
    "description": "NAF CLI Plugin for console applications.",

@@ -232,10 +232,41 @@ or explicitly replace the `core.topbar.workspace` contribution through the exist
 UI registry. The standard contribution contains workspace search; ticket creation
 belongs to the project heading. Account actions remain in `topbar.actions`.
 
-## Content after board filters
+## Board filter actions { #content-after-board-filters }
 
-The `board.filters.after` slot receives `BoardSlotContext`, including normalized `filters`, project scope and CSRF `token`. The `core.board.saved_views` contribution supplies personal views through a data provider. Extensions may explicitly replace it through the UI registry; boards rendered through the common page renderer retain the same contribution.
+`board.filters.actions` receives `BoardSlotContext`, including normalized
+`filters`, project scope and CSRF `token`. It holds compact actions beside
+Filter. The `core.board.saved_views` contribution supplies the Views dialog
+through its existing data provider. Extensions may explicitly replace it through
+the UI registry. `board.filters.after` remains available below the complete filter
+tool and receives the same context.
 
+## DQL properties
+
+Requires `naf/board` 0.1.7 or newer.
+
+DQL uses the existing `BoardFilterDefinition` registry. A lowercase extension
+id matching `[a-z][a-z0-9_.-]*`, such as `example.reviewed`, is also a property:
+`example.reviewed = "1"` uses its normalizer and bound `SqlCondition`. The
+compiler composes `!=`, `IN`, `NOT IN` and boolean negation centrally. A removed
+definition returns 422 when a saved expression references it.
+
+An optional trailing `dql` closure adds property-specific operators or values:
+`(string $operator, string $value, BoardFilterContext $context): SqlCondition`.
+It receives `=` for negated equality and individual list members. Validate
+operators and values, throw `Failure` for unsupported input, and bind every
+user value. The supplied context contains the already authorized project and
+actor scope; apply additional read permissions there. The callback serves both
+counts and cards. The project predicate, archive rule and card limit surround
+the compiled expression.
+
+Simple equality using the default normalizer/condition can return to a contributed
+dropdown. Compound conditions and definitions with custom DQL callbacks remain
+visible as residual DQL. Structured values, ids outside the property grammar and
+scalar normalizers that cannot round-trip through text remain in `filters[...]`.
+Template overrides must preserve those inputs. The read-only, project-authorized
+`board.filters` GET route translates drafts; the regular board GET applies them.
+Neither route writes personal settings.
 
 ## Opt into transactional bulk properties
 
