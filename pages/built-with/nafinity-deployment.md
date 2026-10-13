@@ -17,9 +17,11 @@ absent. `compose.production.yaml` adds MariaDB and separate persistent volumes
 for the database and `storage/`. Use one application instance with this template.
 
 The repository's default branch is `main`. Each merge builds and checks native
-amd64 and arm64 images before publishing `ghcr.io/nafphp/nafinity:main` and a full
-`sha-<commit>` tag. A stable GitHub release named `vX.Y.Z` publishes `X.Y.Z` and
-`latest`. Pull requests run the same checks without publishing. Multi-platform
+amd64 and arm64 images before publishing `ghcr.io/nafphp/nafinity:main`, `latest`
+and a full `sha-<commit>` tag. A stable GitHub release named `vX.Y.Z` also publishes
+`X.Y.Z` and updates `latest`. The `latest` tag follows the most recent successful
+main or stable-release publication; use a tested digest for a repeatable production
+deployment. Pull requests run the same checks without publishing. Multi-platform
 images include build provenance and an SBOM. High or critical Trivy findings
 block publication; the build upgrades Alpine packages before installing PHP.
 
@@ -41,14 +43,31 @@ own code, configuration or plugins, change the installation and build a new
 production image from its committed Composer lock:
 
 ```bash
-docker build --target production -f docker/Dockerfile -t nafinity:production .
-bin/check-production-image nafinity:production
+make image IMAGE=ghcr.io/YOUR_NAMESPACE/nafinity IMAGE_TAG=YOUR_TAG
+bin/check-production-image ghcr.io/YOUR_NAMESPACE/nafinity:YOUR_TAG
+docker login ghcr.io
+make publish IMAGE=ghcr.io/YOUR_NAMESPACE/nafinity IMAGE_TAG=YOUR_TAG
 ```
 
-Publish your checked image to your registry and configure its digest through
-`NAFINITY_IMAGE`. Runtime environment files and storage belong outside the
-image. See [Nafinity extensions](extending-nafinity.md) for application overrides
-and plugins.
+Replace `YOUR_NAMESPACE` with your registry namespace and `YOUR_TAG` with the
+version or build identifier you intend to publish. Authenticate with an account
+that can push there, using Docker's password prompt. Both commands use the same
+`IMAGE` and `IMAGE_TAG` values. Defaults are `ghcr.io/nafphp/nafinity` and
+`sha-<current full Git commit>`.
+
+`make image` builds the production Dockerfile target from the committed Composer
+lock and tags the resulting local image with the chosen tag and `latest`.
+`make publish` pushes those two existing tags without rebuilding. It refuses
+missing tags or tags referring to different local images; rerun `make image`
+with the same settings before publishing. A local build contains the working
+tree at build time, so commit/review changes before using its default SHA tag.
+
+Local builds target the Docker host's architecture. Official GitHub Actions
+publishes the combined amd64/arm64 image after both native checks pass. A manual
+push to the same moving tag replaces its manifest; use a separate namespace
+for your own host image. Configure the checked registry digest in `NAFINITY_IMAGE`.
+Runtime environment files and storage stay outside the image. See
+[Nafinity extensions](extending-nafinity.md) for application overrides and plugins.
 
 ## Prepare a first installation
 
@@ -166,6 +185,7 @@ running application deployments to the same storage/database during recovery.
 | Symptom | Check |
 | --- | --- |
 | Pull returns unauthorized | The first GHCR package may still be private; check package visibility and the selected tag. |
+| `make publish` refuses the tags | Run `make image` with the same `IMAGE` and `IMAGE_TAG`; both local tags must identify the same image. |
 | nginx does not start | Check certificate filenames, uid 1000 read permissions and `bin/production logs app`. |
 | App remains unhealthy | Run migrations, inspect worker/scheduler logs and verify database/storage access. |
 | Login works but account mail fails | Check SMTP credentials, sender-domain setup and the provider's delivery logs. |
