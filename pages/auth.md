@@ -14,6 +14,10 @@ For a working browser login, follow the quickstart and [login form](recipes/logi
 Session persistence requires `naf/session`; the core Auth package does not install a user
 schema or account registration flow.
 
+For administrator-editable roles and stored grants, install [RBAC](rbac.md) explicitly.
+Auth 0.2.3+ advertises it through Composer's optional suggestions. Your identity model still
+supplies `getRoles()` and `getPermissions()`; Auth keeps the same authentication contract.
+
 ## Responsibilities { #what-this-plugin-is }
 
 Auth separates authentication and authorization:

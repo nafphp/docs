@@ -1774,9 +1774,10 @@
    ],
    "suggests": [
     "naf/orm",
+    "naf/rbac",
     "naf/session"
    ],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "auth-ldap": {
    "description": "Optional TLS LDAP provider using the existing NAF Auth contract.",

@@ -206,11 +206,22 @@ installation builds itself.
 
 ## Administration fragments { #the-screens }
 
-The administration views are fragments intended for the host's settings layout:
+The administration views are fragments intended for the host's settings layout.
+
+The fragments use View, Form/Session and i18n helpers. Install these optional UI dependencies
+in the host before rendering them:
+
+```bash
+composer require naf/view naf/form naf/i18n
+```
+
+Configure the host database and authenticated identity as described above. Include the
+fragments from a PHP template with `Naf\View\view`:
 
 ```html+php
-<?= partial('rbac/roles', ['return' => '/admin/settings']) ?>
-<?= partial('rbac/grants', ['user' => 12, 'name' => 'Alice', 'return' => '/admin/users/12']) ?>
+<?php use function Naf\View\view; ?>
+<?= view('rbac/roles', ['return' => '/admin/settings']) ?>
+<?= view('rbac/grants', ['user' => 12, 'name' => 'Alice', 'return' => '/admin/users/12']) ?>
 ```
 
 `rbac/roles` edits what roles carry. `rbac/grants` edits what one person holds and where —
