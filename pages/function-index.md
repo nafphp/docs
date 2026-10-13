@@ -36,7 +36,7 @@ Version **v0.2.10** · [Fundamentals](lifecycle.md)
 
 ## naf/auth
 
-Version **v0.2.2** · [Authentication and permissions](auth.md)
+Version **v0.2.3** · [Authentication and permissions](auth.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
