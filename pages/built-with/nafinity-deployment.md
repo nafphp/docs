@@ -1,11 +1,12 @@
-# Nafinity container deployment
+---
+title: Deploying Nafinity containers
+---
 
-Publication gate: this guide waits for [Nafinity PR #11](https://github.com/nafphp/nafinity/pull/11)
-to merge, its `Container` workflow to publish the first checked image, and an
-anonymous pull of the public GHCR package to succeed. Move this guide to
-`pages/built-with/nafinity-deployment.md`, add navigation and replace the container
-section in `pages/built-with/nafinity.md` with a link after those checks. Do not
-publish commands for an image that does not exist yet.
+# Deploying Nafinity containers
+
+Deploy the public Nafinity image from GitHub Container Registry with persistent
+MariaDB and private application storage. This guide covers a first installation,
+updates, backups and restoration on a single Docker host.
 
 ## What you deploy
 
@@ -23,20 +24,40 @@ images include build provenance and an SBOM. High or critical Trivy findings
 block publication; the build upgrades Alpine packages before installing PHP.
 
 Use `main` for staging. For production, select a tested version or digest from
-the package page. A digest identifies the exact image; version and branch tags
+[the Nafinity package page](https://github.com/nafphp/nafinity/pkgs/container/nafinity). A digest identifies the exact image; version and branch tags
 are registry pointers. A Board source merge alone does not update this image:
 release the Board package, update the installation's lock in a reviewed PR, then
 build the installation image.
 
-GitHub initially creates container packages with private visibility. An owner
-must change this package to public once, then verify an anonymous pull. The
-workflow publishes with its own `GITHUB_TOKEN`; consumers of a public image need
-no registry login. See [GitHub's container registry guide](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+The official package is public and needs no registry login for pulls. The
+workflow publishes with its own `GITHUB_TOKEN`. If you publish under your own
+namespace, GitHub creates a private package initially; an owner must set its
+visibility before an anonymous pull can work. See [GitHub's container registry guide](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+
+## Build your own installation
+
+The official image includes this repository's host configuration. To add your
+own code, configuration or plugins, change the installation and build a new
+production image from its committed Composer lock:
+
+```bash
+docker build --target production -f docker/Dockerfile -t nafinity:production .
+bin/check-production-image nafinity:production
+```
+
+Publish your checked image to your registry and configure its digest through
+`NAFINITY_IMAGE`. Runtime environment files and storage belong outside the
+image. See [Nafinity extensions](extending-nafinity.md) for application overrides
+and plugins.
 
 ## Prepare a first installation
 
-Start from a checkout of the Nafinity installation containing the production
-Compose file and `bin/production` helpers. On the Docker host:
+Install Docker Engine with the Compose plugin on a Linux host. Keep a checkout
+of [the Nafinity installation](https://github.com/nafphp/nafinity) for the Compose
+file and deployment helpers. Image content comes from the registry; the checkout
+does not become a source mount.
+
+From that checkout on the Docker host:
 
 ```bash
 cp .env.production.example .env.production
