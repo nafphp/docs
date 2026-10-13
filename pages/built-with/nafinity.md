@@ -66,21 +66,17 @@ Back up the database and private storage before upgrading. For the workflows bel
 assets, restart long-running services and run `make health`. The new time journal starts
 with the migration; historical ticket totals are not backfilled.
 
-`composer install` takes `naf/board` and the plugins from Packagist, from the committed lock when present, otherwise by resolving manifest constraints. When to update them is your decision: `make composer-update`, then
+`composer install` takes `naf/board` and the plugins from Packagist at the versions recorded in the committed lock. When to update them is your decision: `make composer-update`, then
 `make migrate`, `make roles` and `make assets`.
 
 ## Container deployment { #shipping-it }
 
-```bash
-docker build --target production -f docker/Dockerfile -t nafinity .
-```
-
-That image is the installation as it ships: dependencies installed from Packagist — from
-`app/composer.lock` when you commit one —, every package's stylesheets and scripts published
-into `public/`, and no Composer, source mount or development tool inside. It needs what the
-development stack gives it: the database settings, `APP_URL`, `APP_ENV=prod`, a certificate
-and key in `/etc/nginx/ssl/` and a volume for `storage/`. After each deployment, run `naf db:migrate up` and `naf rbac:sync` in
-it. Building it needs naf/board 0.1.4 or newer, whose boot does not connect to a database.
+Use the public `ghcr.io/nafphp/nafinity` image with
+[`compose.production.yaml`](https://github.com/nafphp/nafinity/blob/main/compose.production.yaml).
+It contains published packages from the committed Composer lock and published
+assets. The stack supplies TLS, persistent database/storage volumes and explicit
+deployment commands. Follow [Deploying Nafinity containers](nafinity-deployment.md)
+for first-account setup, updates, backups and restoration.
 
 ## Application commands { #the-commands-it-brings }
 
