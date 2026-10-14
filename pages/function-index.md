@@ -72,6 +72,19 @@ Version **v0.2.2** · [HTTP client](http-client.md)
 | --- | --- | --- | --- |
 | <code>client(): Naf\Client\Core\Client</code> | — | `Naf\Client` | [HTTP client](http-client.md) |
 
+## naf/cms
+
+Version **v0.0.2** · [NafCMS](cms.md)
+
+| Signature | Purpose | Namespace to import from | Guide |
+| --- | --- | --- | --- |
+| <code>audit(bool $reset = false): Naf\CMS\Support\Audit</code> | — | `Naf\CMS` | [NafCMS](cms.md) |
+| <code>audit_log(Naf\CMS\Support\AuditEntry&#124;string $action, ?string $subjectType = null, ?string $subjectKey = null, mixed $oldValue = null, mixed $newValue = null, array $meta = []): bool</code> | — | `Naf\CMS` | [NafCMS](cms.md) |
+| <code>cms(bool $reset = false, ?Naf\CMS\Support\Cms $override = null): Naf\CMS\Support\Cms</code> | — | `Naf\CMS` | [NafCMS](cms.md) |
+| <code>cms_reset(): void</code> | Reset request-scoped helper state between tests | `Naf\CMS` | [NafCMS](cms.md) |
+| <code>csp_nonce(): string</code> | — | `Naf\CMS` | [NafCMS](cms.md) |
+| <code>user(?Naf\CMS\Support\UserHelper $override = null, bool $reset = false): ?Naf\CMS\Support\UserHelper</code> | The override exists for isolated tests only; production callers must rely on the authenticated session | `Naf\CMS` | [NafCMS](cms.md) |
+
 ## naf/database
 
 Version **v0.2.4** · [Database](database.md)
@@ -233,4 +246,4 @@ Version **v0.1.1** · [WebSocket notifications](websocket.md)
 
 </div>
 
-*65 public functions across 22 packages.*
+*71 public functions across 23 packages.*
