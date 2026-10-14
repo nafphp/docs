@@ -1,6 +1,6 @@
-# Monitoring 0.1.0 guide (pending publication)
+# Monitoring 0.1.0 guide (pending Packagist publication)
 
-Pending maintainer merge of nafphp/monitoring PR #1 and verified stable Packagist publication. Move the guide into pages/monitoring.md, add navigation and package chapter mapping, refresh references and run all examples after release.
+PR #1 is merged and GitHub v0.1.0 is released at adea62f2277392f57500378f017f4724ec21aba9. First Packagist registration and verified Composer availability remain pending. Move the guide into pages/monitoring.md, add navigation and package chapter mapping, refresh references and run all examples after that verification.
 
 ---
 title: Monitoring
@@ -8,13 +8,14 @@ title: Monitoring
 
 # Monitoring
 
-This guide describes the **unreleased `naf/monitoring` 0.1.0 development preview**.
-It requires PHP 8.3+ and the published `naf/framework` 0.2.3 or newer. Install the
-review branch in a disposable host:
+This guide describes `naf/monitoring` 0.1.0, released on GitHub and awaiting its
+first Packagist registration. It requires PHP 8.3+ and the published
+`naf/framework` 0.2.3 or newer. Until registration is verified, install the tagged
+source in a disposable host:
 
 ```bash
 composer config repositories.naf-monitoring vcs https://github.com/nafphp/monitoring
-composer require 'naf/monitoring:dev-v0.1.0-rc'
+composer require 'naf/monitoring:0.1.0'
 ```
 
 Stable installation instructions and the shared documentation inventory will be
