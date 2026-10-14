@@ -58,6 +58,10 @@ dispatches `response.send` during finalization. It returns without emitting or e
 The emitter owns `response.header`, `response.body` and `response.end`; `handle()` does not
 run them. Keep real HTTP tests for emitted cookies, headers, streams and SAPI behavior.
 
+Existing applications continue to start with `app()->run()`. It creates the server request,
+delegates handling and emits the response. `handle()` is an additional entry point for a
+supplied request; adopting it is not required for existing application bootstraps.
+
 Sequential calls share application and plugin services. This does not guarantee isolation
 for persistent HTTP workers; keep request-specific state out of shared services. Concurrent
 or reentrant handling on one App is rejected.
@@ -96,10 +100,12 @@ Run `APP_ENV=test vendor/bin/phpunit tests/RequestTest.php`.
 
 Framework 0.2.12+ adds `Naf\Contracts\MutableContainerInterface`, extending PSR-11 with
 `set(string $id, callable|object $factory): void` and `reset(string $id): void`.
-Both built-in containers implement it. App and AutoResolvingContainer retain their PSR-11
-constructor parameter types but validate the writable contract before boot. Read-only
-containers fail immediately with an explanatory InvalidArgumentException.
-Custom writable containers must implement the new interface.
+Both built-in containers implement it. `App::__construct(MutableContainerInterface $container)`
+and `AutoResolvingContainer::__construct(MutableContainerInterface $container)` require the
+contract directly in their native parameter types. PHP rejects a read-only PSR-11 container
+with `TypeError` before either constructor body runs. Custom writable containers must
+implement the new interface; ordinary applications using the built-in containers and
+`app()->run()` do not need bootstrap changes.
 
 `App::container()` retains its return type; its PHPDoc exposes the writable contract.
 Factories still receive the base container; autowiring belongs to `make()` on the decorator.
