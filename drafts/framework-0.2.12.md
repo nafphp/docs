@@ -18,6 +18,10 @@ For `pages/routing.md`, replace the method paragraph with:
 > Known paths requested with an unsupported method return 405 and `Allow`; unknown paths
 > return 404. `Allow` includes implicit HEAD for GET and automatic OPTIONS.
 
+Dispatcher uses the router's existing method normalization for automatic OPTIONS and
+the welcome response too. Route registrations still use upper-case methods. Numeric
+string route names are preserved during matching, URL generation and removal.
+
 State minimum Framework 0.2.12 and retain older explicit HEAD/OPTIONS behavior in a
 collapsed note. The built-in welcome response exists only when no routes are registered,
 for GET and HEAD `/`.
@@ -42,7 +46,8 @@ Add a "Responses without content" section to `pages/request-response.md`:
 
 Framework 0.2.12+ suppresses content for HEAD, informational statuses, 204, 205 and 304
 without reading the original stream. HEAD preserves an explicit Content-Length or uses
-the known body size when none was supplied. Unknown sizes remain unspecified.
+a known, nonzero body size when none was supplied. Otherwise the length remains unspecified,
+including when the body has already been suppressed by an earlier normalization pass.
 Informational statuses and 204 remove Content-Length; 205 uses zero; 304 retains supplied
 representation metadata. Transfer-Encoding is removed for responses without content.
 The emitter reapplies these rules after response-header listeners.
@@ -57,6 +62,10 @@ events, converts exceptions through the normal error path, normalizes content ru
 dispatches `response.send` during finalization. It returns without emitting or exiting.
 The emitter owns `response.header`, `response.body` and `response.end`; `handle()` does not
 run them. Keep real HTTP tests for emitted cookies, headers, streams and SAPI behavior.
+
+Existing applications continue to start with `app()->run()`. It creates the server request,
+delegates handling and emits the response. `handle()` is an additional entry point for a
+supplied request; adopting it is not required for existing application bootstraps.
 
 Sequential calls share application and plugin services. This does not guarantee isolation
 for persistent HTTP workers; keep request-specific state out of shared services. Concurrent
@@ -96,10 +105,12 @@ Run `APP_ENV=test vendor/bin/phpunit tests/RequestTest.php`.
 
 Framework 0.2.12+ adds `Naf\Contracts\MutableContainerInterface`, extending PSR-11 with
 `set(string $id, callable|object $factory): void` and `reset(string $id): void`.
-Both built-in containers implement it. App and AutoResolvingContainer retain their PSR-11
-constructor parameter types but validate the writable contract before boot. Read-only
-containers fail immediately with an explanatory InvalidArgumentException.
-Custom writable containers must implement the new interface.
+Both built-in containers implement it. `App::__construct(MutableContainerInterface $container)`
+and `AutoResolvingContainer::__construct(MutableContainerInterface $container)` require the
+contract directly in their native parameter types. PHP rejects a read-only PSR-11 container
+with `TypeError` before either constructor body runs. Custom writable containers must
+implement the new interface; ordinary applications using the built-in containers and
+`app()->run()` do not need bootstrap changes.
 
 `App::container()` retains its return type; its PHPDoc exposes the writable contract.
 Factories still receive the base container; autowiring belongs to `make()` on the decorator.
