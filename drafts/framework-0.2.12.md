@@ -18,6 +18,10 @@ For `pages/routing.md`, replace the method paragraph with:
 > Known paths requested with an unsupported method return 405 and `Allow`; unknown paths
 > return 404. `Allow` includes implicit HEAD for GET and automatic OPTIONS.
 
+Dispatcher uses the router's existing method normalization for automatic OPTIONS and
+the welcome response too. Route registrations still use upper-case methods. Numeric
+string route names are preserved during matching, URL generation and removal.
+
 State minimum Framework 0.2.12 and retain older explicit HEAD/OPTIONS behavior in a
 collapsed note. The built-in welcome response exists only when no routes are registered,
 for GET and HEAD `/`.
@@ -42,7 +46,8 @@ Add a "Responses without content" section to `pages/request-response.md`:
 
 Framework 0.2.12+ suppresses content for HEAD, informational statuses, 204, 205 and 304
 without reading the original stream. HEAD preserves an explicit Content-Length or uses
-the known body size when none was supplied. Unknown sizes remain unspecified.
+a known, nonzero body size when none was supplied. Otherwise the length remains unspecified,
+including when the body has already been suppressed by an earlier normalization pass.
 Informational statuses and 204 remove Content-Length; 205 uses zero; 304 retains supplied
 representation metadata. Transfer-Encoding is removed for responses without content.
 The emitter reapplies these rules after response-header listeners.
