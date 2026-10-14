@@ -1,29 +1,87 @@
-# Monitoring 0.1.0 guide (pending Packagist publication)
-
-PR #1 is merged and GitHub v0.1.0 is released at adea62f2277392f57500378f017f4724ec21aba9. First Packagist registration and verified Composer availability remain pending. Move the guide into pages/monitoring.md, add navigation and package chapter mapping, refresh references and run all examples after that verification.
-
 ---
 title: Monitoring
+requires:
+  - naf/monitoring
 ---
 
 # Monitoring
 
-This guide describes `naf/monitoring` 0.1.0, released on GitHub and awaiting its
-first Packagist registration. It requires PHP 8.3+ and the published
-`naf/framework` 0.2.3 or newer. Until registration is verified, install the tagged
-source in a disposable host:
+`naf/monitoring` records declared counters, gauges and histograms, exports them to
+StatsD or DogStatsD, and can decorate a PSR-3 logger. The application chooses its
+metrics, labels and collector. The default exporter performs no network I/O.
 
-```bash
-composer config repositories.naf-monitoring vcs https://github.com/nafphp/monitoring
-composer require 'naf/monitoring:0.1.0'
-```
-
-Stable installation instructions and the shared documentation inventory will be
-published only after the package is available on Packagist.
+Use this guide in an existing [NAF application](first-app.md), with PHP 8.3+ and
+Framework 0.2.3 or newer.
 
 NAF discovers the installed Composer plugin automatically. Application code uses
 `Naf\Monitoring\monitor()` or injects `Naf\Monitoring\Monitor`. Both share the same
 service. No application route, daemon or scheduler is installed by the plugin.
+
+## Quick start
+
+Use a disposable NAF application for this example. Replace `app/config.php` with
+the following file; when adding monitoring to an existing application, merge the
+`monitoring` entry into its current configuration.
+
+```php title="app/config.php"
+<?php
+
+declare(strict_types=1);
+
+return [
+    'monitoring' => [
+        'metrics' => [
+            'orders.created' => ['type' => 'counter', 'labels' => ['channel']],
+        ],
+    ],
+];
+```
+
+Create `bin/monitoring-demo.php`:
+
+```php title="bin/monitoring-demo.php"
+<?php
+
+declare(strict_types=1);
+
+use Naf\Monitoring\Exporters\InMemoryExporter;
+use Naf\Monitoring\MetricExporterInterface;
+
+use function Naf\app;
+use function Naf\Monitoring\monitor;
+
+define('BASE_PATH', dirname(__DIR__));
+require BASE_PATH . '/vendor/autoload.php';
+
+$application = app();
+$exporter = new InMemoryExporter();
+$application->container()->set(MetricExporterInterface::class, $exporter);
+
+monitor('orders.created', ['channel' => 'web'])->increment(3);
+monitor()->flush();
+
+foreach ($exporter->drain() as $measurement) {
+    echo $measurement->definition->name, ': ', $measurement->value,
+        ' (channel=', $measurement->labels['channel'], ')', PHP_EOL;
+}
+```
+
+Run the example from the application root:
+
+```bash
+php bin/monitoring-demo.php
+```
+
+Expected output:
+
+```text
+orders.created: 3 (channel=web)
+```
+
+Register the exporter override before the first metric call. The helper and an
+injected `Monitor` share that service. The in-memory exporter lets you inspect
+measurements without a collector; configure [StatsD or DogStatsD](#statsd-and-dogstatsd)
+for production collection.
 
 ## Declare your metrics
 
@@ -75,7 +133,7 @@ operations too and preserves their exception. `observe()` accepts an already
 measured value in the declared unit. Values must be finite; NaN and infinity fail.
 An undeclared metric or a method incompatible with its type throws immediately.
 
-```php
+```php-inline
 use function Naf\Monitoring\monitor;
 
 monitor('orders.created')->increment();
@@ -150,7 +208,7 @@ and [DogStatsD datagrams](https://docs.datadoghq.com/extend/dogstatsd/datagram_s
 Enable `monitoring:logging:enabled` to wrap the logger currently registered under
 `Psr\Log\LoggerInterface`. Continue using the normal helper:
 
-```php
+```php-inline
 use function Naf\log;
 
 log()->info('Order accepted');
@@ -184,7 +242,7 @@ recursive monitoring; the default diagnostic path uses PHP `error_log()` directl
 If your host replaces the logger after plugin boot, wrap that final logger explicitly
 before constructing its consumers. Keep automatic decoration disabled in that case:
 
-```php
+```php-inline
 use Naf\Monitoring\{Monitor, MonitoringLogger};
 use Psr\Log\LoggerInterface;
 use function Naf\app;
@@ -236,7 +294,7 @@ structured log contexts. Custom exporters must also bound their own work and mem
 
 Long-running workers explicitly flush in the job's existing lifecycle:
 
-```php
+```php-inline
 use function Naf\Monitoring\monitor;
 
 try {
@@ -280,7 +338,7 @@ Use `exporter` and `exporter_options` for a class constructed through NAF's norm
 autowiring, or bind `MetricExporterInterface` explicitly in root `bootstrap.php`,
 before `app()->run()` and before the monitor is resolved. For example:
 
-```php
+```php-inline
 use Naf\Monitoring\MetricExporterInterface;
 use Naf\Monitoring\Exporters\{CompositeExporter, InMemoryExporter, StatsDExporter};
 use function Naf\app;
@@ -305,7 +363,7 @@ processes; no `/metrics` endpoint is shipped here.
 
 ## Testing without a collector
 
-```php
+```php-inline
 use Naf\Monitoring\{MetricDefinition, MetricType, Monitor};
 use Naf\Monitoring\Exporters\InMemoryExporter;
 
@@ -330,3 +388,88 @@ failures, protocol bytes, bounds and label isolation. Real loopback UDP and HTTP
 tests verify Composer discovery, host overrides, response behavior and flushing
 against the published framework. See [AGENTS.md](https://github.com/nafphp/monitoring/blob/main/AGENTS.md)
 for the development commands.
+
+## Configuration
+
+Add these keys below `monitoring` in `app/config.php`. Configuration merges with
+the plugin defaults before the monitoring service is resolved.
+
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `monitoring:exporter` | class string | `Naf\Monitoring\Exporters\NullExporter` | Metric exporter implementing `MetricExporterInterface` |
+| `monitoring:exporter_options` | array | `[]` | Named constructor arguments for the selected metric exporter |
+| `monitoring:log_exporter` | class string or null | `null` | Optional structured log exporter implementing `LogExporterInterface` |
+| `monitoring:log_exporter_options` | array | `[]` | Named constructor arguments for the log exporter |
+| `monitoring:labels` | array | `[]` | Constant service/environment labels on metrics and exported logs |
+| `monitoring:batch_size` | integer | `256` | Shared record-count flush threshold, from 1 to 10000 |
+| `monitoring:metrics` | array | `[]` | Metric names mapped to `type`, optional `unit` and allowed `labels` |
+| `monitoring:http` | boolean | `false` | Enables request, duration and exception metrics through NAF events |
+| `monitoring:on_error` | callable or null | `null` | Independent callback receiving the export exception and `metrics` or `logs`; null uses PHP `error_log()` |
+| `monitoring:logging:enabled` | boolean | `false` | Decorates the currently registered PSR-3 logger |
+| `monitoring:logging:min_level` | string | `warning` | Lowest severity copied into monitoring |
+| `monitoring:logging:count` | boolean | `true` | Adds `logs.total` for qualifying logs when decoration is enabled |
+
+When selecting `StatsDExporter`, its `monitoring:exporter_options` keys are:
+
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `host` | string | `127.0.0.1` | Numeric IPv4/IPv6 collector address |
+| `port` | integer | `8125` | UDP destination port, from 1 to 65535 |
+| `prefix` | string | empty | Prefix using the metric-name syntax |
+| `protocol` | string | `statsd` | `statsd` or `dogstatsd` wire format |
+| `maxDatagramBytes` | integer | `512` | Whole-record datagram limit, from 64 to 65507 bytes |
+| `timeout` | number | `0.05` | Socket connection timeout in seconds, greater than zero and at most one |
+| `transport` | `DatagramTransportInterface` or null | `null` | Explicit transport override; null constructs `UdpTransport` |
+
+`InMemoryExporter` accepts a positive `capacity` constructor option, defaulting to
+10000 retained measurements. Drain it between tests or worker jobs.
+
+## API details
+
+Import the helper from `Naf\Monitoring`:
+
+```php-inline
+use function Naf\Monitoring\monitor;
+
+// monitor(?string $name = null, array $labels = []): Monitor|Metric
+$service = monitor();
+$metric = monitor('orders.created', ['channel' => 'web']);
+```
+
+Calling `monitor()` returns the shared `Monitor`; supplying a name creates a
+`Metric` with its own normalized label values. Labels without a name throw
+`InvalidArgumentException`. `Monitor::metric(string $name, array $labels = []): Metric`
+provides the same lookup on an injected service. Metric mutation methods and
+timing requirements are listed under [Declare your metrics](#declare-your-metrics).
+
+`Monitor::flush(): void` exports pending records once.
+`Monitor::failedBatches(): int` returns the number of failed metric or log batches.
+The extension contracts use these namespaces:
+
+| Contract | Namespace |
+|---|---|
+| Metric batches | `Naf\Monitoring\MetricExporterInterface` |
+| Structured log batches | `Naf\Monitoring\LogExporterInterface` |
+| Datagram transport | `Naf\Monitoring\Transport\DatagramTransportInterface` |
+
+See the generated [function index](function-index.md#nafmonitoring) and
+[configuration reference](configuration-reference.md#nafmonitoring).
+
+## If the result is different
+
+| Symptom | Check |
+|---|---|
+| No metric reaches the collector | The default exporter is `NullExporter`. Select a real exporter, check its numeric address/port and call `flush()` in long-running jobs. A successful UDP write does not confirm delivery. |
+| An undeclared metric or label throws | Add the metric and allowed label keys to application configuration before the monitor is resolved. |
+| A histogram is rejected by StatsD | Plain StatsD accepts only time histograms in `s` or `ms`. Use DogStatsD for other histogram units. |
+| HTTP or log metrics are absent | Enable `monitoring:http` or `monitoring:logging:enabled` and inspect the log severity threshold. |
+| A custom exporter binding is ignored | Register it before the first use of `Monitor` or the decorated logger. Existing objects retain their dependencies. |
+| Export failures recur | Inspect `failedBatches()` and the independent diagnostic callback; bound the exporter work and record sizes. Failed batches are discarded. |
+
+## Related pages
+
+- [Application lifecycle](lifecycle.md) for bootstrap timing and service registration.
+- [Dependency injection](dependency-injection.md) for factories and overrides.
+- [Events](events.md) for request and response hooks.
+- [Queues and workers](queues.md) for background job lifetimes.
+- [HTTP client](http-client.md) for PSR-18 adapters.

@@ -448,6 +448,22 @@
   "Naf\\Mail\\Core\\Transport\\TransportConfiguration",
   "Naf\\Mail\\Exceptions\\MailException",
   "Naf\\Mail\\Models\\Mail",
+  "Naf\\Monitoring\\Exporters\\CompositeExporter",
+  "Naf\\Monitoring\\Exporters\\InMemoryExporter",
+  "Naf\\Monitoring\\Exporters\\NullExporter",
+  "Naf\\Monitoring\\Exporters\\StatsDExporter",
+  "Naf\\Monitoring\\HttpMetrics",
+  "Naf\\Monitoring\\LogExporterInterface",
+  "Naf\\Monitoring\\LogRecord",
+  "Naf\\Monitoring\\Measurement",
+  "Naf\\Monitoring\\Metric",
+  "Naf\\Monitoring\\MetricDefinition",
+  "Naf\\Monitoring\\MetricExporterInterface",
+  "Naf\\Monitoring\\MetricType",
+  "Naf\\Monitoring\\Monitor",
+  "Naf\\Monitoring\\MonitoringLogger",
+  "Naf\\Monitoring\\Transport\\DatagramTransportInterface",
+  "Naf\\Monitoring\\Transport\\UdpTransport",
   "Naf\\OAuth\\Client\\Account\\AccountLink",
   "Naf\\OAuth\\Client\\Account\\AccountLinkStoreInterface",
   "Naf\\OAuth\\Client\\Account\\Accounts",
@@ -1153,6 +1169,20 @@
    "mcp:transport:max_request_bytes": "1048576",
    "mcp:transport:streaming": "false"
   },
+  "monitoring": {
+   "monitoring:batch_size": "256",
+   "monitoring:exporter": "'Naf\\Monitoring\\Exporters\\NullExporter'",
+   "monitoring:exporter_options": "[]",
+   "monitoring:http": "false",
+   "monitoring:labels": "[]",
+   "monitoring:log_exporter": "NULL",
+   "monitoring:log_exporter_options": "[]",
+   "monitoring:logging:count": "true",
+   "monitoring:logging:enabled": "false",
+   "monitoring:logging:min_level": "'warning'",
+   "monitoring:metrics": "[]",
+   "monitoring:on_error": "NULL"
+  },
   "oauth-client": {
    "oauth:accounts:auto_register": "false",
    "oauth:accounts:create": "NULL",
@@ -1292,6 +1322,20 @@
    "mcp:transport:max_request_bytes": "1048576",
    "mcp:transport:streaming": "false",
    "public_url": ""
+  },
+  "monitoring": {
+   "monitoring:batch_size": "256",
+   "monitoring:exporter": "",
+   "monitoring:exporter_options": "[]",
+   "monitoring:http": "false",
+   "monitoring:labels": "[]",
+   "monitoring:log_exporter": "",
+   "monitoring:log_exporter_options": "[]",
+   "monitoring:logging:count": "true",
+   "monitoring:logging:enabled": "false",
+   "monitoring:logging:min_level": "'warning'",
+   "monitoring:metrics": "[]",
+   "monitoring:on_error": ""
   },
   "oauth-client": {
    "auth:logins": "[]",
@@ -1508,6 +1552,11 @@
    "signature": "mailer(?Naf\\Mail\\Core\\TransportInterface $transport = null): Naf\\Mail\\Core\\Mailer",
    "summary": "Use a separate mailer for an explicit transport, or retrieve the shared mailer"
   },
+  "Naf\\Monitoring\\monitor": {
+   "namespace": "Naf\\Monitoring",
+   "signature": "monitor(?string $name = null, array $labels = []): Naf\\Monitoring\\Monitor|Naf\\Monitoring\\Metric",
+   "summary": "Retrieve the monitoring service, or a declared metric with per-call labels"
+  },
   "Naf\\OAuth\\Client\\oauth": {
    "namespace": "Naf\\OAuth\\Client",
    "signature": "oauth(string $provider): Naf\\OAuth\\Client\\Core\\Flow",
@@ -1714,6 +1763,7 @@
   "Naf\\MCP\\tool": "mcp",
   "Naf\\Mail\\mail": "mail",
   "Naf\\Mail\\mailer": "mail",
+  "Naf\\Monitoring\\monitor": "monitoring",
   "Naf\\OAuth\\Client\\oauth": "oauth-client",
   "Naf\\OAuth\\Client\\oauth_button": "oauth-client",
   "Naf\\OAuth\\Client\\oauth_token": "oauth-client",
@@ -1908,6 +1958,16 @@
     "naf/oauth-server"
    ],
    "version": "v0.2.6"
+  },
+  "monitoring": {
+   "description": "Metrics, StatsD exporters and optional PSR-3 logging integration for NAF.",
+   "namespace": "Naf\\Monitoring",
+   "php": ">=8.3",
+   "requires": [
+    "naf/framework"
+   ],
+   "suggests": [],
+   "version": "v0.1.0"
   },
   "oauth-client": {
    "description": "Sign in with external OAuth2 and OpenID Connect providers, keeping your own user model.",

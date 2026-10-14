@@ -858,6 +858,20 @@ def test_configuration_sources(root):
     }, 'Missing override storage restores server configuration')
 
 
+def test_monitoring(root):
+    copy_examples('monitoring.md', root)
+    for _ in range(2):
+        output = run([*PHP, 'bin/monitoring-demo.php'], root)
+        expect(output.strip() == 'orders.created: 3 (channel=web)',
+               'Monitoring helper, declared labels and exporter override capture the documented counter')
+
+    snippet = fragment('monitoring.md', '## Testing without a collector')
+    example = root / 'monitoring-unit-example.php'
+    example.write_text("<?php\nrequire __DIR__ . '/vendor/autoload.php';\n" + snippet)
+    run([*PHP, '-d', 'zend.assertions=1', '-d', 'assert.exception=1', str(example)], root)
+    expect(True, 'Monitoring standalone capture example passes with assertions enabled')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--starter', type=Path, help='Reuse installed starter dependencies; source is read-only')
@@ -962,6 +976,12 @@ def main():
             result = client.request('/')
             expect(result[0] == 200 and json.loads(result[2]) == {'ok': True}, 'Core-only install')
         print('PASS core-only install', flush=True)
+        monitoring = root / 'monitoring'
+        shutil.copytree(core, monitoring)
+        run([*COMPOSER, 'require', 'naf/monitoring:^0.1.0',
+             '--no-interaction', '--prefer-dist'], monitoring)
+        test_monitoring(monitoring)
+        print('PASS Monitoring helper, declared labels, exporter override and standalone capture', flush=True)
         configuration = root / 'configuration'
         shutil.copytree(core, configuration)
         test_configuration_sources(configuration)
