@@ -157,6 +157,25 @@ Version **v0.2.6** · [MCP tools](mcp.md)
 | `mcp:transport:streaming` | `false` | `config.php` |
 | `public_url` | — | code |
 
+## naf/monitoring
+
+Version **v0.1.0** · [Monitoring](monitoring.md)
+
+| Key | Default | Defined in |
+| --- | --- | --- |
+| `monitoring:batch_size` | `256` | `config.php` |
+| `monitoring:exporter` | `'Naf\Monitoring\Exporters\NullExporter'` | `config.php` |
+| `monitoring:exporter_options` | `[]` | `config.php` |
+| `monitoring:http` | `false` | `config.php` |
+| `monitoring:labels` | `[]` | `config.php` |
+| `monitoring:log_exporter` | `NULL` | `config.php` |
+| `monitoring:log_exporter_options` | `[]` | `config.php` |
+| `monitoring:logging:count` | `true` | `config.php` |
+| `monitoring:logging:enabled` | `false` | `config.php` |
+| `monitoring:logging:min_level` | `'warning'` | `config.php` |
+| `monitoring:metrics` | `[]` | `config.php` |
+| `monitoring:on_error` | `NULL` | `config.php` |
+
 ## naf/oauth-client
 
 Version **v0.2.4** · [OAuth client](oauth-client.md)

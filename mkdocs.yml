@@ -137,6 +137,7 @@ nav:
       - External libraries: external-libraries.md
       - Application design: best-practices.md
   - Operate:
+      - Monitoring: monitoring.md
       - Testing applications: testing.md
       - API compatibility and support: compatibility.md
       - Deploying applications: deployment.md

@@ -53,6 +53,8 @@ many-to-many relation and verifies that repeating it does not duplicate the pivo
 The chapter audit also exercises custom event listeners and their result order, bilingual
 translation files, custom queue paths, scheduled payloads, RBAC scope sources and the
 cheat-sheet layout fragment, plus the application Auth provider and WebSocket flags.
+The Monitoring chapter's complete CLI example and standalone capture fragment run against
+published packages, checking declared labels, the shared helper and a container exporter override.
 See [the content audit](CONTENT_AUDIT.md) for chapter coverage.
 The Alexa example runs in its own minimal host and checks setup, doctor, OAuth discovery,
 service tokens, JSON/SSE tool calls and revocation against the published packages.

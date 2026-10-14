@@ -133,6 +133,14 @@ Version **v0.2.6** · [MCP tools](mcp.md)
 | <code>tokens(): Naf\MCP\Store\TokenStoreInterface</code> | — | `Naf\MCP` | [MCP tools](mcp.md) |
 | <code>tool(): Naf\MCP\Support\ToolRegistry</code> | — | `Naf\MCP` | [MCP tools](mcp.md) |
 
+## naf/monitoring
+
+Version **v0.1.0** · [Monitoring](monitoring.md)
+
+| Signature | Purpose | Namespace to import from | Guide |
+| --- | --- | --- | --- |
+| <code>monitor(?string $name = null, array $labels = []): Naf\Monitoring\Monitor&#124;Naf\Monitoring\Metric</code> | Retrieve the monitoring service, or a declared metric with per-call labels | `Naf\Monitoring` | [Monitoring](monitoring.md) |
+
 ## naf/oauth-client
 
 Version **v0.2.4** · [OAuth client](oauth-client.md)
@@ -225,4 +233,4 @@ Version **v0.1.1** · [WebSocket notifications](websocket.md)
 
 </div>
 
-*64 public functions across 21 packages.*
+*65 public functions across 22 packages.*
