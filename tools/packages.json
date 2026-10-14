@@ -719,6 +719,7 @@
   "Naf\\Client\\Transports\\StreamingTransportInterface",
   "Naf\\Client\\Transports\\TransportInterface",
   "Naf\\Contracts\\ConfigurationSourceInterface",
+  "Naf\\Contracts\\MutableContainerInterface",
   "Naf\\Core\\App",
   "Naf\\Core\\Config",
   "Naf\\Core\\Container",
@@ -743,6 +744,7 @@
   "Naf\\Exceptions\\ContainerException",
   "Naf\\Exceptions\\DispatcherException",
   "Naf\\Exceptions\\HttpException",
+  "Naf\\Exceptions\\MethodNotAllowedException",
   "Naf\\Exceptions\\RouteNotFoundException",
   "Naf\\Exceptions\\ServiceNotFoundException",
   "Naf\\Flow\\Http\\RuntimeController",
@@ -2596,7 +2598,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.10"
+   "version": "v0.2.12"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",

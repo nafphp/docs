@@ -132,7 +132,7 @@ On validation failure, return the form with errors and submitted values, usually
 
 | What you see | What to check |
 |---|---|
-| POST returns 404 | Confirm you registered a POST route as well as the GET route and that the form action targets it |
+| POST returns 405 (404 before Framework 0.2.12) | Confirm you registered a POST route as well as the GET route and that the form action targets it |
 | The browser form returns a CSRF error | Reload the GET form, retain cookies and include the generated token in the submission |
 | The validator reports an unknown rule | Check the rule name and register custom rules before validating |
 | Entered values disappear after validation fails | Return the form in the current request; `memory()` cannot carry input through a redirect |

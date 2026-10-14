@@ -572,6 +572,9 @@ def test_integrations(root):
     expect('OK (2 tests, 2 assertions)' in run(
         [*PHP, 'vendor/bin/phpunit', '--bootstrap', 'vendor/autoload.php', 'tests/GreetingTest.php'], root),
         'Documented PHPUnit service tests')
+    expect('OK (1 test, 3 assertions)' in run(
+        [*PHP, 'vendor/bin/phpunit', 'tests/RequestTest.php'], root),
+        'Documented in-process request test runs routing and the error path without emission')
     expect('HTTP transport test passed.' in run([*PHP, 'bin/http-client-demo.php'], root),
            'Fake transport retries without network delivery')
     expect('Hello, World!' in run([*PHP, 'vendor/bin/naf', 'hello:say', 'World'], root),
@@ -955,7 +958,7 @@ def main():
                  '--no-interaction', '--prefer-dist'], starter)
         if args.starter:
             # Reused older starters need the same upgrade documented in the installation guide.
-            run([*COMPOSER, 'require', 'naf/framework:^0.2.9', 'naf/form:^0.2.4', 'naf/view:^0.2.3',
+            run([*COMPOSER, 'require', 'naf/framework:^0.2.12', 'naf/form:^0.2.4', 'naf/view:^0.2.3',
                  '--with-all-dependencies', '--no-interaction', '--prefer-dist'], starter)
         for feature in ('first-app', 'contact', 'login', 'orm', 'mail'):
             fixture = root / feature
@@ -1019,7 +1022,7 @@ def main():
         print('PASS Flow components and fragments', flush=True)
         integrations = root / 'integrations'
         shutil.copytree(starter, integrations)
-        run([*COMPOSER, 'require', 'naf/client', 'naf/queue', 'naf/schedule', 'naf/mcp',
+        run([*COMPOSER, 'require', 'naf/framework:^0.2.12', 'naf/client', 'naf/queue', 'naf/schedule', 'naf/mcp',
              'naf/i18n', 'naf/rbac', 'naf/websocket',
              '--with-all-dependencies', '--no-interaction', '--prefer-dist'], integrations)
         run([*COMPOSER, 'require', '--dev', 'phpunit/phpunit:^12.1',

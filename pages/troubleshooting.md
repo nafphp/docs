@@ -41,14 +41,16 @@ before consumers are constructed.
 | Symptom | Check | Action |
 |---|---|---|
 | Web-server 404 on all routes | Document root and routing fallback | Serve `public/`; forward nonexistent files to `public/index.php` |
-| NAF 404 on one route | Method and path | Inspect `vendor/bin/naf route:debug` with CLI installed |
+| NAF 404 on one route | Registered path; also the method before Framework 0.2.12 | Inspect `vendor/bin/naf route:debug` with CLI installed |
+| NAF 405 on a known path | Requested method and `Allow` header | Register that method or send one the route accepts |
 | Unknown named argument | Placeholder and parameter names | Match `{id}` to `$id` |
 | Class not found | Namespace, case and autoload mapping | Check `App\` maps to `app/`; run `composer dump-autoload` |
 | Service missing while loading routes | Resolution timing | Register handlers in routes; resolve services after bootstrap bindings |
 | `get()` cannot find a concrete class | Service registration | Use constructor injection or `make()` for autowiring |
 
 `php bootstrap.php` does not process HTTP. Under CLI, `run()` returns without routing or
-emission. Use a server and [HTTP tests](testing.md#test-http-behavior).
+emission. Use a server and [HTTP tests](testing.md#test-http-behavior), or Framework 0.2.12+
+[`handle()` tests](testing.md#test-request-handling-without-emission) for request handling without emission.
 
 ## Plugins and configuration
 

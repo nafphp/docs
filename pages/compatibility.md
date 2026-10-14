@@ -61,3 +61,31 @@ The starter's committed lock file describes its initial dependencies. Existing a
 receive library fixes by updating their own dependencies; installing a newer starter is a
 separate operation. See [starter versions and updates](install.md#starter-versions-and-updates)
 and [deployment](deployment.md).
+
+## Upgrading to Framework 0.2.12
+
+Existing applications continue to start with `app()->run()`. The additional
+[`handle()` entry point](lifecycle.md#handle-a-supplied-request) is optional.
+Update the dependency, commit the resulting lock file and run your application tests:
+
+```bash
+composer require 'naf/framework:^0.2.12' --with-all-dependencies
+```
+
+Review these observable corrections:
+
+- An unsupported method on a known path returns 405 with `Allow`; an unknown path remains 404.
+- HEAD can invoke a GET handler. Keep GET free of write side effects or register an explicit HEAD route.
+- Automatic OPTIONS returns 204 for known paths without invoking a controller. Register an explicit route for application behavior.
+- URL placeholders require strings or integers; missing or invalid values throw `InvalidArgumentException`.
+- Custom writable containers implement [`MutableContainerInterface`](dependency-injection.md#custom-writable-containers). PHP rejects unsupported containers before boot.
+- Handlers return PSR-7 responses. The undocumented `-1` exit sentinel now produces a dispatcher error; replace it with an ordinary response.
+
+The core no longer requires PDO, but database integrations still require it and their drivers.
+Composer also resolves Nyholm PSR-7 1.8.2 or newer, avoiding PHP 8.4/8.5 deprecations in
+older versions. The release includes the [request authority correction](request-response.md#request-uri-and-host):
+a container listen port no longer changes an authority supplied without a port in `Host`.
+
+`Event::REQUEST_BODY` and `Event::REQUEST_END` remain defined as deprecated compatibility
+constants and are not dispatched. AppHolder, CoreFileLoader, PluginBootOrder and Stopwatch
+are internal implementation details; use documented application and plugin APIs.

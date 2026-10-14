@@ -14,7 +14,7 @@ for services exposed through these helpers.
 
 ## naf/framework
 
-Version **v0.2.10** · [Fundamentals](lifecycle.md)
+Version **v0.2.12** · [Fundamentals](lifecycle.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |

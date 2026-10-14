@@ -4,8 +4,9 @@ title: Testing applications
 
 # Testing applications
 
-Test business rules independently of HTTP, then test routes through a running application.
-Calling a controller directly does not exercise routing, CSRF, sessions or response emission.
+Test business rules independently of HTTP, then exercise request handling and the emitted
+response. Calling a controller directly does not exercise routing, CSRF, sessions or
+response emission.
 
 The examples start from [Your first application](first-app.md). Run commands from its project
 root. They use local data and do not require a database or external service.
@@ -74,6 +75,54 @@ vendor/bin/phpunit --bootstrap vendor/autoload.php tests/GreetingTest.php
 
 Expect two passing tests. Use constructor dependencies so service tests can supply disposable
 storage or capture transports. Application code does not need a NAF base test class.
+
+## Test request handling without emission
+
+Framework **0.2.12+** can process a supplied PSR-7 request with `app()->handle()` without
+starting a server or emitting a response. The normal router, controller hooks and error
+handling still run. Existing application bootstraps continue to use `app()->run()`.
+
+Starting from the first-application files and the PHPUnit dependency above, update the
+framework and create this complete test:
+
+```bash
+composer require 'naf/framework:^0.2.12' --with-all-dependencies
+```
+
+```php title="tests/RequestTest.php"
+<?php
+
+declare(strict_types=1);
+
+use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\TestCase;
+
+use function Naf\app;
+
+define('BASE_PATH', dirname(__DIR__));
+require BASE_PATH . '/vendor/autoload.php';
+
+final class RequestTest extends TestCase
+{
+    public function testHelloAndMissingRoute(): void
+    {
+        $application = app();
+        $response = $application->handle(new ServerRequest('GET', '/hello/Ada'));
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame(['hello' => 'Ada'], json_decode((string) $response->getBody(), true));
+        self::assertSame(404, $application->handle(new ServerRequest('GET', '/missing'))->getStatusCode());
+    }
+}
+```
+
+```bash
+APP_ENV=test vendor/bin/phpunit tests/RequestTest.php
+```
+
+Expect one passing test with three assertions. Each `handle()` call replaces request and
+parameter bindings and clears the current route; application and plugin singletons remain
+shared. Keep request-specific data out of those services. This example tests the returned
+response; keep the real HTTP tests below for emitted cookies, headers, streams and SAPI behavior.
 
 ## Test HTTP behavior
 

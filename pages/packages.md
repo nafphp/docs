@@ -9,7 +9,7 @@ Published packages, their required dependencies and optional integrations. Gener
 
 | Package | Version | Requires | Suggests | PHP |
 |---|---|---|---|---|
-| **`naf/framework`**<br><span style="font-weight:400">NAF - the ultra-light, functional PHP framework for fast microservices and APIs.</span> | `v0.2.10` | — | — | `>=8.3` |
+| **`naf/framework`**<br><span style="font-weight:400">NAF - the ultra-light, functional PHP framework for fast microservices and APIs.</span> | `v0.2.12` | — | — | `>=8.3` |
 | **`naf/alexa`**<br><span style="font-weight:400">Alexa+ MCP integration, OAuth setup and diagnostics for NAF.</span> | `v0.1.1` | `naf/cli`, `naf/database`, `naf/framework`, `naf/mcp`, `naf/oauth-server` | — | `>=8.3` |
 | **`naf/auth`**<br><span style="font-weight:400">Authentication and permission checks for NAF, with your own user model.</span> | `v0.2.3` | `naf/framework` | `naf/orm`, `naf/rbac`, `naf/session` | `>=8.3` |
 | **`naf/auth-ldap`**<br><span style="font-weight:400">Optional TLS LDAP provider using the existing NAF Auth contract.</span> | `v0.1.0` | `naf/auth` | — | `>=8.3` |

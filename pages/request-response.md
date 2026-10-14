@@ -36,6 +36,19 @@ if (!is_array($data)) {
 }
 ```
 
+## Request URI and Host
+
+Framework **0.2.12+** uses the authority sent in `Host`, including an explicit port, when
+creating the request URI. An internal `SERVER_PORT` does not add a port when the browser's
+`Host` omits it. A request for `https://board.example.test/settings` therefore keeps that
+origin when the container listens on port 8443. An explicit `Host: board.example.test:9443`
+preserves port 9443.
+
+`request()->getHeader('Host')` contains one value. The factory's synthesized Host is replaced
+by the original header. The method, path, query, cookies and other headers remain intact.
+This correction does not configure proxy trust or change scheme detection. Configure HTTPS
+and trusted proxy headers at the host boundary as before.
+
 ## Combined request parameters
 
 ```php-inline
@@ -92,6 +105,18 @@ return json(['message' => 'Created'], 201);
 
 `json()` serializes the value and sets `Content-Type: application/json; charset=UTF-8`.
 For a response with no body use `response('', 204)`, not `json(null, 204)`.
+
+## Responses without content
+
+Framework **0.2.12+** suppresses content for HEAD, informational statuses, 204, 205 and 304
+without reading the original stream. HEAD preserves an explicit Content-Length or uses
+a known, nonzero body size when none was supplied. Otherwise the length remains unspecified,
+including when the body has already been suppressed by an earlier normalization pass.
+
+Informational statuses and 204 remove Content-Length; 205 uses zero; 304 retains supplied
+representation metadata. Transfer-Encoding is removed for responses without content.
+The emitter reapplies these rules after response-header listeners, which can change the
+response status or body.
 
 ## HTML views
 

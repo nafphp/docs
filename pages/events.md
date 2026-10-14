@@ -124,10 +124,10 @@ The following events describe the normal HTTP path. Payload order is part of the
 
 | Event | Payload | When |
 |---|---|---|
-| `request.start` | `$request` | After creating and registering the request in `App::run()` |
+| `request.start` | `$request` | After registering the request in `App::handle()` (called by `run()`) |
 | `route.matching` | `$uri, $method` | Before searching routes |
 | `route.matched` | `$route` array | After finding a match |
-| `route.not_found` | `$uri, $method` | When no route matches |
+| `route.not_found` | `$uri, $method` | When no registered path matches |
 | `controller.calling` | `$request, $controller, $action` | Before invoking the handler; controller is null for a closure |
 | `controller.called` | `$request, $controller, $action, $response` | After invoking the handler |
 | `exception` | `$exception` | When request handling throws |
@@ -136,8 +136,15 @@ The following events describe the normal HTTP path. Payload order is part of the
 | `response.body` | `$response` | Before writing the body, after headers |
 | `response.end` | `$response` | After writing the body |
 
-`request.end` and `request.body` are declared constants but are not dispatched by the current
-request path. There is no `response.sending` event.
+With Framework 0.2.12+, request handling through `handle()` runs the request, route,
+controller and exception hooks, followed by `response.send` during finalization.
+`response.header`, `response.body` and `response.end` run only during emission, for example
+through `app()->run()`.
+
+`Event::REQUEST_END` (`request.end`) and `Event::REQUEST_BODY` (`request.body`) remain defined
+as deprecated compatibility constants in Framework 0.2.12+. The core does not dispatch them;
+there is no replacement body/end event. Use `request.start` to observe the registered request.
+There is no `response.sending` event.
 
 ## Events used by the published plugins
 
