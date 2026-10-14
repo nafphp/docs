@@ -7,6 +7,12 @@ title: Errors and aborting
 An unknown route, a thrown exception or `abort()` reaches the error-handling path.
 The default response uses the exception's `getStatusCode()` when available, otherwise 500.
 
+With Framework **0.2.12+**, an unsupported method on a known path throws
+`Naf\Exceptions\MethodNotAllowedException` and produces 405 with `Allow`.
+`getAllowedMethods()` returns the allowed method names. The normal error path retains
+`Allow` when an exception listener returns a custom 405 response, including JSON.
+An unknown path remains 404; see [Routing](routing.md).
+
 ## Abort a request
 
 ```php-inline

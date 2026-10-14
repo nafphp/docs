@@ -12,8 +12,13 @@ The Composer vendor is **`naf`**; `nafphp` is the GitHub organisation.
 ## Requirements
 
 - PHP 8.3 or newer and Composer.
-- PHP's JSON and PDO extensions. Forms also use `mbstring`; database access needs the PDO driver for your database.
+- PHP's JSON extension. Forms also use `mbstring`; database access needs PDO and its driver.
 - A writable project directory. Sessions and logs need writable storage at runtime.
+
+Framework **0.2.12+** does not require PDO. Older framework releases do; starter 0.2.4
+still locks Framework 0.2.9, so its initial installation also requires PDO. Update the
+framework dependency to use the current core requirements; database-backed features
+continue to need PDO and their database driver.
 
 ## Start with the application skeleton
 
@@ -91,7 +96,7 @@ mkdir -p app public
 ```json title="composer.json"
 {
     "name": "example/naf-api",
-    "require": { "php": ">=8.3", "naf/framework": "^0.2" },
+    "require": { "php": ">=8.3", "naf/framework": "^0.2.12" },
     "autoload": { "psr-4": { "App\\": "app/" } }
 }
 ```
@@ -162,12 +167,14 @@ under CLI and header listeners compose. The [package overview](packages.md) list
 For an application created from an older starter, update the required minimum versions:
 
 ```bash
-composer require 'naf/framework:^0.2.9' 'naf/form:^0.2.4' 'naf/view:^0.2.3' --with-all-dependencies
+composer require 'naf/framework:^0.2.12' 'naf/form:^0.2.4' 'naf/view:^0.2.3' --with-all-dependencies
 ```
 
 To move a new or existing project to the current compatible releases, run `composer update`
 and test your application before deploying it. Commit `composer.lock`; deployments should use `composer install` to reproduce
 that tested dependency set.
+Review the [Framework 0.2.12 migration notes](compatibility.md#upgrading-to-framework-0212)
+when updating an older framework.
 
 ## Environment and next steps
 

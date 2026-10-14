@@ -4,8 +4,10 @@ title: Application lifecycle
 
 # Application lifecycle
 
-The first `app()` call boots NAF. `app()->run()` then handles the HTTP request. This order
-determines where to register services, routes and listeners.
+The first `app()` call boots NAF. `app()->run()` then handles the HTTP request. Existing
+applications continue to use this bootstrap. Framework 0.2.12+ also provides `handle()` for
+a supplied PSR-7 request; adopting it is optional. This order determines where to register
+services, routes and listeners.
 
 ## Application boot
 
@@ -58,12 +60,12 @@ command()->add(\App\Commands\HelloCommand::class);
 
 During `run()`, NAF:
 
-1. Creates and registers the PSR-7 server request.
+1. Creates the PSR-7 server request and passes it to `handle()` (Framework 0.2.12+).
 2. Dispatches `request.start` and matches an HTTP method and path.
 3. Constructs a controller through the default container, or selects a closure.
 4. Dispatches `controller.calling` and invokes the handler with named route parameters.
 5. Receives a PSR-7 response and dispatches `controller.called`.
-6. Finalizes and emits status, headers and body through the response events.
+6. Normalizes content rules and finalizes the response, then emits status, headers and body.
 
 ```mermaid
 sequenceDiagram
@@ -88,9 +90,9 @@ sequenceDiagram
     A-->>B: status, headers, body
 ```
 
-After the body, NAF dispatches `response.body` and `response.end`. An exception at any step
-after boot leaves this path: an `exception` listener may return a
-response, otherwise the error handler renders one, and the response events still run.
+After sending headers, NAF dispatches `response.body` before writing the body, then
+`response.end` afterwards. An exception during request handling enters the error path:
+an `exception` listener may return a response, otherwise the error handler renders one.
 
 Routing and controller exceptions enter the [error path](errors.md). An `exception` listener
 can return a response; otherwise the error handler renders one. Normal emission terminates
@@ -100,10 +102,28 @@ See [Events](events.md#request-lifecycle) for payloads and replacement behavior.
 headers, return a new response from `response.header`. A response returned from
 `controller.called` or `response.send` does not replace the emitted response.
 
+## Handle a supplied request
+
+Framework **0.2.12+** provides
+`App::handle(ServerRequestInterface $request): ResponseInterface`. It replaces request and
+parameter bindings, clears the matched route, runs request/controller events, converts
+exceptions through the normal error path, normalizes content rules and dispatches
+`response.send` during finalization. It returns without emitting headers, writing output
+or exiting. See the complete [request test](testing.md#test-request-handling-without-emission).
+
+The emitter owns `response.header`, `response.body` and `response.end`; `handle()` does not
+run them. Keep real HTTP tests for emitted cookies, headers, streams and SAPI behavior.
+`app()->run()` creates the server request, delegates handling and emits the response.
+
+Sequential calls share application and plugin services. Keep request-specific state out of
+shared services; this API alone does not guarantee isolation for persistent HTTP workers.
+Concurrent or reentrant handling on one App throws `LogicException`.
+
 ## CLI and workers
 
 Under CLI, `app()->run()` returns without routing or emitting HTTP. Commands still use
-application boot, services and configuration. Test routing through a running HTTP application.
+application boot, services and configuration. Use `handle()` for request tests without
+emission, and a running HTTP application to verify the emitted response.
 Framework 0.2.9+ also registers the core guard rules under CLI, so View rendering and HTML
 escaping work in commands and workers after boot.
 

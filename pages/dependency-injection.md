@@ -141,9 +141,28 @@ available to `get()` and future constructor injection. Later calls with `singlet
 reuse the cached instance; dependencies built along the way are not separately registered.
 `make()` without that flag still constructs a new object, even if that class is registered.
 
-`make()`, `set()` and `reset()` extend PSR-11. If you supply a custom container, NAF's
-bootstrap still needs `set()`. With a container that is not an `AutoResolvingContainer`, the core
-dispatcher and event manager instantiate controller and listener classes without arguments.
+`make()`, `set()` and `reset()` extend PSR-11. With a container that is not an
+`AutoResolvingContainer`, the dispatcher first uses a bound controller; otherwise it
+constructs the controller without arguments. The event manager also constructs class
+listeners without arguments in that setup.
+
+## Custom writable containers
+
+Framework **0.2.12+** provides `Naf\Contracts\MutableContainerInterface`, extending PSR-11 with:
+
+- `set(string $id, callable|object $factory): void`
+- `reset(string $id): void`
+
+Both built-in containers implement it. `App::__construct(MutableContainerInterface $container)`
+and `AutoResolvingContainer::__construct(MutableContainerInterface $container)` require the
+contract directly in their native parameter types. Custom writable containers must implement
+this interface; PHP rejects a read-only PSR-11 container with `TypeError` before either
+constructor body or application boot runs.
+
+Ordinary applications using the built-in containers and `app()->run()` need no bootstrap
+changes. `App::container()` retains its PSR-11 return type; its PHPDoc exposes the writable
+contract. Factories still receive the wrapped base container, while autowiring belongs to
+`make()` on the decorator.
 
 ## Where registration belongs
 

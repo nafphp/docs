@@ -14,7 +14,7 @@ packages' `config.php` files and `config()` calls; see each guide for the effect
 
 ## naf/framework
 
-Version **v0.2.10** · [Fundamentals](lifecycle.md)
+Version **v0.2.12** · [Fundamentals](lifecycle.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |

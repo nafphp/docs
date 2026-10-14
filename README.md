@@ -43,8 +43,11 @@ their own minimal dependency set in separate projects. It extracts the **actual 
 lints their PHP and tests them through local HTTP servers. It checks HTML and JSON, validation,
 escaping, CSRF, a local mail outbox, login persistence/logout/suspension, ORM save/find and
 SQLite API persistence and errors, and database migrations (apply, repeat and roll back). It also exercises the documented
-service/HTTP tests, plugin discovery, application commands, streamed downloads, queue failure/retry,
-scheduling, MCP scopes and a fake HTTP transport. The small scenarios check shared layouts,
+service tests, supplied-request tests, HTTP smoke tests, plugin discovery, application commands,
+streamed downloads, queue failure/retry, scheduling, MCP scopes and a fake HTTP transport.
+The request-handling example updates Framework to 0.2.12+ and checks sequential supplied
+requests without emission; HTTP smoke tests still verify the actual server response.
+The small scenarios check shared layouts,
 HTML escaping, bounded query input, response headers and sanitized JSON failures.
 Separate controller and view fixtures check named route arguments, constructor injection,
 response types, template variables, partials, layout blocks, asset tags and custom search
