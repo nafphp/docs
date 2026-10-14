@@ -8,6 +8,7 @@ import argparse
 import base64
 from contextlib import contextmanager
 import html
+import hashlib
 import http.cookiejar
 import json
 import os
@@ -872,6 +873,67 @@ def test_monitoring(root):
     expect(True, 'Monitoring standalone capture example passes with assertions enabled')
 
 
+def test_cms(root):
+    copy_examples('cms.md', root)
+    package = root / 'vendor/naf/cms'
+
+    def package_hash():
+        digest = hashlib.sha256()
+        for path in sorted(package.rglob('*')):
+            if path.is_file():
+                digest.update(str(path.relative_to(package)).encode())
+                digest.update(path.read_bytes())
+        return digest.hexdigest()
+
+    before = package_hash()
+    for command in ('nafcms:assets:publish', 'nafcms:assets:check'):
+        run([*PHP, 'vendor/bin/naf', command], root)
+    run([*PHP, 'vendor/bin/naf', 'db:migrate', 'up'], root)
+    run([*PHP, 'vendor/bin/naf', 'db:migrate', 'up'], root)
+    expect((root / 'storage/nafcms.sqlite').exists(), 'CMS documented SQLite setup and repeated migration succeed')
+
+    password = 'Naf-CMS-Preview-2026!'
+    password_file = root / 'storage/bootstrap-password.test'
+    try:
+        password_file.write_text(password)
+        password_file.chmod(0o600)
+        output = run([*PHP, 'vendor/bin/naf', 'user:create', 'admin',
+                      'admin@example.com', 'admin', '--password-file', str(password_file)], root)
+        expect('User created successfully.' in output, 'CMS documented first-admin command succeeds')
+    finally:
+        password_file.unlink(missing_ok=True)
+
+    guide = root / 'AGENTS.md'
+    original_guide = guide.read_bytes()
+    install = subprocess.run([*PHP, 'vendor/bin/naf', 'nafcms:agents:install'],
+                             cwd=root, capture_output=True, text=True)
+    expect(install.returncode == 1 and guide.read_bytes() == original_guide,
+           'CMS preserves the starter-owned project guide')
+
+    with server(root) as client:
+        anonymous = client.request('/admin/reports')
+        expect(anonymous[0] in (302, 303) and anonymous[1].get('Location') == '/admin/login',
+               'CMS documented page permission requires authentication')
+        login = client.request('/admin/login')
+        result = client.form('/admin/login', {'_csrf': csrf(login), 'username': 'admin',
+                                             'password': password, 'redirectUri': '/admin/reports'})
+        expect(result[0] in (302, 303) and result[1].get('Location') == '/admin/reports',
+               'CMS first administrator can sign in through the real CSRF-protected form')
+        report = client.request('/admin/reports')
+        expect(report[0] == 200 and 'The CMS extension is running.' in report[2],
+               'CMS actual documented registry page and host template render after login')
+        dashboard = client.request('/admin')
+        expect(dashboard[0] == 200, 'CMS dashboard renders against the migrated published installation')
+        stylesheet = client.request('/css/nafcms.css')
+        expect(stylesheet[0] == 200 and stylesheet[2] == (package / 'public/css/nafcms.css').read_text(),
+               'CMS serves the exact stylesheet shipped by the published package')
+        result = client.form('/admin/logout', {'_csrf': csrf(dashboard)})
+        expect(result[0] in (302, 303) and client.request('/admin/reports')[0] in (302, 303),
+               'CMS POST logout removes access to the protected page')
+
+    expect(package_hash() == before, 'CMS installation and HTTP workflows keep vendor files immutable')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--starter', type=Path, help='Reuse installed starter dependencies; source is read-only')
@@ -982,6 +1044,12 @@ def main():
              '--no-interaction', '--prefer-dist'], monitoring)
         test_monitoring(monitoring)
         print('PASS Monitoring helper, declared labels, exporter override and standalone capture', flush=True)
+        cms = root / 'cms'
+        run([*COMPOSER, 'create-project', 'naf/app', str(cms), '--no-interaction', '--prefer-dist'], root)
+        run([*COMPOSER, 'require', 'naf/cms:^0.0.2', '--with-all-dependencies',
+             '--no-interaction', '--prefer-dist'], cms)
+        test_cms(cms)
+        print('PASS CMS setup, assets, migrations, first administrator, protected page and logout', flush=True)
         configuration = root / 'configuration'
         shutil.copytree(core, configuration)
         test_configuration_sources(configuration)

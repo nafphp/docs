@@ -100,6 +100,76 @@ Version **v0.2.2** · [HTTP client](http-client.md)
 | --- | --- | --- |
 | `client` | — | code |
 
+## naf/cms
+
+Version **v0.0.2** · [NafCMS](cms.md)
+
+| Key | Default | Defined in |
+| --- | --- | --- |
+| `ai:embedding_model` | `''` | `config.php` |
+| `ai:enabled` | `'0'` | `config.php` |
+| `ai:instructions` | `''` | `config.php` |
+| `ai:model` | `'llama3.1:8b'` | `config.php` |
+| `ai:routing_debug` | `false` | `config.php` |
+| `ai:type` | `'local'` | `config.php` |
+| `ai:url` | `'http://localhost:11434'` | `config.php` |
+| `app:env` | `'ENV:APP_ENV'` | `config.php` |
+| `app:name` | `'NafCMS'` | `config.php` |
+| `app:short_name` | `'NX'` | `config.php` |
+| `app:url` | `'ENV:APP_URL'` | `config.php` |
+| `cms:admin:accent_colors:articles` | `'#3f7fbd'` | `config.php` |
+| `cms:admin:accent_colors:content` | `'#3f7fbd'` | `config.php` |
+| `cms:admin:accent_colors:dashboard` | `'#ff3b30'` | `config.php` |
+| `cms:admin:accent_colors:media` | `'#14b8a6'` | `config.php` |
+| `cms:admin:accent_colors:roles` | `'#f59e0b'` | `config.php` |
+| `cms:admin:accent_colors:settings` | `'#8b5cf6'` | `config.php` |
+| `cms:admin:accent_colors:users` | `'#0ea5e9'` | `config.php` |
+| `cms:admin:navigation` | `[]` | code |
+| `cms:languages` | `["en","de"]` | `config.php` |
+| `cms:media:allowed_extensions:csv` | `["text/csv","text/plain","application/vnd.ms-excel"]` | `config.php` |
+| `cms:media:allowed_extensions:docx` | `["application/vnd.openxmlformats-officedocument.wordprocessingml.document","a…` | `config.php` |
+| `cms:media:allowed_extensions:gif` | `["image/gif"]` | `config.php` |
+| `cms:media:allowed_extensions:jpeg` | `["image/jpeg"]` | `config.php` |
+| `cms:media:allowed_extensions:jpg` | `["image/jpeg"]` | `config.php` |
+| `cms:media:allowed_extensions:pdf` | `["application/pdf"]` | `config.php` |
+| `cms:media:allowed_extensions:png` | `["image/png"]` | `config.php` |
+| `cms:media:allowed_extensions:pptx` | `["application/vnd.openxmlformats-officedocument.presentationml.presentation",…` | `config.php` |
+| `cms:media:allowed_extensions:txt` | `["text/plain"]` | `config.php` |
+| `cms:media:allowed_extensions:webp` | `["image/webp"]` | `config.php` |
+| `cms:media:allowed_extensions:xlsx` | `["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","applica…` | `config.php` |
+| `cms:media:allowed_extensions:zip` | `["application/zip","application/x-zip-compressed"]` | `config.php` |
+| `cms:media:max_upload_size` | `26214400` | `config.php` |
+| `cms:media:public_path` | computed in code | code |
+| `cms:media:public_url` | `'/media'` | `config.php` |
+| `cms:media:storage_path` | `'{BASE_PATH}/storage/media'` | `config.php` |
+| `cms:outbound_http:ollama:allowed_ports` | `[11434]` | `config.php` |
+| `cms:outbound_http:ollama:max_response_bytes` | `1048576` | `config.php` |
+| `cms:outbound_http:webhooks:allow_development_http` | `false` | `config.php` |
+| `cms:outbound_http:webhooks:development_hosts` | `[]` | `config.php` |
+| `cms:outbound_http:webhooks:max_response_bytes` | `65536` | `config.php` |
+| `cms:outbound_http:webhooks:timeout` | `8.0` | `config.php` |
+| `cms:runtime_path` | `'storage/nafcms'` | `config.php` |
+| `database:database` | `'ENV:DB_DATABASE'` | `config.php` |
+| `database:driver` | `'ENV:DB_DRIVER'` | `config.php` |
+| `database:host` | `'ENV:DB_HOST'` | `config.php` |
+| `database:password` | `'ENV:DB_PASSWORD'` | `config.php` |
+| `database:port` | `'ENV:DB_PORT'` | `config.php` |
+| `database:username` | `'ENV:DB_USERNAME'` | `config.php` |
+| `fallback_language` | `'en'` | `config.php` |
+| `language` | `'en'` | `config.php` |
+| `mcp:auth:driver` | `'file'` | `config.php` |
+| `mcp:auth:enabled` | `true` | `config.php` |
+| `mcp:auth:token_file` | `'{BASE_PATH}/storage/mcp/tokens.json'` | `config.php` |
+| `schedule:coalesce` | `true` | `config.php` |
+| `session:database_table` | `'sessions'` | `config.php` |
+| `session:storage` | `'default'` | `config.php` |
+| `session:trust_proxy_headers` | `false` | `config.php` |
+| `session:trusted_proxies` | `[]` | `config.php` |
+| `view:assets:publicPath` | `'{BASE_PATH}/public'` | `config.php` |
+| `view:assets:versionParameter` | `'v'` | `config.php` |
+| `view:assets:versioning` | `true` | `config.php` |
+| `view:paths` | `["views","app/views"]` | `config.php` |
+
 ## naf/database
 
 Version **v0.2.4** · [Database](database.md)

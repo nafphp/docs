@@ -55,6 +55,9 @@ translation files, custom queue paths, scheduled payloads, RBAC scope sources an
 cheat-sheet layout fragment, plus the application Auth provider and WebSocket flags.
 The Monitoring chapter's complete CLI example and standalone capture fragment run against
 published packages, checking declared labels, the shared helper and a container exporter override.
+The CMS chapter runs in a fresh starter with the published package: asset publication,
+SQLite migrations, the first administrator, real login/logout and the documented protected
+page/template, including preservation of the starter guide and immutable vendor files.
 See [the content audit](CONTENT_AUDIT.md) for chapter coverage.
 The Alexa example runs in its own minimal host and checks setup, doctor, OAuth discovery,
 service tokens, JSON/SSE tool calls and revocation against the published packages.

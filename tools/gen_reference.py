@@ -23,6 +23,7 @@ KAPITEL = {
     "oauth-server": ("OAuth authorization server", "oauth-server.md"),
     "rbac": ("Roles and permissions", "rbac.md"),
     "monitoring": ("Monitoring", "monitoring.md"),
+    "cms": ("NafCMS", "cms.md"),
     "websocket": ("WebSocket notifications", "websocket.md"),
     "board": ("Nafinity", "built-with/nafinity.md"),
 }

@@ -46,6 +46,25 @@ Version **v0.1.8** · [Nafinity](built-with/nafinity.md)
 | `nafinity:seed` | Create local demo accounts and projects once; refuses production. | — | — |
 | `nafinity:user` | Create an account, reading its password from standard input. | `email` (optional), `name` (optional) | `--admin` |
 
+## naf/cms
+
+Version **v0.0.2** · [NafCMS](cms.md)
+
+| Command | Purpose | Arguments | Options |
+| --- | --- | --- | --- |
+| `ai:tools:debug` | Show which CMS tools the local AI routing layer selects for a phrase. | `phrase` | `--area=…`, `--mode=…`, `--capability=…`, `--content-type=…`, `--page-id=…`, `--layout-id=…`, `--theme-id=…`, `--limit=…` (`-l`), `--keyword`, `--json`, `--help` |
+| `db:create` | Create the configured MySQL database if it does not exist. | — | `--force`, `--help` |
+| `docs:check` | Check whether README.md auto documentation blocks match NafCMS registries. | — | `--help` |
+| `docs:sync` | Regenerate README.md auto documentation blocks from NafCMS registries. | — | `--help` |
+| `install:database` | Create the database (if missing) and run all pending migrations. | — | `--force`, `--help` |
+| `integrity:check` | Check block type, block view, and page template registry invariants. | — | `--help` |
+| `nafcms:agents:install` | Create the host AGENTS.md without overwriting user-owned instructions. | — | `--update`, `--help` |
+| `nafcms:assets:check` | Report missing, outdated, stale, or conflicting published assets. | — | — |
+| `nafcms:assets:publish` | Publish versioned NafCMS assets into the host public directory. | — | — |
+| `nafcms:assets:remove` | Remove only unchanged assets owned by the NafCMS publish manifest. | — | — |
+| `seed:fake-data` | Insert demo articles, categories, tags, an admin user, and ensure the role/permission matrix is in place. | — | `--help` |
+| `user:create` | Create the first installation administrator. | `username` (optional), `email` (optional), `role` (optional) | `--firstname=…` (`-f`), `--lastname=…` (`-l`), `--password-file=…` (`-p`), `--help` |
+
 ## naf/database
 
 Version **v0.2.4** · [Database](database.md)

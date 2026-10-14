@@ -101,6 +101,7 @@ nav:
       - Flow browser components: flow.md
       - Translations: translations.md
       - Serving files: file-downloads.md
+      - NafCMS: cms.md
   - Tutorials:
       - Choose a scenario: recipes/index.md
       - Small website: recipes/small-website.md
