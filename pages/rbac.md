@@ -230,12 +230,23 @@ a series of them.
 
 The host supplies the account being managed. RBAC does not list, create or deactivate accounts.
 
+RBAC 0.1.4+ renders the role and permission checkboxes as native inputs with switch
+semantics. Disclosure carets indicate whether role and grant groups are open. Keyboard
+activation, checked and disabled states, and submitted field names follow native form
+behavior.
+
+Reduced-motion preferences disable control, thumb and caret transitions. Forced-color mode
+restores the browser's native checkbox rendering.
+
 `src/Resources/public/assets/rbac.css` styles both through custom properties with neutral
 defaults, so mapping them to a host's design is one block:
 
 ```css
 .rbac-roles, .rbac-grants { --rbac-line: var(--line); --rbac-accent: var(--accent); }
 ```
+
+Set `--rbac-switch-thumb` to a CSS color to customize the switch thumb; its default is
+the system `Canvas` color.
 
 Set `rbac:path` to `null` to register no endpoints and drive the services from screens of your
 own.

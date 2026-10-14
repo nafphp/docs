@@ -170,7 +170,7 @@ Version **v0.2.4** · [Queues and workers](queues.md)
 
 ## naf/rbac
 
-Version **v0.1.3** · [Roles and permissions](rbac.md)
+Version **v0.1.4** · [Roles and permissions](rbac.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |

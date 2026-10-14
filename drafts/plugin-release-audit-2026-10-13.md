@@ -2,7 +2,7 @@
 
 This audit compares fetched remote main, local and remote branches, stable GitHub releases and exact Packagist source references for every top-level Composer naf-plugin repository. It is a dated contributor snapshot, not a public API promise.
 
-CMS release-gate follow-up: 14 October 2026.
+Release follow-up: 14 October 2026.
 
 ## Package decisions
 
@@ -21,13 +21,13 @@ CMS release-gate follow-up: 14 October 2026.
 | naf/i18n | v0.2.2 | Only contributor/README documentation differs; no new package release needed. |
 | naf/mail | v0.2.3 | Published source is current; no package release needed. |
 | naf/mcp | v0.2.6 | Published source is current; no package release needed. |
-| naf/monitoring | None | Initial implementation and checks pass; maintainer merge and first Packagist registration gates pending. |
+| naf/monitoring | GitHub v0.1.0 | Merged and released on GitHub; first Packagist registration is pending. |
 | naf/oauth-client | v0.2.4 | Published source is current; no package release needed. |
 | naf/oauth-server | v0.2.5 | Published source is current; no package release needed. |
 | naf/orm | v0.2.3 | Published source is current; no package release needed. |
 | naf/queue | v0.2.4 | Published source is current; no package release needed. |
 | naf/rate-limit | v0.1.0 | Only contributor/README documentation differs; no new package release needed. |
-| naf/rbac | v0.1.3 | Reduced-motion bug found and fixed; tests and CI green; maintainer merge gate pending. |
+| naf/rbac | v0.1.4 | Released; exact GitHub/Packagist commit and fresh authenticated UI installation verified. |
 | naf/sanity | None | Unfinished prototype: missing helper target, no runtime integration or behavioral test suite; not release-ready. |
 | naf/schedule | v0.2.4 | Published source is current; no package release needed. |
 | naf/session | v0.2.3 | Published source is current; no package release needed. |
@@ -38,8 +38,8 @@ CMS release-gate follow-up: 14 October 2026.
 ## Verified release and review candidates
 
 - Auth v0.2.3: merged commit 44f392db0fe73765b683b177462351689301c785; GitHub and Packagist verified. 99 tests / 290 assertions, analysis, style and strict validation passed; exact merge CI covers PHP 8.3/8.4/8.5.
-- RBAC v0.1.4: PR #4, cfa8063ac01ccdd77446e797f930ecab0f2b2f92. A real browser test found the reduced-motion specificity defect; the correction, negative regression and authenticated rendered host pass. PHP tests: 50 / 71 with the local MySQL acceptance skipped; PR CI covers MySQL 8.4 and the browser regression.
-- Monitoring v0.1.0: PR #1, 196faa9f7736f16150bbaa496ecdfc625390e8d4. 57 unit tests / 146 assertions, real HTTP/UDP and CLI-host checks, formatting, strict validation and PHP 8.3/8.4/8.5 PR CI pass.
+- RBAC v0.1.4: [release](https://github.com/nafphp/rbac/releases/tag/v0.1.4) at merged commit 45be69f9ec04ba2b213ac9da7ea0c3d1351c1a47; exact Packagist reference verified. A real browser test found the reduced-motion specificity defect; the correction and negative regression pass. The merge CI covers MySQL 8.4 and browser accessibility checks. A fresh installation using only published packages renders the actual authenticated administration fragments and passes keyboard, checked-state, form-field, reduced-motion and forced-color checks. The matching UI guidance is published in the Roles and permissions chapter.
+- Monitoring v0.1.0: [GitHub release](https://github.com/nafphp/monitoring/releases/tag/v0.1.0) at merged commit adea62f2277392f57500378f017f4724ec21aba9. 57 unit tests / 146 assertions, real HTTP/UDP and CLI-host checks, formatting, strict validation and exact merge CI on PHP 8.3/8.4/8.5 pass. First Packagist registration needs an authenticated account; stable Composer installation and the public guide remain pending until its metadata is available. The user explicitly delegated the Monitoring and RBAC merges; that delegation does not include CMS.
 - CMS: [PR #2](https://github.com/nafphp/cms/pull/2), commit 57ffdea1188adbe21ad693e35d05ffe26b132cd5. The RC now requires Framework 0.2.9, CLI 0.2.2 and PDO explicitly, and locks published packages. PHPStan scans helper symbols without booting runtime services; the argv baseline is stable across environments. Tailwind uses explicit package sources, source-map-js is patched to 1.2.2, and the fresh-host test checks preservation of starter-owned guides as well as managed-guide installation. The updated lock and minimum NAF versions both pass 493 tests / 2455 assertions; analysis, style, strict validation, docs and integrity commands, 25 builder tests, reproducible assets, archive inspection and the real host smoke pass. The host applies 16 SQLite migrations and verifies CLI rendering, scoped MCP, HTTP authentication redirect and vendor immutability. CI adds the PHP 8.3 minimum dependency job and npm audit; supported PHP jobs and MariaDB migration checks pass. Minimum ORM dependencies emit a known deprecation under local PHP 8.5; the supported PHP 8.3 minimum CI job passes. The package is not yet merged, tagged or registered on Packagist.
 - Sanity: draft PR #2 is explicitly unfinished. sanity() targets a missing class, the validator/converter traits are not integrated, and there is no behavioral suite or runtime contract ready for publication.
 

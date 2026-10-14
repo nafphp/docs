@@ -27,7 +27,7 @@ Published packages, their required dependencies and optional integrations. Gener
 | **`naf/orm`**<br><span style="font-weight:400">NAF ORM Plugin.</span> | `v0.2.3` | `naf/database`, `naf/framework` | — | `>=8.3` |
 | **`naf/queue`**<br><span style="font-weight:400">NAF Queue Plugin for asynchronous jobs.</span> | `v0.2.4` | `naf/cli`, `naf/framework` | — | `>=8.3` |
 | **`naf/rate-limit`**<br><span style="font-weight:400">Atomic PDO fixed-window rate limits for NAF hosts.</span> | `v0.1.0` | `naf/framework` | — | `>=8.3` |
-| **`naf/rbac`**<br><span style="font-weight:400">Roles, permissions and the rules for handing them out, for NAF hosts.</span> | `v0.1.3` | `naf/auth`, `naf/database`, `naf/framework` | — | `>=8.3` |
+| **`naf/rbac`**<br><span style="font-weight:400">Roles, permissions and the rules for handing them out, for NAF hosts.</span> | `v0.1.4` | `naf/auth`, `naf/database`, `naf/framework` | — | `>=8.3` |
 | **`naf/schedule`**<br><span style="font-weight:400">NAF Schedule Plugin for recurring Tasks.</span> | `v0.2.4` | `naf/framework`, `naf/queue` | — | `>=8.3` |
 | **`naf/session`**<br><span style="font-weight:400">NAF Session Plugin for storing data across requests.</span> | `v0.2.3` | `naf/framework` | `naf/database` | `>=8.3` |
 | **`naf/storage`**<br><span style="font-weight:400">Provider-independent file storage with named disks and streams for NAF.</span> | `v0.1.0` | `naf/framework` | `naf/client` | `>=8.3` |
