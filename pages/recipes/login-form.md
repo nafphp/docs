@@ -74,6 +74,7 @@ namespace App\Controllers;
 use Naf\Auth\Credentials\PasswordCredentials;
 use Psr\Http\Message\ResponseInterface;
 use function Naf\Auth\auth;
+use function Naf\Form\csrf;
 use function Naf\Form\validator;
 use function Naf\View\render;
 use function Naf\{abort, param};
@@ -119,6 +120,8 @@ final class SessionController
             ])->withStatus(422);
         }
 
+        csrf()->generate();
+
         return redirect(route('account'));
     }
 
@@ -131,6 +134,7 @@ final class SessionController
     public function logout(): ResponseInterface
     {
         auth()->logout();
+        csrf()->generate();
 
         return redirect(route('login'));
     }

@@ -230,6 +230,11 @@ rendered earlier, including those in other tabs, stop validating. Use `generate(
 you deliberately rotate the token. `csrf()->token()` needs Form 0.2.3 or newer; on older
 versions call `generate()` once per page and reuse its value for every form on that page.
 
+Rotate the token after a successful login, adoption of a verified identity, and logout.
+With Auth 0.2.3 or earlier, the application calls `csrf()->generate()` explicitly after the
+authentication operation. Open forms from the previous authentication state then need reloading.
+See [Authentication sessions](auth.md#sessions).
+
 ### What is checked, and when
 
 The plugin listens on `Event::CONTROLLER_CALLING`, so the check runs after a route matched
