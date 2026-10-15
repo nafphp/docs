@@ -66,6 +66,9 @@ The Alexa example runs in its own minimal host and checks setup, doctor, OAuth d
 service tokens, JSON/SSE tool calls and revocation against the published packages.
 It never sends mail externally. Temporary projects and servers are cleaned up, including on
 test failure.
+The OAuth request-lifetime example runs against published OAuth Server 0.2.6+: it checks
+explicit PSR-7 requests and token A, missing/invalid tokens and token B through one application
+and resource-server instance.
 
 To reuse a starter that already has `naf/auth`, `naf/orm` and `naf/mail` installed:
 

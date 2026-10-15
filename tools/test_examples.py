@@ -847,6 +847,65 @@ def test_alexa(root):
         rpc(call, 401)
 
 
+def test_oauth_request_lifetime(root):
+    version = run([*PHP, '-r', "require 'vendor/autoload.php'; echo (int) version_compare("
+                   "\\Composer\\InstalledVersions::getVersion('naf/oauth-server'), '0.2.6.0', '>=');"], root)
+    expect(version == '1', 'Request-lifetime examples require published OAuth Server 0.2.6 or newer')
+    example = root / 'oauth-request-lifetime.php'
+    example.write_text('''<?php
+require __DIR__ . '/bootstrap.php';
+\\Naf\\app()->container()->set(\\Psr\\Log\\LoggerInterface::class, new \\Psr\\Log\\NullLogger());
+$clients = \\Naf\\app()->container()->get(\\Naf\\OAuth\\Server\\Store\\ClientStoreInterface::class);
+$tokens = \\Naf\\app()->container()->get(\\Naf\\OAuth\\Server\\Store\\TokenStoreInterface::class);
+$audience = \\Naf\\config('oauth_server:audience', '');
+[$first] = $clients->register('Request A', [], ['client_credentials'], ['posts.read'], true);
+[$second] = $clients->register('Request B', [], ['client_credentials'], ['posts.read'], true);
+$a = $tokens->issueForClient($first, ['posts.read'], $audience, 60);
+$b = $tokens->issueForClient($second, ['posts.read'], $audience, 60);
+$request = new \\Nyholm\\Psr7\\Request('GET', '/api', ['Authorization' => 'Bearer ' . $a->accessToken]);
+''' + fragment('oauth-server.md', 'For an explicit integration, pass the PSR-7') + '''
+$server = app()->container()->get(ResourceServer::class);
+$explicit = [$context->clientId() === $first->id, $server->context($request) === $context];
+foreach ([$request->withoutHeader('Authorization'), $request->withHeader('Authorization', 'Bearer invalid')] as $missing) {
+    try {
+        $server->context($missing)->requireScope('posts.read');
+        $explicit[] = false;
+    } catch (\\Naf\\Auth\\Exceptions\\UnauthenticatedException) {
+        $explicit[] = true;
+    }
+}
+\\Naf\\route()->add('GET', '/request-lifetime', static function () {
+    \\Naf\\OAuth\\Server\\token()->requireScope('posts.read');
+    return \\Naf\\json(['client' => \\Naf\\OAuth\\Server\\token()->clientId()]);
+}, 'docs.request.lifetime');
+$base = new \\Nyholm\\Psr7\\ServerRequest('GET', 'https://tools.example.com/request-lifetime');
+$requests = [
+    $base->withHeader('Authorization', 'Bearer ' . $a->accessToken),
+    $base,
+    $base->withHeader('Authorization', 'Bearer invalid'),
+    $base->withHeader('Authorization', 'Bearer ' . $b->accessToken),
+];
+$responses = [];
+foreach ($requests as $supplied) {
+    $response = app()->handle($supplied);
+    $body = json_decode((string) $response->getBody(), true);
+    $responses[] = [$response->getStatusCode(), $body['client'] ?? null];
+}
+echo json_encode([
+    'explicit' => $explicit,
+    'statuses' => array_column($responses, 0),
+    'clients' => [$responses[0][1] === $first->id, $responses[3][1] === $second->id],
+    'shared' => $server === app()->container()->get(ResourceServer::class),
+]);
+''')
+    run([*PHP, '-l', str(example)], root)
+    result = json.loads(run([*PHP, str(example)], root))
+    expect(result['explicit'] == [True, True, True, True],
+           'Documented context(request) accepts plain PSR-7 requests, caches one request and rejects missing/invalid tokens')
+    expect(result['statuses'] == [200, 401, 401, 200] and result['clients'] == [True, True] and result['shared'],
+           'Published OAuth Server isolates token A, missing/invalid tokens and token B through one App and ResourceServer')
+
+
 def test_configuration_sources(root):
     copy_examples('configuration.md', root)
     run([*COMPOSER, 'dump-autoload', '--no-interaction'], root)
@@ -1033,6 +1092,8 @@ def main():
         alexa.mkdir()
         test_alexa(alexa)
         print('PASS Alexa setup, doctor, OAuth discovery, service token, JSON/SSE tools and revocation', flush=True)
+        test_oauth_request_lifetime(alexa)
+        print('PASS OAuth explicit requests and sequential bearer-context isolation', flush=True)
         core = root / 'core'
         core.mkdir()
         copy_examples('install.md', core)

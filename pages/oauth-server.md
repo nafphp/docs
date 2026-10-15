@@ -10,7 +10,7 @@ requires:
 using existing NAF Auth accounts. Other applications can obtain access tokens and, with the
 `openid` scope, verify user identities.
 
-This guide requires `naf/oauth-server` 0.2.5+ and PHP 8.3+.
+This guide requires `naf/oauth-server` 0.2.6+ and PHP 8.3+.
 
 Deployment requires a configured issuer, database migrations, registered clients and scopes.
 User grants also need local login; OpenID Connect needs signing keys. The sections below
@@ -247,6 +247,36 @@ There is no path from `token()` to a session. An expired, revoked or invented be
 cannot quietly fall back to whoever happens to be signed in with a cookie — a request with no
 usable token has no usable token, whatever else it carries.
 
+### Request lifetime
+
+OAuth Server 0.2.6 resolves the active request when `token()` is called. The default
+`ResourceServer` reuses a `TokenContext` only for the same immutable PSR-7 request instance.
+Successive `App::handle()` calls evaluate their own Authorization headers: a missing,
+invalid or different token cannot inherit the preceding caller's identity or scopes.
+Do not retain a `TokenContext` across requests.
+
+For an explicit integration, pass the PSR-7 `RequestInterface` being authorized. This fragment
+assumes `$request` is that request and the configured OAuth Server plugin has booted:
+
+```php-inline
+use Naf\OAuth\Server\Core\ResourceServer;
+
+use function Naf\app;
+
+$context = app()->container()->get(ResourceServer::class)->context($request);
+$context->requireScope('posts.read');
+```
+
+Custom `ResourceServer` construction can use the optional `currentRequest` closure to resolve
+the active request, or supply each request to `context($request)`. Existing positional and
+named constructor calls using `request` remain compatible; a fixed constructor request is
+appropriate only for a service used for that one request. Calling `context()` without a
+request or resolver raises `LogicException`.
+
+The front controller boots a fresh application for each HTTP request. A custom persistent
+adapter must also manage the lifetime of other request-bound services: this bearer-context
+guarantee does not refresh dependencies that captured a previous request or session.
+
 ---
 
 ## Endpoints
@@ -388,13 +418,14 @@ concurrent row-locking behavior that SQLite alone cannot validate. Correct code 
 refresh rotation and family revocation depend on transactions and the database's locking.
 
 For server changes or a deployment-specific database validation, use disposable databases and
-the package's [concurrency checks](https://github.com/nafphp/oauth-server/blob/v0.2.4/tests/Concurrency/README.md).
+the package's [concurrency checks](https://github.com/nafphp/oauth-server/blob/v0.2.6/tests/Concurrency/README.md).
 They check simultaneous redemption and revocation/refresh races on SQLite, PostgreSQL and MySQL.
 Unit tests alone do not establish these guarantees.
 
 ### Upgrading
 
-No database migration is needed when upgrading from 0.2.3 or 0.2.4 to 0.2.5.
+No database migration is needed when upgrading from 0.2.3, 0.2.4 or 0.2.5 to 0.2.6.
+Review custom shared `ResourceServer` services and follow the [request-lifetime rules](#request-lifetime).
 Review custom scope definitions: explicit `permission` values must be null or nonempty
 strings. Ensure account-linking clients generate valid PKCE S256 verifiers and challenges
 as described below.
@@ -433,12 +464,6 @@ The consent POST uses its request-bound HMAC CSRF check. Its exact-route exempti
 `naf/form` is intentional: replacing it with the session-wide token would invalidate parallel
 consent forms. Stored consent binds the session, provider and user; the submitted form cannot
 replace the validated client, redirect, resource or scopes.
-
-Authorization state is request-scoped. The supported front controller boots a fresh application
-for each web request and exits after emission. `ResourceServer` caches its bound request's
-context. A custom persistent HTTP adapter must create a fresh application/container and
-request-bound services for every request; rebinding only `ServerRequestInterface` leaves
-already-resolved services holding the old request. Reusing those instances is unsupported.
 
 The PDO store does not automatically delete old OAuth rows. Plan database retention and monitor
 growth. In particular, used codes and refresh-token tombstones support replay detection: deleting

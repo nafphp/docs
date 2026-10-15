@@ -1,20 +1,21 @@
 # Follow-up corrections awaiting stable packages
 
-These additions belong in the named guides after their fixed versions are available on
-Packagist. They describe the second audit pass of 15 October 2026. They must stay outside
-`pages/` until publication; the original audit working files are not repository artifacts.
+The remaining additions belong in the named guides after their fixed versions are available
+on Packagist. They describe the second audit pass of 15 October 2026. Unreleased guidance
+must stay outside `pages/`; the original audit working files are not repository artifacts.
 
 | Package | Prepared version | Release dependency |
 |---|---|---|
 | `naf/auth` | 0.2.4 | None |
 | `naf/session` | 0.2.4 | None |
 | `naf/client` | 0.2.3 | Extend the existing pending RC |
-| `naf/oauth-server` | 0.2.6 | Run all required SQLite, PostgreSQL and MySQL concurrency checks before release |
-| `naf/mcp` | 0.2.7 | OAuth Server 0.2.6 must be published first |
+| `naf/oauth-server` | 0.2.6 published | Guide promoted; both concurrency suites passed on SQLite, PostgreSQL and MySQL |
+| `naf/mcp` | 0.2.7 | Resolve the committed lock against published OAuth Server 0.2.6; publish MCP before promoting its guidance |
 | `naf/cms` | 0.0.3 | Raise the Auth minimum to 0.2.4 and update the committed lock after Auth publication |
 
-Before promoting this draft, confirm the final CMS RC version and review the final combined
-RC diff. No package release or package-code merge is authorized by this fix request.
+Before promoting the CMS section, confirm the final RC version and review the final combined
+RC diff. Only OAuth Server PR #6 and its 0.2.6 publication were subsequently authorized;
+the other package releases and package-code merges still need maintainer authorization.
 
 ## Authentication and forms
 
@@ -90,17 +91,12 @@ and DNS behavior.
 
 ## OAuth and MCP request lifetime
 
-Add to `pages/oauth-server.md`, Bearer authentication, and `pages/mcp.md`, OAuth:
+[OAuth Server 0.2.6](https://github.com/nafphp/oauth-server/releases/tag/v0.2.6) is published at
+`4e43b884e164f081879450cedd23538909ca1cb9`. Its request-lifetime guidance has moved to
+`pages/oauth-server.md`. Both concurrency scripts passed on all three required engines
+(16 workers and 40 replay rounds per engine).
 
-OAuth Server 0.2.6 resolves the current request when `token()` is called. A shared
-`ResourceServer` caches a context only for the same immutable request instance. Successive
-`App::handle()` calls therefore evaluate their own Authorization headers. A missing or
-invalid token never reuses the preceding caller's identity or scopes.
-
-Explicit integrations can call `ResourceServer::context($request)` with any PSR-7
-`RequestInterface`. Existing constructor calls using the `request` argument remain valid.
-Shared services can instead pass the `currentRequest` closure, which returns the active
-request. Do not store a `TokenContext` across requests.
+After MCP 0.2.7 publication, add to `pages/mcp.md`, OAuth:
 
 MCP 0.2.7 passes the authenticator's supplied request directly to the resource server,
 including ordinary PSR-7 requests. Its Composer conflict excludes OAuth Server versions
