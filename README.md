@@ -127,10 +127,11 @@ export COMPOSER_COMMAND='php -n /absolute/path/to/composer'
 ```
 
 Use `-n` only if the required extensions are compiled into that PHP binary; otherwise supply a
-working INI configuration. Starter 0.2.4 locks framework 0.2.9, form 0.2.4, session 0.2.3
-and view 0.2.3. Redirects use the framework directly, without
-the old protocol-normalization listener. The test runner exercises the untouched published
-starter before adding recipe dependencies, so a broken starter lock cannot be hidden by an update.
+working INI configuration. Starter 0.2.5 locks framework 0.2.12, form 0.2.4, session 0.2.3
+and view 0.2.3. Its fresh installation no longer requires PDO. Redirects use the framework
+directly, without the old protocol-normalization listener. The test runner exercises the
+untouched published starter before adding recipe dependencies, so a broken starter lock
+cannot be hidden by an update.
 
 ## Contributor and agent guidance
 

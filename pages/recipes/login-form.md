@@ -23,7 +23,7 @@ public APIs can start without accounts; [compare the scenarios](index.md).
 First complete [the authentication quickstart](../auth.md#quickstart), including its SQLite
 config, user model and seed command. It builds on [Your first
 application](../first-app.md). These steps provide the account **demo** with password
-**local-demo-password** for local use. Starter 0.2.4 supplies Form 0.2.4 and Session,
+**local-demo-password** for local use. Starter 0.2.4+ supplies Form 0.2.4 and Session,
 including `csrf()->token()`, which the templates use.
 
 ??? note "Applications from older starters"

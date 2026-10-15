@@ -26,7 +26,7 @@ Start from [Your first application](../first-app.md), then install Mail:
 composer require naf/mail
 ```
 
-Starter 0.2.4 already supplies View, Session and Form 0.2.4, including `csrf()->token()`
+Starter 0.2.4+ already supplies View, Session and Form 0.2.4, including `csrf()->token()`
 and CSRF checks for every unsafe method. Each titled block is a complete file; create
 missing directories and replace the tutorial's corresponding files. If you combine
 recipes, merge their routes and service bindings instead of discarding the existing ones.

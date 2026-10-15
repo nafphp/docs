@@ -54,7 +54,7 @@ composer require naf/flow:^0.1 --with-all-dependencies
 ```
 
 Requires PHP 8.3+, `naf/framework` 0.2.7+ and `naf/view` 0.2+. Composer installs these
-dependencies and NAF discovers the plugin. Starter 0.2.4 also accepts `composer require
+dependencies and NAF discovers the plugin. Starter 0.2.4+ also accepts `composer require
 naf/flow` directly. `--with-all-dependencies` updates a framework version held by an older
 starter lock file. No Node installation or frontend
 build is needed in the consuming application. Only the host's `public/` directory is a web root.

@@ -15,10 +15,14 @@ The Composer vendor is **`naf`**; `nafphp` is the GitHub organisation.
 - PHP's JSON extension. Forms also use `mbstring`; database access needs PDO and its driver.
 - A writable project directory. Sessions and logs need writable storage at runtime.
 
-Framework **0.2.12+** does not require PDO. Older framework releases do; starter 0.2.4
-still locks Framework 0.2.9, so its initial installation also requires PDO. Update the
-framework dependency to use the current core requirements; database-backed features
-continue to need PDO and their database driver.
+Starter **0.2.5+** includes Framework 0.2.12 and does not require PDO. Database-backed
+features still need PDO and their database driver.
+
+??? note "Older starter installations"
+
+    Starter 0.2.4 locks Framework 0.2.9, which still requires PDO. Framework 0.2.12 removes
+    that core requirement. See [starter versions and updates](#starter-versions-and-updates)
+    for the dependency update; adding a database integration still requires its driver.
 
 ## Start with the application skeleton
 
@@ -149,11 +153,21 @@ directory; it includes its own bootstrap, routes and Composer file.
 These notes are for checking an existing project or choosing dependency updates. A fresh
 starter installation can proceed directly to [Your first application](first-app.md).
 
-Starter **0.2.4** locks framework **0.2.9**, form **0.2.4**, session **0.2.3** and view
-**0.2.3** (with Nyholm PSR-7 1.8.2). Its minimum constraints require these framework,
-form and view versions, so the fixes also apply when resolving the lowest dependencies.
-Form checks every unsafe method and provides `csrf()->token()`; framework guards work
-under CLI and header listeners compose. The [package overview](packages.md) lists releases.
+Starter **0.2.5** requires and locks framework **0.2.12**, form **0.2.4**, session **0.2.3**
+and view **0.2.3** (with Nyholm PSR-7 1.8.2). Its minimum constraints retain the framework,
+form and view fixes even with the lowest dependency resolution. Fresh `create-project`
+installations work with their committed lock file; no follow-up update is needed.
+
+The starter no longer requires PDO. Framework supplies HEAD fallback, automatic OPTIONS,
+405 responses with Allow and the optional `handle()` request API; `app()->run()` remains
+unchanged. Form checks every unsafe method and provides `csrf()->token()`; framework guards
+work under CLI and header listeners compose. The [package overview](packages.md) lists releases.
+
+??? info "Versions included in starter 0.2.4"
+
+    Starter **0.2.4** locks Framework 0.2.9, Form 0.2.4, Session 0.2.3 and View 0.2.3.
+    Its framework dependency requires PDO. Use the update command below to adopt the
+    current framework; the normal bootstrap remains `app()->run()`.
 
 ??? info "Versions included in starters 0.2.2 and 0.2.3"
 
