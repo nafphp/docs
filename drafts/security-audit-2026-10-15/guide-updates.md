@@ -55,6 +55,8 @@ before reading server metadata, parsed input, uploads or query parameters.
 The installed-host smoke check runs `install:database` twice against a disposable SQLite
 database. Both runs must succeed, and the second must apply no new migrations. No schema
 migration or new runtime dependency is introduced by this quality follow-up.
+User list and edit-form queries also run on SQLite: they use the common GROUP_CONCAT syntax
+and sort role and permission names in PHP, preserving distinct names and users without roles.
 
 ## HTTP client redirects
 
