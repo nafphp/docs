@@ -411,6 +411,12 @@ $_SESSION['auth'] = ['provider' => 'database', 'identifier' => '42'];
 `auth()->logout()` clears the login and rotates the ID again, leaving the rest of the session
 (carts, flashes, language) untouched.
 
+When using Form with Auth 0.2.3 or earlier, call `Naf\Form\csrf()->generate()` after a
+successful login, adoption of a verified identity, and logout. This replaces the token issued
+under the previous authentication state; session ID rotation alone does not replace it.
+Reload forms opened before the change. The [login recipe](recipes/login-form.md) includes
+this rotation.
+
 Turn persistence off for a stateless API:
 
 ```php-inline
