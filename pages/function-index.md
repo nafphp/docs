@@ -166,7 +166,7 @@ Version **v0.2.4** · [OAuth client](oauth-client.md)
 
 ## naf/oauth-server
 
-Version **v0.2.5** · [OAuth authorization server](oauth-server.md)
+Version **v0.2.6** · [OAuth authorization server](oauth-server.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |

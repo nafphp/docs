@@ -2674,7 +2674,7 @@
     "naf/database",
     "naf/view"
    ],
-   "version": "v0.2.5"
+   "version": "v0.2.6"
   },
   "orm": {
    "description": "NAF ORM Plugin.",
