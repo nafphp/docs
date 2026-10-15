@@ -91,6 +91,11 @@ The token signs the subject, channels and expiry with HMAC. The server permits o
 channels listed in it. Permission changes do not rewrite an already issued token; use
 short lifetimes and authorize token renewal.
 
+In WebSocket 0.1.1, expiry is checked during the upgrade. An established connection can
+outlive its token; a short lifetime alone does not end its subscription. Keep messages
+limited to change identifiers and reauthorize HTTP reads. When access must end immediately,
+close the affected connections or restart the supervised server, and refuse their renewal.
+
 The browser module `websocket.js` uses its page token once, then requests a new token before
 each reconnect. The host supplies the renewal URL and checks the current session and channel
 permissions there. Return an authorization failure when the account can no longer connect.

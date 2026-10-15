@@ -99,6 +99,12 @@ Pass an ordered array of transport instances to `new Client($transports)` for cu
 selection. Fallback is based on availability; a failed cURL request does not automatically
 switch to the stream transport.
 
+Use the default cURL transport for requests carrying credentials. Its redirect handling
+removes `Authorization` and `Cookie` when the destination origin changes. The PHP stream
+wrapper does not provide the same redirect controls. Restrict outbound destinations in the
+application when URLs can come from untrusted input; transport selection does not provide
+an SSRF policy.
+
 ## Streaming large bodies { #large-bodies-do-not-go-through-memory }
 
 The cURL transport reads the request body from its current position and spools the response

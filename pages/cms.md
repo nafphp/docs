@@ -198,6 +198,11 @@ Logout is a CSRF-protected POST. Existing legacy sessions can be restored throug
 the database provider; see the
 [Auth integration notes](https://github.com/nafphp/cms/blob/main/docs/auth-migration.md).
 
+Verify session revocation separately from password changes. In CMS 0.0.2, resetting a
+password does not by itself end previously authenticated sessions. Incident response must
+also invalidate those sessions in the configured backend. Test with a second browser session
+and check that its next protected request requires authentication.
+
 MCP authentication is enabled with file-backed tokens by default. Create tokens
 with `vendor/bin/naf mcp:token:create` and grant only the scopes the client needs.
 Tools use the executable registry; `cms_system_health`, `cms_queue_status` and
