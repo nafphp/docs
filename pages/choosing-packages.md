@@ -65,7 +65,7 @@ composer require naf/view naf/form
 
 The starter already includes these packages. View renders PHP templates; Form validates input
 and checks CSRF tokens for every method except GET, HEAD and OPTIONS (Form 0.2.3+).
-Starter 0.2.4 locks Form 0.2.4, so a fresh installation already has this behavior. In an
+Starter 0.2.4+ locks Form 0.2.4, so a fresh installation already has this behavior. In an
 older project, run `composer require 'naf/form:^0.2.4'`. Form installs Session for token storage.
 The `memory()` helper reads the current request; it does not preserve input across redirects.
 

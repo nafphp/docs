@@ -13,7 +13,7 @@ check runs for every request method except GET, HEAD and OPTIONS, including PATC
 Use the examples in a bootstrapped application. Template examples assume the starter's
 `naf/view` package for HTML escaping; validation itself does not require View.
 
-Starter 0.2.4 includes Form 0.2.4 and the CSRF behaviour described here. For older
+Starter 0.2.4+ includes Form 0.2.4 and the CSRF behaviour described here. For older
 applications, see the [version notes](#use-the-corrected-helper-release).
 
 ## Quick start
