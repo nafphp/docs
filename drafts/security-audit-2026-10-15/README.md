@@ -6,6 +6,14 @@ The published guides continue to describe current releases and their operational
 Do not promote these sections into `pages/` or raise installation minimums before Packagist
 contains the verified release commits.
 
+The four security pull requests were reviewed and merged on 15 October 2026:
+[CMS #4](https://github.com/nafphp/cms/pull/4),
+[Board #39](https://github.com/nafphp/board/pull/39),
+[Client #3](https://github.com/nafphp/client/pull/3) and
+[WebSocket #2](https://github.com/nafphp/websocket/pull/2).
+Merging source does not publish these package versions. The subsequent CMS quality pass
+also targets 0.0.3; review its final RC before promoting the corresponding guide text.
+
 | Package | RC branch | Guide sections |
 |---|---|---|
 | `naf/cms` | `v0.0.3-rc` | CMS requirements, authentication, upgrades and uploads |

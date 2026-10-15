@@ -38,6 +38,26 @@ through the authorized, CSRF-protected endpoint; the other session's next protec
 must redirect to login. The old password must fail, and a fresh login with the replacement
 must succeed. Keep the tests on the configured production session backend as well.
 
+## CMS contributor checks and article actions
+
+The CMS 0.0.3 source quality follow-up removes the PHPStan baseline while retaining level 6
+analysis of `src/` and `tests/`. EntityStorage's generic entity type is preserved across
+single-entity and collection operations. Array contracts and PHPDoc tags describe the
+actual metadata, schema and result records. Migration execution remains a separate check.
+Contributor instructions live in the package's `docs/quality-checks.md`.
+
+Article publish and delete handlers pass the normalised language string returned by
+LanguageRegistry to the Content API. They do not read an enum property from that string.
+The published-version deletion guard remains in place. Login and form handlers establish
+the parsed body's array shape, and CMS HTTP paths check the PSR server-request capability
+before reading server metadata, parsed input, uploads or query parameters.
+
+The installed-host smoke check runs `install:database` twice against a disposable SQLite
+database. Both runs must succeed, and the second must apply no new migrations. No schema
+migration or new runtime dependency is introduced by this quality follow-up.
+User list and edit-form queries also run on SQLite: they use the common GROUP_CONCAT syntax
+and sort role and permission names in PHP, preserving distinct names and users without roles.
+
 ## HTTP client redirects
 
 In Client 0.2.3 the PHP stream fallback returns the original 3xx response, its Location header,
