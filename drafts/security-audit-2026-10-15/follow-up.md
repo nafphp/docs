@@ -10,7 +10,7 @@ must stay outside `pages/`; the original audit working files are not repository 
 | `naf/session` | 0.2.4 | None |
 | `naf/client` | 0.2.3 | Extend the existing pending RC |
 | `naf/oauth-server` | 0.2.6 published | Guide promoted; both concurrency suites passed on SQLite, PostgreSQL and MySQL |
-| `naf/mcp` | 0.2.7 | Resolve the committed lock against published OAuth Server 0.2.6; publish MCP before promoting its guidance |
+| `naf/mcp` | 0.2.7 | Lock now includes released OAuth Server 0.2.6 and Framework 0.2.12; CI passed; publish MCP before promoting its guidance |
 | `naf/cms` | 0.0.3 | Raise the Auth minimum to 0.2.4 and update the committed lock after Auth publication |
 
 Before promoting the CMS section, confirm the final RC version and review the final combined
