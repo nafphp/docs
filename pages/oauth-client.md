@@ -284,6 +284,44 @@ not a server fault:
 <?php endif ?>
 ```
 
+### Form CSRF tokens after external login
+
+When the host also uses `naf/form`, rotate its CSRF token after external authentication,
+as with password login. Auth 0.2.3 rotates session state but does not rotate Form's token;
+OAuth Client 0.2.4's shipped callback does not perform that host integration either.
+Otherwise a token rendered before sign-in remains valid afterwards.
+
+With Form 0.2.3+, call `csrf()->generate()` after a successful application-owned callback.
+For the shipped account mapping and callback behavior, a thin host route can delegate to
+`OAuthController` and perform that rotation. Set `'oauth' => ['routes' => false]` in the
+application configuration, then register all three named routes in `app/routes.php`:
+
+```php-inline
+use Naf\OAuth\Client\Controllers\OAuthController;
+use Psr\Http\Message\ResponseInterface;
+use function Naf\app;
+use function Naf\Auth\auth;
+use function Naf\Form\csrf;
+use function Naf\route;
+
+route()->add('GET', '/auth/{provider}', [OAuthController::class, 'start'], 'oauth.start');
+route()->add('GET', '/auth/{provider}/connect', [OAuthController::class, 'connect'], 'oauth.connect');
+route()->add('GET', '/auth/{provider}/callback', static function (string $provider): ResponseInterface {
+    $response = app()->container()->make(OAuthController::class)->callback($provider);
+    if (auth()->check()) {
+        csrf()->generate();
+    }
+
+    return $response;
+}, 'oauth.callback');
+```
+
+Protocol verification and account linking remain in the plugin. A refused callback does
+not authenticate a guest; an already signed-in member also receives a fresh token after
+the handler. Forms and other tabs holding the old token must reload before their next write.
+Check the complete login flow: a pre-login token must fail afterwards, while a freshly
+rendered form succeeds.
+
 ---
 
 ## Map an external identity to an account { #which-account-is-this }
