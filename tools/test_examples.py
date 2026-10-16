@@ -763,6 +763,33 @@ echo json_encode([
             result = client.request('/plugins/naf/websocket/assets/' + filename)
             source = root / 'vendor/naf/websocket/src/Resources/public/assets' / filename
             expect(result[0] == 200 and result[2] == source.read_text(), 'Published WebSocket module is available over HTTP: ' + filename)
+    # Exercise the copied PDO enqueue fragment through the documented transaction boundaries.
+    queue_example = root / 'bin/pdo-queue-example.php'
+    enqueue = fragment('queues.md', '`PDODriver` also deduplicates pending jobs')
+    queue_example.write_text("<?php\nrequire dirname(__DIR__) . '/bootstrap.php';\n" + enqueue.split("queue()->push", 1)[0] + '''
+$pdo = new \\PDO('sqlite::memory:');
+$driver = new \\Naf\\Queue\\Drivers\\PDODriver($pdo, 300);
+$driver->install();
+\\Naf\\app()->container()->set(\\Naf\\Queue\\Core\\Queue::class, new \\Naf\\Queue\\Core\\Queue($driver));
+$enqueue = static function (): void {
+''' + 'queue()->push' + enqueue.split('queue()->push', 1)[1] + '''
+};
+$pdo->beginTransaction();
+$enqueue();
+$pdo->rollBack();
+$rolledBack = (int) $pdo->query('SELECT COUNT(*) FROM naf_queue_jobs')->fetchColumn();
+$pdo->beginTransaction();
+$enqueue();
+$enqueue();
+$pdo->commit();
+$deduplicated = (int) $pdo->query('SELECT COUNT(*) FROM naf_queue_jobs')->fetchColumn();
+$reservation = $driver->reserve();
+$driver->acknowledge($reservation);
+$enqueue();
+echo json_encode([$rolledBack, $deduplicated, (int) $pdo->query('SELECT COUNT(*) FROM naf_queue_jobs')->fetchColumn()]);
+''')
+    expect(json.loads(run([*PHP, 'bin/pdo-queue-example.php'], root)) == [0, 1, 1],
+           'Documented PDO enqueue rolls back atomically, deduplicates pending work and releases its key after acknowledgement')
     # The configuration check must distinguish string false from PHP truthiness.
     config = root / 'app/config.php'
     original = config.read_text()
