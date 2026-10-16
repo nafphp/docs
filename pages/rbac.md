@@ -76,6 +76,40 @@ public function getPermissions(): iterable
 Both are read once per request and cached. Call `rbac()->forget()` after a change that a
 later part of the same request will read back.
 
+### PDO accounts without a user model
+
+With Auth's `DatabaseProvider`, the application's identity factory can supply stored grants
+directly. After configuring PDO, running the RBAC migrations and synchronizing roles, add
+these entries to `app/config.php`:
+
+```php-inline
+use Naf\Auth\Identity\Identity;
+use Naf\Auth\Provider\DatabaseProvider;
+use function Naf\Rbac\rbac;
+
+return ['auth' => [
+    'providers' => ['database' => DatabaseProvider::class],
+    'database' => ['identity_factory' => static fn(array $row): Identity => new Identity(
+        (string) $row['id'],
+        roles: rbac()->rolesOf((int) $row['id']),
+        permissions: rbac()->permissionsOf((int) $row['id']),
+    )],
+]];
+```
+
+This is a fragment to merge into the existing configuration, not a replacement for its
+database and session settings. It uses Auth's existing PDO provider and integer application
+account IDs. The provider reloads the identity on authenticated requests, so saved grants
+affect the next request. Return `null` from the factory when an application-owned account
+rule forbids sign-in, as described in [Authentication](auth.md).
+
+Registration remains application code. Assign its intended initial role in the same PDO
+transaction as account creation, and never accept a role or permission from public signup
+input. Initialize administration through a trusted setup command; being the first registrant
+does not itself establish authority. The application must also check that a grant target is
+an existing account it permits administrators to manage: RBAC deliberately does not own the
+host's user table.
+
 ## Privilege policy { #the-rules }
 
 `PrivilegePolicy` enforces the following administration rules:
