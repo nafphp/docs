@@ -246,6 +246,30 @@ but a job must finish within its lease or renew it. Delivery is at least once: m
 effects tolerate a repeated job. The worker acknowledges after success; custom consumers
 must acknowledge their own reservations.
 
+When a business write and its job must succeed together, bind `PDODriver` to the **same PDO
+instance** used for the write and call `queue()->push()` before committing that transaction.
+Rolling back removes both changes. The default file driver cannot participate in a database
+transaction, and using another PDO connection does not make the writes atomic. Do not hold
+the transaction open while a worker performs network requests or other slow work.
+
+`PDODriver` also deduplicates pending jobs when their payload includes `_job_id`
+(Queue 0.2.4+):
+
+```php-inline
+use App\Jobs\RecordSignup;
+use function Naf\Queue\queue;
+
+queue()->push(RecordSignup::class, ['user_id' => 42, '_job_id' => 'signup:42']);
+```
+
+This uses the job above and the PDO binding in this section. The key is scoped to the job
+class; repeating the same class and key keeps the existing job and its original payload.
+Choose an ID for one logical operation. A successful acknowledgement deletes the job and
+frees the key, so deduplication is not a permanent record of completed work. A crash after an
+external effect can still repeat that effect on retry. Use application-level idempotency for
+saved replies, payments or other effects that must not be duplicated. FileDriver does not
+provide this `_job_id` behavior.
+
 Set `queue:heartbeat_file` to an application-specific writable path for a worker heartbeat.
 Monitor its age together with failures and backlog; it proves polling, not successful jobs.
 
