@@ -703,7 +703,7 @@ def test_integrations(root):
 
 
 def test_chapter_examples(root):
-    for page in ('events.md', 'translations.md'):
+    for page in ('events.md', 'translations.md', 'websocket.md'):
         copy_examples(page, root)
     run([*COMPOSER, 'dump-autoload', '--no-interaction'], root)
     output = run([*PHP, 'bin/events-demo.php'], root)
@@ -750,6 +750,19 @@ echo json_encode([
 ''')
     expect(json.loads(run([*PHP, 'bin/provider-demo.php'], root)) == ['42', None, None, '42'],
            'Application provider and documented container factory authenticate and load through an in-memory API fixture')
+    run([*PHP, 'bin/publish-websocket-assets.php'], root)
+    for filename in ('websocket.js', 'token.js'):
+        source = root / 'vendor/naf/websocket/src/Resources/public/assets' / filename
+        target = root / 'public/plugins/naf/websocket/assets' / filename
+        expect(target.read_bytes() == source.read_bytes(), 'WebSocket publishing copies the installed ' + filename)
+    target.write_text('stale asset')
+    run([*PHP, 'bin/publish-websocket-assets.php'], root)
+    expect(target.read_bytes() == source.read_bytes(), 'Repeating asset publication replaces stale browser modules')
+    with server(root) as client:
+        for filename in ('websocket.js', 'token.js'):
+            result = client.request('/plugins/naf/websocket/assets/' + filename)
+            source = root / 'vendor/naf/websocket/src/Resources/public/assets' / filename
+            expect(result[0] == 200 and result[2] == source.read_text(), 'Published WebSocket module is available over HTTP: ' + filename)
     # The configuration check must distinguish string false from PHP truthiness.
     config = root / 'app/config.php'
     original = config.read_text()
