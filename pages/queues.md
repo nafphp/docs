@@ -267,8 +267,12 @@ class; repeating the same class and key keeps the existing job and its original 
 Choose an ID for one logical operation. A successful acknowledgement deletes the job and
 frees the key, so deduplication is not a permanent record of completed work. A crash after an
 external effect can still repeat that effect on retry. Use application-level idempotency for
-saved replies, payments or other effects that must not be duplicated. FileDriver does not
-provide this `_job_id` behavior.
+saved replies, payments or other effects that must not be duplicated.
+
+FileDriver uses `_job_id` as a job filename within its channel. Reusing it can replace the
+pending file and its payload; it does not keep the original job or scope the key to its
+class. File keys must pass `safePath`, so the colon-containing example above is for
+`PDODriver`. Do not assume the two drivers have the same duplicate-key semantics.
 
 Set `queue:heartbeat_file` to an application-specific writable path for a worker heartbeat.
 Monitor its age together with failures and backlog; it proves polling, not successful jobs.

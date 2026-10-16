@@ -786,10 +786,17 @@ $deduplicated = (int) $pdo->query('SELECT COUNT(*) FROM naf_queue_jobs')->fetchC
 $reservation = $driver->reserve();
 $driver->acknowledge($reservation);
 $enqueue();
-echo json_encode([$rolledBack, $deduplicated, (int) $pdo->query('SELECT COUNT(*) FROM naf_queue_jobs')->fetchColumn()]);
+$afterAcknowledgement = (int) $pdo->query('SELECT COUNT(*) FROM naf_queue_jobs')->fetchColumn();
+$files = new \\Naf\\Queue\\Drivers\\FileDriver(BASE_PATH . '/storage/file-key-demo', BASE_PATH . '/storage/file-key-failed');
+$files->enqueue(RecordSignup::class, ['user_id' => 42, '_job_id' => 'signup-42']);
+$files->enqueue(RecordSignup::class, ['user_id' => 99, '_job_id' => 'signup-42']);
+$fileJob = $files->dequeue();
+echo json_encode([$rolledBack, $deduplicated, $afterAcknowledgement, $fileJob['payload']['user_id']]);
 ''')
-    expect(json.loads(run([*PHP, 'bin/pdo-queue-example.php'], root)) == [0, 1, 1],
+    queue_result = json.loads(run([*PHP, 'bin/pdo-queue-example.php'], root))
+    expect(queue_result[:3] == [0, 1, 1],
            'Documented PDO enqueue rolls back atomically, deduplicates pending work and releases its key after acknowledgement')
+    expect(queue_result[3] == 99, 'FileDriver reusing a safe job ID replaces the pending file payload')
     # The configuration check must distinguish string false from PHP truthiness.
     config = root / 'app/config.php'
     original = config.read_text()
