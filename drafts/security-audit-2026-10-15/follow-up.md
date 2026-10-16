@@ -10,12 +10,12 @@ must stay outside `pages/`; the original audit working files are not repository 
 | `naf/session` | 0.2.4 | None |
 | `naf/client` | 0.2.3 | Extend the existing pending RC |
 | `naf/oauth-server` | 0.2.6 published | Guide promoted; both concurrency suites passed on SQLite, PostgreSQL and MySQL |
-| `naf/mcp` | 0.2.7 | Lock now includes released OAuth Server 0.2.6 and Framework 0.2.12; CI passed; publish MCP before promoting its guidance |
+| `naf/mcp` | 0.2.7 published | Guide promoted; explicit-request and sequential MCP authentication checks added |
 | `naf/cms` | 0.0.3 | Raise the Auth minimum to 0.2.4 and update the committed lock after Auth publication |
 
 Before promoting the CMS section, confirm the final RC version and review the final combined
-RC diff. Only OAuth Server PR #6 and its 0.2.6 publication were subsequently authorized;
-the other package releases and package-code merges still need maintainer authorization.
+RC diff. The remaining Auth, Session, Client and CMS package-code PRs and releases await
+maintainer review.
 
 ## Authentication and forms
 
@@ -96,12 +96,11 @@ and DNS behavior.
 `pages/oauth-server.md`. Both concurrency scripts passed on all three required engines
 (16 workers and 40 replay rounds per engine).
 
-After MCP 0.2.7 publication, add to `pages/mcp.md`, OAuth:
-
-MCP 0.2.7 passes the authenticator's supplied request directly to the resource server,
-including ordinary PSR-7 requests. Its Composer conflict excludes OAuth Server versions
-before 0.2.6. Publish OAuth Server first, then verify the combination with a fresh Composer
-resolution before publishing MCP.
+[MCP 0.2.7](https://github.com/nafphp/mcp/releases/tag/v0.2.7) is published at
+`a37a05dffcf91d185d54aced0520a68bed8b6070`. Its supplied-request authentication guidance has
+moved to `pages/mcp.md`; the MCP and Alexa guides require OAuth Server 0.2.6+ for the
+integration. The example runner checks the configured authenticator with ordinary PSR-7
+requests and sequential authenticated, missing-token and invalid-token `POST /mcp` calls.
 
 ## CMS permissions, profiles and scripts
 

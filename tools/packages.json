@@ -2630,7 +2630,7 @@
    "suggests": [
     "naf/oauth-server"
    ],
-   "version": "v0.2.6"
+   "version": "v0.2.7"
   },
   "monitoring": {
    "description": "Metrics, StatsD exporters and optional PSR-3 logging integration for NAF.",

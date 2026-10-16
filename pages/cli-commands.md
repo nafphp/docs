@@ -76,7 +76,7 @@ Version **v0.2.4** · [Database](database.md)
 
 ## naf/mcp
 
-Version **v0.2.6** · [MCP tools](mcp.md)
+Version **v0.2.7** · [MCP tools](mcp.md)
 
 | Command | Purpose | Arguments | Options |
 | --- | --- | --- | --- |
