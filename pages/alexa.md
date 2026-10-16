@@ -41,7 +41,7 @@ are outside its scope.
 ## Prepare a host
 
 Use PHP 8.3+, `mbstring`, `readline`, PDO and `pdo_sqlite` for this example. This guide
-requires `naf/alexa` 0.1.1+, `naf/mcp` 0.2.6+ and `naf/oauth-server` 0.2.5+.
+requires `naf/alexa` 0.1.1+, `naf/mcp` 0.2.7+ and `naf/oauth-server` 0.2.6+.
 Create a host application; only its `public/` directory is the document root:
 
 ```bash

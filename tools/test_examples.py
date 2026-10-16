@@ -848,9 +848,14 @@ def test_alexa(root):
 
 
 def test_oauth_request_lifetime(root):
+    installation = fragment('mcp.md', 'Install or update the OAuth integration together with MCP:', 'bash')
+    run([*COMPOSER, *shlex.split(installation)[1:], '--no-interaction', '--prefer-dist'], root)
     version = run([*PHP, '-r', "require 'vendor/autoload.php'; echo (int) version_compare("
                    "\\Composer\\InstalledVersions::getVersion('naf/oauth-server'), '0.2.6.0', '>=');"], root)
     expect(version == '1', 'Request-lifetime examples require published OAuth Server 0.2.6 or newer')
+    mcp_version = run([*PHP, '-r', "require 'vendor/autoload.php'; echo (int) version_compare("
+                       "\\Composer\\InstalledVersions::getVersion('naf/mcp'), '0.2.7.0', '>=');"], root)
+    expect(mcp_version == '1', 'MCP request-lifetime examples require published MCP 0.2.7 or newer')
     example = root / 'oauth-request-lifetime.php'
     example.write_text('''<?php
 require __DIR__ . '/bootstrap.php';
@@ -891,11 +896,37 @@ foreach ($requests as $supplied) {
     $body = json_decode((string) $response->getBody(), true);
     $responses[] = [$response->getStatusCode(), $body['client'] ?? null];
 }
+$authenticator = app()->container()->get(\\Naf\\MCP\\Auth\\AuthenticatorInterface::class);
+$request = new \\Nyholm\\Psr7\\Request('POST', '/mcp', ['Authorization' => 'Bearer ' . $a->accessToken]);
+''' + fragment('mcp.md', 'For a custom adapter, pass the PSR-7') + '''
+$mcpExplicit = [
+    $identity?->id === $first->id,
+    $authenticator->authenticate($request->withoutHeader('Authorization')) === null,
+    $authenticator->authenticate($request->withHeader('Authorization', 'Bearer invalid')) === null,
+    $authenticator->authenticate($request->withHeader('Authorization', 'Bearer ' . $b->accessToken))?->id === $second->id,
+];
+$mcpStatuses = [];
+foreach ([$a->accessToken, null, 'invalid', $b->accessToken] as $bearer) {
+    $headers = [
+        'Content-Type' => 'application/json',
+        'Accept' => 'application/json, text/event-stream',
+        'MCP-Protocol-Version' => '2025-11-25',
+    ];
+    if ($bearer !== null) {
+        $headers['Authorization'] = 'Bearer ' . $bearer;
+    }
+    $supplied = new \\Nyholm\\Psr7\\ServerRequest('POST', 'https://tools.example.com/mcp', $headers,
+        '{"jsonrpc":"2.0","id":1,"method":"ping"}');
+    $mcpStatuses[] = app()->handle($supplied)->getStatusCode();
+}
 echo json_encode([
     'explicit' => $explicit,
     'statuses' => array_column($responses, 0),
     'clients' => [$responses[0][1] === $first->id, $responses[3][1] === $second->id],
     'shared' => $server === app()->container()->get(ResourceServer::class),
+    'mcpExplicit' => $mcpExplicit,
+    'mcpStatuses' => $mcpStatuses,
+    'sharedAuthenticator' => $authenticator === app()->container()->get(\\Naf\\MCP\\Auth\\AuthenticatorInterface::class),
 ]);
 ''')
     run([*PHP, '-l', str(example)], root)
@@ -904,6 +935,10 @@ echo json_encode([
            'Documented context(request) accepts plain PSR-7 requests, caches one request and rejects missing/invalid tokens')
     expect(result['statuses'] == [200, 401, 401, 200] and result['clients'] == [True, True] and result['shared'],
            'Published OAuth Server isolates token A, missing/invalid tokens and token B through one App and ResourceServer')
+    expect(result['mcpExplicit'] == [True, True, True, True],
+           'Documented MCP authentication fragment uses each explicit PSR-7 request instead of the current global request')
+    expect(result['mcpStatuses'] == [200, 401, 401, 200] and result['sharedAuthenticator'],
+           'Published MCP isolates sequential POST calls through one App and authenticator')
 
 
 def test_configuration_sources(root):

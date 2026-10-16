@@ -10,7 +10,7 @@ requires:
 Tools are PHP classes with input schemas and handlers. Bearer tokens and tool scopes control access;
 handlers must still authorize the application data and operations they expose.
 
-This guide requires `naf/mcp` 0.2.6+, PHP 8.3+ and `naf/framework` 0.2.8+.
+This guide requires `naf/mcp` 0.2.7+, PHP 8.3+ and `naf/framework` 0.2.8+.
 Start from a bootstrapped application. The default token store uses a file, not a database.
 The example below measures files in one application-owned reports directory.
 
@@ -324,8 +324,16 @@ And calls one:
 
 ## OAuth authentication and personal tools
 
-Install `naf/oauth-server` and configure its database, scopes, public URL and canonical audience.
-Set these fragments in the host configuration, replacing the example URLs:
+Install or update the OAuth integration together with MCP:
+
+```bash
+composer require naf/mcp:^0.2.7 naf/oauth-server:^0.2.6 --with-all-dependencies
+```
+
+OAuth remains optional when using the default File-Token driver. MCP 0.2.7 excludes OAuth
+Server versions before 0.2.6 through Composer conflict metadata.
+Configure the OAuth database, scopes, public URL and canonical audience. Set these fragments
+in the host configuration, replacing the example URLs:
 
 ```php-inline
 'public_url' => 'https://tools.example.com',
@@ -364,9 +372,31 @@ OAuth ResourceServer. Expired, revoked, wrong-audience and deleted-account token
 Current user permissions filter the token's usable scopes. A browser session never supplies
 a missing bearer identity. PRM is public at `/.well-known/oauth-protected-resource` and
 `/.well-known/oauth-protected-resource/mcp`; absent resource/server configuration returns 404.
-Use `naf/oauth-server` 0.2.5+ for OAuth authentication. It includes the conventional
+Use `naf/oauth-server` 0.2.6+ for OAuth authentication. It includes the conventional
 authorization-server metadata and resource-bound code exchange needed by Alexa, together
 with strict scope-policy and PKCE validation.
+
+### Request lifetime
+
+MCP 0.2.7 passes the authenticator's supplied PSR-7 request directly to the OAuth resource
+server, including ordinary `RequestInterface` instances. A shared authenticator evaluates
+each request's Authorization header: a missing, invalid or different token cannot inherit
+the preceding caller's identity or scopes.
+
+For a custom adapter, pass the PSR-7 request being authorized to the configured
+`Naf\MCP\Auth\AuthenticatorInterface`. This fragment assumes `$authenticator` is that injected
+service and `$request` is the supplied request:
+
+```php-inline
+$identity = $authenticator->authenticate($request);
+```
+
+The OAuth driver returns a `Naf\MCP\Auth\McpIdentity` for a usable token and `null` when it
+cannot authenticate it. Acquire this identity for each request. Follow the OAuth server's
+[request-lifetime rules](oauth-server.md#request-lifetime) when sharing services in a custom
+adapter; other request-bound dependencies also need an appropriate lifetime.
+
+### Personal tools and discovery
 
 Personal tools implement `UserToolInterface` in addition to the ordinary tool/scoped contracts.
 Calling one without a linked user returns HTTP 401; a linked user missing the required scopes

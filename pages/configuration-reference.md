@@ -210,7 +210,7 @@ Version **v0.2.3** · [Sending mail](mail.md)
 
 ## naf/mcp
 
-Version **v0.2.6** · [MCP tools](mcp.md)
+Version **v0.2.7** · [MCP tools](mcp.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
