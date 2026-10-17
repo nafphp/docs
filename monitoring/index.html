@@ -1,0 +1,3968 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Not Another Framework — a minimal, functional PHP microframework">
+      
+      
+      
+        <link rel="canonical" href="https://nafphp.github.io/docs/monitoring/">
+      
+      
+        <link rel="prev" href="../best-practices/">
+      
+      
+        <link rel="next" href="../testing/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/naf-logo-small-square.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Monitoring - NAF</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:300,300i,400,400i,700,700i%7CIBM+Plex+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"IBM Plex Sans";--md-code-font:"IBM Plex Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#monitoring" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="NAF" class="md-header__button md-logo" aria-label="NAF" data-md-component="logo">
+      
+  <img src="../assets/naf-logo-small-square.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NAF
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Monitoring
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/nafphp/framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    nafphp/framework
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="NAF" class="md-nav__button md-logo" aria-label="NAF" data-md-component="logo">
+      
+  <img src="../assets/naf-logo-small-square.png" alt="logo">
+
+    </a>
+    NAF
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/nafphp/framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    nafphp/framework
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NAF overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../first-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your first application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choosing-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choosing packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fundamentals
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fundamentals
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../routing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Routing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../controllers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controllers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../request-response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requests and responses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dependency-injection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependency injection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build web pages
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Build web pages
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../views/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Views and templates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../forms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forms and validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sessions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sessions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Flow browser components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../translations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Translations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file-downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serving files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NafCMS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a scenario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/small-website/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Small website
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/simple-json-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JSON API without a database
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/post-requests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Handling POST requests
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/contact-form/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/login-form/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Login form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/json-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JSON API with a database
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Store data
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Store data
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database and migrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../orm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ORM and repositories
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Background work
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Background work
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../console/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Console commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../queues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Queues and workers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scheduling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduled jobs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mail/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mail delivery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../http-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HTTP client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rate-limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rate limits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WebSocket notifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../alexa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alexa+ MCP server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security and identity
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security and identity
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guard rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication and permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auth-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rbac/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roles and permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auth-ldap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LDAP authentication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../oauth-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OAuth client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../oauth-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OAuth authorization server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extend NAF
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Extend NAF
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugin development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../external-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    External libraries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#declare-your-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Declare your metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#labels-and-request-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Labels and request isolation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statsd-and-dogstatsd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        StatsD and DogStatsD
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#psr-3-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PSR-3 logging
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#http-instrumentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP instrumentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#buffering-workers-and-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Buffering, workers and failures
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-exporters-and-multiple-destinations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom exporters and multiple destinations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-without-a-collector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing without a collector
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API details
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#if-the-result-is-different" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If the result is different
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing applications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API compatibility and support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploying applications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting and logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cheat-sheet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cheat sheet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../function-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Function index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration keys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Package overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading-from-nixphp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrading from NixPHP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built with NAF
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Built with NAF
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/nafinity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/nafinity-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity container deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/nafinity-tickets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity tickets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/nafinity-accounts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity accounts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/nafinity-invoices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity hours and invoices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/nafinity-appearance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity appearance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/nafinity-mail/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity mail replies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-with/extending-nafinity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nafinity extensions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#declare-your-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Declare your metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#labels-and-request-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Labels and request isolation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statsd-and-dogstatsd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        StatsD and DogStatsD
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#psr-3-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PSR-3 logging
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#http-instrumentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP instrumentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#buffering-workers-and-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Buffering, workers and failures
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-exporters-and-multiple-destinations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom exporters and multiple destinations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-without-a-collector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing without a collector
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API details
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#if-the-result-is-different" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If the result is different
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/nafphp/docs/edit/main/pages/monitoring.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.06 9 .94.94L5.92 19H5v-.92zm3.6-6c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Permanent link">&para;</a></h1>
+<p><code>naf/monitoring</code> records declared counters, gauges and histograms, exports them to
+StatsD or DogStatsD, and can decorate a PSR-3 logger. The application chooses its
+metrics, labels and collector. The default exporter performs no network I/O.</p>
+<p>Use this guide in an existing <a href="../first-app/">NAF application</a>, with PHP 8.3+ and
+Framework 0.2.3 or newer.</p>
+<p>NAF discovers the installed Composer plugin automatically. Application code uses
+<code>Naf\Monitoring\monitor()</code> or injects <code>Naf\Monitoring\Monitor</code>. Both share the same
+service. No application route, daemon or scheduler is installed by the plugin.</p>
+<div class="admonition info">
+<p class="admonition-title">Required packages</p>
+<p>In an existing NAF application:</p>
+<div class="language-bash highlight"><pre><span></span><code>composer<span class="w"> </span>require<span class="w"> </span>naf/monitoring
+</code></pre></div>
+</div>
+<h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<p>Use a disposable NAF application for this example. Replace <code>app/config.php</code> with
+the following file; when adding monitoring to an existing application, merge the
+<code>monitoring</code> entry into its current configuration.</p>
+<div class="language-php highlight"><span class="filename">app/config.php</span><pre><span></span><code><span class="cp">&lt;?php</span>
+
+<span class="k">declare</span><span class="p">(</span><span class="nx">strict_types</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="k">return</span> <span class="p">[</span>
+    <span class="s1">'monitoring'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+        <span class="s1">'metrics'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+            <span class="s1">'orders.created'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'type'</span> <span class="o">=&gt;</span> <span class="s1">'counter'</span><span class="p">,</span> <span class="s1">'labels'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'channel'</span><span class="p">]],</span>
+        <span class="p">],</span>
+    <span class="p">],</span>
+<span class="p">];</span>
+</code></pre></div>
+<p>Create <code>bin/monitoring-demo.php</code>:</p>
+<div class="language-php highlight"><span class="filename">bin/monitoring-demo.php</span><pre><span></span><code><span class="cp">&lt;?php</span>
+
+<span class="k">declare</span><span class="p">(</span><span class="nx">strict_types</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="k">use</span> <span class="nx">Naf\Monitoring\Exporters\InMemoryExporter</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Naf\Monitoring\MetricExporterInterface</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\app</span><span class="p">;</span>
+<span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\Monitoring\monitor</span><span class="p">;</span>
+
+<span class="nb">define</span><span class="p">(</span><span class="s1">'BASE_PATH'</span><span class="p">,</span> <span class="nb">dirname</span><span class="p">(</span><span class="no">__DIR__</span><span class="p">));</span>
+<span class="k">require</span> <span class="nx">BASE_PATH</span> <span class="o">.</span> <span class="s1">'/vendor/autoload.php'</span><span class="p">;</span>
+
+<span class="nv">$application</span> <span class="o">=</span> <span class="nx">app</span><span class="p">();</span>
+<span class="nv">$exporter</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">InMemoryExporter</span><span class="p">();</span>
+<span class="nv">$application</span><span class="o">-&gt;</span><span class="na">container</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="nx">MetricExporterInterface</span><span class="o">::</span><span class="na">class</span><span class="p">,</span> <span class="nv">$exporter</span><span class="p">);</span>
+
+<span class="nx">monitor</span><span class="p">(</span><span class="s1">'orders.created'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'channel'</span> <span class="o">=&gt;</span> <span class="s1">'web'</span><span class="p">])</span><span class="o">-&gt;</span><span class="na">increment</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="nx">monitor</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">flush</span><span class="p">();</span>
+
+<span class="k">foreach</span> <span class="p">(</span><span class="nv">$exporter</span><span class="o">-&gt;</span><span class="na">drain</span><span class="p">()</span> <span class="k">as</span> <span class="nv">$measurement</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="nv">$measurement</span><span class="o">-&gt;</span><span class="na">definition</span><span class="o">-&gt;</span><span class="na">name</span><span class="p">,</span> <span class="s1">': '</span><span class="p">,</span> <span class="nv">$measurement</span><span class="o">-&gt;</span><span class="na">value</span><span class="p">,</span>
+        <span class="s1">' (channel='</span><span class="p">,</span> <span class="nv">$measurement</span><span class="o">-&gt;</span><span class="na">labels</span><span class="p">[</span><span class="s1">'channel'</span><span class="p">],</span> <span class="s1">')'</span><span class="p">,</span> <span class="nx">PHP_EOL</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Run the example from the application root:</p>
+<div class="language-bash highlight"><pre><span></span><code>php<span class="w"> </span>bin/monitoring-demo.php
+</code></pre></div>
+<p>Expected output:</p>
+<div class="language-text highlight"><pre><span></span><code>orders.created: 3 (channel=web)
+</code></pre></div>
+<p>Register the exporter override before the first metric call. The helper and an
+injected <code>Monitor</code> share that service. The in-memory exporter lets you inspect
+measurements without a collector; configure <a href="#statsd-and-dogstatsd">StatsD or DogStatsD</a>
+for production collection.</p>
+<h2 id="declare-your-metrics">Declare your metrics<a class="headerlink" href="#declare-your-metrics" title="Permanent link">&para;</a></h2>
+<p>Merge these entries into the array returned by <code>app/config.php</code>:</p>
+<div class="language-php highlight"><pre><span></span><code><span class="cp">&lt;?php</span>
+<span class="k">use</span> <span class="nx">Naf\Monitoring\Exporters\StatsDExporter</span><span class="p">;</span>
+
+<span class="k">return</span> <span class="p">[</span><span class="s1">'monitoring'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+    <span class="s1">'exporter'</span> <span class="o">=&gt;</span> <span class="nx">StatsDExporter</span><span class="o">::</span><span class="na">class</span><span class="p">,</span>
+    <span class="s1">'exporter_options'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+        <span class="s1">'host'</span> <span class="o">=&gt;</span> <span class="s1">'127.0.0.1'</span><span class="p">,</span>
+        <span class="s1">'port'</span> <span class="o">=&gt;</span> <span class="mi">8125</span><span class="p">,</span>
+        <span class="s1">'prefix'</span> <span class="o">=&gt;</span> <span class="s1">'shop'</span><span class="p">,</span>
+        <span class="s1">'protocol'</span> <span class="o">=&gt;</span> <span class="s1">'statsd'</span><span class="p">,</span>
+        <span class="s1">'maxDatagramBytes'</span> <span class="o">=&gt;</span> <span class="mi">512</span><span class="p">,</span>
+        <span class="s1">'timeout'</span> <span class="o">=&gt;</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="s1">'labels'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'service'</span> <span class="o">=&gt;</span> <span class="s1">'shop'</span><span class="p">,</span> <span class="s1">'environment'</span> <span class="o">=&gt;</span> <span class="s1">'prod'</span><span class="p">],</span>
+    <span class="s1">'batch_size'</span> <span class="o">=&gt;</span> <span class="mi">256</span><span class="p">,</span>
+    <span class="s1">'metrics'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+        <span class="s1">'orders.created'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'type'</span> <span class="o">=&gt;</span> <span class="s1">'counter'</span><span class="p">,</span> <span class="s1">'labels'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'channel'</span><span class="p">]],</span>
+        <span class="s1">'queue.depth'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'type'</span> <span class="o">=&gt;</span> <span class="s1">'gauge'</span><span class="p">],</span>
+        <span class="s1">'checkout.duration'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'type'</span> <span class="o">=&gt;</span> <span class="s1">'histogram'</span><span class="p">,</span> <span class="s1">'unit'</span> <span class="o">=&gt;</span> <span class="s1">'s'</span><span class="p">],</span>
+    <span class="p">],</span>
+    <span class="s1">'http'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
+    <span class="s1">'logging'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+        <span class="s1">'enabled'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
+        <span class="s1">'min_level'</span> <span class="o">=&gt;</span> <span class="s1">'warning'</span><span class="p">,</span>
+        <span class="s1">'count'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">]];</span>
+</code></pre></div>
+<p>The default exporter is <code>Naf\Monitoring\Exporters\NullExporter</code>, with no network
+I/O. Default labels and custom metrics are empty; HTTP and logging are disabled.
+Changing the configured exporter keeps the metric calls in your application intact.</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Method</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>counter</code></td>
+<td><code>increment(int\|float $amount = 1): void</code></td>
+<td>Add a nonnegative delta; never a cumulative total</td>
+</tr>
+<tr>
+<td><code>gauge</code></td>
+<td><code>set(int\|float $value): void</code></td>
+<td>Set the current value, including negative values</td>
+</tr>
+<tr>
+<td><code>histogram</code></td>
+<td><code>observe(int\|float $value): void</code></td>
+<td>Record a nonnegative sample in the declared unit</td>
+</tr>
+<tr>
+<td>Time histogram</td>
+<td><code>measure(callable $operation): mixed</code></td>
+<td>Run and time a callback; return its result</td>
+</tr>
+</tbody>
+</table>
+<p><code>measure()</code> requires unit <code>s</code> or <code>ms</code>, uses a monotonic clock, records failed
+operations too and preserves their exception. <code>observe()</code> accepts an already
+measured value in the declared unit. Values must be finite; NaN and infinity fail.
+An undeclared metric or a method incompatible with its type throws immediately.</p>
+<div class="language-php-inline highlight"><pre><span></span><code><span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\Monitoring\monitor</span><span class="p">;</span>
+
+<span class="nx">monitor</span><span class="p">(</span><span class="s1">'orders.created'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">increment</span><span class="p">();</span>
+<span class="nx">monitor</span><span class="p">(</span><span class="s1">'orders.created'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'channel'</span> <span class="o">=&gt;</span> <span class="s1">'web'</span><span class="p">])</span><span class="o">-&gt;</span><span class="na">increment</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+<span class="nx">monitor</span><span class="p">(</span><span class="s1">'queue.depth'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>
+<span class="nx">monitor</span><span class="p">(</span><span class="s1">'checkout.duration'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">observe</span><span class="p">(</span><span class="mf">0.125</span><span class="p">);</span> <span class="c1">// seconds</span>
+
+<span class="nv">$result</span> <span class="o">=</span> <span class="nx">monitor</span><span class="p">(</span><span class="s1">'checkout.duration'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">measure</span><span class="p">(</span><span class="nx">fn</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nv">$checkout</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">());</span>
+</code></pre></div>
+<p>The metric definitions belong to the application configuration, not to request
+input. Names contain 1–120 ASCII letters, digits, <code>_</code> and <code>.</code>, start with a letter,
+and cannot contain the reserved <code>__labels</code> segment. Units contain up to 24 ASCII
+letters, digits, <code>_</code> or <code>/</code>. Built-in metric names below cannot be redeclared.</p>
+<h2 id="labels-and-request-isolation">Labels and request isolation<a class="headerlink" href="#labels-and-request-isolation" title="Permanent link">&para;</a></h2>
+<p>Per-metric <code>labels</code> declare the allowed keys, not their values. Omitted labels
+remain absent. Global <code>monitoring:labels</code> apply to every metric and exported log;
+global keys cannot overlap any declared per-metric keys, including built-in keys.</p>
+<p>Each helper call owns its label values. Reusing a returned metric retains its own
+labels; subsequent calls do not change it. There is no mutable global request
+context to leak into another queue job.</p>
+<p>Label names start with a letter and contain at most 32 letters, digits or <code>_</code>.
+Values are strings, integers or booleans; normalized values contain 1–80 ASCII
+letters, digits, <code>_</code>, <code>.</code>, <code>/</code> or <code>-</code>. Booleans become <code>true</code> and <code>false</code>. There
+may be at most 16 global and metric labels combined. Protocol delimiters and
+control characters are rejected rather than silently changing a metric's identity.</p>
+<p>Use bounded values such as channel, route name and status. Unique user IDs, order
+IDs and full request URLs create a new time series per value. The character and
+length limits do not limit the number of distinct series in your backend.</p>
+<h2 id="statsd-and-dogstatsd">StatsD and DogStatsD<a class="headerlink" href="#statsd-and-dogstatsd" title="Permanent link">&para;</a></h2>
+<p>The shipped <code>StatsDExporter</code> uses UDP to a numeric IPv4/IPv6 address. The default
+is <code>127.0.0.1:8125</code>. Hostnames are rejected so DNS lookup cannot stall a request;
+resolve the agent address in deployment configuration or inject a custom
+<code>DatagramTransportInterface</code>. The socket opens lazily at export and uses
+non-blocking writes. The connection timeout is in seconds, greater than zero
+and at most one second.</p>
+<table>
+<thead>
+<tr>
+<th>Behavior</th>
+<th><code>statsd</code></th>
+<th><code>dogstatsd</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Counter</td>
+<td><code>c</code>, delta</td>
+<td><code>c</code>, delta</td>
+</tr>
+<tr>
+<td>Gauge</td>
+<td><code>g</code>, absolute value</td>
+<td><code>g</code>, absolute value</td>
+</tr>
+<tr>
+<td>Histogram</td>
+<td><code>ms</code>, requires <code>s</code> or <code>ms</code>; seconds convert to milliseconds</td>
+<td><code>h</code>, retains the declared unit/value</td>
+</tr>
+<tr>
+<td>Labels</td>
+<td>Sorted, hex-encoded suffix in the metric name</td>
+<td>Sorted native <code>\|#key:value</code> tags</td>
+</tr>
+<tr>
+<td>Aggregation/buckets</td>
+<td>Configured in the StatsD agent</td>
+<td>Configured in the DogStatsD agent/backend</td>
+</tr>
+</tbody>
+</table>
+<p>For example, <code>orders.created</code> with <code>channel=web</code> is sent as
+<code>orders.created.__labels.6368616e6e656c.776562:1|c</code> in plain StatsD, or
+<code>orders.created:1|c|#channel:web</code> in DogStatsD, before any configured prefix.
+The reserved suffix and hex encoding preserve distinct label values and keys.
+Classic StatsD cannot carry native tags, unit metadata or arbitrary histograms;
+declaring a non-time histogram with that exporter fails during service creation.
+Configure display units in the backend for DogStatsD histograms.</p>
+<p>Plain StatsD treats signed gauges as deltas. Negative absolute gauges therefore
+send a reset to zero followed by the negative value in the same datagram. Packets
+contain whole records, never fragments of a measurement or its reset pair.
+<code>maxDatagramBytes</code> defaults to 512 and accepts 64–65507; choose a limit appropriate
+for your network MTU. A single oversize measurement fails the batch and is diagnosed.</p>
+<p>Protocol references: <a href="https://github.com/statsd/statsd/blob/master/docs/metric_types.md">StatsD metric types</a>
+and <a href="https://docs.datadoghq.com/extend/dogstatsd/datagram_shell/">DogStatsD datagrams</a>.</p>
+<h2 id="psr-3-logging">PSR-3 logging<a class="headerlink" href="#psr-3-logging" title="Permanent link">&para;</a></h2>
+<p>Enable <code>monitoring:logging:enabled</code> to wrap the logger currently registered under
+<code>Psr\Log\LoggerInterface</code>. Continue using the normal helper:</p>
+<div class="language-php-inline highlight"><pre><span></span><code><span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\log</span><span class="p">;</span>
+
+<span class="nb">log</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">info</span><span class="p">(</span><span class="s1">'Order accepted'</span><span class="p">);</span>
+<span class="nb">log</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">warning</span><span class="p">(</span><span class="s1">'Inventory below threshold'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'remaining'</span> <span class="o">=&gt;</span> <span class="mi">3</span><span class="p">]);</span>
+<span class="nb">log</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="s1">'Checkout failed'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'exception'</span> <span class="o">=&gt;</span> <span class="nv">$exception</span><span class="p">]);</span>
+</code></pre></div>
+<p>Every call still reaches the original logger. The monitoring copy is filtered
+by <code>min_level</code>, which defaults to <code>warning</code> and accepts all eight PSR-3 levels:
+<code>debug</code>, <code>info</code>, <code>notice</code>, <code>warning</code>, <code>error</code>, <code>critical</code>, <code>alert</code>, <code>emergency</code>.
+It includes the chosen severity and all higher severities. Invalid levels fail.</p>
+<p>With <code>count: true</code>, each qualifying log increments <code>logs.total</code> with its <code>level</code>.
+Log messages, exception texts and context values never become metric labels.
+StatsD transports metrics only: enabling the logger does not send raw log messages
+to a StatsD agent.</p>
+<p>For structured log delivery, optionally register a <code>LogExporterInterface</code> service
+before the first use of the monitor, or configure <code>log_exporter</code> as its class name
+and <code>log_exporter_options</code> as named constructor arguments. Its <code>export(array $records)</code>
+receives <code>LogRecord</code> objects with the original message, PSR-3 context, severity,
+global labels and a Unix timestamp in seconds. The metric and log destinations
+are attempted independently. Set <code>logging:count</code> to <code>false</code> for log export alone.</p>
+<p>Records retain PHP context objects by reference until the batch is exported. Avoid
+mutating them before flushing; a custom exporter owns serialization, exception
+formatting, field selection and redaction. There is no bundled HTTP/OTLP log
+exporter in this first version. Export failures and diagnostics are guarded against
+recursive monitoring; the default diagnostic path uses PHP <code>error_log()</code> directly.</p>
+<p>If your host replaces the logger after plugin boot, wrap that final logger explicitly
+before constructing its consumers. Keep automatic decoration disabled in that case:</p>
+<div class="language-php-inline highlight"><pre><span></span><code><span class="k">use</span> <span class="nx">Naf\Monitoring\</span><span class="p">{</span><span class="nx">Monitor</span><span class="p">,</span> <span class="nx">MonitoringLogger</span><span class="p">};</span>
+<span class="k">use</span> <span class="nx">Psr\Log\LoggerInterface</span><span class="p">;</span>
+<span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\app</span><span class="p">;</span>
+
+<span class="nv">$container</span> <span class="o">=</span> <span class="nx">app</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">container</span><span class="p">();</span>
+<span class="nv">$original</span> <span class="o">=</span> <span class="nv">$container</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="nx">LoggerInterface</span><span class="o">::</span><span class="na">class</span><span class="p">);</span> <span class="c1">// After your custom registration.</span>
+<span class="nv">$container</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="nx">LoggerInterface</span><span class="o">::</span><span class="na">class</span><span class="p">,</span> <span class="k">static</span> <span class="nx">fn</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">new</span> <span class="nx">MonitoringLogger</span><span class="p">(</span>
+    <span class="nv">$original</span><span class="p">,</span>
+    <span class="nv">$container</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="nx">Monitor</span><span class="o">::</span><span class="na">class</span><span class="p">),</span>
+    <span class="nx">minLevel</span><span class="o">:</span> <span class="s1">'error'</span><span class="p">,</span>
+<span class="p">));</span>
+</code></pre></div>
+<p>Register overrides before resolving <code>Monitor</code> or the decorated logger. A later
+rebinding cannot replace a dependency already held by an instantiated service.</p>
+<h2 id="http-instrumentation">HTTP instrumentation<a class="headerlink" href="#http-instrumentation" title="Permanent link">&para;</a></h2>
+<p>With <code>monitoring:http</code> enabled, the plugin listens to the existing NAF request,
+route, exception and response events. It records:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Type/unit</th>
+<th>Labels</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http.requests</code></td>
+<td>Counter</td>
+<td><code>method</code>, <code>route</code>, <code>status</code></td>
+</tr>
+<tr>
+<td><code>http.duration</code></td>
+<td>Histogram, seconds</td>
+<td><code>method</code>, <code>route</code>, <code>status</code></td>
+</tr>
+<tr>
+<td><code>http.exceptions</code></td>
+<td>Counter</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>logs.total</code></td>
+<td>Counter; requires logging/count enabled</td>
+<td><code>level</code></td>
+</tr>
+</tbody>
+</table>
+<p>Duration begins at <code>REQUEST_START</code> and normally ends at <code>RESPONSE_END</code>, after
+the response body is written. It excludes bootstrap and the final monitoring flush.
+Threshold-triggered exports during the request remain part of its processing time.
+It measures server processing, not the client's download time. A shutdown fallback
+handles skipped/interrupted response-end listeners without counting a request twice;
+when a response was observed, it uses PHP's emitted status for that fallback.</p>
+<p>Routes use their registered name, never the concrete URL. Unmatched routes use
+<code>unmatched</code>, unnamed routes use <code>unnamed</code>, and names outside the portable label
+syntax use <code>other</code>. Unrecognized HTTP methods use <code>OTHER</code>. Exception counting is
+once per observed request and includes exceptions raised for normal HTTP errors
+such as a missing route. It covers the NAF exception event and observed fatal
+shutdowns; it is not a global record of every caught or uncaught PHP exception.</p>
+<h2 id="buffering-workers-and-failures">Buffering, workers and failures<a class="headerlink" href="#buffering-workers-and-failures" title="Permanent link">&para;</a></h2>
+<p>The shared metric/log buffer flushes when it reaches <code>batch_size</code> records, at
+normal response end and at PHP shutdown. The default is 256, with an allowed
+range of 1–10000. The bound is a record count, not a byte limit on arbitrary
+structured log contexts. Custom exporters must also bound their own work and memory.</p>
+<p>Long-running workers explicitly flush in the job's existing lifecycle:</p>
+<div class="language-php-inline highlight"><pre><span></span><code><span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\Monitoring\monitor</span><span class="p">;</span>
+
+<span class="k">try</span> <span class="p">{</span>
+    <span class="nv">$job</span><span class="o">-&gt;</span><span class="na">handle</span><span class="p">();</span>
+<span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+    <span class="nx">monitor</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">flush</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This is an application fragment, not a new NAF worker API. There is no periodic
+background flush or queue dependency. Retained metric objects keep their labels,
+so create job-specific metrics inside each job. The <code>InMemoryExporter</code> used in
+tests also needs draining between jobs if retained indefinitely.</p>
+<p>Export happens synchronously at flush points. UDP is best-effort: a successful
+socket write does not confirm delivery or collector health. Batches are removed
+before export and never retried, preventing repeated counter increments. A partial
+network failure can deliver some datagrams and lose others. Process termination,
+early bootstrap errors, memory exhaustion and a prior shutdown handler that exits
+can prevent the final flush. This is telemetry, not an audit trail or billing ledger.</p>
+<p>Runtime export exceptions are caught and increase <code>monitor()-&gt;failedBatches()</code>.
+The plugin's default diagnostic callback writes to PHP's <code>error_log()</code>. Override
+<code>monitoring:on_error</code> with a callback receiving <code>(Throwable $error, string $signal)</code>;
+<code>$signal</code> is <code>metrics</code> or <code>logs</code>. Keep that callback independent of this monitor.
+API/configuration mistakes still throw early. <code>measure()</code> preserves an application's
+return value or exception even if exporting the timing fails.</p>
+<h2 id="custom-exporters-and-multiple-destinations">Custom exporters and multiple destinations<a class="headerlink" href="#custom-exporters-and-multiple-destinations" title="Permanent link">&para;</a></h2>
+<p>Implement <code>MetricExporterInterface</code> with two methods:</p>
+<ul>
+<li><code>validate(MetricDefinition $definition): void</code> rejects unsupported types/units
+  when the monitoring service is constructed, including built-in definitions.</li>
+<li><code>export(array $measurements): void</code> receives a batch of <code>Measurement</code> objects.
+  Each contains its definition, numeric value and normalized labels. It sends
+  once and throws on failure. Counters represent deltas, gauges absolute values
+  and histograms individual observations.</li>
+</ul>
+<p>Use <code>exporter</code> and <code>exporter_options</code> for a class constructed through NAF's normal
+autowiring, or bind <code>MetricExporterInterface</code> explicitly in root <code>bootstrap.php</code>,
+before <code>app()-&gt;run()</code> and before the monitor is resolved. For example:</p>
+<div class="language-php-inline highlight"><pre><span></span><code><span class="k">use</span> <span class="nx">Naf\Monitoring\MetricExporterInterface</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Naf\Monitoring\Exporters\</span><span class="p">{</span><span class="nx">CompositeExporter</span><span class="p">,</span> <span class="nx">InMemoryExporter</span><span class="p">,</span> <span class="nx">StatsDExporter</span><span class="p">};</span>
+<span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\app</span><span class="p">;</span>
+
+<span class="nv">$capture</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">InMemoryExporter</span><span class="p">();</span>
+<span class="nx">app</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">container</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="nx">MetricExporterInterface</span><span class="o">::</span><span class="na">class</span><span class="p">,</span> <span class="k">new</span> <span class="nx">CompositeExporter</span><span class="p">([</span>
+    <span class="k">new</span> <span class="nx">StatsDExporter</span><span class="p">(</span><span class="nx">host</span><span class="o">:</span> <span class="s1">'127.0.0.1'</span><span class="p">,</span> <span class="nx">port</span><span class="o">:</span> <span class="mi">8125</span><span class="p">),</span>
+    <span class="nv">$capture</span><span class="p">,</span>
+<span class="p">]));</span>
+</code></pre></div>
+<p><code>CompositeExporter</code> attempts every destination even when one fails. A failed
+composite batch increments <code>failedBatches()</code> once; successful destinations are
+not retried. All destinations must support the declared metrics.</p>
+<p>For an HTTP adapter, inject a PSR-18 client, such as <code>naf/client</code>, and keep URL,
+authentication and format inside that adapter. Bind <code>Psr\Http\Client\ClientInterface</code>
+to the configured client in the host; the monitoring plugin does not install an
+HTTP stack. An OTLP adapter should use the existing OpenTelemetry SDK. A future
+Prometheus pull adapter additionally needs aggregation across PHP requests and
+processes; no <code>/metrics</code> endpoint is shipped here.</p>
+<h2 id="testing-without-a-collector">Testing without a collector<a class="headerlink" href="#testing-without-a-collector" title="Permanent link">&para;</a></h2>
+<div class="language-php-inline highlight"><pre><span></span><code><span class="k">use</span> <span class="nx">Naf\Monitoring\</span><span class="p">{</span><span class="nx">MetricDefinition</span><span class="p">,</span> <span class="nx">MetricType</span><span class="p">,</span> <span class="nx">Monitor</span><span class="p">};</span>
+<span class="k">use</span> <span class="nx">Naf\Monitoring\Exporters\InMemoryExporter</span><span class="p">;</span>
+
+<span class="nv">$exporter</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">InMemoryExporter</span><span class="p">();</span>
+<span class="nv">$monitor</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Monitor</span><span class="p">(</span><span class="nv">$exporter</span><span class="p">,</span> <span class="p">[</span>
+    <span class="k">new</span> <span class="nx">MetricDefinition</span><span class="p">(</span><span class="s1">'orders.created'</span><span class="p">,</span> <span class="nx">MetricType</span><span class="o">::</span><span class="na">Counter</span><span class="p">),</span>
+<span class="p">]);</span>
+<span class="nv">$monitor</span><span class="o">-&gt;</span><span class="na">metric</span><span class="p">(</span><span class="s1">'orders.created'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">increment</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="nv">$monitor</span><span class="o">-&gt;</span><span class="na">flush</span><span class="p">();</span>
+
+<span class="nv">$measurements</span> <span class="o">=</span> <span class="nv">$exporter</span><span class="o">-&gt;</span><span class="na">drain</span><span class="p">();</span>
+<span class="nb">assert</span><span class="p">(</span><span class="nv">$measurements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-&gt;</span><span class="na">value</span> <span class="o">===</span> <span class="mi">3</span><span class="p">);</span>
+</code></pre></div>
+<p><code>measurements()</code> inspects retained records; <code>drain()</code> returns and clears them.
+The in-memory exporter defaults to a capacity of 10000 records and throws when
+full. Through <code>Monitor</code>, that failure is counted and the failed batch is dropped.
+<code>NullExporter</code> discards exported batches and performs no I/O.</p>
+<p>The package suite tests these APIs, the PSR-3 severity matrix, independent export
+failures, protocol bytes, bounds and label isolation. Real loopback UDP and HTTP/CLI
+tests verify Composer discovery, host overrides, response behavior and flushing
+against the published framework. See <a href="https://github.com/nafphp/monitoring/blob/main/AGENTS.md">AGENTS.md</a>
+for the development commands.</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>Add these keys below <code>monitoring</code> in <code>app/config.php</code>. Configuration merges with
+the plugin defaults before the monitoring service is resolved.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>monitoring:exporter</code></td>
+<td>class string</td>
+<td><code>Naf\Monitoring\Exporters\NullExporter</code></td>
+<td>Metric exporter implementing <code>MetricExporterInterface</code></td>
+</tr>
+<tr>
+<td><code>monitoring:exporter_options</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Named constructor arguments for the selected metric exporter</td>
+</tr>
+<tr>
+<td><code>monitoring:log_exporter</code></td>
+<td>class string or null</td>
+<td><code>null</code></td>
+<td>Optional structured log exporter implementing <code>LogExporterInterface</code></td>
+</tr>
+<tr>
+<td><code>monitoring:log_exporter_options</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Named constructor arguments for the log exporter</td>
+</tr>
+<tr>
+<td><code>monitoring:labels</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Constant service/environment labels on metrics and exported logs</td>
+</tr>
+<tr>
+<td><code>monitoring:batch_size</code></td>
+<td>integer</td>
+<td><code>256</code></td>
+<td>Shared record-count flush threshold, from 1 to 10000</td>
+</tr>
+<tr>
+<td><code>monitoring:metrics</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Metric names mapped to <code>type</code>, optional <code>unit</code> and allowed <code>labels</code></td>
+</tr>
+<tr>
+<td><code>monitoring:http</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Enables request, duration and exception metrics through NAF events</td>
+</tr>
+<tr>
+<td><code>monitoring:on_error</code></td>
+<td>callable or null</td>
+<td><code>null</code></td>
+<td>Independent callback receiving the export exception and <code>metrics</code> or <code>logs</code>; null uses PHP <code>error_log()</code></td>
+</tr>
+<tr>
+<td><code>monitoring:logging:enabled</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Decorates the currently registered PSR-3 logger</td>
+</tr>
+<tr>
+<td><code>monitoring:logging:min_level</code></td>
+<td>string</td>
+<td><code>warning</code></td>
+<td>Lowest severity copied into monitoring</td>
+</tr>
+<tr>
+<td><code>monitoring:logging:count</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Adds <code>logs.total</code> for qualifying logs when decoration is enabled</td>
+</tr>
+</tbody>
+</table>
+<p>When selecting <code>StatsDExporter</code>, its <code>monitoring:exporter_options</code> keys are:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>host</code></td>
+<td>string</td>
+<td><code>127.0.0.1</code></td>
+<td>Numeric IPv4/IPv6 collector address</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td>integer</td>
+<td><code>8125</code></td>
+<td>UDP destination port, from 1 to 65535</td>
+</tr>
+<tr>
+<td><code>prefix</code></td>
+<td>string</td>
+<td>empty</td>
+<td>Prefix using the metric-name syntax</td>
+</tr>
+<tr>
+<td><code>protocol</code></td>
+<td>string</td>
+<td><code>statsd</code></td>
+<td><code>statsd</code> or <code>dogstatsd</code> wire format</td>
+</tr>
+<tr>
+<td><code>maxDatagramBytes</code></td>
+<td>integer</td>
+<td><code>512</code></td>
+<td>Whole-record datagram limit, from 64 to 65507 bytes</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>number</td>
+<td><code>0.05</code></td>
+<td>Socket connection timeout in seconds, greater than zero and at most one</td>
+</tr>
+<tr>
+<td><code>transport</code></td>
+<td><code>DatagramTransportInterface</code> or null</td>
+<td><code>null</code></td>
+<td>Explicit transport override; null constructs <code>UdpTransport</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>InMemoryExporter</code> accepts a positive <code>capacity</code> constructor option, defaulting to
+10000 retained measurements. Drain it between tests or worker jobs.</p>
+<h2 id="api-details">API details<a class="headerlink" href="#api-details" title="Permanent link">&para;</a></h2>
+<p>Import the helper from <code>Naf\Monitoring</code>:</p>
+<div class="language-php-inline highlight"><pre><span></span><code><span class="k">use</span> <span class="k">function</span> <span class="nf">Naf\Monitoring\monitor</span><span class="p">;</span>
+
+<span class="c1">// monitor(?string $name = null, array $labels = []): Monitor|Metric</span>
+<span class="nv">$service</span> <span class="o">=</span> <span class="nx">monitor</span><span class="p">();</span>
+<span class="nv">$metric</span> <span class="o">=</span> <span class="nx">monitor</span><span class="p">(</span><span class="s1">'orders.created'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'channel'</span> <span class="o">=&gt;</span> <span class="s1">'web'</span><span class="p">]);</span>
+</code></pre></div>
+<p>Calling <code>monitor()</code> returns the shared <code>Monitor</code>; supplying a name creates a
+<code>Metric</code> with its own normalized label values. Labels without a name throw
+<code>InvalidArgumentException</code>. <code>Monitor::metric(string $name, array $labels = []): Metric</code>
+provides the same lookup on an injected service. Metric mutation methods and
+timing requirements are listed under <a href="#declare-your-metrics">Declare your metrics</a>.</p>
+<p><code>Monitor::flush(): void</code> exports pending records once.
+<code>Monitor::failedBatches(): int</code> returns the number of failed metric or log batches.
+The extension contracts use these namespaces:</p>
+<table>
+<thead>
+<tr>
+<th>Contract</th>
+<th>Namespace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Metric batches</td>
+<td><code>Naf\Monitoring\MetricExporterInterface</code></td>
+</tr>
+<tr>
+<td>Structured log batches</td>
+<td><code>Naf\Monitoring\LogExporterInterface</code></td>
+</tr>
+<tr>
+<td>Datagram transport</td>
+<td><code>Naf\Monitoring\Transport\DatagramTransportInterface</code></td>
+</tr>
+</tbody>
+</table>
+<p>See the generated <a href="../function-index/#nafmonitoring">function index</a> and
+<a href="../configuration-reference/#nafmonitoring">configuration reference</a>.</p>
+<h2 id="if-the-result-is-different">If the result is different<a class="headerlink" href="#if-the-result-is-different" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No metric reaches the collector</td>
+<td>The default exporter is <code>NullExporter</code>. Select a real exporter, check its numeric address/port and call <code>flush()</code> in long-running jobs. A successful UDP write does not confirm delivery.</td>
+</tr>
+<tr>
+<td>An undeclared metric or label throws</td>
+<td>Add the metric and allowed label keys to application configuration before the monitor is resolved.</td>
+</tr>
+<tr>
+<td>A histogram is rejected by StatsD</td>
+<td>Plain StatsD accepts only time histograms in <code>s</code> or <code>ms</code>. Use DogStatsD for other histogram units.</td>
+</tr>
+<tr>
+<td>HTTP or log metrics are absent</td>
+<td>Enable <code>monitoring:http</code> or <code>monitoring:logging:enabled</code> and inspect the log severity threshold.</td>
+</tr>
+<tr>
+<td>A custom exporter binding is ignored</td>
+<td>Register it before the first use of <code>Monitor</code> or the decorated logger. Existing objects retain their dependencies.</td>
+</tr>
+<tr>
+<td>Export failures recur</td>
+<td>Inspect <code>failedBatches()</code> and the independent diagnostic callback; bound the exporter work and record sizes. Failed batches are discarded.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="related-pages">Related pages<a class="headerlink" href="#related-pages" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../lifecycle/">Application lifecycle</a> for bootstrap timing and service registration.</li>
+<li><a href="../dependency-injection/">Dependency injection</a> for factories and overrides.</li>
+<li><a href="../events/">Events</a> for request and response hooks.</li>
+<li><a href="../queues/">Queues and workers</a> for background job lifetimes.</li>
+<li><a href="../http-client/">HTTP client</a> for PSR-18 adapters.</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../best-practices/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Application design">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Application design
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../testing/" class="md-footer__link md-footer__link--next" aria-label="Next: Testing applications">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Testing applications
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.path", "navigation.footer", "navigation.top", "navigation.tracking", "content.action.edit", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
