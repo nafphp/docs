@@ -68,7 +68,7 @@ configuration on a cloned client, leaving the shared instance unchanged.
 | `ssl_verify` | boolean | `true` | TLS certificate verification |
 | `cacert` | string or null | automatic | Explicit CA bundle file |
 | `http_version` | string | `auto` | cURL negotiation: `auto`, `1.1` or `2` |
-| `max_redirects` | integer | `5` | Redirect limit; `0` disables following |
+| `max_redirects` | integer | `5` | cURL redirect limit; `0` disables following. The stream fallback never follows redirects (0.2.3+) |
 | `decode_content` | boolean | `true` | cURL response content decoding |
 | `streaming` | boolean | `false` | Require a streaming-capable transport |
 
@@ -104,6 +104,17 @@ removes `Authorization` and `Cookie` when the destination origin changes. The PH
 wrapper does not provide the same redirect controls. Restrict outbound destinations in the
 application when URLs can come from untrusted input; transport selection does not provide
 an SSRF policy.
+
+Client 0.2.3 accepts absolute HTTP and HTTPS URLs with a host. Other schemes and relative URLs
+raise `ClientException` before transport selection or body consumption. Both shipped
+transports enforce this rule for direct calls; cURL also restricts libcurl protocols and
+redirect protocols to HTTP(S). A response without an HTTP status line is rejected.
+
+This restriction does not decide which HTTP hosts, addresses or ports an application may
+contact. Keep the application's destination allow-list or SSRF policy, including redirects
+and DNS behavior.
+
+In Client 0.2.3+, the PHP stream fallback returns the original redirect response, including its Location header and body, without following it. Use cURL when following redirects is required; `max_redirects` does not enable redirects in the stream fallback.
 
 ## Streaming large bodies { #large-bodies-do-not-go-through-memory }
 

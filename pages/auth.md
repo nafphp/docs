@@ -409,13 +409,33 @@ $_SESSION['auth'] = ['provider' => 'database', 'identifier' => '42'];
 ```
 
 `auth()->logout()` clears the login and rotates the ID again, leaving the rest of the session
-(carts, flashes, language) untouched.
+(carts, flashes, language) untouched except for the configured authentication secrets.
 
 When using Form with Auth 0.2.3 or earlier, call `Naf\Form\csrf()->generate()` after a
 successful login, adoption of a verified identity, and logout. This replaces the token issued
 under the previous authentication state; session ID rotation alone does not replace it.
 Reload forms opened before the change. The [login recipe](recipes/login-form.md) includes
 this rotation.
+
+Auth 0.2.4's session adapter removes secrets from the previous authentication state after
+successful authentication or adoption of a verified identity, and on logout. The default
+reset list contains `_csrf`. Form creates a fresh token the next time `csrf()->token()` is
+called. Open forms from before the change must be reloaded. Other session data, such as
+carts and language preferences, survives. Failed credential checks do not rotate the token.
+
+Applications can extend the reset list in `app/config.php`; retain `_csrf` when using Form:
+
+```php-inline
+return ['auth' => ['session_reset_keys' => ['_csrf', 'step_up']]];
+```
+
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `auth:session_reset_keys` | list of strings | `['_csrf']` | Session values removed at login, identity adoption and logout |
+
+Custom `StateStoreInterface` implementations remain responsible for their own trust-boundary
+cleanup. The explicit `csrf()->generate()` calls in the login recipe remain valid on both
+old and new Auth releases.
 
 Turn persistence off for a stateless API:
 

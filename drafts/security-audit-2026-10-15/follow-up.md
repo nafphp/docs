@@ -6,16 +6,16 @@ must stay outside `pages/`; the original audit working files are not repository 
 
 | Package | Prepared version | Release dependency |
 |---|---|---|
-| `naf/auth` | 0.2.4 | None |
-| `naf/session` | 0.2.4 | None |
-| `naf/client` | 0.2.3 | Extend the existing pending RC |
+| `naf/auth` | 0.2.4 published | Guidance promoted to `pages/auth.md` |
+| `naf/session` | 0.2.4 published | Guidance promoted to `pages/sessions.md` |
+| `naf/client` | 0.2.3 published | Guidance promoted to `pages/http-client.md` |
 | `naf/oauth-server` | 0.2.6 published | Guide promoted; both concurrency suites passed on SQLite, PostgreSQL and MySQL |
 | `naf/mcp` | 0.2.7 published | Guide promoted; explicit-request and sequential MCP authentication checks added |
 | `naf/cms` | 0.0.3 | Raise the Auth minimum to 0.2.4 and update the committed lock after Auth publication |
 
 Before promoting the CMS section, confirm the final RC version and review the final combined
-RC diff. The remaining Auth, Session, Client and CMS package-code PRs and releases await
-maintainer review.
+RC diff. Auth, Session and Client are now published; their sections below remain an audit record.
+CMS 0.0.3 is published, but raising its Auth minimum to 0.2.4 remains a separate package follow-up.
 
 ## Authentication and forms
 

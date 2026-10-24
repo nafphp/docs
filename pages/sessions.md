@@ -96,6 +96,39 @@ see [Migrations](database.md#migrations).
 If `naf/database` is absent, the plugin logs a warning and retains the default handler.
 Verify the selected handler and application log after changing storage.
 
+## Cookie scope and strict IDs
+
+Session 0.2.4 uses host-only cookies by default: it omits the `Domain` attribute, so the
+browser does not send the cookie to subdomains. `HttpOnly`, `SameSite=Lax`, path `/` and the
+existing HTTPS/trusted-proxy rules for `Secure` remain in effect. Share a cookie with
+subdomains only when they belong to the same trust boundary. Configure this in `app/config.php`:
+
+```php-inline
+return ['session' => ['cookie_domain' => 'example.com']];
+```
+
+| Key | Type | Default | Effect |
+|---|---|---|---|
+| `session:cookie_domain` | string or null | `null` | Omit Domain by default; an explicit domain shares the cookie with its subdomains |
+
+For a directly instantiated `Session`, call `configureCookieDomain()` before `start()`.
+`clear()` expires the cookie with the same scope and flags used to create it.
+
+Session startup enables `use_strict_mode` and `use_only_cookies`, and disables `use_trans_sid`.
+Unknown client-supplied IDs are replaced. The database handler implements
+`SessionUpdateTimestampHandlerInterface`: `validateId()` rejects missing and expired records,
+while `updateTimestamp()` refreshes unchanged sessions and request metadata. Custom save
+handlers must provide strict-ID validation as well; PHP cannot enforce strict mode with a
+handler that lacks it.
+
+For an upgrade from domain cookies, expire the previous cookie once using its original
+Domain and Path, or change the session name. A domain cookie and a host-only cookie with the
+same name can coexist. Verify the transition in a real browser and expect a fresh login when
+changing the session name. Do not automatically derive a deletion domain from an untrusted
+Host header.
+
+Auth 0.2.4 also clears configured authentication secrets such as CSRF tokens at login and logout; see [Authentication](auth.md#sessions).
+
 ## Behind a proxy
 
 A load balancer terminating TLS speaks plain HTTP to your application, which then believes
@@ -121,7 +154,7 @@ supply `X-Forwarded-Proto`; accept it only from the configured proxies.
 | `session:trusted_proxies` | list of IP addresses | `[]` | Proxy addresses whose `X-Forwarded-Proto` is accepted |
 
 The session cookie is always `HttpOnly`, `SameSite=Lax`, valid for the browser session and
-bound to the request's host name.
+host-only by default; `session:cookie_domain` can explicitly widen the scope.
 
 ## If the result is different
 

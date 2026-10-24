@@ -908,6 +908,7 @@
   "Naf\\Queue\\Decorators\\Drivers\\ChannelDeadletterDriverInterface",
   "Naf\\Queue\\Decorators\\Drivers\\ChannelDriver",
   "Naf\\Queue\\Decorators\\Drivers\\ChannelQueueDriverInterface",
+  "Naf\\Queue\\Drivers\\DelayedQueueDriverInterface",
   "Naf\\Queue\\Drivers\\FileDriver",
   "Naf\\Queue\\Drivers\\LeaseQueueDriverInterface",
   "Naf\\Queue\\Drivers\\PDODriver",
@@ -1726,6 +1727,7 @@
    "auth:policies": "[]",
    "auth:providers": "[]",
    "auth:session": "NULL",
+   "auth:session_reset_keys": "[\"_csrf\"]",
    "auth:users:identifier_field": "'id'",
    "auth:users:model": "NULL",
    "auth:users:password_field": "'password'",
@@ -1866,6 +1868,7 @@
    "rbac:path": "'/admin/roles'"
   },
   "session": {
+   "session:cookie_domain": "NULL",
    "session:database_table": "'sessions'",
    "session:storage": "'default'",
    "session:trust_proxy_headers": "false",
@@ -1906,6 +1909,7 @@
    "auth:policies": "[]",
    "auth:providers": "[]",
    "auth:session": "",
+   "auth:session_reset_keys": "['_csrf']",
    "auth:users:model": "",
    "auth:users:store": "'orm'"
   },
@@ -2056,6 +2060,7 @@
    "schedule:queue:coalesce": "true"
   },
   "session": {
+   "session:cookie_domain": "",
    "session:database_table": "'sessions'",
    "session:storage": "'default'",
    "session:trust_proxy_headers": "false",
@@ -2533,7 +2538,7 @@
     "naf/rbac",
     "naf/session"
    ],
-   "version": "v0.2.3"
+   "version": "v0.2.4"
   },
   "auth-ldap": {
    "description": "Optional TLS LDAP provider using the existing NAF Auth contract.",
@@ -2591,7 +2596,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.2"
+   "version": "v0.2.3"
   },
   "cms": {
    "description": "Fully working CMS for NAF.",
@@ -2751,7 +2756,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.4"
+   "version": "v0.2.5"
   },
   "rate-limit": {
    "description": "Atomic PDO fixed-window rate limits for NAF hosts.",
@@ -2796,7 +2801,7 @@
    "suggests": [
     "naf/database"
    ],
-   "version": "v0.2.3"
+   "version": "v0.2.4"
   },
   "storage": {
    "description": "Provider-independent file storage with named disks and streams for NAF.",
