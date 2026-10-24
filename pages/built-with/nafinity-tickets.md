@@ -160,7 +160,30 @@ and comments are fixed ticket areas and stay visible. Hiding tracked time also
 hides its timer controls; an already running timer continues running. Restore
 the field to use those controls again.
 
+## Track time in the timer dialog
+
+Use `naf/board` 0.1.9 or newer for the dedicated timer dialog. The stopwatch in
+the recorded-time row opens it. It shows the ticket, elapsed time, whole minutes
+ready to book and carried seconds. Choose **Start**, **Pause** or **Resume** to
+control the clock, and **Book** to add whole minutes to the ticket. Pausing keeps
+elapsed seconds without booking them; remaining seconds carry into the next booking.
+
+One person can run a timer on one ticket at a time across boards. The dialog
+names another running ticket before you start; starting here pauses that timer.
+Concurrent starts from two tabs still leave only one running clock. Opening the
+dialog reads current server state. Closing or redrawing it preserves the running
+display until another server response supplies its state.
+
+Booking reloads the ticket so later edits use its current version. Booked minutes
+also enter your [personal hours journal](nafinity-invoices.md#exporting-personal-hours); editing the ticket's
+manual total does not create a personal booking. Hiding recorded time in your
+custom ticket view also hides the stopwatch and leaves a running timer active.
+
 ## Edit and discuss a ticket
+
+With `naf/board` 0.1.9 or newer, title, description and sidebar editors occupy the
+same space as their reading view. Status and assignee controls share one style,
+and the sidebar stacks below the description on narrow screens.
 
 Click the description text to open its editor, as with the title. Links and
 other interactive content inside the description retain their own actions.
@@ -238,4 +261,5 @@ without replacing existing ticket pairs.
 | An assignment is missing from My tickets | Check that the ticket and project are active, the assignment is current and you can still read the project. |
 | A ticket is missing from Followed tickets | Check the eye state, list status filter, active ticket/project and current project access. |
 | A followed ticket stays silent | Check the personal notification channel, project muting and current membership. |
+| The timer dialog is unavailable | Use Board 0.1.9+, publish its assets and show recorded time in your ticket view. |
 | A save reports a conflict | Reload the latest ticket or view and apply the change to its current version. |

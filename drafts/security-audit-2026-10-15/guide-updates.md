@@ -1,7 +1,8 @@
 # Guide updates after the security releases
 
-These sections are prepared for the releases named in the adjacent README. They describe the
-RC implementations and must remain outside the published site until those releases exist.
+These prepared sections remain as the release audit record. The adjacent README records
+which sections have been promoted to the published guides. WebSocket guidance still waits
+for its verified stable release.
 
 ## CMS requirements and upgrades
 
