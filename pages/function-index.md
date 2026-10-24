@@ -36,7 +36,7 @@ Version **v0.2.13** · [Fundamentals](lifecycle.md)
 
 ## naf/auth
 
-Version **v0.2.3** · [Authentication and permissions](auth.md)
+Version **v0.2.4** · [Authentication and permissions](auth.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -66,7 +66,7 @@ Version **v0.2.4** · [Console commands](console.md)
 
 ## naf/client
 
-Version **v0.2.2** · [HTTP client](http-client.md)
+Version **v0.2.3** · [HTTP client](http-client.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -183,7 +183,7 @@ Version **v0.2.3** · [ORM and repositories](orm.md)
 
 ## naf/queue
 
-Version **v0.2.4** · [Queues and workers](queues.md)
+Version **v0.2.5** · [Queues and workers](queues.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -209,7 +209,7 @@ Version **v0.2.4** · [Scheduled jobs](scheduling.md)
 
 ## naf/session
 
-Version **v0.2.3** · [Sessions](sessions.md)
+Version **v0.2.4** · [Sessions](sessions.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |

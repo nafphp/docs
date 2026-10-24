@@ -112,7 +112,7 @@ Version **v0.2.6** · [OAuth authorization server](oauth-server.md)
 
 ## naf/queue
 
-Version **v0.2.4** · [Queues and workers](queues.md)
+Version **v0.2.5** · [Queues and workers](queues.md)
 
 | Command | Purpose | Arguments | Options |
 | --- | --- | --- | --- |

@@ -48,7 +48,7 @@ Version **v0.1.1** · [Alexa+ MCP server](alexa.md)
 
 ## naf/auth
 
-Version **v0.2.3** · [Authentication and permissions](auth.md)
+Version **v0.2.4** · [Authentication and permissions](auth.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
@@ -64,6 +64,7 @@ Version **v0.2.3** · [Authentication and permissions](auth.md)
 | `auth:policies` | `[]` | `config.php` |
 | `auth:providers` | `[]` | `config.php` |
 | `auth:session` | `NULL` | `config.php` |
+| `auth:session_reset_keys` | `["_csrf"]` | `config.php` |
 | `auth:users:identifier_field` | `'id'` | `config.php` |
 | `auth:users:model` | `NULL` | `config.php` |
 | `auth:users:password_field` | `'password'` | `config.php` |
@@ -94,7 +95,7 @@ Version **v0.1.8** · [Nafinity](built-with/nafinity.md)
 
 ## naf/client
 
-Version **v0.2.2** · [HTTP client](http-client.md)
+Version **v0.2.3** · [HTTP client](http-client.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
@@ -296,7 +297,7 @@ Version **v0.2.6** · [OAuth authorization server](oauth-server.md)
 
 ## naf/queue
 
-Version **v0.2.4** · [Queues and workers](queues.md)
+Version **v0.2.5** · [Queues and workers](queues.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
@@ -327,10 +328,11 @@ Version **v0.2.4** · [Scheduled jobs](scheduling.md)
 
 ## naf/session
 
-Version **v0.2.3** · [Sessions](sessions.md)
+Version **v0.2.4** · [Sessions](sessions.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
+| `session:cookie_domain` | `NULL` | `config.php` |
 | `session:database_table` | `'sessions'` | `config.php` |
 | `session:storage` | `'default'` | `config.php` |
 | `session:trust_proxy_headers` | `false` | `config.php` |

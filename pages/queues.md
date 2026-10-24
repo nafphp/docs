@@ -277,6 +277,45 @@ class. File keys must pass `safePath`, so the colon-containing example above is 
 Set `queue:heartbeat_file` to an application-specific writable path for a worker heartbeat.
 Monitor its age together with failures and backlog; it proves polling, not successful jobs.
 
+## Persist a job for later
+
+Queue 0.2.5+ adds `pushAfter()` for drivers implementing
+`Naf\Queue\Drivers\DelayedQueueDriverInterface`. The PDO driver supports it; the file,
+legacy SQLite and channel drivers do not advertise this optional capability.
+
+After host boot, with the PDO binding above, delay the `RecordSignup` job defined in this
+chapter:
+
+```php-inline
+use App\Jobs\RecordSignup;
+use function Naf\Queue\queue;
+
+queue()->pushAfter(30, RecordSignup::class, [
+    'user_id' => 42,
+    '_job_id' => 'signup:42',
+]);
+```
+
+`pushAfter(int $delaySeconds, string $class, array $payload = []): void` persists the job
+immediately and makes it eligible after the non-negative delay. Zero is valid. Negative
+delays or timestamp overflow throw `InvalidArgumentException`. An unsupported driver throws
+`LogicException`; it does not execute immediately or sleep in the worker.
+
+`DelayedQueueDriverInterface` extends `QueueDriverInterface` with
+`enqueueAt(string $class, array $payload, int $availableAt): void`. A non-negative Unix
+timestamp in the past is immediately eligible. The PDO driver uses its existing
+`available_at` column, so no schema migration is needed. Ordinary `push()` remains immediate.
+
+Delayed enqueue participates in the caller's PDO transaction. Rolling back removes the job.
+Coalescing retains the first pending job and its original due time; another enqueue with the
+same class and `_job_id` does not reschedule it. Other ready work can run while it waits.
+Leases, acknowledgements, retries and deadletter recovery retain their existing behavior.
+The due time is the earliest reservation time, not a completion deadline.
+
+Use delayed jobs for individual events and [Scheduling](scheduling.md) for recurring checks.
+The job must recheck current application state and access when it executes. Queue eligibility
+does not cancel business work that has become obsolete.
+
 ## Configuration
 
 | Key | Type | Default | Effect |
