@@ -89,6 +89,26 @@ propagates to the caller; the event manager does not undo earlier writes or deli
 Keep required business rules in the application service, dispatch after the relevant work
 succeeds, and use [Queue](queues.md) when a reaction should run in a worker.
 
+## Isolated listeners { #isolated-listeners }
+
+Since **v0.2.13**, `event()->isolated()->dispatch()` runs every listener on its own. An
+exception in one listener is logged as `Event listener failed` with the event name, the
+listener (class and method, or the closure's file and line) and the exception; the remaining
+listeners still run.
+It returns the results of the listeners that succeeded, in execution order, and accepts
+names, payloads and event objects exactly like `dispatch()`. `isolated()` only changes this
+one call; `event()->dispatch()` itself keeps propagating exceptions:
+
+```php-inline
+event()->isolated()->dispatch('app.catalog.imported', 'catalog.csv', 3);
+event()->isolated()->dispatch(new OrderShipped('A-1'));
+```
+
+Use it for notifications about work that has already happened, where one broken listener
+must not stop the others. Keep guards on `dispatch()`: an isolated dispatch also catches an
+`abort()` or an authentication exception and only logs it, so the request would continue.
+Isolation adds no measurable cost while listeners succeed.
+
 ## Object events { #an-event-can-be-an-object }
 
 Since **v0.2.6** the event may be an object, in which case its class is the name and the
@@ -115,8 +135,8 @@ missing class with `new` fails. Keep listener names and dispatched classes consi
 String names and event class names share one key space. Replacing a custom string name
 with a class name changes the event key; update its listeners in the same change.
 
-Priorities, class listeners, return values and `dispatchForResponse()` behave identically
-either way.
+Priorities, class listeners, return values, `isolated()->dispatch()` and `dispatchForResponse()`
+behave identically either way.
 
 ## Request lifecycle
 
