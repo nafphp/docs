@@ -94,7 +94,8 @@ succeeds, and use [Queue](queues.md) when a reaction should run in a worker.
 Since **v0.2.13**, `event()->isolated()->dispatch()` runs every listener on its own. An
 exception in one listener is logged as `Event listener failed` with the event name, the
 listener (class and method, or the closure's file and line) and the exception; the remaining
-listeners still run.
+listeners still run. If the logger fails, reporting falls back to PHP's `error_log()`.
+`EventManager::isolated()` returns a `Naf\Core\IsolatedDispatcher`.
 It returns the results of the listeners that succeeded, in execution order, and accepts
 names, payloads and event objects exactly like `dispatch()`. `isolated()` only changes this
 one call; `event()->dispatch()` itself keeps propagating exceptions:
@@ -107,7 +108,6 @@ event()->isolated()->dispatch(new OrderShipped('A-1'));
 Use it for notifications about work that has already happened, where one broken listener
 must not stop the others. Keep guards on `dispatch()`: an isolated dispatch also catches an
 `abort()` or an authentication exception and only logs it, so the request would continue.
-Isolation adds no measurable cost while listeners succeed.
 
 ## Object events { #an-event-can-be-an-object }
 

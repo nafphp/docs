@@ -11,8 +11,8 @@ pages, forms, media, navigation, themes, users, permissions and audit history.
 Its page, API, content and block registries let plugins extend those workflows.
 The host owns configuration, runtime storage and the public webroot.
 
-Use CMS 0.0.2 or newer with PHP 8.3 or 8.4, Composer 2, cURL, DOM, PDO and a PDO SQLite or MySQL driver.
-Framework 0.2.9+ and CLI 0.2.2+ are required and installed as dependencies.
+Use CMS 0.0.3 or newer with PHP 8.3 or 8.4, Composer 2, cURL, DOM, PDO and a PDO SQLite or MySQL driver.
+Framework 0.2.13+, CLI 0.2.2+, Form 0.2.4+ and MCP 0.2.6+ are required and installed as dependencies.
 Node.js is needed only to rebuild CMS frontend assets.
 
 ## Quick start

@@ -384,6 +384,9 @@
   "Naf\\CMS\\Commands\\InstallAgentGuideCommand",
   "Naf\\CMS\\Commands\\InstallDatabaseCommand",
   "Naf\\CMS\\Commands\\IntegrityCheckCommand",
+  "Naf\\CMS\\Commands\\MakeBlockCommand",
+  "Naf\\CMS\\Commands\\MakePluginCommand",
+  "Naf\\CMS\\Commands\\MakeTemplateCommand",
   "Naf\\CMS\\Commands\\PublishAssetsCommand",
   "Naf\\CMS\\Commands\\RemoveAssetsCommand",
   "Naf\\CMS\\Content\\Article\\ArticleContentType",
@@ -408,6 +411,7 @@
   "Naf\\CMS\\Content\\Page\\Block\\BlockTypeInterface",
   "Naf\\CMS\\Content\\Page\\Block\\BlockTypeRegistry",
   "Naf\\CMS\\Content\\Page\\Block\\PageBuilderBlockOptions",
+  "Naf\\CMS\\Content\\Page\\Block\\ProvidesBlockViewInterface",
   "Naf\\CMS\\Content\\Page\\Block\\Types\\ArticleContentBlockType",
   "Naf\\CMS\\Content\\Page\\Block\\Types\\ArticleMetaBlockType",
   "Naf\\CMS\\Content\\Page\\Block\\Types\\ArticleRelatedBlockType",
@@ -456,6 +460,8 @@
   "Naf\\CMS\\Enums\\ToolRisk",
   "Naf\\CMS\\Events\\AdminGuardEvent",
   "Naf\\CMS\\Events\\AuthRedirectEvent",
+  "Naf\\CMS\\Events\\CmsEvent",
+  "Naf\\CMS\\Events\\ContentEvent",
   "Naf\\CMS\\Events\\FormPayloadLimitEvent",
   "Naf\\CMS\\Events\\SecurityHeadersEvent",
   "Naf\\CMS\\Events\\SettingsLocaleEvent",
@@ -562,6 +568,7 @@
   "Naf\\CMS\\Migrations\\Migration202605030005",
   "Naf\\CMS\\Migrations\\Migration202605030006",
   "Naf\\CMS\\Migrations\\Migration202607210001",
+  "Naf\\CMS\\Migrations\\Migration202610150001",
   "Naf\\CMS\\Models\\Article",
   "Naf\\CMS\\Models\\ArticleReviewAction",
   "Naf\\CMS\\Models\\ArticleVersion",
@@ -594,6 +601,7 @@
   "Naf\\CMS\\Page\\PageRegistry",
   "Naf\\CMS\\Page\\PageSeoMeta",
   "Naf\\CMS\\Page\\PageTemplateCatalog",
+  "Naf\\CMS\\Page\\PageTemplateRegistry",
   "Naf\\CMS\\Page\\PageThemeMeta",
   "Naf\\CMS\\Page\\Template",
   "Naf\\CMS\\Repositories\\ArticleRepository",
@@ -686,6 +694,7 @@
   "Naf\\CMS\\Support\\AuditLogRecord",
   "Naf\\CMS\\Support\\AuditRedactor",
   "Naf\\CMS\\Support\\Cms",
+  "Naf\\CMS\\Support\\ContentChange",
   "Naf\\CMS\\Support\\Docs\\ApiDocRenderer",
   "Naf\\CMS\\Support\\Docs\\CmsApiDocRenderer",
   "Naf\\CMS\\Support\\Docs\\ContentTypesDocRenderer",
@@ -700,10 +709,13 @@
   "Naf\\CMS\\Support\\Docs\\ReadmeDocBlockUpdater",
   "Naf\\CMS\\Support\\HandlerInvoker",
   "Naf\\CMS\\Support\\RuntimePaths",
+  "Naf\\CMS\\Support\\ScaffoldFiles",
   "Naf\\CMS\\Support\\ScopedCms",
+  "Naf\\CMS\\Support\\ScriptJson",
   "Naf\\CMS\\Support\\Settings",
   "Naf\\CMS\\Support\\Slug",
   "Naf\\CMS\\Support\\UserHelper",
+  "Naf\\CMS\\Support\\ViewLocator",
   "Naf\\CMS\\Theme\\Theme",
   "Naf\\CMS\\Theme\\ThemeRegistry",
   "Naf\\CMS\\Visualization\\ChartDataset",
@@ -728,6 +740,7 @@
   "Naf\\Core\\ErrorHandler",
   "Naf\\Core\\Event",
   "Naf\\Core\\EventManager",
+  "Naf\\Core\\IsolatedDispatcher",
   "Naf\\Core\\Log",
   "Naf\\Core\\ResponseEmitter",
   "Naf\\Core\\Route",
@@ -1119,6 +1132,44 @@
    "description": "Check block type, block view, and page template registry invariants.",
    "package": "cms",
    "title": "Check NafCMS Integrity"
+  },
+  "make:block": {
+   "class": "Naf\\CMS\\Commands\\MakeBlockCommand",
+   "definition": {
+    "arguments": {
+     "id": "required"
+    },
+    "options": []
+   },
+   "description": "Create a host block type and its view.",
+   "package": "cms",
+   "title": "Make Block"
+  },
+  "make:plugin": {
+   "class": "Naf\\CMS\\Commands\\MakePluginCommand",
+   "definition": {
+    "arguments": {
+     "id": "required"
+    },
+    "options": {
+     "path": "value"
+    }
+   },
+   "description": "Create a Composer plugin skeleton.",
+   "package": "cms",
+   "title": "Make Plugin"
+  },
+  "make:template": {
+   "class": "Naf\\CMS\\Commands\\MakeTemplateCommand",
+   "definition": {
+    "arguments": {
+     "id": "required"
+    },
+    "options": []
+   },
+   "description": "Create a host page template.",
+   "package": "cms",
+   "title": "Make Template"
   },
   "mcp:token:create": {
    "class": "Naf\\MCP\\Commands\\CreateTokenCommand",
@@ -1601,6 +1652,9 @@
   "docs:sync",
   "install:database",
   "integrity:check",
+  "make:block",
+  "make:plugin",
+  "make:template",
   "mcp:token:create",
   "mcp:token:list",
   "mcp:token:revoke",
@@ -1900,7 +1954,8 @@
    "mcp:auth:token_file": "$basePath . '/storage/mcp/tokens.json'",
    "session:database_table": "null",
    "session:storage": "null",
-   "view:assets:publicPath": "'public'"
+   "view:assets:publicPath": "'public'",
+   "view:paths": "['views', 'app/views', 'src/views']"
   },
   "database": {
    "database": "",
@@ -2558,7 +2613,7 @@
     "naf/view"
    ],
    "suggests": [],
-   "version": "v0.0.2"
+   "version": "v0.0.3"
   },
   "database": {
    "description": "NAF Database Plugin to work with various storage solutions.",
@@ -2598,7 +2653,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.12"
+   "version": "v0.2.13"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
