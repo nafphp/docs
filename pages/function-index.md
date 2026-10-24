@@ -14,7 +14,7 @@ for services exposed through these helpers.
 
 ## naf/framework
 
-Version **v0.2.12** · [Fundamentals](lifecycle.md)
+Version **v0.2.13** · [Fundamentals](lifecycle.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -74,7 +74,7 @@ Version **v0.2.2** · [HTTP client](http-client.md)
 
 ## naf/cms
 
-Version **v0.0.2** · [NafCMS](cms.md)
+Version **v0.0.3** · [NafCMS](cms.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |

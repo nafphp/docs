@@ -48,7 +48,7 @@ Version **v0.1.8** · [Nafinity](built-with/nafinity.md)
 
 ## naf/cms
 
-Version **v0.0.2** · [NafCMS](cms.md)
+Version **v0.0.3** · [NafCMS](cms.md)
 
 | Command | Purpose | Arguments | Options |
 | --- | --- | --- | --- |
@@ -58,6 +58,9 @@ Version **v0.0.2** · [NafCMS](cms.md)
 | `docs:sync` | Regenerate README.md auto documentation blocks from NafCMS registries. | — | `--help` |
 | `install:database` | Create the database (if missing) and run all pending migrations. | — | `--force`, `--help` |
 | `integrity:check` | Check block type, block view, and page template registry invariants. | — | `--help` |
+| `make:block` | Create a host block type and its view. | `id` | — |
+| `make:plugin` | Create a Composer plugin skeleton. | `id` | `--path=…` |
+| `make:template` | Create a host page template. | `id` | — |
 | `nafcms:agents:install` | Create the host AGENTS.md without overwriting user-owned instructions. | — | `--update`, `--help` |
 | `nafcms:assets:check` | Report missing, outdated, stale, or conflicting published assets. | — | — |
 | `nafcms:assets:publish` | Publish versioned NafCMS assets into the host public directory. | — | — |
