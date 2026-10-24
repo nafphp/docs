@@ -131,6 +131,22 @@ cannot be rolled back and may contain a link that a later refusal invalidates.
 Account audit data records the changed field names, without credential values,
 email values or raw recovery tokens.
 
+## Sessions after credential changes
+
+Password and email changes invalidate the account's existing sessions. Sign in
+again before submitting another change. With `naf/auth` 0.2.4 or newer, restoring
+a revoked session also clears its CSRF token: a form prepared before revocation
+can receive HTTP 400 from the CSRF guard. A competing confirmation that already
+passed that guard is refused with 401 by the account recheck. Neither response
+can apply the email change or consume its code a second time.
+
+With `naf/board` 0.1.9 or newer, remembered sign-ins also take the account lock
+through token revalidation, validator rotation and session publication. A
+password reset either invalidates the already published session version or
+commits first and makes the old remembered credential unusable. Two concurrent
+callers cannot both rotate the same validator. Sign-in events still run after
+the transaction commits. No new migration or configuration is required.
+
 ## Update global roles
 
 Select individual rows or all eligible rows on the current page to reveal the
@@ -176,5 +192,6 @@ and full rollback after a later property write fails.
 | --- | --- |
 | The reset-link action is unavailable | Check `users.reset_password` separately from account-edit rights; role synchronization preserves existing role definitions. |
 | An invitation or reset link is no longer valid | Check expiry, revocation, current sponsor/issuer rights and the target account's current state. |
+| An old form returns 400 or 401 after an account change | Sign in again and reload the form; session revocation can also invalidate its CSRF token. |
 | An account editor reports a conflict | Reopen it to obtain the latest revision before applying the change. |
 | Email delivery fails | Verify the configured transport; the operation preserves the previous invitation/reset link on a delivery failure. |
