@@ -70,7 +70,7 @@ Version **v0.0.3** · [NafCMS](cms.md)
 
 ## naf/database
 
-Version **v0.2.4** · [Database](database.md)
+Version **v0.2.5** · [Database](database.md)
 
 | Command | Purpose | Arguments | Options |
 | --- | --- | --- | --- |

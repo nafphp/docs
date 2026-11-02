@@ -2340,7 +2340,7 @@
   "Naf\\View\\s": {
    "namespace": "Naf\\View",
    "signature": "s(array|string|null $value): array|string|null",
-   "summary": ""
+   "summary": "Escape HTML text and quoted attributes; arrays are flat, null becomes an empty string"
   },
   "Naf\\View\\view": {
    "namespace": "Naf\\View",
@@ -2628,7 +2628,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.4"
+   "version": "v0.2.5"
   },
   "flow": {
    "description": "Reactive JavaScript components and HTML updates for NAF, automatically integrated with naf/view.",
@@ -2658,7 +2658,7 @@
    "php": ">=8.3",
    "requires": [],
    "suggests": [],
-   "version": "v0.2.13"
+   "version": "v0.2.14"
   },
   "i18n": {
    "description": "NAF Internationalization Plugin",
@@ -2823,7 +2823,7 @@
     "naf/framework"
    ],
    "suggests": [],
-   "version": "v0.2.3"
+   "version": "v0.2.4"
   },
   "websocket": {
    "description": "A WebSocket server for NAF hosts, in plain PHP: it carries that something changed, never what.",

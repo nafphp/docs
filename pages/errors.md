@@ -5,7 +5,8 @@ title: Errors and aborting
 # Errors and aborting
 
 An unknown route, a thrown exception or `abort()` reaches the error-handling path.
-The default response uses the exception's `getStatusCode()` when available, otherwise 500.
+The default response uses the exception's callable `getStatusCode()` when it returns an
+integer from 400 to 599, otherwise 500 (Framework 0.2.14+).
 
 With Framework **0.2.12+**, an unsupported method on a known path throws
 `Naf\Exceptions\MethodNotAllowedException` and produces 405 with `Allow`.
@@ -33,8 +34,30 @@ listener returns them to clients.
 ## Default output
 
 The core supplies diagnostic and sanitized error templates. `APP_ENV=prod` and `APP_ENV=test`
-use sanitized output; `dev` shows diagnostics. Use the exact names documented in
+use sanitized output; only the exact value `dev` shows diagnostics. Missing, empty, unknown
+or invalid environment values also use sanitized output. Use the exact names documented in
 [Configuration](configuration.md#application-environment).
+
+With Framework **0.2.14+**, Composer autoloading registers the global error and exception
+handlers for every environment and disables PHP error display. This covers failures before
+and during application boot, including when `APP_ENV` is loaded from `.env` or `.env.local`
+rather than supplied by the process. Before environment loading, output defaults to sanitized
+unless the process already explicitly selects `dev`. Set production PHP's `display_errors`
+and `display_startup_errors` to `Off` too: PHP startup failures and code that fails before
+Composer loads cannot be protected by the framework.
+
+Request-cycle failures use the application logger. Uncaught HTTP/bootstrap failures use PHP's
+error log without trying to boot the application again; rendering failures have a minimal
+500 fallback. Protect these logs because they contain internal diagnostics. CLI failures
+continue to report their message and origin to STDERR and exit with status 1; a stack trace
+is included only in `dev`.
+
+??? note "Upgrading the test environment to Framework 0.2.14"
+
+    `APP_ENV=test` no longer skips global handler registration. It selects sanitized HTTP
+    output consistently, whether supplied by the process or an environment file. A test
+    runner or host can install its own handlers after loading Composer; the framework
+    does not re-register them during `app()` boot.
 
 === "APP_ENV=dev"
 

@@ -203,11 +203,27 @@ the same way.
 <h1><?= s($title) ?></h1>
 ```
 
-`s()` escapes strings or flat arrays of strings for HTML text and quoted attributes. It is
-not a JavaScript, CSS or URL sanitizer; use encoding appropriate to those contexts.
+`s()` escapes strings or flat arrays of strings for HTML text and quoted attributes.
+With Framework 0.2.9+, both quote characters are escaped (`ENT_QUOTES`), invalid UTF-8 is
+replaced (`ENT_SUBSTITUTE`) and `null` becomes an empty string, including in flat arrays.
+Array keys are preserved; nested arrays are not supported. View 0.2.4 requires Framework
+0.2.9+ so this behavior is available with its minimum dependency set.
+
+For JavaScript data, use `json_encode()` with `JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS |
+JSON_HEX_QUOT | JSON_THROW_ON_ERROR` inside a script block; do not interpolate `s()` output
+into JavaScript. For URLs, first allow-list permitted schemes/destinations, then use `s()`
+when inserting the URL into a quoted HTML attribute. HTML escaping alone does not reject
+`javascript:` URLs. For internal links, generate the path with [named routes](routing.md#generate-a-url).
+Do not place untrusted values directly into CSS or event-handler attributes.
 
 Templates do not escape values automatically. Use `s()` when inserting untrusted text or
 attribute values. `<?= $title ?>` emits the value directly.
+
+View 0.2.4 discards rendering buffers, including unfinished block buffers, when a template
+or layout throws. The exception still propagates; output buffered by the caller is preserved.
+Template variables cannot replace renderer locals. Templates execute trusted PHP code:
+keep template files and configured view directories under application control, and never
+allow uploads to replace them.
 
 ## Layouts and blocks
 

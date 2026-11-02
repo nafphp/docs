@@ -24,8 +24,11 @@ or workers need it. Attach protected configuration and persistent storage before
 
 ## Production configuration
 
-Set `APP_ENV=prod`. NAF loads `.env.local` instead of `.env` when it exists. Use the exact
-value `prod`; an unrecognized value such as `production` can enable diagnostic error output.
+Set `APP_ENV=prod`. Disable PHP `display_errors` and `display_startup_errors` in production,
+and protect application/PHP logs. NAF loads `.env.local` instead of `.env` when it exists.
+Use the exact value `prod`. Only `dev` enables detailed HTTP diagnostics; unknown or missing
+values fail closed. Framework 0.2.14+ also protects bootstrap failures when the process
+supplies `prod`; see [Errors and aborting](errors.md#default-output).
 
 Framework 0.2.8+ preserves process environment values over file values. Use `ENV:NAME` references
 when configuration may come from the process environment. See [Configuration](configuration.md).
