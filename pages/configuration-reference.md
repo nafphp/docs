@@ -14,7 +14,7 @@ packages' `config.php` files and `config()` calls; see each guide for the effect
 
 ## naf/framework
 
-Version **v0.2.13** · [Fundamentals](lifecycle.md)
+Version **v0.2.14** · [Fundamentals](lifecycle.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
@@ -173,7 +173,7 @@ Version **v0.0.3** · [NafCMS](cms.md)
 
 ## naf/database
 
-Version **v0.2.4** · [Database](database.md)
+Version **v0.2.5** · [Database](database.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |
@@ -350,7 +350,7 @@ Version **v0.1.0** · [File storage](file-storage.md)
 
 ## naf/view
 
-Version **v0.2.3** · [Views and templates](views.md)
+Version **v0.2.4** · [Views and templates](views.md)
 
 | Key | Default | Defined in |
 | --- | --- | --- |

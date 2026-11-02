@@ -14,7 +14,7 @@ for services exposed through these helpers.
 
 ## naf/framework
 
-Version **v0.2.13** · [Fundamentals](lifecycle.md)
+Version **v0.2.14** · [Fundamentals](lifecycle.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -87,7 +87,7 @@ Version **v0.0.3** · [NafCMS](cms.md)
 
 ## naf/database
 
-Version **v0.2.4** · [Database](database.md)
+Version **v0.2.5** · [Database](database.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
@@ -225,13 +225,13 @@ Version **v0.1.0** · [File storage](file-storage.md)
 
 ## naf/view
 
-Version **v0.2.3** · [Views and templates](views.md)
+Version **v0.2.4** · [Views and templates](views.md)
 
 | Signature | Purpose | Namespace to import from | Guide |
 | --- | --- | --- | --- |
 | <code>asset(): Naf\View\Core\Asset</code> | — | `Naf\View` | [Views and templates](views.md) |
 | <code>render(string $template, array $vars = []): Psr\Http\Message\ResponseInterface</code> | — | `Naf\View` | [Views and templates](views.md) |
-| <code>s(array&#124;string&#124;null $value): array&#124;string&#124;null</code> | — | `Naf\View` | [Views and templates](views.md) |
+| <code>s(array&#124;string&#124;null $value): array&#124;string&#124;null</code> | Escape HTML text and quoted attributes; arrays are flat, null becomes an empty string | `Naf\View` | [Views and templates](views.md) |
 | <code>view(string $tpl, array $vars = []): string</code> | — | `Naf\View` | [Views and templates](views.md) |
 
 ## naf/websocket

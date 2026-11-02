@@ -72,10 +72,11 @@ if (env() === Environment::PROD) {
 | `test` | `Environment::TEST` | Sanitized HTTP error output |
 | `prod` | `Environment::PROD` | Sanitized HTTP error output |
 
-Use **`APP_ENV=prod`** in production. Other nonempty values, including `production` and
-`staging`, are treated as development-like values by the error renderer and can expose
-diagnostics. If the value is absent, the error renderer uses sanitized output, but you
-should still configure the environment explicitly before using `env()`.
+Use **`APP_ENV=prod`** in production. Only the exact value `dev` enables detailed HTTP
+diagnostics. Unknown values such as `production` and `staging`, empty values and a missing
+value use sanitized output. Configure the environment explicitly before using `env()`.
+Framework 0.2.14+ installs global error handlers during Composer autoloading in every
+environment, before `.env` loading; see [Errors and aborting](errors.md#default-output).
 
 ## Read configuration
 

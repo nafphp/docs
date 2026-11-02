@@ -39,6 +39,18 @@ PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
 ```
 
+With Database **0.2.5+**, MySQL also receives `PDO::ATTR_EMULATE_PREPARES => false`.
+PostgreSQL and SQLite retain their driver defaults; this MySQL option is not passed to them.
+Native prepares keep bound values separate from SQL. Continue to bind all input values and
+allow-list dynamic table/column names; identifiers cannot be parameterized.
+
+??? note "Upgrading MySQL queries to Database 0.2.5"
+
+    Use a distinct named placeholder for each occurrence, or positional placeholders.
+    Reusing one named placeholder in several positions depends on emulation and is not
+    portable to native MySQL prepares. For example, use `:sender` and `:recipient` rather
+    than using `:user` twice. See the [PDO prepare contract](https://www.php.net/manual/en/pdo.prepare.php).
+
 **Errors throw.** A failed query raises `PDOException` instead of returning `false`, so
 `if (!$stmt)` is a branch that never runs. Wrap what you want to handle and let the rest
 reach the error handler.
@@ -287,7 +299,9 @@ only see values in that array. `env()` returns the application environment name.
 ## Connection errors { #when-the-connection-fails }
 
 A connection that cannot be made throws `Naf\Database\Exceptions\DatabaseException`,
-wrapping the original `PDOException` message. It happens while the container builds the
+with the generic message `Database connection failed.` (Database 0.2.5+). The original
+`PDOException` remains available through `getPrevious()` for protected operator diagnostics;
+never send that cause or an exception trace to a client. It happens while the container builds the
 connection. The failure appears when a consumer first resolves it; eager resolution during
 boot can therefore fail before the first query.
 
@@ -296,8 +310,8 @@ boot can therefore fail before the first query.
 | What you see | What to check |
 |---|---|
 | `database()` returns `null`, or `Database connection not found.` | `app/config.php` returns a `database` array |
-| `Database connection failed: could not find driver` | Enable the PDO extension for the driver (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`) |
-| `Database connection failed: …` with another message | Host, port, database name and credentials; the message comes from PDO |
+| `Database connection failed.` | Inspect the previous exception in protected logs; verify the PDO extension, host, port, database and credentials |
+| `Invalid connection parameter: …` | Network DSN fields cannot contain semicolons or NUL bytes; keep connection configuration under application control |
 | `Unsupported PDO driver: …` | `database:driver` is `mysql`, `pgsql` or `sqlite` |
 | `Migration name must select exactly one migration` | The `--name` value matches one class or file name |
 | `Applied migration source is missing` | A migration that has run was deleted or renamed; restore it before rolling back |

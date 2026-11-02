@@ -71,16 +71,32 @@ $url = route('users.show', ['id' => 42]); // /users/42
 
 Pass every placeholder as a string or integer. Framework 0.2.12+ throws
 `InvalidArgumentException` for a missing or invalid value, identifying the route and parameter.
-Values are substituted once, exactly as supplied. Encode each dynamic segment with
-`rawurlencode()` before calling `route()`; the framework does not encode or decode it again.
-Extra parameter keys are ignored; these values are path segments, not an appended query string.
+With Framework **0.2.14+**, pass **raw values**. Each value is encoded with `rawurlencode()`
+as one path segment, so `/`, `?`, `#`, `%` and spaces cannot introduce path separators,
+queries or fragments. Extra keys are ignored; they do not become a query string.
 
 ```php-inline
-$url = \Naf\route('files.show', ['name' => rawurlencode('annual report.pdf')]);
+$url = \Naf\route('files.show', ['name' => 'annual report.pdf']);
+// /files/annual%20report.pdf
 ```
 
-For a registered `/files/{name}` route named `files.show`, this produces
-`/files/annual%20report.pdf`. Route names also identify CSRF exemptions and active navigation:
+For `/files/{name}`, matching resolves segment boundaries on the encoded path, then decodes
+each captured value exactly once with `rawurldecode()`. The handler receives
+`annual report.pdf`; a value containing `/` remains one route argument. A literal `+`
+remains `+`. Your web server or proxy must preserve encoded slashes for these URLs to reach
+PHP unchanged. Route arguments remain untrusted input: validate identifiers and never use
+them directly as file paths or redirect destinations.
+
+??? note "Upgrading URL generation to Framework 0.2.14"
+
+    Remove `rawurlencode()` around values passed to `route()`. Already encoded input is
+    treated as literal text: passing `a%2Fb` produces `a%252Fb`, and the handler receives
+    `a%2Fb`. Passing raw `a/b` produces `a%2Fb`, and the handler receives `a/b`.
+    Remove manual decoding of route arguments too. Framework 0.2.13 and earlier substitute
+    values unchanged and return encoded captures; callers on those versions must encode
+    dynamic segments themselves.
+
+Route names also identify CSRF exemptions and active navigation:
 
 ```php-inline
 route()->current();                                  // current route name, or null

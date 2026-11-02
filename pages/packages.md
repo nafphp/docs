@@ -9,7 +9,7 @@ Published packages, their required dependencies and optional integrations. Gener
 
 | Package | Version | Requires | Suggests | PHP |
 |---|---|---|---|---|
-| **`naf/framework`**<br><span style="font-weight:400">NAF - the ultra-light, functional PHP framework for fast microservices and APIs.</span> | `v0.2.13` | — | — | `>=8.3` |
+| **`naf/framework`**<br><span style="font-weight:400">NAF - the ultra-light, functional PHP framework for fast microservices and APIs.</span> | `v0.2.14` | — | — | `>=8.3` |
 | **`naf/alexa`**<br><span style="font-weight:400">Alexa+ MCP integration, OAuth setup and diagnostics for NAF.</span> | `v0.1.1` | `naf/cli`, `naf/database`, `naf/framework`, `naf/mcp`, `naf/oauth-server` | — | `>=8.3` |
 | **`naf/auth`**<br><span style="font-weight:400">Authentication and permission checks for NAF, with your own user model.</span> | `v0.2.4` | `naf/framework` | `naf/orm`, `naf/rbac`, `naf/session` | `>=8.3` |
 | **`naf/auth-ldap`**<br><span style="font-weight:400">Optional TLS LDAP provider using the existing NAF Auth contract.</span> | `v0.1.0` | `naf/auth` | — | `>=8.3` |
@@ -17,7 +17,7 @@ Published packages, their required dependencies and optional integrations. Gener
 | **`naf/cli`**<br><span style="font-weight:400">NAF CLI Plugin for console applications.</span> | `v0.2.4` | `naf/framework` | — | `>=8.3` |
 | **`naf/client`**<br><span style="font-weight:400">NAF Client Plugin to make simple http requests.</span> | `v0.2.3` | `naf/framework` | — | `>=8.3` |
 | **`naf/cms`**<br><span style="font-weight:400">Fully working CMS for NAF.</span> | `v0.0.3` | `naf/auth`, `naf/cli`, `naf/database`, `naf/form`, `naf/framework`, `naf/i18n`, `naf/mail`, `naf/mcp`, `naf/orm`, `naf/queue`, `naf/schedule`, `naf/session`, `naf/view` | — | `>=8.3` |
-| **`naf/database`**<br><span style="font-weight:400">NAF Database Plugin to work with various storage solutions.</span> | `v0.2.4` | `naf/framework` | — | `>=8.3` |
+| **`naf/database`**<br><span style="font-weight:400">NAF Database Plugin to work with various storage solutions.</span> | `v0.2.5` | `naf/framework` | — | `>=8.3` |
 | **`naf/flow`**<br><span style="font-weight:400">Reactive JavaScript components and HTML updates for NAF, automatically integrated with naf/view.</span> | `v0.1.0` | `naf/framework`, `naf/view` | — | `>=8.3` |
 | **`naf/form`**<br><span style="font-weight:400">NAF Form Plugin to make form handling easier.</span> | `v0.2.4` | `naf/framework`, `naf/session` | — | `>=8.3` |
 | **`naf/i18n`**<br><span style="font-weight:400">NAF Internationalization Plugin</span> | `v0.2.2` | `naf/framework` | — | `>=8.3` |
@@ -33,5 +33,5 @@ Published packages, their required dependencies and optional integrations. Gener
 | **`naf/schedule`**<br><span style="font-weight:400">NAF Schedule Plugin for recurring Tasks.</span> | `v0.2.4` | `naf/framework`, `naf/queue` | — | `>=8.3` |
 | **`naf/session`**<br><span style="font-weight:400">NAF Session Plugin for storing data across requests.</span> | `v0.2.4` | `naf/framework` | `naf/database` | `>=8.3` |
 | **`naf/storage`**<br><span style="font-weight:400">Provider-independent file storage with named disks and streams for NAF.</span> | `v0.1.0` | `naf/framework` | `naf/client` | `>=8.3` |
-| **`naf/view`**<br><span style="font-weight:400">NAF View Plugin with simple templating.</span> | `v0.2.3` | `naf/framework` | — | `>=8.3` |
+| **`naf/view`**<br><span style="font-weight:400">NAF View Plugin with simple templating.</span> | `v0.2.4` | `naf/framework` | — | `>=8.3` |
 | **`naf/websocket`**<br><span style="font-weight:400">A WebSocket server for NAF hosts, in plain PHP: it carries that something changed, never what.</span> | `v0.1.1` | `naf/framework` | — | `>=8.3` |
